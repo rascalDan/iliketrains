@@ -1,0 +1,15 @@
+using gcc ;
+using pkg-config ;
+import pkg-config ;
+
+pkg-config.import sdl2 ;
+pkg-config.import glew ;
+lib stb : : : : <include>/usr/include/stb ;
+
+exe test :
+	[ glob *.cpp *.c ]
+	:
+	<library>sdl2
+	<library>glew
+	<use>stb
+	;
