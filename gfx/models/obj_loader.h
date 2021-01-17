@@ -44,10 +44,9 @@ private:
 	unsigned int FindLastVertexIndex(
 			const std::vector<OBJIndex *> & indexLookup, const OBJIndex * currentIndex, const IndexedModel & result);
 	void CreateOBJFace(const std::string & line);
-
-	glm::vec2 ParseOBJVec2(const std::string & line);
-	glm::vec3 ParseOBJVec3(const std::string & line);
-	OBJIndex ParseOBJIndex(const std::string & token, bool * hasUVs, bool * hasNormals);
+	static glm::vec2 ParseOBJVec2(const std::string & line);
+	static glm::vec3 ParseOBJVec3(const std::string & line);
+	static OBJIndex ParseOBJIndex(const std::string & token, bool * hasUVs, bool * hasNormals);
 };
 
 #endif // OBJ_LOADER_H_INCLUDED
