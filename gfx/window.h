@@ -7,13 +7,13 @@
 #include <string>
 #include <type_traits>
 
-class Display {
+class Window {
 public:
-	Display(int width, int height, const std::string & title);
-	virtual ~Display();
+	Window(int width, int height, const std::string & title);
+	~Window() = default;
 
-	NO_COPY(Display);
-	NO_MOVE(Display);
+	NO_COPY(Window);
+	NO_MOVE(Window);
 
 	void Clear(float r, float g, float b, float a) const;
 	void SwapBuffers() const;
