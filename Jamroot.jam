@@ -13,8 +13,8 @@ project : requirements
 	<variant>debug:<warnings>extra
 	<variant>debug:<warnings-as-errors>on
 	<variant>release:<lto>on
-	<toolset>tidy:<exclude>bin/res/fs-basicShader.h
-	<toolset>tidy:<exclude>bin/res/vs-basicShader.h
+	<toolset>tidy:<exclude>bin/gfx/gl/shaders/fs-basicShader.h
+	<toolset>tidy:<exclude>bin/gfx/gl/shaders/vs-basicShader.h
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
 	<toolset>tidy:<checkxx>clang-*
@@ -45,6 +45,8 @@ IMPORT $(__name__) : xxd.i : : xxd.i ;
 exe test :
 	[ glob-tree *.cpp *.c *.vs *.fs : bin ]
 	:
+	<include>.
+	<include>utility
 	<library>sdl2
 	<library>glew
 	<use>stb

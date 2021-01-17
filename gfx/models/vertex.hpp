@@ -33,4 +33,5 @@ private:
 	glm::vec2 texCoord;
 	glm::vec3 normal;
 };
+
 #endif

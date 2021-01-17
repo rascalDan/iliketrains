@@ -3,17 +3,17 @@
 
 #include "ptr.hpp"
 #include <SDL2/SDL.h>
+#include <special_members.hpp>
 #include <string>
 #include <type_traits>
 
 class Display {
 public:
 	Display(int width, int height, const std::string & title);
-
-	Display(const Display &) = delete;
-	void operator=(const Display &) = delete;
-
 	virtual ~Display();
+
+	NO_COPY(Display);
+	NO_MOVE(Display);
 
 	void Clear(float r, float g, float b, float a) const;
 	void SwapBuffers() const;

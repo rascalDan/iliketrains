@@ -7,7 +7,7 @@ class Camera {
 public:
 	Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar);
 
-	glm::mat4 GetViewProjection() const;
+	[[nodiscard]] glm::mat4 GetViewProjection() const;
 
 	void MoveForward(float amt);
 	void MoveRight(float amt);

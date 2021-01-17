@@ -2,20 +2,20 @@
 #define TEXTURE_H
 
 #include <GL/glew.h>
+#include <special_members.hpp>
 #include <string>
 
 class Texture {
 public:
 	explicit Texture(const std::string & fileName);
 
-	Texture(const Texture &) = delete;
-	void operator=(const Texture &) = delete;
-
 	virtual ~Texture();
+
+	NO_COPY(Texture);
+	NO_MOVE(Texture);
 
 	void Bind() const;
 
-protected:
 private:
 	GLuint m_texture;
 };

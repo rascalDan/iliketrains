@@ -1,8 +1,8 @@
 #include "shader.h"
 #include "transform.h"
+#include <gfx/gl/shaders/fs-basicShader.h>
+#include <gfx/gl/shaders/vs-basicShader.h>
 #include <glm/glm.hpp>
-#include <res/fs-basicShader.h>
-#include <res/vs-basicShader.h>
 #include <stdexcept>
 
 Shader::Shader(const std::string &) :

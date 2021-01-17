@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <array>
+#include <special_members.hpp>
 #include <string>
 
 class Camera;
@@ -12,8 +13,9 @@ class Shader {
 public:
 	explicit Shader(const std::string & fileName);
 	virtual ~Shader();
-	void operator=(const Shader &) = delete;
-	Shader(const Shader &) = delete;
+
+	NO_COPY(Shader);
+	NO_MOVE(Shader);
 
 	void Bind() const;
 	void Update(const Transform & transform, const Camera & camera) const;

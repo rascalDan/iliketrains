@@ -1,11 +1,11 @@
-#include "camera.h"
 #include "display.h"
-#include "mesh.h"
-#include "shader.h"
-#include "texture.h"
-#include "transform.h"
 #include <SDL2/SDL.h>
 #include <cmath>
+#include <gfx/gl/camera.h>
+#include <gfx/gl/shader.h>
+#include <gfx/gl/transform.h>
+#include <gfx/models/mesh.h>
+#include <gfx/models/texture.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <numbers>

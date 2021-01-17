@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <array>
 #include <cstddef>
+#include <special_members.hpp>
 #include <string>
 
 class IndexedModel;
@@ -16,10 +17,10 @@ public:
 	explicit Mesh(const std::string & fileName);
 	explicit Mesh(const IndexedModel & model);
 	Mesh(Vertex * vertices, unsigned int numVertices, unsigned int * indices, unsigned int numIndices);
-	Mesh(const Mesh &) = delete;
-	void operator=(const Mesh &) = delete;
-
 	virtual ~Mesh();
+
+	NO_COPY(Mesh);
+	NO_MOVE(Mesh);
 
 	void Draw();
 
