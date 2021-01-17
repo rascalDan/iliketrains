@@ -1,13 +1,49 @@
 using gcc ;
 using pkg-config ;
 import pkg-config ;
+import type : register ;
+import generators : register-standard ;
 
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
 lib stb : : : : <include>/usr/include/stb ;
 
+project : requirements
+	<cxxstd>20
+	<variant>debug:<warnings>extra
+	<variant>debug:<warnings-as-errors>on
+	<variant>release:<lto>on
+	<toolset>tidy:<exclude>bin/res/fs-basicShader.h
+	<toolset>tidy:<exclude>bin/res/vs-basicShader.h
+	<toolset>tidy:<checkxx>boost-*
+	<toolset>tidy:<checkxx>bugprone-*
+	<toolset>tidy:<checkxx>clang-*
+	<toolset>tidy:<checkxx>misc-*
+	<toolset>tidy:<checkxx>modernize-*
+	<toolset>tidy:<xcheckxx>modernize-use-trailing-return-type
+	<toolset>tidy:<checkxx>hicpp-*
+	<toolset>tidy:<xcheckxx>hicpp-signed-bitwise
+	<toolset>tidy:<xcheckxx>hicpp-named-parameter
+	<toolset>tidy:<checkxx>performance-*
+	<toolset>tidy:<comments>no
+	<toolset>tidy:<mapping>iwyu.json
+	<toolset>tidy:<define>TIDY
+	;
+
+type.register VERTEXSHADER : vs ;
+type.register FRAGMENTSHADER : fs ;
+
+generators.register-standard xxd.i : VERTEXSHADER : C(vs-%) H(vs-%) ;
+generators.register-standard xxd.i : FRAGMENTSHADER : C(fs-%) H(fs-%) ;
+
+actions xxd.i
+{
+	( cd $(2:D) ; xxd -i $(2:B)$(2:S) ) | tee $(1[1]) | cproto -veo $(1[2])
+}
+IMPORT $(__name__) : xxd.i : : xxd.i ;
+
 exe test :
-	[ glob *.cpp *.c ]
+	[ glob-tree *.cpp *.c *.vs *.fs : bin ]
 	:
 	<library>sdl2
 	<library>glew

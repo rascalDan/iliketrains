@@ -1,15 +1,20 @@
 #include "shader.h"
-#include <fstream>
-#include <iostream>
+#include "transform.h"
+#include <glm/glm.hpp>
+#include <res/fs-basicShader.h>
+#include <res/vs-basicShader.h>
+#include <stdexcept>
 
-Shader::Shader(const std::string & fileName)
+Shader::Shader(const std::string &) :
+	m_program {glCreateProgram()}, m_shaders {CreateShader(
+													  (GLchar *)(basicShader_vs), basicShader_vs_len, GL_VERTEX_SHADER),
+										   CreateShader(
+												   (GLchar *)basicShader_fs, basicShader_fs_len, GL_FRAGMENT_SHADER)},
+	m_uniforms {}
 {
-	m_program = glCreateProgram();
-	m_shaders[0] = CreateShader(LoadShader(fileName + ".vs"), GL_VERTEX_SHADER);
-	m_shaders[1] = CreateShader(LoadShader(fileName + ".fs"), GL_FRAGMENT_SHADER);
-
-	for (unsigned int i = 0; i < NUM_SHADERS; i++)
-		glAttachShader(m_program, m_shaders[i]);
+	for (auto m_shader : m_shaders) {
+		glAttachShader(m_program, m_shader);
+	}
 
 	glBindAttribLocation(m_program, 0, "position");
 	glBindAttribLocation(m_program, 1, "texCoord");
@@ -19,97 +24,74 @@ Shader::Shader(const std::string & fileName)
 	CheckShaderError(m_program, GL_LINK_STATUS, true, "Error linking shader program");
 
 	glValidateProgram(m_program);
-	CheckShaderError(m_program, GL_LINK_STATUS, true, "Invalid shader program");
+	CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Invalid shader program");
 
-	m_uniforms[0] = glGetUniformLocation(m_program, "MVP");
-	m_uniforms[1] = glGetUniformLocation(m_program, "Normal");
-	m_uniforms[2] = glGetUniformLocation(m_program, "lightDirection");
+	m_uniforms = {glGetUniformLocation(m_program, "MVP"), glGetUniformLocation(m_program, "Normal"),
+			glGetUniformLocation(m_program, "lightDirection")};
 }
 
 Shader::~Shader()
 {
-	for (unsigned int i = 0; i < NUM_SHADERS; i++) {
-		glDetachShader(m_program, m_shaders[i]);
-		glDeleteShader(m_shaders[i]);
+	for (auto m_shader : m_shaders) {
+		glDetachShader(m_program, m_shader);
+		glDeleteShader(m_shader);
 	}
 
 	glDeleteProgram(m_program);
 }
 
 void
-Shader::Bind()
+Shader::Bind() const
 {
 	glUseProgram(m_program);
 }
 
 void
-Shader::Update(const Transform & transform, const Camera & camera)
+Shader::Update(const Transform & transform, const Camera & camera) const
 {
 	glm::mat4 MVP = transform.GetMVP(camera);
 	glm::mat4 Normal = transform.GetModel();
 
 	glUniformMatrix4fv(m_uniforms[0], 1, GL_FALSE, &MVP[0][0]);
 	glUniformMatrix4fv(m_uniforms[1], 1, GL_FALSE, &Normal[0][0]);
-	glUniform3f(m_uniforms[2], 0.0f, 0.0f, 1.0f);
-}
-
-std::string
-Shader::LoadShader(const std::string & fileName)
-{
-	std::ifstream file;
-	file.open((fileName).c_str());
-
-	std::string output;
-	std::string line;
-
-	if (file.is_open()) {
-		while (file.good()) {
-			getline(file, line);
-			output.append(line + "\n");
-		}
-	}
-	else {
-		std::cerr << "Unable to load shader: " << fileName << std::endl;
-	}
-
-	return output;
+	glUniform3f(m_uniforms[2], 0.0F, 0.0F, 1.0F);
 }
 
 void
 Shader::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, const std::string & errorMessage)
 {
 	GLint success = 0;
-	GLchar error[1024] = {0};
+	std::array<GLchar, 1024> error {};
 
-	if (isProgram)
+	if (isProgram) {
 		glGetProgramiv(shader, flag, &success);
-	else
+	}
+	else {
 		glGetShaderiv(shader, flag, &success);
+	}
 
 	if (success == GL_FALSE) {
-		if (isProgram)
-			glGetProgramInfoLog(shader, sizeof(error), NULL, error);
-		else
-			glGetShaderInfoLog(shader, sizeof(error), NULL, error);
+		if (isProgram) {
+			glGetProgramInfoLog(shader, error.size(), nullptr, error.data());
+		}
+		else {
+			glGetShaderInfoLog(shader, error.size(), nullptr, error.data());
+		}
 
-		std::cerr << errorMessage << ": '" << error << "'" << std::endl;
+		throw std::runtime_error {errorMessage + ": '" + std::string {error.data(), error.size()} + "'"};
 	}
 }
 
 GLuint
-Shader::CreateShader(const std::string & text, unsigned int type)
+Shader::CreateShader(const GLchar * text, GLint len, unsigned int type)
 {
 	GLuint shader = glCreateShader(type);
 
-	if (shader == 0)
-		std::cerr << "Error compiling shader type " << type << std::endl;
+	if (shader == 0) {
+		throw std::runtime_error {"Error compiling shader type " + std::to_string(type)};
+	}
 
-	const GLchar * p[1];
-	p[0] = text.c_str();
-	GLint lengths[1];
-	lengths[0] = text.length();
-
-	glShaderSource(shader, 1, p, lengths);
+	glShaderSource(shader, 1, &text, &len);
 	glCompileShader(shader);
 
 	CheckShaderError(shader, GL_COMPILE_STATUS, false, "Error compiling shader!");

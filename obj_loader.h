@@ -36,7 +36,7 @@ public:
 	bool hasUVs;
 	bool hasNormals;
 
-	OBJModel(const std::string & fileName);
+	explicit OBJModel(const std::string & fileName);
 
 	IndexedModel ToIndexedModel();
 

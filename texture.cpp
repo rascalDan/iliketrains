@@ -1,14 +1,15 @@
 #include "texture.h"
 #include "stb_image.h"
-#include <iostream>
+#include <stdexcept>
 
-Texture::Texture(const std::string & fileName)
+Texture::Texture(const std::string & fileName) : m_texture {}
 {
 	int width, height, numComponents;
 	unsigned char * data = stbi_load((fileName).c_str(), &width, &height, &numComponents, 4);
 
-	if (data == NULL)
-		std::cerr << "Unable to load texture: " << fileName << std::endl;
+	if (!data) {
+		throw std::runtime_error {"Unable to load texture: " + fileName};
+	}
 
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -28,7 +29,7 @@ Texture::~Texture()
 }
 
 void
-Texture::Bind()
+Texture::Bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }

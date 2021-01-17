@@ -6,20 +6,17 @@
 
 class Texture {
 public:
-	Texture(const std::string & fileName);
+	explicit Texture(const std::string & fileName);
 
-	void Bind();
+	Texture(const Texture &) = delete;
+	void operator=(const Texture &) = delete;
 
 	virtual ~Texture();
 
+	void Bind() const;
+
 protected:
 private:
-	Texture(const Texture & texture) { }
-	void
-	operator=(const Texture & texture)
-	{
-	}
-
 	GLuint m_texture;
 };
 

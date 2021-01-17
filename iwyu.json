@@ -1,0 +1,42 @@
+[
+    {
+        "include": [
+            "<ext/alloc_traits.h>",
+            "private",
+            "<memory>",
+            "public"
+        ]
+    },
+    {
+        "include": [
+            "@\"SDL.*.h\"",
+            "private",
+            "<SDL2/SDL.h>",
+            "public"
+        ]
+    },
+    {
+        "include": [
+            "@<glm/detail/.*>",
+            "private",
+            "<glm/glm.hpp>",
+            "public"
+        ]
+    },
+    {
+        "include": [
+            "@<glm/ext/.*>",
+            "private",
+            "<glm/glm.hpp>",
+            "public"
+        ]
+    },
+    {
+        "include": [
+            "@<glm/gtx/transform.inl>",
+            "private",
+            "<glm/gtx/transform.hpp>",
+            "public"
+        ]
+    }
+]
