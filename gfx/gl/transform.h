@@ -19,6 +19,12 @@ public:
 		return pos;
 	}
 
+	[[nodiscard]] inline const glm::vec3 &
+	GetPos() const
+	{
+		return pos;
+	}
+
 	[[nodiscard]] inline glm::vec3 &
 	GetRot()
 	{

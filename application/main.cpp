@@ -1,11 +1,14 @@
 #include "gfx/window.h"
 #include <SDL2/SDL.h>
+#include <chrono>
 #include <cmath>
+#include <collection.hpp>
+#include <game/physical.h>
+#include <game/world.h>
+#include <game/worldobject.h>
 #include <gfx/gl/camera.h>
 #include <gfx/gl/shader.h>
 #include <gfx/gl/transform.h>
-#include <gfx/models/mesh.h>
-#include <gfx/models/texture.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <numbers>
@@ -13,6 +16,22 @@
 
 static const int DISPLAY_WIDTH = 800;
 static const int DISPLAY_HEIGHT = 600;
+
+class Monkey : public WorldObject, public Physical {
+public:
+	Monkey() : Physical {{}, "res/monkey3.obj", "res/bricks.jpg"} { }
+
+	void
+	tick(TickDuration elapsed) override
+	{
+		counter += 0.000625F * elapsed.count();
+		location.GetRot().y = std::numbers::pi_v<double> + sin(counter);
+		location.GetRot().z = 0.3 * cos(counter * 10);
+	}
+
+private:
+	float counter {};
+};
 
 class SDL_Application {
 public:
@@ -38,17 +57,21 @@ public:
 	void
 	run()
 	{
-		Window main_window(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
+		Collection<Window> windows;
+		windows.create(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
 
-		Mesh monkey("./res/monkey3.obj");
+		World world;
+		world.create<Monkey>();
+
 		Shader shader("./res/basicShader");
-		Texture texture("./res/bricks.jpg");
-		Transform transform;
-		Camera camera(glm::vec3(0.0F, 0.0F, -5.0F), 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
+		Camera camera({0.0F, 0.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
 
 		SDL_Event e;
 		bool isRunning = true;
-		float counter = 0.0F;
+
+		auto t_start = std::chrono::high_resolution_clock::now();
+		const auto framelen = std::chrono::milliseconds {1000} / 120;
+
 		while (isRunning) {
 			while (SDL_PollEvent(&e)) {
 				if (e.type == SDL_QUIT) {
@@ -56,25 +79,19 @@ public:
 				}
 			}
 
-			main_window.Clear(0.0F, 0.0F, 0.0F, 1.0F);
+			const auto t_end = std::chrono::high_resolution_clock::now();
+			const auto t_passed = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start);
 
-			// float sinCounter = sinf(counter);
-			// float absSinCounter = abs(sinCounter);
-
-			// transform.GetPos()->x = sinCounter;
-			transform.GetRot().y = std::numbers::pi_v<double> + sin(counter);
-			transform.GetRot().z = 0.3 * cos(counter * 10);
-			// transform.GetScale()->x = absSinCounter;
-			// transform.GetScale()->y = absSinCounter;
-
+			world.apply(&WorldObject::tick, t_passed);
+			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
 			shader.Bind();
-			texture.Bind();
-			shader.Update(transform, camera);
-			monkey.Draw();
+			world.apply<Physical>(&Physical::render, shader, camera);
+			windows.apply(&Window::SwapBuffers);
 
-			main_window.SwapBuffers();
-			SDL_Delay(1);
-			counter += 0.01F;
+			if (const auto snz = framelen - t_passed; snz.count() > 0) {
+				SDL_Delay(snz.count());
+			}
+			t_start = t_end;
 		}
 	}
 };

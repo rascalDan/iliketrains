@@ -22,7 +22,7 @@ public:
 	NO_COPY(Mesh);
 	NO_MOVE(Mesh);
 
-	void Draw();
+	void Draw() const;
 
 private:
 	static constexpr unsigned int NUM_BUFFERS {4};

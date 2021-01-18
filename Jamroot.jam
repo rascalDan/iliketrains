@@ -19,6 +19,7 @@ project : requirements
 	<toolset>tidy:<checkxx>bugprone-*
 	<toolset>tidy:<checkxx>clang-*
 	<toolset>tidy:<checkxx>misc-*
+	<toolset>tidy:<xcheckxx>misc-non-private-member-variables-in-classes
 	<toolset>tidy:<checkxx>modernize-*
 	<toolset>tidy:<xcheckxx>modernize-use-trailing-return-type
 	<toolset>tidy:<checkxx>hicpp-*

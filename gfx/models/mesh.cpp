@@ -65,7 +65,7 @@ Mesh::~Mesh()
 }
 
 void
-Mesh::Draw()
+Mesh::Draw() const
 {
 	glBindVertexArray(m_vertexArrayObject);
 
