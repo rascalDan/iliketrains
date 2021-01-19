@@ -1,4 +1,4 @@
-using gcc ;
+using gcc : 11.0.0 ;
 using pkg-config ;
 import pkg-config ;
 import type : register ;
@@ -7,6 +7,7 @@ import generators : register-standard ;
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
 lib stb : : : : <include>/usr/include/stb ;
+lib pthread ;
 
 project : requirements
 	<cxxstd>20
@@ -48,7 +49,9 @@ exe test :
 	:
 	<include>.
 	<include>utility
+	<include>lib
 	<library>sdl2
 	<library>glew
+	<library>pthread
 	<use>stb
 	;

@@ -13,6 +13,7 @@
 #include <memory>
 #include <numbers>
 #include <special_members.hpp>
+#include <worker.h>
 
 static const int DISPLAY_WIDTH = 800;
 static const int DISPLAY_HEIGHT = 600;
@@ -59,6 +60,8 @@ public:
 	{
 		Collection<Window> windows;
 		windows.create(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
+
+		Worker w;
 
 		World world;
 		world.create<Monkey>();

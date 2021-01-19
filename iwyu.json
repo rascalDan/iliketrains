@@ -38,5 +38,13 @@
             "<glm/gtx/transform.hpp>",
             "public"
         ]
+    },
+    {
+        "symbol": [
+            "std::__atomic_wait",
+            "private",
+            "<mutex>",
+            "public"
+        ]
     }
 ]
