@@ -1,14 +1,16 @@
 #ifndef PHYSICAL_H
 #define PHYSICAL_H
 
-#include "gfx/models/mesh.h"
-#include "gfx/models/texture.h"
 #include <gfx/gl/transform.h>
 #include <glm/glm.hpp>
+#include <memory>
 #include <string>
 
 class Camera;
 class Shader;
+class Mesh;
+class Texture;
+template<typename Obj> class Cache;
 
 class Physical {
 public:
@@ -24,8 +26,13 @@ public:
 
 protected:
 	Transform location;
-	Mesh mesh;
-	Texture texture;
+
+	std::shared_ptr<Mesh> mesh;
+	std::shared_ptr<Texture> texture;
+
+private:
+	static Cache<Mesh> cachedMesh;
+	static Cache<Texture> cachedTexture;
 };
 
 #endif
