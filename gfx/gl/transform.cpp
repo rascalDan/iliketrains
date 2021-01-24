@@ -1,5 +1,4 @@
 #include "transform.h"
-#include "camera.h"
 #include <glm/gtx/transform.hpp>
 
 Transform::Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) : pos {pos}, rot {rot}, scale {scale} { }
@@ -15,13 +14,4 @@ Transform::GetModel() const
 	const auto rotMat = rotX * rotY * rotZ;
 
 	return posMat * rotMat * scaleMat;
-}
-
-glm::mat4
-Transform::GetMVP(const Camera & camera) const
-{
-	const auto VP = camera.GetViewProjection();
-	const auto M = GetModel();
-
-	return VP * M;
 }

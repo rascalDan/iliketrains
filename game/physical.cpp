@@ -3,6 +3,7 @@
 #include "gfx/models/texture.h"
 #include <cache.h>
 #include <gfx/gl/shader.h>
+#include <gfx/gl/transform.h>
 
 Cache<Mesh> Physical::cachedMesh;
 Cache<Texture> Physical::cachedTexture;
@@ -13,9 +14,9 @@ Physical::Physical(glm::vec3 where, const std::string & m, const std::string & t
 }
 
 void
-Physical::render(const Shader & shader, const Camera & camera) const
+Physical::render(const Shader & shader) const
 {
-	shader.Update(location, camera);
+	shader.setModel(location.GetModel());
 	texture->Bind();
 	mesh->Draw();
 }

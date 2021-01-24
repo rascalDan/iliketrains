@@ -6,7 +6,6 @@
 #include <memory>
 #include <string>
 
-class Camera;
 class Shader;
 class Mesh;
 class Texture;
@@ -16,7 +15,7 @@ class Physical {
 public:
 	Physical(glm::vec3 where, const std::string & m, const std::string & t);
 
-	void render(const Shader & shader, const Camera & camera) const;
+	void render(const Shader & shader) const;
 
 	[[nodiscard]] const auto &
 	getPosition() const

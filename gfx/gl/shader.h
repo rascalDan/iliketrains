@@ -3,17 +3,16 @@
 
 #include <GL/glew.h>
 #include <glRef.hpp>
+#include <glm/glm.hpp>
 #include <string_view>
-
-class Camera;
-class Transform;
 
 class Shader {
 public:
 	Shader();
 
 	void Bind() const;
-	void Update(const Transform & transform, const Camera & camera) const;
+	void setView(glm::mat4 view) const;
+	void setModel(glm::mat4 model) const;
 
 private:
 	class Source {
@@ -31,7 +30,7 @@ private:
 	using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
 
 	ProgramRef m_program;
-	GLint mvp_uniform, normal_uniform, lightDir_uniform;
+	GLint viewProjection_uniform, model_uniform, lightDir_uniform;
 };
 
 #endif

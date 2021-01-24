@@ -3,15 +3,11 @@
 
 #include <glm/glm.hpp>
 
-class Camera;
-
 class Transform {
 public:
 	explicit Transform(glm::vec3 pos = {}, glm::vec3 rot = {}, glm::vec3 scale = {1.0F, 1.0F, 1.0F});
 
 	[[nodiscard]] glm::mat4 GetModel() const;
-
-	[[nodiscard]] glm::mat4 GetMVP(const Camera & camera) const;
 
 	[[nodiscard]] inline glm::vec3 &
 	GetPos()
@@ -27,6 +23,12 @@ public:
 
 	[[nodiscard]] inline glm::vec3 &
 	GetRot()
+	{
+		return rot;
+	}
+
+	[[nodiscard]] inline const glm::vec3 &
+	GetRot() const
 	{
 		return rot;
 	}

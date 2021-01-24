@@ -1,5 +1,4 @@
 #include "shader.h"
-#include "transform.h"
 #include <array>
 #include <gfx/gl/shaders/fs-basicShader.h>
 #include <gfx/gl/shaders/vs-basicShader.h>
@@ -7,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-Shader::Shader() : mvp_uniform {}, normal_uniform {}, lightDir_uniform {}
+Shader::Shader() : viewProjection_uniform {}, model_uniform {}, lightDir_uniform {}
 {
 	glAttachShader(m_program, Source {{basicShader_vs, basicShader_vs_len}, GL_VERTEX_SHADER}.id);
 	glAttachShader(m_program, Source {{basicShader_fs, basicShader_fs_len}, GL_FRAGMENT_SHADER}.id);
@@ -22,8 +21,8 @@ Shader::Shader() : mvp_uniform {}, normal_uniform {}, lightDir_uniform {}
 	glValidateProgram(m_program);
 	CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Invalid shader program");
 
-	mvp_uniform = glGetUniformLocation(m_program, "MVP");
-	normal_uniform = glGetUniformLocation(m_program, "Normal");
+	viewProjection_uniform = glGetUniformLocation(m_program, "viewProjection");
+	model_uniform = glGetUniformLocation(m_program, "model");
 	lightDir_uniform = glGetUniformLocation(m_program, "lightDirection");
 }
 
@@ -34,14 +33,16 @@ Shader::Bind() const
 }
 
 void
-Shader::Update(const Transform & transform, const Camera & camera) const
+Shader::setView(glm::mat4 proj) const
 {
-	glm::mat4 MVP = transform.GetMVP(camera);
-	glm::mat4 Normal = transform.GetModel();
+	glUniformMatrix4fv(viewProjection_uniform, 1, GL_FALSE, &proj[0][0]);
+	glUniform3f(lightDir_uniform, 0.0F, -1.0F, 0.0F);
+}
 
-	glUniformMatrix4fv(mvp_uniform, 1, GL_FALSE, &MVP[0][0]);
-	glUniformMatrix4fv(normal_uniform, 1, GL_FALSE, &Normal[0][0]);
-	glUniform3f(lightDir_uniform, 0.0F, 0.0F, 1.0F);
+void
+Shader::setModel(glm::mat4 model) const
+{
+	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, &model[0][0]);
 }
 
 void

@@ -68,6 +68,8 @@ public:
 
 		Shader shader;
 		Camera camera({0.0F, 0.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
+		shader.Bind();
+		shader.setView(camera.GetViewProjection());
 
 		SDL_Event e;
 		bool isRunning = true;
@@ -87,8 +89,7 @@ public:
 
 			world.apply(&WorldObject::tick, t_passed);
 			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
-			shader.Bind();
-			world.apply<Physical>(&Physical::render, shader, camera);
+			world.apply<Physical>(&Physical::render, shader);
 			windows.apply(&Window::SwapBuffers);
 
 			if (const auto snz = framelen - t_passed; snz.count() > 0) {
