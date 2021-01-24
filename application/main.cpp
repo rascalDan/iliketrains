@@ -66,7 +66,7 @@ public:
 		World world;
 		world.create<Monkey>();
 
-		Shader shader("./res/basicShader");
+		Shader shader;
 		Camera camera({0.0F, 0.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
 
 		SDL_Event e;
