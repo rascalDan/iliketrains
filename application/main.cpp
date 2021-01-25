@@ -9,6 +9,7 @@
 #include <gfx/gl/camera.h>
 #include <gfx/gl/shader.h>
 #include <gfx/gl/transform.h>
+#include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <numbers>
@@ -115,7 +116,7 @@ public:
 
 			world.apply(&WorldObject::tick, t_passed);
 			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
-			world.apply<Physical>(&Physical::render, shader);
+			world.apply<Renderable>(&Renderable::render, shader);
 			windows.apply(&Window::SwapBuffers);
 
 			if (const auto snz = framelen - t_passed; snz.count() > 0) {

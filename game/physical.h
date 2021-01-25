@@ -2,6 +2,7 @@
 #define PHYSICAL_H
 
 #include <gfx/gl/transform.h>
+#include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
@@ -11,11 +12,11 @@ class Mesh;
 class Texture;
 template<typename Obj> class Cache;
 
-class Physical {
+class Physical : public Renderable {
 public:
 	Physical(glm::vec3 where, const std::string & m, const std::string & t);
 
-	void render(const Shader & shader) const;
+	void render(const Shader & shader) const override;
 
 	[[nodiscard]] const auto &
 	getPosition() const
