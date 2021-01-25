@@ -67,7 +67,8 @@ public:
 		world.create<Monkey>();
 
 		Shader shader;
-		Camera camera({0.0F, 0.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
+		Camera camera({-5.0F, 2.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
+		camera.RotateY(0.7854);
 		shader.Bind();
 		shader.setView(camera.GetViewProjection());
 
@@ -79,8 +80,33 @@ public:
 
 		while (isRunning) {
 			while (SDL_PollEvent(&e)) {
-				if (e.type == SDL_QUIT) {
-					isRunning = false;
+				switch (e.type) {
+					case SDL_QUIT:
+						isRunning = false;
+						break;
+					case SDL_KEYDOWN:
+						switch (e.key.keysym.sym) {
+							case SDLK_KP_8:
+								camera.MoveForward(1);
+								break;
+							case SDLK_KP_2:
+								camera.MoveForward(-1);
+								break;
+							case SDLK_KP_4:
+								camera.MoveRight(1);
+								break;
+							case SDLK_KP_6:
+								camera.MoveRight(-1);
+								break;
+							case SDLK_KP_7:
+								camera.RotateY(0.04);
+								break;
+							case SDLK_KP_9:
+								camera.RotateY(-0.04);
+								break;
+						}
+						shader.setView(camera.GetViewProjection());
+						break;
 				}
 			}
 
