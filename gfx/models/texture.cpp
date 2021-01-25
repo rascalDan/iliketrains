@@ -1,6 +1,9 @@
 #include "texture.h"
 #include "stb_image.h"
+#include <cache.h>
 #include <stdexcept>
+
+Cache<Texture> Texture::cachedTexture;
 
 Texture::Texture(const std::string & fileName) : m_texture {}
 {

@@ -32,7 +32,6 @@ protected:
 
 private:
 	static Cache<Mesh> cachedMesh;
-	static Cache<Texture> cachedTexture;
 };
 
 #endif

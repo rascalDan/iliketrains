@@ -5,6 +5,8 @@
 #include <special_members.hpp>
 #include <string>
 
+template<typename Obj> class Cache;
+
 class Texture {
 public:
 	explicit Texture(const std::string & fileName);
@@ -13,6 +15,8 @@ public:
 
 	NO_COPY(Texture);
 	NO_MOVE(Texture);
+
+	static Cache<Texture> cachedTexture;
 
 	void Bind() const;
 

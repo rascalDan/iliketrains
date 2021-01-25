@@ -6,10 +6,9 @@
 #include <gfx/gl/transform.h>
 
 Cache<Mesh> Physical::cachedMesh;
-Cache<Texture> Physical::cachedTexture;
 
 Physical::Physical(glm::vec3 where, const std::string & m, const std::string & t) :
-	location {where}, mesh {cachedMesh.get(m)}, texture {cachedTexture.get(t)}
+	location {where}, mesh {cachedMesh.get(m)}, texture {Texture::cachedTexture.get(t)}
 {
 }
 
