@@ -1,3 +1,4 @@
+#include "game/terrain.h"
 #include "gfx/window.h"
 #include <SDL2/SDL.h>
 #include <chrono>
@@ -21,7 +22,7 @@ static const int DISPLAY_HEIGHT = 600;
 
 class Monkey : public WorldObject, public Physical {
 public:
-	Monkey() : Physical {{}, "res/monkey3.obj", "res/bricks.jpg"} { }
+	Monkey() : Physical {{0.0, 0.5, 1.0}, "res/monkey3.obj", "res/bricks.jpg"} { }
 
 	void
 	tick(TickDuration elapsed) override
@@ -66,6 +67,7 @@ public:
 
 		World world;
 		world.create<Monkey>();
+		world.create<Terrain>();
 
 		Shader shader;
 		Camera camera({-5.0F, 2.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
