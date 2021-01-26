@@ -48,7 +48,7 @@ Terrain::Terrain() :
 	glGenBuffers(2, m_vertexArrayBuffers.data());
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * verticesCount, vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, pos));
@@ -60,7 +60,7 @@ Terrain::Terrain() :
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vertexArrayBuffers[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indicesCount, indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
@@ -81,7 +81,7 @@ Terrain::render(const Shader & shader) const
 	texture->Bind();
 	glBindVertexArray(m_vertexArrayObject);
 
-	glDrawElementsBaseVertex(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, nullptr, 0);
+	glDrawElementsBaseVertex(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr, 0);
 
 	glBindVertexArray(0);
 }
