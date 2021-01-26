@@ -82,6 +82,7 @@ public:
 		auto t_start = std::chrono::high_resolution_clock::now();
 		const auto framelen = std::chrono::milliseconds {1000} / 120;
 
+		bool mrb {false}, ctrl {false};
 		while (isRunning) {
 			while (SDL_PollEvent(&e)) {
 				switch (e.type) {
@@ -108,8 +109,49 @@ public:
 							case SDLK_KP_9:
 								camera.RotateY(-0.04);
 								break;
+							case SDLK_LCTRL:
+							case SDLK_RCTRL:
+								ctrl = true;
+								break;
 						}
 						shader.setView(camera.GetViewProjection());
+						break;
+					case SDL_KEYUP:
+						switch (e.key.keysym.sym) {
+							case SDLK_LCTRL:
+							case SDLK_RCTRL:
+								ctrl = false;
+								break;
+						}
+						break;
+					case SDL_MOUSEBUTTONDOWN:
+						switch (e.button.button) {
+							case SDL_BUTTON_RIGHT:
+								SDL_SetRelativeMouseMode(SDL_TRUE);
+								mrb = true;
+								break;
+						}
+						break;
+					case SDL_MOUSEBUTTONUP:
+						switch (e.button.button) {
+							case SDL_BUTTON_RIGHT:
+								SDL_SetRelativeMouseMode(SDL_FALSE);
+								mrb = false;
+								break;
+						}
+						break;
+					case SDL_MOUSEMOTION:
+						if (mrb) {
+							if (ctrl) {
+								camera.RotateY(-0.01F * e.motion.xrel);
+								camera.Pitch(-0.01F * e.motion.yrel);
+							}
+							else {
+								camera.MoveRight(e.motion.xrel);
+								camera.SlideForward(e.motion.yrel);
+							}
+							shader.setView(camera.GetViewProjection());
+						}
 						break;
 				}
 			}

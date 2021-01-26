@@ -20,6 +20,12 @@ Camera::MoveForward(float amt)
 }
 
 void
+Camera::SlideForward(float amt)
+{
+	pos += forward * amt * glm::vec3 {1, 0, 1};
+}
+
+void
 Camera::MoveRight(float amt)
 {
 	pos += glm::cross(up, forward) * amt;
