@@ -36,7 +36,8 @@ void
 Shader::setView(glm::mat4 proj) const
 {
 	glUniformMatrix4fv(viewProjection_uniform, 1, GL_FALSE, &proj[0][0]);
-	glUniform3f(lightDir_uniform, 0.0F, -1.0F, 0.0F);
+	const glm::vec3 lightDir = glm::normalize(glm::vec3 {1, -1, 0});
+	glUniform3fv(lightDir_uniform, 1, &lightDir[0]);
 }
 
 void
