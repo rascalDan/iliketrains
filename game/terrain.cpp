@@ -2,32 +2,40 @@
 #include "gfx/models/texture.h"
 #include <array>
 #include <cache.h>
+#include <cmath>
 #include <cstddef>
 #include <gfx/gl/shader.h>
 #include <gfx/gl/transform.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
+#include <random>
 
-constexpr auto size {255}; // Vertices
+constexpr auto size {241}; // Vertices
+constexpr auto offset {(size - 1) / 2};
 constexpr auto verticesCount = size * size;
 constexpr auto tilesCount = (size - 1) * (size - 1);
 constexpr auto trianglesCount = tilesCount * 2;
 constexpr auto indicesCount = trianglesCount * 3;
 constexpr auto resolution = 10; // Grid size
+constexpr auto extent = offset * resolution;
 
 Terrain::Terrain() :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("res/bricks.jpg")}
+	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("res/terrain.png")}
 {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	vertices.reserve(verticesCount + 4);
 	vertices.resize(verticesCount, {{}, {}, {}});
-	indices.reserve(indicesCount);
+	indices.reserve(indicesCount + 6);
 
 	// Initial coordinates
 	for (auto z = 0; z < size; z += 1) {
 		for (auto x = 0; x < size; x += 1) {
 			auto & vertex = vertices[x + (z * size)];
-			vertex.pos = {resolution * x, -1, resolution * z};
+			vertex.pos = {resolution * (x - offset), -1.5, resolution * (z - offset)};
 			vertex.normal = {0, 1, 0};
-			vertex.texCoord = {x % 2, z % 2};
+			vertex.texCoord = {(x % 2) / 2.01, (z % 2) / 2.01};
 		}
 	}
 	// Indices
@@ -41,6 +49,53 @@ Terrain::Terrain() :
 			indices.push_back((x + 1) + ((z + 1) * size));
 		}
 	}
+	// Add hills
+	std::mt19937 gen(std::random_device {}());
+	std::uniform_int_distribution<> rpos(2, size - 2);
+	std::uniform_int_distribution<> rsize(10, 20);
+	std::uniform_int_distribution<> rheight(1, 3);
+	for (int h = 0; h < 500;) {
+		const glm::ivec2 hpos {rpos(gen), rpos(gen)};
+		const glm::ivec2 hsize {rsize(gen), rsize(gen)};
+		if (const auto lim1 = hpos - hsize; lim1.x > 0 && lim1.y > 0) {
+			if (const auto lim2 = hpos + hsize; lim2.x < size && lim2.y < size) {
+				auto height {rheight(gen)};
+				const glm::ivec2 hsizesqrd {hsize.x * hsize.x, hsize.y * hsize.y};
+				for (auto z = lim1.y; z < lim2.y; z += 1) {
+					for (auto x = lim1.x; x < lim2.x; x += 1) {
+						const auto dist {hpos - glm::ivec2 {x, z}};
+						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
+						if ((pow(x - hpos.x, 2) / pow(hsize.x, 2)) + (pow(z - hpos.y, 2) / pow(hsize.y, 2)) <= 1.0) {
+							auto & vertex = vertices[x + (z * size)];
+							vertex.pos.y += height;
+						}
+					}
+				}
+				h += 1;
+			}
+		}
+	}
+	// Normals
+	for (auto z = 1; z < size - 1; z += 1) {
+		for (auto x = 1; x < size - 1; x += 1) {
+			const auto a = v(x - 1, z).pos;
+			const auto b = v(x, z - 1).pos;
+			const auto c = v(x + 1, z).pos;
+			const auto d = v(x, z + 1).pos;
+			v(x, z).normal = -glm::normalize(glm::cross(c - a, d - b));
+		}
+	}
+	// Add water
+	vertices.emplace_back(glm::vec3 {-extent, 0, -extent}, glm::vec2 {0.5, 0.0}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {-extent, 0, extent}, glm::vec2 {0.5, 0.5}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {extent, 0, extent}, glm::vec2 {1, 0.5}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {extent, 0, -extent}, glm::vec2 {1, 0.0}, glm::vec3 {0, 1, 0});
+	indices.push_back(verticesCount);
+	indices.push_back(verticesCount + 1);
+	indices.push_back(verticesCount + 2);
+	indices.push_back(verticesCount);
+	indices.push_back(verticesCount + 2);
+	indices.push_back(verticesCount + 3);
 
 	glGenVertexArrays(1, &m_vertexArrayObject);
 	glBindVertexArray(m_vertexArrayObject);
@@ -63,6 +118,12 @@ Terrain::Terrain() :
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+}
+
+Vertex &
+Terrain::v(unsigned int x, unsigned int z)
+{
+	return vertices[x + (z * size)];
 }
 
 Terrain::~Terrain()

@@ -27,6 +27,8 @@ public:
 private:
 	static constexpr unsigned int NUM_BUFFERS {4};
 
+	Vertex & v(unsigned int, unsigned int);
+
 	GLuint m_vertexArrayObject;
 	std::array<GLuint, NUM_BUFFERS> m_vertexArrayBuffers;
 	std::vector<Vertex> vertices;
