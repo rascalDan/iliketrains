@@ -70,7 +70,8 @@ public:
 		world.create<Terrain>();
 
 		Shader shader;
-		Camera camera({-5.0F, 2.0F, -5.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 100.0F);
+		Camera camera({-1250.0F, 35.0F, -1250.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 10000.0F);
+		camera.Pitch(0.24);
 		camera.RotateY(0.7854);
 		shader.Bind();
 		shader.setView(camera.GetViewProjection());
