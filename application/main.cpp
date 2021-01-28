@@ -4,41 +4,20 @@
 #include "manualCameraController.h"
 #include <SDL2/SDL.h>
 #include <chrono>
-#include <cmath>
 #include <collection.hpp>
-#include <game/physical.h>
 #include <game/world.h>
 #include <game/worldobject.h>
 #include <gfx/camera_controller.h>
 #include <gfx/gl/camera.h>
 #include <gfx/gl/shader.h>
-#include <gfx/gl/transform.h>
 #include <gfx/renderable.h>
-#include <glm/glm.hpp>
 #include <memory>
-#include <numbers>
 #include <special_members.hpp>
 #include <vector>
 #include <worker.h>
 
 static const int DISPLAY_WIDTH = 800;
 static const int DISPLAY_HEIGHT = 600;
-
-class Monkey : public WorldObject, public Physical {
-public:
-	Monkey() : Physical {{0.0, 0.5, 1.0}, "res/monkey3.obj", "res/bricks.jpg"} { }
-
-	void
-	tick(TickDuration elapsed) override
-	{
-		counter += 0.000625F * elapsed.count();
-		location.GetRot().y = std::numbers::pi_v<double> + sin(counter);
-		location.GetRot().z = 0.3 * cos(counter * 10);
-	}
-
-private:
-	float counter {};
-};
 
 class SDL_Application : public InputHandler, public std::enable_shared_from_this<SDL_Application> {
 public:
@@ -82,7 +61,6 @@ public:
 
 		Worker w;
 
-		world.create<Monkey>();
 		world.create<Terrain>();
 
 		Shader shader;
