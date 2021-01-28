@@ -27,7 +27,9 @@ public:
 private:
 	static constexpr unsigned int NUM_BUFFERS {4};
 
-	Vertex & v(unsigned int, unsigned int);
+	void finish(unsigned int width, unsigned int height, unsigned int resolution);
+
+	Vertex & v(unsigned int width, unsigned int x, unsigned int z);
 
 	GLuint m_vertexArrayObject;
 	std::array<GLuint, NUM_BUFFERS> m_vertexArrayBuffers;

@@ -10,24 +10,19 @@
 #include <glm/glm.hpp>
 #include <random>
 
-constexpr auto size {241}; // Vertices
-constexpr auto offset {(size - 1) / 2};
-constexpr auto verticesCount = size * size;
-constexpr auto tilesCount = (size - 1) * (size - 1);
-constexpr auto trianglesCount = tilesCount * 2;
-constexpr auto indicesCount = trianglesCount * 3;
-constexpr auto resolution = 10; // Grid size
-constexpr auto extent = offset * resolution;
-
 Terrain::Terrain() :
 	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("res/terrain.png")}
 {
+	constexpr auto size {241}; // Vertices
+	constexpr auto offset {(size - 1) / 2};
+	constexpr auto verticesCount = size * size;
+	constexpr auto resolution = 10; // Grid size
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	vertices.reserve(verticesCount + 4);
 	vertices.resize(verticesCount, {{}, {}, {}});
-	indices.reserve(indicesCount + 6);
 
 	// Initial coordinates
 	for (auto z = 0; z < size; z += 1) {
@@ -36,17 +31,6 @@ Terrain::Terrain() :
 			vertex.pos = {resolution * (x - offset), -1.5, resolution * (z - offset)};
 			vertex.normal = {0, 1, 0};
 			vertex.texCoord = {(x % 2) / 2.01, (z % 2) / 2.01};
-		}
-	}
-	// Indices
-	for (auto z = 0; z < size - 1; z += 1) {
-		for (auto x = 0; x < size - 1; x += 1) {
-			indices.push_back(x + (z * size));
-			indices.push_back((x + 1) + ((z + 1) * size));
-			indices.push_back((x + 1) + (z * size));
-			indices.push_back(x + (z * size));
-			indices.push_back(x + ((z + 1) * size));
-			indices.push_back((x + 1) + ((z + 1) * size));
 		}
 	}
 	// Add hills
@@ -75,21 +59,45 @@ Terrain::Terrain() :
 			}
 		}
 	}
-	// Normals
-	for (auto z = 1; z < size - 1; z += 1) {
-		for (auto x = 1; x < size - 1; x += 1) {
-			const auto a = v(x - 1, z).pos;
-			const auto b = v(x, z - 1).pos;
-			const auto c = v(x + 1, z).pos;
-			const auto d = v(x, z + 1).pos;
-			v(x, z).normal = -glm::normalize(glm::cross(c - a, d - b));
+	finish(size, size, resolution);
+}
+
+void
+Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution)
+{
+	const auto tilesCount = (width - 1) * (height - 1);
+	const auto trianglesCount = tilesCount * 2;
+	const auto indicesCount = trianglesCount * 3;
+	indices.reserve(indicesCount + 6);
+	// Indices
+	for (auto z = 0U; z < height - 1; z += 1) {
+		for (auto x = 0U; x < width - 1; x += 1) {
+			indices.push_back(x + (z * width));
+			indices.push_back((x + 1) + ((z + 1) * width));
+			indices.push_back((x + 1) + (z * width));
+			indices.push_back(x + (z * width));
+			indices.push_back(x + ((z + 1) * width));
+			indices.push_back((x + 1) + ((z + 1) * width));
 		}
 	}
+	// Normals
+	for (auto z = 1U; z < height - 1; z += 1) {
+		for (auto x = 1U; x < width - 1; x += 1) {
+			const auto a = v(width, x - 1, z).pos;
+			const auto b = v(width, x, z - 1).pos;
+			const auto c = v(width, x + 1, z).pos;
+			const auto d = v(width, x, z + 1).pos;
+			v(width, x, z).normal = -glm::normalize(glm::cross(c - a, d - b));
+		}
+	}
+	const auto verticesCount = vertices.size();
 	// Add water
-	vertices.emplace_back(glm::vec3 {-extent, 0, -extent}, glm::vec2 {0.5, 0.0}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {-extent, 0, extent}, glm::vec2 {0.5, 0.5}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {extent, 0, extent}, glm::vec2 {1, 0.5}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {extent, 0, -extent}, glm::vec2 {1, 0.0}, glm::vec3 {0, 1, 0});
+	const auto extentx {(int)((width - 1) * resolution / 2)};
+	const auto extentz {(int)((height - 1) * resolution / 2)};
+	vertices.emplace_back(glm::vec3 {-extentx, 0, -extentz}, glm::vec2 {0.5, 0.0}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {-extentx, 0, extentz}, glm::vec2 {0.5, 0.5}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {extentx, 0, extentz}, glm::vec2 {1, 0.5}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {extentx, 0, -extentz}, glm::vec2 {1, 0.0}, glm::vec3 {0, 1, 0});
 	indices.push_back(verticesCount);
 	indices.push_back(verticesCount + 1);
 	indices.push_back(verticesCount + 2);
@@ -121,9 +129,9 @@ Terrain::Terrain() :
 }
 
 Vertex &
-Terrain::v(unsigned int x, unsigned int z)
+Terrain::v(unsigned int width, unsigned int x, unsigned int z)
 {
-	return vertices[x + (z * size)];
+	return vertices[x + (z * width)];
 }
 
 Terrain::~Terrain()
