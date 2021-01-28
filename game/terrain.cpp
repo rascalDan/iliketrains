@@ -9,6 +9,8 @@
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
 #include <random>
+#include <stb_image.h>
+#include <stdexcept>
 
 Terrain::Terrain() :
 	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("res/terrain.png")}
@@ -60,6 +62,36 @@ Terrain::Terrain() :
 		}
 	}
 	finish(size, size, resolution);
+}
+
+Terrain::Terrain(const std::string & fileName) :
+	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("res/terrain.png")}
+{
+	constexpr auto resolution {100};
+
+	int width, height, numComponents;
+	unsigned char * data = stbi_load((fileName).c_str(), &width, &height, &numComponents, STBI_grey);
+
+	if (!data) {
+		throw std::runtime_error {"Unable to load heightmap: " + fileName};
+	}
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	vertices.reserve((width * height) + 4);
+
+	for (auto z = 0; z < height; z += 1) {
+		for (auto x = 0; x < width; x += 1) {
+			vertices.emplace_back(
+					glm::vec3 {resolution * (x - (width / 2)), ((float)data[x + (z * width)] * 0.1F) - 1.5F,
+							resolution * (z - (height / 2))},
+					glm::vec2 {(x % 2) / 2.01, (z % 2) / 2.01}, glm::vec3 {0, 1, 0});
+		}
+	}
+	stbi_image_free(data);
+
+	finish(width, height, resolution);
 }
 
 void

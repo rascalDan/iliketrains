@@ -8,6 +8,7 @@
 #include <gfx/renderable.h>
 #include <memory>
 #include <special_members.hpp>
+#include <string>
 #include <vector>
 
 class Shader;
@@ -16,6 +17,7 @@ class Texture;
 class Terrain : public WorldObject, public Renderable {
 public:
 	Terrain();
+	explicit Terrain(const std::string &);
 	~Terrain() override;
 	NO_COPY(Terrain);
 	NO_MOVE(Terrain);
