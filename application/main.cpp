@@ -1,5 +1,7 @@
 #include "game/terrain.h"
 #include "gfx/window.h"
+#include "inputHandler.h"
+#include "manualCameraController.h"
 #include <SDL2/SDL.h>
 #include <chrono>
 #include <cmath>
@@ -7,6 +9,7 @@
 #include <game/physical.h>
 #include <game/world.h>
 #include <game/worldobject.h>
+#include <gfx/camera_controller.h>
 #include <gfx/gl/camera.h>
 #include <gfx/gl/shader.h>
 #include <gfx/gl/transform.h>
@@ -15,6 +18,7 @@
 #include <memory>
 #include <numbers>
 #include <special_members.hpp>
+#include <vector>
 #include <worker.h>
 
 static const int DISPLAY_WIDTH = 800;
@@ -36,7 +40,7 @@ private:
 	float counter {};
 };
 
-class SDL_Application {
+class SDL_Application : public InputHandler, public std::enable_shared_from_this<SDL_Application> {
 public:
 	SDL_Application()
 	{
@@ -50,12 +54,25 @@ public:
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	}
-	~SDL_Application()
+
+	~SDL_Application() override
 	{
 		SDL_Quit();
 	}
+
 	NO_COPY(SDL_Application);
 	NO_MOVE(SDL_Application);
+
+	bool
+	handleInput(SDL_Event & e) override
+	{
+		switch (e.type) {
+			case SDL_QUIT:
+				isRunning = false;
+				return true;
+		}
+		return false;
+	}
 
 	void
 	run()
@@ -65,7 +82,6 @@ public:
 
 		Worker w;
 
-		World world;
 		world.create<Monkey>();
 		world.create<Terrain>();
 
@@ -76,90 +92,19 @@ public:
 		shader.Bind();
 		shader.setView(camera.GetViewProjection());
 
-		SDL_Event e;
-		bool isRunning = true;
-
 		auto t_start = std::chrono::high_resolution_clock::now();
 		const auto framelen = std::chrono::milliseconds {1000} / 120;
 
-		bool mrb {false}, ctrl {false};
-		while (isRunning) {
-			while (SDL_PollEvent(&e)) {
-				switch (e.type) {
-					case SDL_QUIT:
-						isRunning = false;
-						break;
-					case SDL_KEYDOWN:
-						switch (e.key.keysym.sym) {
-							case SDLK_KP_8:
-								camera.MoveForward(1);
-								break;
-							case SDLK_KP_2:
-								camera.MoveForward(-1);
-								break;
-							case SDLK_KP_4:
-								camera.MoveRight(1);
-								break;
-							case SDLK_KP_6:
-								camera.MoveRight(-1);
-								break;
-							case SDLK_KP_7:
-								camera.RotateY(0.04);
-								break;
-							case SDLK_KP_9:
-								camera.RotateY(-0.04);
-								break;
-							case SDLK_LCTRL:
-							case SDLK_RCTRL:
-								ctrl = true;
-								break;
-						}
-						shader.setView(camera.GetViewProjection());
-						break;
-					case SDL_KEYUP:
-						switch (e.key.keysym.sym) {
-							case SDLK_LCTRL:
-							case SDLK_RCTRL:
-								ctrl = false;
-								break;
-						}
-						break;
-					case SDL_MOUSEBUTTONDOWN:
-						switch (e.button.button) {
-							case SDL_BUTTON_RIGHT:
-								SDL_SetRelativeMouseMode(SDL_TRUE);
-								mrb = true;
-								break;
-						}
-						break;
-					case SDL_MOUSEBUTTONUP:
-						switch (e.button.button) {
-							case SDL_BUTTON_RIGHT:
-								SDL_SetRelativeMouseMode(SDL_FALSE);
-								mrb = false;
-								break;
-						}
-						break;
-					case SDL_MOUSEMOTION:
-						if (mrb) {
-							if (ctrl) {
-								camera.RotateY(-0.01F * e.motion.xrel);
-								camera.Pitch(-0.01F * e.motion.yrel);
-							}
-							else {
-								camera.MoveRight(e.motion.xrel);
-								camera.SlideForward(e.motion.yrel);
-							}
-							shader.setView(camera.GetViewProjection());
-						}
-						break;
-				}
-			}
+		inputStack.objects.push_back(shared_from_this());
+		inputStack.objects.insert(inputStack.objects.begin(), world.create<ManualCameraController>());
 
+		while (isRunning) {
+			processInputs();
 			const auto t_end = std::chrono::high_resolution_clock::now();
 			const auto t_passed = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start);
 
 			world.apply(&WorldObject::tick, t_passed);
+			world.apply<CameraController>(&CameraController::updateCamera, &camera, &shader);
 			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
 			world.apply<Renderable>(&Renderable::render, shader);
 			windows.apply(&Window::SwapBuffers);
@@ -170,12 +115,25 @@ public:
 			t_start = t_end;
 		}
 	}
+
+private:
+	void
+	processInputs()
+	{
+		for (SDL_Event e; SDL_PollEvent(&e);) {
+			inputStack.applyOne(&InputHandler::handleInput, e);
+		}
+	}
+
+	bool isRunning {true};
+	Collection<InputHandler> inputStack;
+	World world;
 };
 
 int
 main(int, char **)
 {
-	SDL_Application().run();
+	std::make_shared<SDL_Application>()->run();
 
 	return 0;
 }

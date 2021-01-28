@@ -2,8 +2,8 @@
 #include <glm/gtx/transform.hpp>
 
 Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
-	projection {glm::perspective(fov, aspect, zNear, zFar)}, pos {pos}, forward {0.0F, 0.0F, 1.0F}, up {0.0F, 1.0F,
-																											0.0F}
+	pos {pos}, forward {0.0F, 0.0F, 1.0F}, up {0.0F, 1.0F, 0.0F}, projection {
+																		  glm::perspective(fov, aspect, zNear, zFar)}
 {
 }
 

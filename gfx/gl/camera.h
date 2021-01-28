@@ -15,11 +15,12 @@ public:
 	void Pitch(float angle);
 	void RotateY(float angle);
 
-private:
-	glm::mat4 projection;
 	glm::vec3 pos;
 	glm::vec3 forward;
 	glm::vec3 up;
+
+private:
+	glm::mat4 projection;
 };
 
 #endif
