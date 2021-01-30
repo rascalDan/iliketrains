@@ -49,13 +49,10 @@ exe iliketrains :
 	application/main.cpp
 	:
 	<library>ilt
-	<include>.
-	<include>utility
-	<include>lib
 	;
 
 lib ilt :
-	[ glob-tree *.cpp *.c *.vs *.fs : bin ]
+	[ glob-tree *.cpp *.c *.vs *.fs : bin test ]
 	:
 	<variant>release:<link>static
 	<include>.
@@ -65,4 +62,10 @@ lib ilt :
 	<library>glew/<link>shared
 	<library>pthread/<link>shared
 	<use>stb
+	: :
+	<include>.
+	<include>utility
+	<include>lib
 	;
+
+build-project test ;

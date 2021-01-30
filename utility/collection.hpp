@@ -7,7 +7,8 @@
 template<typename Object> class Collection {
 public:
 	using Ptr = std::shared_ptr<Object>;
-	std::vector<Ptr> objects;
+	using Objects = std::vector<Ptr>;
+	Objects objects;
 
 	template<typename T = Object, typename... Params>
 	auto
@@ -52,6 +53,12 @@ public:
 								  return dynamic_cast<T *>(op.get());
 							  }),
 				objects.end());
+	}
+
+	auto
+	end() const
+	{
+		return objects.end();
 	}
 };
 

@@ -39,6 +39,38 @@
             "public"
         ]
     },
+		{
+        "include": [
+            "<boost/test/unit_test_suite.hpp>",
+            "private",
+            "<boost/test/unit_test.hpp>",
+            "public"
+        ]
+    },
+		{
+        "include": [
+            "@<boost/test/utils/.*>",
+            "private",
+            "<boost/test/unit_test.hpp>",
+            "public"
+        ]
+    },
+		{
+        "include": [
+            "@<boost/test/tools/.*>",
+            "private",
+            "<boost/test/unit_test.hpp>",
+            "public"
+        ]
+    },
+		{
+        "include": [
+            "@<boost/preprocessor/.*>",
+            "private",
+            "<boost/test/unit_test.hpp>",
+            "public"
+        ]
+    },
     {
         "symbol": [
             "std::__atomic_wait",

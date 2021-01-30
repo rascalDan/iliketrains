@@ -1,0 +1,12 @@
+import testing ;
+
+lib boost_unit_test_framework ;
+
+project : requirements
+	<define>BOOST_TEST_DYN_LINK
+	<library>boost_unit_test_framework
+	<library>..//ilt
+	<toolset>tidy:<xcheckxx>hicpp-vararg
+	;
+
+run test-collection.cpp ;
