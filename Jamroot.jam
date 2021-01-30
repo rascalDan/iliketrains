@@ -14,8 +14,8 @@ project : requirements
 	<variant>debug:<warnings>extra
 	<variant>debug:<warnings-as-errors>on
 	<variant>release:<lto>on
-	<toolset>tidy:<exclude>bin/gfx/gl/shaders/fs-basicShader.h
-	<toolset>tidy:<exclude>bin/gfx/gl/shaders/vs-basicShader.h
+	<toolset>tidy:<exclude>gfx/gl/shaders/fs-basicShader.h
+	<toolset>tidy:<exclude>gfx/gl/shaders/vs-basicShader.h
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
 	<toolset>tidy:<checkxx>clang-*
@@ -45,14 +45,24 @@ actions xxd.i
 }
 IMPORT $(__name__) : xxd.i : : xxd.i ;
 
-exe test :
-	[ glob-tree *.cpp *.c *.vs *.fs : bin ]
+exe iliketrains :
+	application/main.cpp
 	:
+	<library>ilt
 	<include>.
 	<include>utility
 	<include>lib
-	<library>sdl2
-	<library>glew
-	<library>pthread
+	;
+
+lib ilt :
+	[ glob-tree *.cpp *.c *.vs *.fs : bin ]
+	:
+	<variant>release:<link>static
+	<include>.
+	<include>utility
+	<include>lib
+	<library>sdl2/<link>shared
+	<library>glew/<link>shared
+	<library>pthread/<link>shared
 	<use>stb
 	;

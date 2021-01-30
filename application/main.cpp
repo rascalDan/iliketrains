@@ -1,16 +1,16 @@
-#include "game/terrain.h"
-#include "gfx/window.h"
-#include "inputHandler.h"
-#include "manualCameraController.h"
 #include <SDL2/SDL.h>
 #include <chrono>
 #include <collection.hpp>
+#include <game/terrain.h>
 #include <game/world.h>
 #include <game/worldobject.h>
 #include <gfx/camera_controller.h>
 #include <gfx/gl/camera.h>
 #include <gfx/gl/shader.h>
+#include <gfx/inputHandler.h>
+#include <gfx/manualCameraController.h>
 #include <gfx/renderable.h>
+#include <gfx/window.h>
 #include <memory>
 #include <special_members.hpp>
 #include <vector>
@@ -53,7 +53,7 @@ public:
 		return false;
 	}
 
-	void
+	int
 	run()
 	{
 		Collection<Window> windows;
@@ -92,6 +92,8 @@ public:
 			}
 			t_start = t_end;
 		}
+
+		return 0;
 	}
 
 private:
@@ -111,7 +113,5 @@ private:
 int
 main(int, char **)
 {
-	std::make_shared<SDL_Application>()->run();
-
-	return 0;
+	return std::make_shared<SDL_Application>()->run();
 }

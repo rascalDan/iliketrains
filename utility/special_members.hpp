@@ -9,4 +9,10 @@
 	TYPE(TYPE &&) = delete; \
 	void operator=(TYPE &&) = delete
 
+#define DEFAULT_MOVE_COPY(TYPE) \
+	TYPE(const TYPE &) = default; \
+	TYPE(TYPE &&) = default; \
+	TYPE & operator=(const TYPE &) = default; \
+	TYPE & operator=(TYPE &&) = default
+
 #endif
