@@ -1,6 +1,7 @@
 #ifndef OBJ_LOADER_H_INCLUDED
 #define OBJ_LOADER_H_INCLUDED
 
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
@@ -36,7 +37,7 @@ public:
 	bool hasUVs;
 	bool hasNormals;
 
-	explicit OBJModel(const std::string & fileName);
+	explicit OBJModel(const std::filesystem::path & fileName);
 
 	IndexedModel ToIndexedModel();
 

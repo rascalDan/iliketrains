@@ -2,8 +2,13 @@ import testing ;
 
 lib boost_unit_test_framework ;
 
+path-constant res : ../res ;
+path-constant fixtures : fixtures ;
+
 project : requirements
 	<define>BOOST_TEST_DYN_LINK
+	<define>RESDIR=\\\"$(res)/\\\"
+	<define>FIXTURESDIR=\\\"$(fixtures)/\\\"
 	<library>boost_unit_test_framework
 	<library>..//ilt
 	<toolset>tidy:<xcheckxx>hicpp-vararg

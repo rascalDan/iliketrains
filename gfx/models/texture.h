@@ -2,14 +2,14 @@
 #define TEXTURE_H
 
 #include <GL/glew.h>
+#include <filesystem>
 #include <special_members.hpp>
-#include <string>
 
 template<typename Obj> class Cache;
 
 class Texture {
 public:
-	explicit Texture(const std::string & fileName);
+	explicit Texture(const std::filesystem::path & fileName);
 
 	virtual ~Texture();
 

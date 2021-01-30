@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <resource.h>
 #include <stdexcept>
 #include <utility>
 
@@ -12,12 +13,12 @@ static inline unsigned int ParseOBJIndexValue(const std::string & token, unsigne
 static inline float ParseOBJFloatValue(const std::string & token, unsigned int start, unsigned int end);
 static inline std::vector<std::string> SplitString(const std::string & s, char delim);
 
-OBJModel::OBJModel(const std::string & fileName)
+OBJModel::OBJModel(const std::filesystem::path & fileName)
 {
 	hasUVs = false;
 	hasNormals = false;
 	std::ifstream file;
-	file.open(fileName.c_str());
+	file.open(Resource::mapPath(fileName).c_str());
 
 	std::string line;
 	if (file.is_open()) {
@@ -55,7 +56,7 @@ OBJModel::OBJModel(const std::string & fileName)
 		}
 	}
 	else {
-		throw std::runtime_error {"Unable to load mesh: " + fileName};
+		throw std::runtime_error {"Unable to load mesh: " + fileName.string()};
 	}
 }
 

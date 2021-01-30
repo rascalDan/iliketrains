@@ -1,18 +1,14 @@
 #include "texture.h"
 #include "stb_image.h"
 #include <cache.h>
-#include <stdexcept>
+#include <gfx/image.h>
+#include <resource.h>
 
 Cache<Texture> Texture::cachedTexture;
 
-Texture::Texture(const std::string & fileName) : m_texture {}
+Texture::Texture(const std::filesystem::path & fileName) : m_texture {}
 {
-	int width, height, numComponents;
-	unsigned char * data = stbi_load((fileName).c_str(), &width, &height, &numComponents, STBI_rgb_alpha);
-
-	if (!data) {
-		throw std::runtime_error {"Unable to load texture: " + fileName};
-	}
+	const Image tex {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha};
 
 	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
@@ -22,8 +18,7 @@ Texture::Texture(const std::string & fileName) : m_texture {}
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	stbi_image_free(data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
 }
 
 Texture::~Texture()
