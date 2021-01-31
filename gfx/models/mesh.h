@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <array>
 #include <cstddef>
+#include <span>
 #include <special_members.hpp>
 #include <string>
 
@@ -16,7 +17,7 @@ class Mesh {
 public:
 	explicit Mesh(const std::string & fileName);
 	explicit Mesh(const IndexedModel & model);
-	Mesh(Vertex * vertices, unsigned int numVertices, unsigned int * indices, unsigned int numIndices);
+	Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices);
 	virtual ~Mesh();
 
 	NO_COPY(Mesh);
