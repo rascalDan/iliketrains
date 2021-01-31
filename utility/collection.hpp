@@ -3,10 +3,11 @@
 
 #include <algorithm>
 #include <memory>
+#include <type_traits>
 
-template<typename Object> class Collection {
+template<typename Object, bool shared = true> class Collection {
 public:
-	using Ptr = std::shared_ptr<Object>;
+	using Ptr = std::conditional_t<shared, std::shared_ptr<Object>, std::unique_ptr<Object>>;
 	using Objects = std::vector<Ptr>;
 	Objects objects;
 
@@ -14,9 +15,14 @@ public:
 	auto
 	create(Params &&... params)
 	{
-		auto obj = std::make_shared<T>(std::forward<Params>(params)...);
-		objects.emplace_back(obj);
-		return obj;
+		if constexpr (shared) {
+			auto obj = std::make_shared<T>(std::forward<Params>(params)...);
+			objects.emplace_back(obj);
+			return obj;
+		}
+		else {
+			return static_cast<T *>(objects.emplace_back(std::make_unique<T>(std::forward<Params>(params)...)).get());
+		}
 	}
 
 	template<typename T = Object, typename M = void, typename... Params>
