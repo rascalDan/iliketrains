@@ -1,13 +1,12 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
+#include "collection.hpp"
 #include "worldobject.h"
-#include <GL/glew.h>
-#include <array>
+#include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
 #include <gfx/renderable.h>
 #include <memory>
-#include <special_members.hpp>
 #include <string>
 #include <vector>
 
@@ -18,9 +17,6 @@ class Terrain : public WorldObject, public Renderable {
 public:
 	Terrain();
 	explicit Terrain(const std::string &);
-	~Terrain() override;
-	NO_COPY(Terrain);
-	NO_MOVE(Terrain);
 
 	void render(const Shader & shader) const override;
 
@@ -33,8 +29,7 @@ private:
 
 	Vertex & v(unsigned int width, unsigned int x, unsigned int z);
 
-	GLuint m_vertexArrayObject;
-	std::array<GLuint, NUM_BUFFERS> m_vertexArrayBuffers;
+	Collection<Mesh, false> meshes;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::shared_ptr<Texture> texture;

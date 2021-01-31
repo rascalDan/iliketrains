@@ -1,19 +1,18 @@
 #include "terrain.h"
 #include "gfx/models/texture.h"
-#include <array>
+#include <GL/glew.h>
 #include <cache.h>
 #include <cmath>
-#include <cstddef>
 #include <gfx/gl/shader.h>
 #include <gfx/gl/transform.h>
 #include <gfx/image.h>
+#include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
 #include <random>
 #include <stb_image.h>
 
-Terrain::Terrain() :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("terrain.png")}
+Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 {
 	constexpr auto size {241}; // Vertices
 	constexpr auto offset {(size - 1) / 2};
@@ -64,8 +63,7 @@ Terrain::Terrain() :
 	finish(size, size, resolution);
 }
 
-Terrain::Terrain(const std::string & fileName) :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, texture {Texture::cachedTexture.get("terrain.png")}
+Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture.get("terrain.png")}
 {
 	constexpr auto resolution {100};
 
@@ -131,39 +129,13 @@ Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution
 	indices.push_back(verticesCount + 2);
 	indices.push_back(verticesCount + 3);
 
-	glGenVertexArrays(1, &m_vertexArrayObject);
-	glBindVertexArray(m_vertexArrayObject);
-
-	glGenBuffers(2, m_vertexArrayBuffers.data());
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, pos));
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, texCoord));
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vertexArrayBuffers[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
+	meshes.create<Mesh>(vertices, indices);
 }
 
 Vertex &
 Terrain::v(unsigned int width, unsigned int x, unsigned int z)
 {
 	return vertices[x + (z * width)];
-}
-
-Terrain::~Terrain()
-{
-	glDeleteBuffers(NUM_BUFFERS, m_vertexArrayBuffers.data());
-	glDeleteVertexArrays(1, &m_vertexArrayObject);
 }
 
 static const Transform identity {};
@@ -174,9 +146,5 @@ Terrain::render(const Shader & shader) const
 {
 	shader.setModel(identityModel);
 	texture->Bind();
-	glBindVertexArray(m_vertexArrayObject);
-
-	glDrawElementsBaseVertex(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr, 0);
-
-	glBindVertexArray(0);
+	meshes.apply(&Mesh::Draw);
 }
