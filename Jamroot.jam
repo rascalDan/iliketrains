@@ -3,6 +3,7 @@ using pkg-config ;
 import pkg-config ;
 import type : register ;
 import generators : register-standard ;
+import testing ;
 
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
@@ -48,6 +49,11 @@ IMPORT $(__name__) : xxd.i : : xxd.i ;
 exe iliketrains :
 	application/main.cpp
 	:
+	<library>ilt
+	;
+
+run application/main.cpp
+	: : :
 	<library>ilt
 	;
 

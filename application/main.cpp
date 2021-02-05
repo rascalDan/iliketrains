@@ -1,6 +1,9 @@
 #include <SDL2/SDL.h>
+#include <array>
 #include <chrono>
 #include <collection.hpp>
+#include <game/network/link.h>
+#include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/world.h>
 #include <game/worldobject.h>
@@ -11,13 +14,15 @@
 #include <gfx/manualCameraController.h>
 #include <gfx/renderable.h>
 #include <gfx/window.h>
+#include <glm/glm.hpp>
 #include <memory>
 #include <special_members.hpp>
+#include <utility>
 #include <vector>
 #include <worker.h>
 
-static const int DISPLAY_WIDTH = 800;
-static const int DISPLAY_HEIGHT = 600;
+static const int DISPLAY_WIDTH = 1280;
+static const int DISPLAY_HEIGHT = 1024;
 
 class SDL_Application : public InputHandler, public std::enable_shared_from_this<SDL_Application> {
 public:
@@ -62,6 +67,11 @@ public:
 		Worker w;
 
 		world.create<Terrain>();
+		auto rl = world.create<RailLinks>();
+		auto a = rl->addLink<RailLinkStraight>({-1190, 5, -1190}, {-1190, 6, -1180});
+		auto b = rl->addLink<RailLinkStraight>(a->ends.back().first->pos, glm::vec3 {-1180, 5, -1180});
+		auto c = rl->addLink<RailLinkStraight>(b->ends.back().first->pos, glm::vec3 {-1180, 4, -1190});
+		rl->addLink<RailLinkStraight>(c->ends.back().first->pos, a->ends.front().first->pos);
 
 		Shader shader;
 		Camera camera({-1250.0F, 35.0F, -1250.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 10000.0F);

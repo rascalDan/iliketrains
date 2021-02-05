@@ -7,7 +7,7 @@
 Mesh::Mesh(const std::string & fileName) : Mesh(OBJModel(fileName).ToIndexedModel()) { }
 
 Mesh::Mesh(const IndexedModel & model) :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {model.indices.size()}
+	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {model.indices.size()}, mode {GL_TRIANGLES}
 {
 	glGenVertexArrays(1, &m_vertexArrayObject);
 	glBindVertexArray(m_vertexArrayObject);
@@ -38,8 +38,8 @@ Mesh::Mesh(const IndexedModel & model) :
 	glBindVertexArray(0);
 }
 
-Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices) :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {indices.size()}
+Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m) :
+	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {indices.size()}, mode {m}
 {
 	glGenVertexArrays(1, &m_vertexArrayObject);
 	glBindVertexArray(m_vertexArrayObject);
@@ -75,7 +75,7 @@ Mesh::Draw() const
 {
 	glBindVertexArray(m_vertexArrayObject);
 
-	glDrawElementsBaseVertex(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, nullptr, 0);
+	glDrawElementsBaseVertex(mode, m_numIndices, GL_UNSIGNED_INT, nullptr, 0);
 
 	glBindVertexArray(0);
 }

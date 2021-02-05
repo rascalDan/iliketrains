@@ -17,7 +17,7 @@ class Mesh {
 public:
 	explicit Mesh(const std::string & fileName);
 	explicit Mesh(const IndexedModel & model);
-	Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices);
+	Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum = GL_TRIANGLES);
 	virtual ~Mesh();
 
 	NO_COPY(Mesh);
@@ -31,6 +31,7 @@ private:
 	GLuint m_vertexArrayObject;
 	std::array<GLuint, NUM_BUFFERS> m_vertexArrayBuffers;
 	size_t m_numIndices;
+	GLenum mode;
 };
 
 #endif

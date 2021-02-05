@@ -33,6 +33,14 @@
     },
     {
         "include": [
+            "@<glm/gtx/rotate_vector.inl>",
+            "private",
+            "<glm/gtx/rotate_vector.hpp>",
+            "public"
+        ]
+    },
+    {
+        "include": [
             "@<glm/gtx/transform.inl>",
             "private",
             "<glm/gtx/transform.hpp>",
