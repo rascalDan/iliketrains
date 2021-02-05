@@ -33,12 +33,21 @@ public:
 	RailLinkStraight(End, End);
 };
 
+class RailLinkCurve : public RailLink {
+public:
+	RailLinkCurve(End, End, glm::vec2);
+
+private:
+	glm::vec2 centre;
+};
+
 template<typename T> concept RailLinkConcept = std::is_base_of_v<RailLink, T>;
 
 class RailLinks : public Renderable, public WorldObject {
 public:
 	RailLinks();
 	template<RailLinkConcept T> std::shared_ptr<T> addLink(glm::vec3, glm::vec3);
+	template<RailLinkConcept T> std::shared_ptr<T> addLink(glm::vec3, glm::vec3, glm::vec2);
 
 private:
 	using Nodes = std::set<NodePtr, PtrSorter<NodePtr>>;

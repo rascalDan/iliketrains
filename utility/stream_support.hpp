@@ -5,7 +5,7 @@
 
 template<glm::length_t L, glm::length_t R, typename T, glm::qualifier Q>
 std::ostream &
-operator<<(std::ostream & s, glm::mat<L, R, T, Q> & m)
+operator<<(std::ostream & s, const glm::mat<L, R, T, Q> & m)
 {
 	for (int y = 0; y < m.length(); y++) {
 		const auto & col = m[y];
@@ -13,6 +13,16 @@ operator<<(std::ostream & s, glm::mat<L, R, T, Q> & m)
 			s << col[x] << ", ";
 		}
 		s << "\n";
+	}
+	return s;
+}
+
+template<glm::length_t L, typename T, glm::qualifier Q>
+std::ostream &
+operator<<(std::ostream & s, const glm::vec<L, T, Q> & v)
+{
+	for (int x = 0; x < L; x++) {
+		s << v[x] << ", ";
 	}
 	return s;
 }

@@ -33,6 +33,22 @@
     },
     {
         "include": [
+            "@<glm/gtc/constants.inl>",
+            "private",
+            "<glm/gtc/constants.hpp>",
+            "public"
+        ]
+    },
+    {
+        "include": [
+            "@<glm/gtx/vector_angle.inl>",
+            "private",
+            "<glm/gtx/vector_angle.hpp>",
+            "public"
+        ]
+    },
+    {
+        "include": [
             "@<glm/gtx/rotate_vector.inl>",
             "private",
             "<glm/gtx/rotate_vector.hpp>",
