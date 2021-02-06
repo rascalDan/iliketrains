@@ -81,6 +81,14 @@ flat_orientation(const V & diff)
 	return (std::isnan(e[0][0])) ? oneeighty : e;
 }
 
+template<typename V>
+auto
+flat_angle(const V & diff)
+{
+	const auto flatdiff {glm::normalize(glm::vec3 {diff.x, 0, diff.z})};
+	return glm::orientedAngle(flatdiff, north, up);
+}
+
 template<typename T>
 constexpr auto
 round_frac(const T & v, const T & frac)
@@ -123,18 +131,20 @@ RailLinkCurve::RailLinkCurve(End a, End b, glm::vec2 c) : RailLink(std::move(a),
 	const glm::vec3 centre3 {centre.x, e0p.y, centre.y};
 	const auto diffa = centre3 - e0p;
 	const auto diffb = centre3 - e1p;
-	const auto anga = glm::orientedAngle(glm::normalize(diffa), north, up) - half_pi;
+	const auto anga = flat_angle(diffa);
 	const auto angb = [&diffb, &anga]() {
-		const auto angb = glm::orientedAngle(glm::normalize(diffb), north, up) - half_pi;
-		return (angb < anga) ? angb + glm::radians(360.f) : angb;
+		const auto angb = flat_angle(diffb);
+		return (angb < anga) ? angb + glm::two_pi<float>() : angb;
 	}();
 	const auto radius = glm::length(e0p - centre3);
 	const auto length = round_sleepers(radius * (angb - anga) / 2.F);
-	const auto step {glm::vec3 {std::abs(angb - anga), e1p.y - e0p.y, length} / std::round(angb - anga) / 5.F};
+	const auto segs = std::round(5.F * length / std::pow(radius, 0.7F));
+	const auto step {glm::vec3 {angb - anga, e1p.y - e0p.y, length} / segs};
 	const auto trans {glm::translate(centre3)};
 
 	auto addRcs = [this, trans, radius](auto arc) {
-		const auto t {trans * glm::rotate(arc.x, up) * glm::translate(glm::vec3 {radius, arc.y, 0.F})};
+		const auto t {trans * glm::rotate(glm::half_pi<float>() - arc.x, up)
+				* glm::translate(glm::vec3 {radius, arc.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
 			vertices.emplace_back(m, glm::vec2 {rcs.second, arc.z}, up);
@@ -146,8 +156,8 @@ RailLinkCurve::RailLinkCurve(End a, End b, glm::vec2 c) : RailLink(std::move(a),
 	addRcs(glm::vec3 {angb, e1p.y - e0p.y, length});
 
 	for (auto n = 4U; n < vertices.size(); n += 1) {
-		indices.push_back(n);
 		indices.push_back(n - 4);
+		indices.push_back(n);
 	}
 	meshes.create<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
 }

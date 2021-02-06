@@ -1,8 +1,6 @@
 #include <SDL2/SDL.h>
-#include <array>
 #include <chrono>
 #include <collection.hpp>
-#include <game/network/link.h>
 #include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/world.h>
@@ -14,9 +12,9 @@
 #include <gfx/manualCameraController.h>
 #include <gfx/renderable.h>
 #include <gfx/window.h>
+#include <glm/glm.hpp>
 #include <memory>
 #include <special_members.hpp>
-#include <utility>
 #include <vector>
 #include <worker.h>
 
@@ -66,11 +64,22 @@ public:
 		Worker w;
 
 		world.create<Terrain>();
+
 		auto rl = world.create<RailLinks>();
-		auto a = rl->addLink<RailLinkStraight>({-1190, 5, -1190}, {-1190, 6, -1180});
-		auto b = rl->addLink<RailLinkCurve>(a->ends.back().first->pos, {-1180, 5, -1180}, {-1185, -1180});
-		auto c = rl->addLink<RailLinkStraight>(b->ends.back().first->pos, {-1180, 4, -1190});
-		rl->addLink<RailLinkCurve>(c->ends.back().first->pos, a->ends.front().first->pos, {-1185, -1190});
+		{
+			const glm::vec3 j {-1100, 5, -1100}, k {-1100, 5, -1000}, l {-1150, 10, -1050}, m {-1050, 10, -1050};
+			rl->addLink<RailLinkStraight>(j, k);
+			rl->addLink<RailLinkCurve>(k, l, {l.x, k.z});
+			rl->addLink<RailLinkStraight>(l, m);
+			rl->addLink<RailLinkCurve>(j, m, {m.x, j.z});
+		}
+		{
+			const glm::vec3 j {-1190, 5, -1190}, k {-1190, 6, -1180}, l {-1180, 4, -1180}, m {-1180, 4, -1190};
+			rl->addLink<RailLinkStraight>(j, k);
+			rl->addLink<RailLinkCurve>(l, k, {-1185, k.z});
+			rl->addLink<RailLinkStraight>(l, m);
+			rl->addLink<RailLinkCurve>(j, m, {-1185, m.z});
+		}
 
 		Shader shader;
 		Camera camera({-1250.0F, 35.0F, -1250.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 10000.0F);
