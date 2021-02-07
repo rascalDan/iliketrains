@@ -12,6 +12,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <numbers>
+#include <type_traits>
 #include <utility>
 
 RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }
@@ -26,29 +27,6 @@ RailLinks::render(const Shader & shader) const
 	texture->Bind();
 	links.apply(&RailLink::render, shader);
 }
-
-template<RailLinkConcept T>
-std::shared_ptr<T>
-RailLinks::addLink(glm::vec3 a, glm::vec3 b)
-{
-	const auto node1 = *nodes.insert(std::make_shared<Node>(a)).first;
-	const auto node2 = *nodes.insert(std::make_shared<Node>(b)).first;
-	// TODO set end flag properly
-	return links.create<T>(Link::End {node1, true}, Link::End {node2, true});
-}
-
-template<RailLinkConcept T>
-std::shared_ptr<T>
-RailLinks::addLink(glm::vec3 a, glm::vec3 b, glm::vec2 centre)
-{
-	const auto node1 = *nodes.insert(std::make_shared<Node>(a)).first;
-	const auto node2 = *nodes.insert(std::make_shared<Node>(b)).first;
-	// TODO set end flag properly
-	return links.create<T>(Link::End {node1, true}, Link::End {node2, true}, centre);
-}
-
-template std::shared_ptr<RailLinkStraight> RailLinks::addLink(glm::vec3, glm::vec3);
-template std::shared_ptr<RailLinkCurve> RailLinks::addLink(glm::vec3, glm::vec3, glm::vec2);
 
 void
 RailLink::render(const Shader &) const
@@ -69,6 +47,8 @@ constexpr const glm::vec3 up {0, 1, 0};
 constexpr const glm::vec3 north {0, 0, 1};
 const auto oneeighty {glm::rotate(std::numbers::pi_v<float>, up)};
 constexpr auto half_pi {glm::half_pi<float>()};
+constexpr auto pi {glm::pi<float>()};
+constexpr auto two_pi {glm::two_pi<float>()};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
 
 template<typename V>
@@ -103,12 +83,14 @@ round_sleepers(const T & v)
 	return std::round(v / sleepers) * sleepers;
 }
 
-RailLinkStraight::RailLinkStraight(End a, End b) : RailLink(std::move(a), std::move(b))
+RailLinkStraight::RailLinkStraight(const NodePtr & a, const NodePtr & b) : RailLinkStraight(a, b, b->pos - a->pos) { }
+
+RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff) :
+	RailLink({std::move(a), flat_angle(diff)}, {std::move(b), flat_angle(-diff)}, glm::length(diff))
 {
 	vertices.reserve(2 * railCrossSection.size());
 	indices.reserve(2 * railCrossSection.size());
-	const auto diff {ends[1].first->pos - ends[0].first->pos};
-	const auto len = round_sleepers(glm::length(diff) / 2.F);
+	const auto len = round_sleepers(length / 2.F);
 	const auto e {flat_orientation(diff)};
 	for (int ei = 0; ei < 2; ei++) {
 		const auto trans {glm::translate(ends[ei].first->pos) * e};
@@ -124,36 +106,72 @@ RailLinkStraight::RailLinkStraight(End a, End b) : RailLink(std::move(a), std::m
 	meshes.create<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
 }
 
-RailLinkCurve::RailLinkCurve(End a, End b, glm::vec2 c) : RailLink(std::move(a), std::move(b)), centre(c)
+constexpr inline glm::vec3
+operator!(const glm::vec2 & v)
 {
-	const auto & e0p {ends[0].first->pos};
-	const auto & e1p {ends[1].first->pos};
-	const glm::vec3 centre3 {centre.x, e0p.y, centre.y};
+	return {v.x, 0, v.y};
+}
+
+constexpr inline float
+arc_length(const Arc & arc)
+{
+	return arc.second - arc.first;
+}
+
+constexpr inline float
+normalize(float ang)
+{
+	while (ang > pi) {
+		ang -= two_pi;
+	}
+	while (ang <= -pi) {
+		ang += two_pi;
+	}
+	return ang;
+}
+
+inline Arc
+create_arc(const glm::vec3 centre3, glm::vec3 e0p, glm::vec3 e1p)
+{
 	const auto diffa = centre3 - e0p;
 	const auto diffb = centre3 - e1p;
 	const auto anga = flat_angle(diffa);
 	const auto angb = [&diffb, &anga]() {
 		const auto angb = flat_angle(diffb);
-		return (angb < anga) ? angb + glm::two_pi<float>() : angb;
+		return (angb < anga) ? angb + two_pi : angb;
 	}();
-	const auto radius = glm::length(e0p - centre3);
-	const auto length = round_sleepers(radius * (angb - anga) / 2.F);
-	const auto segs = std::round(5.F * length / std::pow(radius, 0.7F));
-	const auto step {glm::vec3 {angb - anga, e1p.y - e0p.y, length} / segs};
-	const auto trans {glm::translate(centre3)};
+	return {anga, angb};
+}
+
+RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
+	RailLinkCurve(a, b, {c.x, a->pos.y, c.y}, create_arc(!c, a->pos, b->pos))
+{
+}
+
+RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, const Arc arc) :
+	RailLink({a, normalize(arc.first - half_pi)}, {b, normalize(arc.second + half_pi)},
+			(glm::length(a->pos - c)) * arc_length(arc)),
+	centreBase(c)
+{
+	const auto & e0p {ends[0].first->pos};
+	const auto & e1p {ends[1].first->pos};
+	const auto radius = glm::length(e0p - centreBase);
+	const auto slength = round_sleepers(length / 2.F);
+	const auto segs = std::round(5.F * slength / std::pow(radius, 0.7F));
+	const auto step {glm::vec3 {arc_length(arc), e1p.y - e0p.y, slength} / segs};
+	const auto trans {glm::translate(centreBase)};
 
 	auto addRcs = [this, trans, radius](auto arc) {
-		const auto t {trans * glm::rotate(glm::half_pi<float>() - arc.x, up)
-				* glm::translate(glm::vec3 {radius, arc.y, 0.F})};
+		const auto t {trans * glm::rotate(half_pi - arc.x, up) * glm::translate(glm::vec3 {radius, arc.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
 			vertices.emplace_back(m, glm::vec2 {rcs.second, arc.z}, up);
 		}
 	};
-	for (glm::vec3 arc = {anga, 0.F, 0.F}; arc.x < angb; arc += step) {
-		addRcs(arc);
+	for (glm::vec3 swing = {arc.first, 0.F, 0.F}; swing.x < arc.second; swing += step) {
+		addRcs(swing);
 	}
-	addRcs(glm::vec3 {angb, e1p.y - e0p.y, length});
+	addRcs(glm::vec3 {arc.second, e1p.y - e0p.y, slength});
 
 	for (auto n = 4U; n < vertices.size(); n += 1) {
 		indices.push_back(n - 4);

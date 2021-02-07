@@ -2,7 +2,7 @@
 #include <compare>
 #include <tuple>
 
-Link::Link(End a, End b) : ends {{std::move(a), std::move(b)}} { }
+Link::Link(End a, End b, float l) : ends {{std::move(a), std::move(b)}}, length {l} { }
 
 bool
 operator<(const glm::vec3 & a, const glm::vec3 & b)

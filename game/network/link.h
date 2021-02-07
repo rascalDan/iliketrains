@@ -26,15 +26,15 @@ using NodePtr = std::shared_ptr<Node>;
 // it joins 2 nodes
 class Link {
 public:
-	// side determines which edges can be moved to next, must alternate
-	using End = std::pair<NodePtr, bool /*side*/>;
+	using End = std::pair<NodePtr, float /*dir*/>;
 
-	Link(End, End);
+	Link(End, End, float);
 	virtual ~Link() = default;
 	NO_COPY(Link);
 	NO_MOVE(Link);
 
 	std::array<End, 2> ends;
+	float length;
 };
 
 template<typename T> struct PtrSorter {
