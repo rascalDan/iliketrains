@@ -8,10 +8,13 @@
 #include "gfx/renderable.h"
 #include "link.h"
 #include <glm/glm.hpp>
+#include <maths.h>
 #include <memory>
 #include <set>
+#include <sorting.hpp>
 #include <utility>
 #include <vector>
+
 class Shader;
 class Texture;
 
@@ -36,7 +39,6 @@ private:
 	RailLinkStraight(NodePtr, NodePtr, const glm::vec3 & diff);
 };
 
-using Arc = std::pair<float, float>;
 class RailLinkCurve : public RailLink {
 public:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec2);

@@ -37,14 +37,6 @@ public:
 	float length;
 };
 
-template<typename T> struct PtrSorter {
-	bool
-	operator()(const T & a, const T & b) const
-	{
-		return *a < *b;
-	}
-};
-
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);
 bool operator<(const Node & a, const Node & b);
 
