@@ -26,6 +26,8 @@ public:
 	void render(const Shader &) const override;
 
 protected:
+	void defaultMesh();
+
 	Collection<Mesh, false> meshes;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;

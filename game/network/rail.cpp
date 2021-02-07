@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <array>
 #include <cache.h>
+#include <cassert>
 #include <gfx/gl/shader.h>
 #include <gfx/models/texture.h>
 #include <gfx/models/vertex.hpp>
@@ -20,6 +21,19 @@ RailLinks::render(const Shader & shader) const
 	shader.setModel(glm::identity<glm::mat4>());
 	texture->Bind();
 	links.apply(&RailLink::render, shader);
+}
+
+void
+RailLink::defaultMesh()
+{
+	for (auto n = 4U; n < vertices.size(); n += 1) {
+		indices.push_back(n - 4);
+		indices.push_back(n);
+	}
+
+	assert(vertices.capacity() == vertices.size());
+	assert(indices.capacity() == indices.size());
+	meshes.create<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
 }
 
 void
@@ -59,13 +73,9 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(trans * glm::vec4 {rcs.first, 1})};
 			vertices.emplace_back(m, glm::vec2 {rcs.second, ei ? len : 0.F}, up);
-			if (vertices.size() > railCrossSection.size()) {
-				indices.push_back(vertices.size() - railCrossSection.size() - 1);
-				indices.push_back(vertices.size() - 1);
-			}
 		}
 	}
-	meshes.create<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
+	defaultMesh();
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
@@ -86,21 +96,15 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 	const auto step {glm::vec3 {arc_length(arc), e1p.y - e0p.y, slength} / segs};
 	const auto trans {glm::translate(centreBase)};
 
-	auto addRcs = [this, trans, radius](auto arc) {
-		const auto t {trans * glm::rotate(half_pi - arc.x, up) * glm::translate(glm::vec3 {radius, arc.y, 0.F})};
+	int segCount = segs;
+	vertices.reserve((segCount + 1) * railCrossSection.size());
+	indices.reserve(segCount * 2 * railCrossSection.size());
+	for (glm::vec3 swing = {arc.first, 0.F, 0.F}; segCount >= 0; swing += step, --segCount) {
+		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
-			vertices.emplace_back(m, glm::vec2 {rcs.second, arc.z}, up);
+			vertices.emplace_back(m, glm::vec2 {rcs.second, swing.z}, up);
 		}
-	};
-	for (glm::vec3 swing = {arc.first, 0.F, 0.F}; swing.x < arc.second; swing += step) {
-		addRcs(swing);
 	}
-	addRcs(glm::vec3 {arc.second, e1p.y - e0p.y, slength});
-
-	for (auto n = 4U; n < vertices.size(); n += 1) {
-		indices.push_back(n - 4);
-		indices.push_back(n);
-	}
-	meshes.create<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
+	defaultMesh();
 }
