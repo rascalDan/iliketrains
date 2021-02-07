@@ -4,10 +4,14 @@
 
 #include <collection.hpp>
 #include <memory>
+#include <special_members.hpp>
 #include <vector>
 
 class Base {
 public:
+	Base() = default;
+	virtual ~Base() = default;
+	DEFAULT_MOVE_COPY(Base);
 	virtual bool
 	add()
 	{
