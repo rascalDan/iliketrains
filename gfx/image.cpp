@@ -5,6 +5,7 @@
 
 Image::Image(const char * fileName, int flags) : width {}, height {}, numComponents {}
 {
+	stbi_set_flip_vertically_on_load(1);
 	unsigned char * bytes = stbi_load(fileName, &width, &height, &numComponents, flags);
 
 	if (!bytes) {
