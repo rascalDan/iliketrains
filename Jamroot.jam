@@ -4,6 +4,7 @@ import pkg-config ;
 import type : register ;
 import generators : register-standard ;
 import testing ;
+import lex ;
 
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
@@ -58,7 +59,7 @@ run application/main.cpp
 	;
 
 lib ilt :
-	[ glob-tree *.cpp *.c *.vs *.fs : bin test ]
+	[ glob-tree *.cpp *.c *.vs *.fs *.ll : bin test ]
 	:
 	<variant>release:<link>static
 	<include>.
