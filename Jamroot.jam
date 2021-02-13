@@ -18,6 +18,7 @@ project : requirements
 	<variant>release:<lto>on
 	<toolset>tidy:<exclude>gfx/gl/shaders/fs-basicShader.h
 	<toolset>tidy:<exclude>gfx/gl/shaders/vs-basicShader.h
+	<toolset>tidy:<exclude>gfx/models/obj.cpp
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
 	<toolset>tidy:<checkxx>clang-*

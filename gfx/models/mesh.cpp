@@ -1,41 +1,19 @@
 #include "mesh.h"
-#include "obj_loader.h"
+#include "obj.h"
 #include "vertex.hpp"
-#include <memory>
+#include <algorithm>
+#include <glm/glm.hpp>
+#include <iterator>
+#include <resource.h>
 #include <vector>
 
-Mesh::Mesh(const std::string & fileName) : Mesh(OBJModel(fileName).ToIndexedModel()) { }
+Mesh::Mesh(const std::filesystem::path & fileName) : Mesh(ObjParser {Resource::mapPath(fileName)}) { }
 
-Mesh::Mesh(const IndexedModel & model) :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {model.indices.size()}, mode {GL_TRIANGLES}
+Mesh::Mesh(const ObjParser & obj) : Mesh(packObjParser(obj), GL_TRIANGLES) { }
+
+Mesh::Mesh(std::pair<std::vector<Vertex>, std::vector<unsigned int>> && vandi, GLenum m) :
+	Mesh(vandi.first, vandi.second, m)
 {
-	glGenVertexArrays(1, &m_vertexArrayObject);
-	glBindVertexArray(m_vertexArrayObject);
-
-	glGenBuffers(NUM_BUFFERS, m_vertexArrayBuffers.data());
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers[POSITION_VB]);
-	glBufferData(
-			GL_ARRAY_BUFFER, sizeof(model.positions[0]) * model.positions.size(), &model.positions[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers[TEXCOORD_VB]);
-	glBufferData(
-			GL_ARRAY_BUFFER, sizeof(model.texCoords[0]) * model.texCoords.size(), &model.texCoords[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers[NORMAL_VB]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(model.normals[0]) * model.normals.size(), &model.normals[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vertexArrayBuffers[INDEX_VB]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(model.indices[0]) * model.indices.size(), &model.indices[0],
-			GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
 }
 
 Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m) :
@@ -62,6 +40,34 @@ Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+}
+
+Mesh::Data
+Mesh::packObjParser(const ObjParser & obj)
+{
+	std::vector<Vertex> vertices;
+	std::vector<ObjParser::FaceElement> vertexOrder;
+	std::vector<unsigned int> indices;
+	std::for_each(obj.faces.begin(), obj.faces.end(), [&](const ObjParser::Face & face) {
+		for (auto idx = 2U; idx < face.size(); idx += 1) {
+			auto f = [&](auto idx) {
+				const auto & fe {face[idx]};
+				if (const auto existing = std::find(vertexOrder.begin(), vertexOrder.end(), fe);
+						existing != vertexOrder.end()) {
+					indices.push_back(std::distance(vertexOrder.begin(), existing));
+				}
+				else {
+					indices.push_back(vertices.size());
+					vertices.emplace_back(obj.vertices[fe.x - 1], obj.texCoords[fe.y - 1], -obj.normals[fe.z - 1]);
+					vertexOrder.emplace_back(fe);
+				}
+			};
+			f(0);
+			f(idx);
+			f(idx - 1);
+		}
+	});
+	return std::make_pair(vertices, indices);
 }
 
 Mesh::~Mesh()
