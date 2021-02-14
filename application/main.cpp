@@ -67,7 +67,7 @@ public:
 
 		auto rl = world.create<RailLinks>();
 		{
-			const glm::vec3 j {-1100, 5, -1100}, k {-1100, 5, -1000}, l {-1150, 10, -1050}, m {-1050, 10, -1050};
+			const glm::vec3 j {-1100, 5, -1100}, k {-1100, 15, -1000}, l {-1150, 30, -1050}, m {-1050, 10, -1050};
 			rl->addLink<RailLinkStraight>(j, k);
 			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
 			rl->addLink<RailLinkStraight>(l, m);

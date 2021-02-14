@@ -102,7 +102,7 @@ RailLinkStraight::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
 	const auto diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
-	return Transform {es.first->pos + dir * dist, {0, vector_yaw(diff) /*, std::atan2(diff.x, -diff.z)*/, 0}};
+	return Transform {es.first->pos + dir * dist, {-vector_pitch(dir), vector_yaw(dir), 0}};
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
@@ -147,6 +147,6 @@ RailLinkCurve::positionAt(float dist, unsigned char start) const
 	const auto relPos {glm::vec3 {std::cos(angArc), 0, -std::sin(angArc)} * radius};
 	const auto relClimb {
 			glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
-
-	return Transform {relPos + relClimb + centreBase, {0, normalize(ang + dirOffset[start]), 0}};
+	const auto pitch {vector_pitch({0, (es.first->pos.y - es.second->pos.y) / length, 0})};
+	return Transform {relPos + relClimb + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
 }
