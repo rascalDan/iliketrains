@@ -6,7 +6,7 @@
 
 class WorldObject {
 public:
-	using TickDuration = std::chrono::milliseconds;
+	using TickDuration = std::chrono::duration<float, std::chrono::seconds::period>;
 
 	WorldObject() = default;
 	virtual ~WorldObject() = default;

@@ -97,7 +97,7 @@ public:
 		while (isRunning) {
 			processInputs();
 			const auto t_end = std::chrono::high_resolution_clock::now();
-			const auto t_passed = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start);
+			const auto t_passed = std::chrono::duration_cast<WorldObject::TickDuration>(t_end - t_start);
 
 			world.apply(&WorldObject::tick, t_passed);
 			world.apply<CameraController>(&CameraController::updateCamera, &camera, &shader);
