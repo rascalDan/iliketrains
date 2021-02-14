@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
-#include <glm/gtx/vector_angle.hpp>
 
 glm::mat4
 flat_orientation(const glm::vec3 & diff)

@@ -1,3 +1,4 @@
+#include "game/network/link.h"
 #include "game/worldobject.h"
 #include "vehicle.h"
 #include <string>
@@ -10,5 +11,5 @@ public:
 
 class Brush47 : public RailLoco {
 public:
-	Brush47(LinkPtr p);
+	explicit Brush47(const LinkPtr & p);
 };

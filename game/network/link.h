@@ -37,7 +37,7 @@ public:
 	NO_COPY(Link);
 	NO_MOVE(Link);
 
-	virtual Transform positionAt(float dist, unsigned char start) const = 0;
+	[[nodiscard]] virtual Transform positionAt(float dist, unsigned char start) const = 0;
 
 	std::array<End, 2> ends;
 	float length;

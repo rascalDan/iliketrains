@@ -4,7 +4,9 @@
 #include <boost/test/unit_test.hpp>
 #include <stream_support.hpp>
 
+#include <glm/glm.hpp>
 #include <maths.h>
+#include <tuple>
 constexpr auto quarter_pi = pi / 4.F;
 
 using vecter_to_angle = std::tuple<glm::vec3, float>;

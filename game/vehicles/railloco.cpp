@@ -1,8 +1,12 @@
 #include "railloco.h"
-#include "game/vehicles/vehicle.h"
 #include "gfx/gl/transform.h"
+#include <algorithm>
+#include <array>
 #include <glm/glm.hpp>
 #include <maths.h>
+#include <memory>
+#include <utility>
+#include <vector>
 
 void
 RailLoco::tick(TickDuration dur)
@@ -27,4 +31,4 @@ RailLoco::tick(TickDuration dur)
 	location = link->positionAt(linkDist, linkDir);
 }
 
-Brush47::Brush47(LinkPtr l) : RailLoco(l, "brush47.obj", "brush47.png") { }
+Brush47::Brush47(const LinkPtr & l) : RailLoco(l, "brush47.obj", "brush47.png") { }

@@ -3,6 +3,7 @@
 
 #include "collection.hpp"
 #include "game/worldobject.h"
+#include "gfx/gl/transform.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/vertex.hpp"
 #include "gfx/renderable.h"
@@ -36,7 +37,7 @@ protected:
 class RailLinkStraight : public RailLink {
 public:
 	RailLinkStraight(const NodePtr &, const NodePtr &);
-	Transform positionAt(float dist, unsigned char start) const override;
+	[[nodiscard]] Transform positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkStraight(NodePtr, NodePtr, const glm::vec3 & diff);
@@ -45,7 +46,7 @@ private:
 class RailLinkCurve : public RailLink {
 public:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec2);
-	Transform positionAt(float dist, unsigned char start) const override;
+	[[nodiscard]] Transform positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec3, const Arc);
@@ -65,7 +66,7 @@ public:
 	{
 		const auto node1 = *nodes.insert(std::make_shared<Node>(a)).first;
 		const auto node2 = *nodes.insert(std::make_shared<Node>(b)).first;
-		auto l = links.create<T>(node1, node2, std::forward<Params>(params)...);
+		auto l {links.create<T>(node1, node2, std::forward<Params>(params)...)};
 		joinLinks(l);
 		return l;
 	}
@@ -76,7 +77,7 @@ private:
 	Nodes nodes;
 	void render(const Shader &) const override;
 	void tick(TickDuration elapsed) override;
-	void joinLinks(LinkPtr) const;
+	void joinLinks(const LinkPtr &) const;
 	std::shared_ptr<Texture> texture;
 };
 

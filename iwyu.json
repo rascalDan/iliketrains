@@ -81,6 +81,14 @@
     },
 		{
         "include": [
+            "@<boost/test/data/.*>",
+            "private",
+            "<boost/test/data/test_case.hpp>",
+            "public"
+        ]
+    },
+		{
+        "include": [
             "@<boost/test/tools/.*>",
             "private",
             "<boost/test/unit_test.hpp>",

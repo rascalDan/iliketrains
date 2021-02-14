@@ -8,7 +8,7 @@
 #include <gfx/models/texture.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/gtx/transform.hpp>
-#include <glm/gtx/vector_angle.hpp>
+#include <initializer_list>
 #include <maths.h>
 #include <type_traits>
 #include <utility>
@@ -17,7 +17,7 @@ RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }
 void RailLinks::tick(TickDuration) { }
 
 void
-RailLinks::joinLinks(LinkPtr l) const
+RailLinks::joinLinks(const LinkPtr & l) const
 {
 	for (const auto & ol : links.objects) {
 		if (l != ol) {
