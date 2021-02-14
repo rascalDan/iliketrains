@@ -101,22 +101,21 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) 
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, const Arc arc) :
-	RailLink({a, normalize(arc.first - half_pi)}, {b, normalize(arc.second + half_pi)},
+	RailLink({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			(glm::length(a->pos - c)) * arc_length(arc)),
-	centreBase(c)
+	centreBase(c), radius {glm::length(ends[0].first->pos - centreBase)}, arc {arc}
 {
 	const auto & e0p {ends[0].first->pos};
 	const auto & e1p {ends[1].first->pos};
-	const auto radius = glm::length(e0p - centreBase);
 	const auto slength = round_sleepers(length / 2.F);
 	const auto segs = std::round(5.F * slength / std::pow(radius, 0.7F));
-	const auto step {glm::vec3 {arc_length(arc), e1p.y - e0p.y, slength} / segs};
+	const auto step {glm::vec3 {arc_length(arc), e0p.y - e1p.y, slength} / segs};
 	const auto trans {glm::translate(centreBase)};
 
 	int segCount = segs;
 	vertices.reserve((segCount + 1) * railCrossSection.size());
 	indices.reserve(segCount * 2 * railCrossSection.size());
-	for (glm::vec3 swing = {arc.first, 0.F, 0.F}; segCount >= 0; swing += step, --segCount) {
+	for (glm::vec3 swing = {arc.second, -e1p.y, 0.F}; segCount >= 0; swing += step, --segCount) {
 		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};

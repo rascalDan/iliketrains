@@ -48,6 +48,8 @@ public:
 private:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec3, const Arc);
 	glm::vec3 centreBase;
+	float radius;
+	Arc arc;
 };
 
 template<typename T> concept RailLinkConcept = std::is_base_of_v<RailLink, T>;
