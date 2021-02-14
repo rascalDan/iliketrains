@@ -5,7 +5,15 @@
 #include <glm/gtc/constants.hpp>
 #include <utility>
 
-using Arc = std::pair<float, float>;
+struct Arc : public std::pair<float, float> {
+	using std::pair<float, float>::pair;
+
+	float
+	operator[](unsigned int i) const
+	{
+		return i ? second : first;
+	}
+};
 
 constexpr const glm::vec3 up {0, 1, 0};
 constexpr const glm::vec3 north {0, 0, 1};
