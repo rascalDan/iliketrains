@@ -8,6 +8,8 @@
 struct Arc : public std::pair<float, float> {
 	using std::pair<float, float>::pair;
 
+	Arc(const glm::vec3 & centre3, const glm::vec3 & e0p, const glm::vec3 & e1p);
+
 	float
 	operator[](unsigned int i) const
 	{
@@ -43,7 +45,5 @@ arc_length(const Arc & arc)
 }
 
 float normalize(float ang);
-
-Arc create_arc(const glm::vec3 & centre3, const glm::vec3 & e0p, const glm::vec3 & e1p);
 
 #endif

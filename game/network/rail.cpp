@@ -79,7 +79,7 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
-	RailLinkCurve(a, b, {c.x, a->pos.y, c.y}, create_arc(!c, a->pos, b->pos))
+	RailLinkCurve(a, b, {c.x, a->pos.y, c.y}, {!c, a->pos, b->pos})
 {
 }
 

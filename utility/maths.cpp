@@ -39,15 +39,16 @@ normalize(float ang)
 	return ang;
 }
 
-Arc
-create_arc(const glm::vec3 & centre3, const glm::vec3 & e0p, const glm::vec3 & e1p)
+Arc::Arc(const glm::vec3 & centre3, const glm::vec3 & e0p, const glm::vec3 & e1p) :
+	Arc([&]() -> Arc {
+		const auto diffa = e0p - centre3;
+		const auto diffb = e1p - centre3;
+		const auto anga = flat_angle(diffa);
+		const auto angb = [&diffb, &anga]() {
+			const auto angb = flat_angle(diffb);
+			return (angb < anga) ? angb + two_pi : angb;
+		}();
+		return {anga, angb};
+	}())
 {
-	const auto diffa = centre3 - e0p;
-	const auto diffb = centre3 - e1p;
-	const auto anga = flat_angle(diffa);
-	const auto angb = [&diffb, &anga]() {
-		const auto angb = flat_angle(diffb);
-		return (angb < anga) ? angb + two_pi : angb;
-	}();
-	return {anga, angb};
 }
