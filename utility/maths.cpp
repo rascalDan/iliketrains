@@ -18,8 +18,7 @@ flat_orientation(const glm::vec3 & diff)
 float
 flat_angle(const glm::vec3 & diff)
 {
-	const auto flatdiff {glm::normalize(glm::vec3 {diff.x, 0, diff.z})};
-	return glm::orientedAngle(flatdiff, north, up);
+	return std::atan2(diff.x, diff.z);
 }
 
 float
