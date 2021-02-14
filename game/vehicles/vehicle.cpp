@@ -24,15 +24,26 @@ LinkHistory::add(const LinkWPtr & l, unsigned char d)
 }
 
 LinkHistory::Return
-LinkHistory::getAt(float len) const
+LinkHistory::getCurrent() const
+{
+	return {links.front().first.lock(), links.front().second};
+}
+
+LinkHistory::Return
+LinkHistory::getAt(float len, float * rem) const
 {
 	auto litr = links.begin();
 	while (len > 0.F && litr != links.end()) {
-		len -= litr->first.lock()->length;
 		litr++;
+		if (litr != links.end()) {
+			len -= litr->first.lock()->length;
+		}
 	}
 	if (litr == links.end()) {
 		litr--;
+	}
+	if (rem) {
+		*rem = -len;
 	}
 	return {litr->first.lock(), litr->second};
 }

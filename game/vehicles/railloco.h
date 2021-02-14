@@ -1,11 +1,17 @@
 #include "game/network/link.h"
+#include "game/vehicles/vehicle.h"
 #include "game/worldobject.h"
-#include "vehicle.h"
 #include <string>
 
-class RailLoco : public Vehicle {
+class RailVehicle : public Vehicle {
 public:
 	using Vehicle::Vehicle;
+	float wheelBase;
+};
+
+class RailLoco : public RailVehicle {
+public:
+	using RailVehicle::RailVehicle;
 	void tick(TickDuration elapsed) override;
 };
 
