@@ -5,7 +5,7 @@
 
 class Transform {
 public:
-	explicit Transform(glm::vec3 pos = {}, glm::vec3 rot = {}, glm::vec3 scale = {1.0F, 1.0F, 1.0F});
+	explicit Transform(glm::vec3 pos = {}, glm::vec3 rot = {});
 
 	[[nodiscard]] glm::mat4 GetModel() const;
 
@@ -33,12 +33,6 @@ public:
 		return rot;
 	}
 
-	[[nodiscard]] inline glm::vec3 &
-	GetScale()
-	{
-		return scale;
-	}
-
 	inline void
 	SetPos(glm::vec3 && pos)
 	{
@@ -51,16 +45,9 @@ public:
 		this->rot = rot;
 	}
 
-	inline void
-	SetScale(glm::vec3 && scale)
-	{
-		this->scale = scale;
-	}
-
 private:
 	glm::vec3 pos;
 	glm::vec3 rot;
-	glm::vec3 scale;
 };
 
 #endif
