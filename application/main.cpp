@@ -3,6 +3,7 @@
 #include <collection.hpp>
 #include <game/network/rail.h>
 #include <game/terrain.h>
+#include <game/vehicles/railloco.h>
 #include <game/world.h>
 #include <game/worldobject.h>
 #include <gfx/camera_controller.h>
@@ -70,8 +71,9 @@ public:
 			const glm::vec3 j {-1100, 5, -1100}, k {-1100, 15, -1000}, l {-1150, 30, -1050}, m {-1050, 10, -1050};
 			rl->addLink<RailLinkStraight>(j, k);
 			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
-			rl->addLink<RailLinkStraight>(l, m);
+			auto l3 = rl->addLink<RailLinkStraight>(l, m);
 			rl->addLink<RailLinkCurve>(m, j, glm::vec2 {m.x, j.z});
+			world.create<Brush47>(l3);
 		}
 
 		Shader shader;
