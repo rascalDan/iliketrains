@@ -125,7 +125,7 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 	int segCount = segs;
 	vertices.reserve((segCount + 1) * railCrossSection.size());
 	indices.reserve(segCount * 2 * railCrossSection.size());
-	for (glm::vec3 swing = {arc.second, -e1p.y, 0.F}; segCount >= 0; swing += step, --segCount) {
+	for (glm::vec3 swing = {arc.second, e1p.y - centreBase.y, 0.F}; segCount >= 0; swing += step, --segCount) {
 		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
