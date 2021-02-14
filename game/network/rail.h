@@ -61,7 +61,9 @@ public:
 	{
 		const auto node1 = *nodes.insert(std::make_shared<Node>(a)).first;
 		const auto node2 = *nodes.insert(std::make_shared<Node>(b)).first;
-		return links.create<T>(node1, node2, std::forward<Params>(params)...);
+		auto l = links.create<T>(node1, node2, std::forward<Params>(params)...);
+		joinLinks(l);
+		return l;
 	}
 
 private:
@@ -70,6 +72,7 @@ private:
 	Nodes nodes;
 	void render(const Shader &) const override;
 	void tick(TickDuration elapsed) override;
+	void joinLinks(LinkPtr) const;
 	std::shared_ptr<Texture> texture;
 };
 

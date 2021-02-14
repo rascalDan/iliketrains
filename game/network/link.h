@@ -6,6 +6,7 @@
 #include <memory>
 #include <special_members.hpp>
 #include <utility>
+#include <vector>
 
 // Generic network node
 // something that can be travelled to
@@ -24,6 +25,8 @@ using NodePtr = std::shared_ptr<Node>;
 // Generic network link
 // something that can be travelled along
 // it joins 2 nodes
+class Link;
+using LinkPtr = std::shared_ptr<Link>;
 class Link {
 public:
 	using End = std::pair<NodePtr, float /*dir*/>;
@@ -35,6 +38,8 @@ public:
 
 	std::array<End, 2> ends;
 	float length;
+	using Next = std::pair<LinkPtr, unsigned char /*end*/>;
+	std::array<std::vector<Next>, 2> nexts;
 };
 
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);

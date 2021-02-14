@@ -16,6 +16,23 @@ RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }
 void RailLinks::tick(TickDuration) { }
 
 void
+RailLinks::joinLinks(LinkPtr l) const
+{
+	for (const auto & ol : links.objects) {
+		if (l != ol) {
+			for (const auto oe : {0, 1}) {
+				for (const auto te : {0, 1}) {
+					if (l->ends[te].first == ol->ends[oe].first) {
+						l->nexts[te].emplace_back(ol.get(), oe);
+						ol->nexts[oe].emplace_back(l.get(), te);
+					}
+				}
+			}
+		}
+	}
+}
+
+void
 RailLinks::render(const Shader & shader) const
 {
 	shader.setModel(glm::identity<glm::mat4>());
