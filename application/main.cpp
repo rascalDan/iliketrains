@@ -69,16 +69,9 @@ public:
 		{
 			const glm::vec3 j {-1100, 5, -1100}, k {-1100, 5, -1000}, l {-1150, 10, -1050}, m {-1050, 10, -1050};
 			rl->addLink<RailLinkStraight>(j, k);
-			rl->addLink<RailLinkCurve>(k, l, glm::vec2 {l.x, k.z});
+			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
 			rl->addLink<RailLinkStraight>(l, m);
-			rl->addLink<RailLinkCurve>(j, m, glm::vec2 {m.x, j.z});
-		}
-		{
-			const glm::vec3 j {-1190, 5, -1190}, k {-1190, 6, -1180}, l {-1180, 4, -1180}, m {-1180, 4, -1190};
-			rl->addLink<RailLinkStraight>(j, k);
-			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {-1185, k.z});
-			rl->addLink<RailLinkStraight>(l, m);
-			rl->addLink<RailLinkCurve>(j, m, glm::vec2 {-1185, m.z});
+			rl->addLink<RailLinkCurve>(m, j, glm::vec2 {m.x, j.z});
 		}
 
 		Shader shader;
