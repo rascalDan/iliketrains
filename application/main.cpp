@@ -106,6 +106,7 @@ public:
 			t_start = t_end;
 		}
 
+		inputStack.removeAll();
 		return 0;
 	}
 
