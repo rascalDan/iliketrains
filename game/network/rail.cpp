@@ -8,6 +8,7 @@
 #include <gfx/models/texture.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <maths.h>
 #include <type_traits>
 #include <utility>
@@ -95,6 +96,15 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 	defaultMesh();
 }
 
+Transform
+RailLinkStraight::positionAt(float dist, unsigned char start) const
+{
+	const auto es {std::make_pair(ends[start].first, ends[1 - start].first)};
+	const auto diff {es.second->pos - es.first->pos};
+	const auto dir {glm::normalize(diff)};
+	return Transform {es.first->pos + dir * dist, {0, flat_angle(diff) /*, std::atan2(diff.x, -diff.z)*/, 0}};
+}
+
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
 	RailLinkCurve(a, b, {c.x, a->pos.y, c.y}, {!c, a->pos, b->pos})
 {
@@ -123,4 +133,20 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 		}
 	}
 	defaultMesh();
+}
+
+Transform
+RailLinkCurve::positionAt(float dist, unsigned char start) const
+{
+	static constexpr std::array<float, 2> dirOffset {half_pi, -half_pi};
+	const auto frac {dist / length};
+	const auto es {std::make_pair(ends[start].first, ends[1 - start].first)};
+	const auto as {std::make_pair(arc[start], arc[1 - start])};
+	const auto ang {as.first + ((as.second - as.first) * frac)};
+	const auto angArc {ang - half_pi};
+	const auto relPos {glm::vec3 {std::cos(angArc), 0, -std::sin(angArc)} * radius};
+	const auto relClimb {
+			glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
+
+	return Transform {relPos + relClimb + centreBase, {0, normalize(ang + dirOffset[start]), 0}};
 }

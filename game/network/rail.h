@@ -36,6 +36,7 @@ protected:
 class RailLinkStraight : public RailLink {
 public:
 	RailLinkStraight(const NodePtr &, const NodePtr &);
+	Transform positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkStraight(NodePtr, NodePtr, const glm::vec3 & diff);
@@ -44,6 +45,7 @@ private:
 class RailLinkCurve : public RailLink {
 public:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec2);
+	Transform positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec3, const Arc);
