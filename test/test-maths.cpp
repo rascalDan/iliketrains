@@ -17,6 +17,28 @@ BOOST_DATA_TEST_CASE(test_vector_yaw,
 	BOOST_CHECK_CLOSE(vector_yaw(v), a, 1.F);
 }
 
+BOOST_DATA_TEST_CASE(test_vector_pitch,
+		boost::unit_test::data::make<vecter_to_angle>({
+				{north, 0},
+				{east, 0},
+				{south, 0},
+				{west, 0},
+				{north + up, quarter_pi},
+				{east + up, quarter_pi},
+				{south + up, quarter_pi},
+				{west + up, quarter_pi},
+				{north - up, -quarter_pi},
+				{east - up, -quarter_pi},
+				{south - up, -quarter_pi},
+				{west - up, -quarter_pi},
+				{north + west - up, -quarter_pi},
+				{north + west + up, quarter_pi},
+		}),
+		v, a)
+{
+	BOOST_CHECK_CLOSE(vector_pitch(v), a, 1.F);
+}
+
 using normalize_angle = std::tuple<float, float>;
 BOOST_DATA_TEST_CASE(test_angle_normalize,
 		boost::unit_test::data::make<normalize_angle>({

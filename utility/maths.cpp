@@ -22,6 +22,12 @@ vector_yaw(const glm::vec3 & diff)
 }
 
 float
+vector_pitch(const glm::vec3 & diff)
+{
+	return std::atan(diff.y);
+}
+
+float
 round_frac(const float & v, const float & frac)
 {
 	return std::round(v / frac) * frac;
