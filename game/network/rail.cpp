@@ -46,10 +46,10 @@ constexpr const std::array<std::pair<glm::vec3, float>, 4> railCrossSection {{
 		//   ___________
 		// _/           \_
 		//  left to right
-		{{-1.F, 0.F, 0.F}, 0.F},
-		{{-.75F, .25F, 0.F}, 0.125F},
-		{{.75F, .25F, 0.F}, 0.875F},
-		{{1.F, 0.F, 0.F}, 1.F},
+		{{-1.9F, 0.F, 0.F}, 0.F},
+		{{-1.43F, .25F, 0.F}, 0.125F},
+		{{1.43F, .25F, 0.F}, 0.875F},
+		{{1.9F, 0.F, 0.F}, 1.F},
 }};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
 
