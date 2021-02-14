@@ -5,6 +5,7 @@ import type : register ;
 import generators : register-standard ;
 import testing ;
 import lex ;
+import sequence ;
 
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
@@ -55,7 +56,9 @@ exe iliketrains :
 	;
 
 run application/main.cpp
-	: : :
+	: -- :
+	[ sequence.insertion-sort [ glob res/* ] ]
+	:
 	<library>ilt
 	;
 
