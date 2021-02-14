@@ -28,7 +28,7 @@ constexpr auto two_pi {glm::two_pi<float>()};
 
 glm::mat4 flat_orientation(const glm::vec3 & diff);
 
-float flat_angle(const glm::vec3 & diff);
+float vector_yaw(const glm::vec3 & diff);
 
 float round_frac(const float & v, const float & frac);
 

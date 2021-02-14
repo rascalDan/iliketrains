@@ -16,7 +16,7 @@ flat_orientation(const glm::vec3 & diff)
 }
 
 float
-flat_angle(const glm::vec3 & diff)
+vector_yaw(const glm::vec3 & diff)
 {
 	return std::atan2(diff.x, diff.z);
 }
@@ -43,9 +43,9 @@ Arc::Arc(const glm::vec3 & centre3, const glm::vec3 & e0p, const glm::vec3 & e1p
 	Arc([&]() -> Arc {
 		const auto diffa = e0p - centre3;
 		const auto diffb = e1p - centre3;
-		const auto anga = flat_angle(diffa);
+		const auto anga = vector_yaw(diffa);
 		const auto angb = [&diffb, &anga]() {
-			const auto angb = flat_angle(diffb);
+			const auto angb = vector_yaw(diffb);
 			return (angb < anga) ? angb + two_pi : angb;
 		}();
 		return {anga, angb};

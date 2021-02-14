@@ -8,13 +8,13 @@
 constexpr auto quarter_pi = pi / 4.F;
 
 using vecter_to_angle = std::tuple<glm::vec3, float>;
-BOOST_DATA_TEST_CASE(test_flat_angle,
+BOOST_DATA_TEST_CASE(test_vector_yaw,
 		boost::unit_test::data::make<vecter_to_angle>(
 				{{north, 0}, {south, pi}, {west, half_pi}, {east, -half_pi}, {north + east, -quarter_pi},
 						{south + east, quarter_pi * -3}, {north + west, quarter_pi}, {south + west, quarter_pi * 3}}),
 		v, a)
 {
-	BOOST_CHECK_CLOSE(flat_angle(v), a, 1.F);
+	BOOST_CHECK_CLOSE(vector_yaw(v), a, 1.F);
 }
 
 using normalize_angle = std::tuple<float, float>;

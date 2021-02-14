@@ -80,7 +80,7 @@ round_sleepers(const float v)
 RailLinkStraight::RailLinkStraight(const NodePtr & a, const NodePtr & b) : RailLinkStraight(a, b, b->pos - a->pos) { }
 
 RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff) :
-	RailLink({std::move(a), flat_angle(diff)}, {std::move(b), flat_angle(-diff)}, glm::length(diff))
+	RailLink({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
 {
 	vertices.reserve(2 * railCrossSection.size());
 	indices.reserve(2 * railCrossSection.size());
@@ -102,7 +102,7 @@ RailLinkStraight::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
 	const auto diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
-	return Transform {es.first->pos + dir * dist, {0, flat_angle(diff) /*, std::atan2(diff.x, -diff.z)*/, 0}};
+	return Transform {es.first->pos + dir * dist, {0, vector_yaw(diff) /*, std::atan2(diff.x, -diff.z)*/, 0}};
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
