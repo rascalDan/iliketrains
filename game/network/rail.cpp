@@ -99,7 +99,7 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 Transform
 RailLinkStraight::positionAt(float dist, unsigned char start) const
 {
-	const auto es {std::make_pair(ends[start].first, ends[1 - start].first)};
+	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
 	const auto diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
 	return Transform {es.first->pos + dir * dist, {0, flat_angle(diff) /*, std::atan2(diff.x, -diff.z)*/, 0}};
@@ -140,7 +140,7 @@ RailLinkCurve::positionAt(float dist, unsigned char start) const
 {
 	static constexpr std::array<float, 2> dirOffset {half_pi, -half_pi};
 	const auto frac {dist / length};
-	const auto es {std::make_pair(ends[start].first, ends[1 - start].first)};
+	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
 	const auto as {std::make_pair(arc[start], arc[1 - start])};
 	const auto ang {as.first + ((as.second - as.first) * frac)};
 	const auto angArc {ang - half_pi};
