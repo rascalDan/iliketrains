@@ -12,23 +12,25 @@ void
 RailLoco::tick(TickDuration dur)
 {
 	linkDist += dur.count() * speed;
-	while (linkDist > link->length) {
-		location = link->positionAt(link->length, linkDir);
-		const auto & nexts {link->nexts[1 - linkDir]};
+	auto curLink {link.lock()};
+	while (linkDist > curLink->length) {
+		location = curLink->positionAt(curLink->length, linkDir);
+		const auto & nexts {curLink->nexts[1 - linkDir]};
 		const auto next = std::find_if(nexts.begin(), nexts.end(), [ang = location.GetRot().y](const Link::Next & n) {
-			return std::abs(normalize(n.first->ends[n.second].second - ang)) < 0.1F;
+			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) < 0.1F;
 		});
 		if (next != nexts.end()) {
-			linkDist -= link->length;
+			linkDist -= curLink->length;
 			link = next->first;
+			curLink = link.lock();
 			linkDir = next->second;
 		}
 		else {
-			linkDist = link->length;
+			linkDist = curLink->length;
 			speed = 0;
 		}
 	}
-	location = link->positionAt(linkDist, linkDir);
+	location = curLink->positionAt(linkDist, linkDir);
 }
 
 Brush47::Brush47(const LinkPtr & l) : RailLoco(l, "brush47.obj", "brush47.png") { }

@@ -24,8 +24,8 @@ RailLinks::joinLinks(const LinkPtr & l) const
 			for (const auto oe : {0, 1}) {
 				for (const auto te : {0, 1}) {
 					if (l->ends[te].first == ol->ends[oe].first) {
-						l->nexts[te].emplace_back(ol.get(), oe);
-						ol->nexts[oe].emplace_back(l.get(), te);
+						l->nexts[te].emplace_back(ol, oe);
+						ol->nexts[oe].emplace_back(l, te);
 					}
 				}
 			}

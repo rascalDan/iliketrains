@@ -28,6 +28,7 @@ using NodePtr = std::shared_ptr<Node>;
 // it joins 2 nodes
 class Link;
 using LinkPtr = std::shared_ptr<Link>;
+using LinkWPtr = std::weak_ptr<const Link>;
 class Link {
 public:
 	using End = std::pair<NodePtr, float /*dir*/>;
@@ -41,7 +42,7 @@ public:
 
 	std::array<End, 2> ends;
 	float length;
-	using Next = std::pair<LinkPtr, unsigned char /*end*/>;
+	using Next = std::pair<LinkWPtr, unsigned char /*end*/>;
 	std::array<std::vector<Next>, 2> nexts;
 };
 
