@@ -70,13 +70,13 @@ void RailWagon::tick(TickDuration) { }
 Brush47::Brush47(const LinkPtr & l) : RailLoco(l, "brush47.obj", "brush47.png")
 {
 	wheelBase = 15.7F;
-	length = 19.38F;
+	length = 20.F;
 	linkDist = wheelBase;
 }
 
 Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(l, "brush47.obj", "brush47.png")
 {
 	wheelBase = 15.7F;
-	length = 19.38F;
+	length = 20.F;
 	linkDist = wheelBase;
 }
