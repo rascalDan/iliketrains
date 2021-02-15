@@ -4,6 +4,7 @@
 #include "game/physical.h"
 #include <game/network/link.h>
 #include <game/worldobject.h>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -30,5 +31,6 @@ public:
 protected:
 	LinkHistory linkHist;
 };
+using VehicleWPtr = std::weak_ptr<Vehicle>;
 
 #endif
