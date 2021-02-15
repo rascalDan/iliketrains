@@ -73,7 +73,10 @@ public:
 			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
 			auto l3 = rl->addLink<RailLinkStraight>(l, m);
 			rl->addLink<RailLinkCurve>(m, j, glm::vec2 {m.x, j.z});
-			world.create<Brush47>(l3);
+			auto loco = world.create<Brush47>(l3);
+			for (int n = 0; n < 6; n++) {
+				loco->wagons.push_back(world.create<Brush47Wagon>(l3));
+			}
 		}
 
 		Shader shader;
