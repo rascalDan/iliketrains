@@ -19,9 +19,9 @@ public:
 	void render(const Shader & shader) const override;
 
 	[[nodiscard]] const auto &
-	getPosition() const
+	getLocation() const
 	{
-		return location.GetPos();
+		return location;
 	}
 
 protected:
