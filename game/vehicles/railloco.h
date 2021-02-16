@@ -10,13 +10,13 @@ public:
 	using Vehicle::Vehicle;
 	float wheelBase;
 	float length;
+	friend class RailLoco;
 };
 
 class RailWagon : public RailVehicle {
 public:
 	using RailVehicle::RailVehicle;
 	void tick(TickDuration elapsed) override;
-	friend class RailLoco;
 };
 using RailWagonPtr = std::weak_ptr<RailWagon>;
 
@@ -28,6 +28,9 @@ public:
 	std::vector<RailWagonPtr> wagons;
 
 private:
+	void move(TickDuration dur);
+	Transform getBogeyPosition(float linkDist, float dist) const;
+	void updateRailVehiclePosition(RailVehicle *, float trailBy) const;
 	void updateWagons() const;
 };
 

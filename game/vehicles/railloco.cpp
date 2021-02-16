@@ -9,7 +9,7 @@
 #include <vector>
 
 void
-RailLoco::tick(TickDuration dur)
+RailLoco::move(TickDuration dur)
 {
 	linkDist += dur.count() * speed;
 	auto curLink {linkHist.getCurrent()};
@@ -28,17 +28,32 @@ RailLoco::tick(TickDuration dur)
 			speed = 0;
 		}
 	}
-	const auto b1pos = curLink.first->positionAt(linkDist, curLink.second);
-	const auto b2pos
-			= (linkDist >= wheelBase) ? curLink.first->positionAt(linkDist - wheelBase, curLink.second) : [&]() {
-				  float b2linkDist {};
-				  const auto b2Link = linkHist.getAt(wheelBase - linkDist, &b2linkDist);
-				  return b2Link.first->positionAt(b2linkDist, b2Link.second);
-			  }();
-	location.GetPos() = (b1pos.GetPos() + b2pos.GetPos()) / 2.F;
-	const auto diff = glm::normalize(b2pos.GetPos() - b1pos.GetPos());
-	location.GetRot().x = -vector_pitch(diff);
-	location.GetRot().y = vector_yaw(diff);
+}
+
+Transform
+RailLoco::getBogeyPosition(float linkDist, float dist) const
+{
+	float b2linkDist {};
+	const auto b2Link = linkHist.getAt(dist - linkDist, &b2linkDist);
+	return b2Link.first->positionAt(b2linkDist, b2Link.second);
+}
+
+void
+RailLoco::updateRailVehiclePosition(RailVehicle * w, float trailBy) const
+{
+	const auto overhang {(w->length - w->wheelBase) / 2};
+	const auto b1Pos = getBogeyPosition(linkDist, trailBy += overhang);
+	const auto b2Pos = getBogeyPosition(linkDist, trailBy += wheelBase);
+	const auto diff = glm::normalize(b2Pos.GetPos() - b1Pos.GetPos());
+	w->location.GetPos() = (b1Pos.GetPos() + b2Pos.GetPos()) / 2.F;
+	w->location.GetRot() = {-vector_pitch(diff), vector_yaw(diff), 0};
+}
+
+void
+RailLoco::tick(TickDuration dur)
+{
+	move(dur);
+	updateRailVehiclePosition(this, 0);
 	updateWagons();
 }
 
@@ -46,21 +61,10 @@ void
 RailLoco::updateWagons() const
 {
 	// Drag wagons
-	float trailBy {wheelBase + ((length - wheelBase)) / 2};
+	float trailBy {length};
 	for (const auto & wagon : wagons) {
 		const auto w {wagon.lock()};
-		auto wTrailBy {trailBy + ((w->length - w->wheelBase) / 2)};
-		float b1linkDist {};
-		const auto b1Link = linkHist.getAt(wTrailBy - linkDist, &b1linkDist);
-		const auto b1Pos = b1Link.first->positionAt(b1linkDist, b1Link.second);
-		wTrailBy += w->wheelBase;
-		float b2linkDist {};
-		const auto b2Link = linkHist.getAt(wTrailBy - linkDist, &b2linkDist);
-		const auto b2Pos = b2Link.first->positionAt(b2linkDist, b2Link.second);
-		w->location.GetPos() = (b1Pos.GetPos() + b2Pos.GetPos()) / 2.F;
-		const auto diff = glm::normalize(b2Pos.GetPos() - b1Pos.GetPos());
-		w->location.GetRot().x = -vector_pitch(diff);
-		w->location.GetRot().y = vector_yaw(diff);
+		updateRailVehiclePosition(w.get(), trailBy);
 		trailBy += w->length;
 	}
 }
