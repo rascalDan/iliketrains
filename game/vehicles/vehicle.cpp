@@ -10,7 +10,7 @@ Vehicle::Vehicle(const LinkPtr & l, const std::string & obj, const std::string &
 	linkHist.add(l, 0);
 }
 
-LinkHistory::Return
+LinkHistory::Entry
 LinkHistory::add(const LinkWPtr & l, unsigned char d)
 {
 	links.insert(links.begin(), {l, d});
@@ -23,13 +23,13 @@ LinkHistory::add(const LinkWPtr & l, unsigned char d)
 	return {lp, d};
 }
 
-LinkHistory::Return
+LinkHistory::Entry
 LinkHistory::getCurrent() const
 {
 	return {links.front().first.lock(), links.front().second};
 }
 
-LinkHistory::Return
+LinkHistory::Entry
 LinkHistory::getAt(float len, float * rem) const
 {
 	auto litr = links.begin();
