@@ -29,7 +29,7 @@ private:
 	void addWater(unsigned int width, unsigned int height, unsigned int resolution);
 
 	Collection<Mesh, false> meshes;
-	std::shared_ptr<Texture> texture;
+	std::shared_ptr<Texture> grass, water;
 };
 
 #endif

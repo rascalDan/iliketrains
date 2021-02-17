@@ -16,15 +16,12 @@ template<unsigned int Comp> class TerrainComp : public Mesh {
 	using Mesh::Mesh;
 };
 
-Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
+Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Texture::cachedTexture.get("water.png")}
 {
 	constexpr auto size {241}; // Vertices
 	constexpr auto offset {(size - 1) / 2};
 	constexpr auto verticesCount = size * size;
 	constexpr auto resolution = 10; // Grid size
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	std::vector<Vertex> vertices;
 	vertices.reserve(verticesCount + 4);
@@ -36,7 +33,7 @@ Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 			auto & vertex = vertices[x + (z * size)];
 			vertex.pos = {resolution * (x - offset), -1.5, resolution * (z - offset)};
 			vertex.normal = {0, 1, 0};
-			vertex.texCoord = {(x % 2) / 2.01, (z % 2) / 2.01};
+			vertex.texCoord = {x, z};
 		}
 	}
 	// Add hills
@@ -69,14 +66,12 @@ Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 	addWater(size, size, resolution);
 }
 
-Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture.get("terrain.png")}
+Terrain::Terrain(const std::string & fileName) :
+	grass {Texture::cachedTexture.get("grass.png")}, water {Texture::cachedTexture.get("water.png")}
 {
 	constexpr auto resolution {100};
 
 	const Image map {fileName.c_str(), STBI_grey};
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	std::vector<Vertex> vertices;
 	vertices.reserve((map.width * map.height) + 4);
@@ -139,10 +134,10 @@ Terrain::addWater(unsigned int width, unsigned int height, unsigned int resoluti
 	// Add water
 	const auto extentx {(int)((width - 1) * resolution / 2)};
 	const auto extentz {(int)((height - 1) * resolution / 2)};
-	vertices.emplace_back(glm::vec3 {-extentx, 0, -extentz}, glm::vec2 {0.5, 0.0}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {-extentx, 0, extentz}, glm::vec2 {0.5, 0.5}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {extentx, 0, extentz}, glm::vec2 {1, 0.5}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {extentx, 0, -extentz}, glm::vec2 {1, 0.0}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {-extentx, 0, -extentz}, glm::vec2 {0, 0}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {-extentx, 0, extentz}, glm::vec2 {0, height}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {extentx, 0, extentz}, glm::vec2 {width, height}, glm::vec3 {0, 1, 0});
+	vertices.emplace_back(glm::vec3 {extentx, 0, -extentz}, glm::vec2 {width, 0}, glm::vec3 {0, 1, 0});
 	indices.push_back(verticesCount);
 	indices.push_back(verticesCount + 1);
 	indices.push_back(verticesCount + 2);
@@ -159,7 +154,8 @@ void
 Terrain::render(const Shader & shader) const
 {
 	shader.setModel(identityModel);
-	texture->Bind();
+	grass->Bind();
 	meshes.apply<TerrainComp<0>>(&Mesh::Draw);
+	water->Bind();
 	meshes.apply<TerrainComp<1>>(&Mesh::Draw);
 }
