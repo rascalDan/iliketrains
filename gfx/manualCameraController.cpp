@@ -48,7 +48,7 @@ ManualCameraController::handleInput(SDL_Event & e)
 }
 
 void
-ManualCameraController::updateCamera(Camera * camera, Shader * shader) const
+ManualCameraController::updateCamera(Camera * camera) const
 {
 	if (motion) {
 		if (ctrl) {
@@ -59,7 +59,6 @@ ManualCameraController::updateCamera(Camera * camera, Shader * shader) const
 			camera->MoveRight(motion->xrel);
 			camera->SlideForward(motion->yrel);
 		}
-		shader->setView(camera->GetViewProjection());
 		motion.reset();
 	}
 }

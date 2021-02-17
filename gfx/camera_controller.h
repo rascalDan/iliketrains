@@ -4,11 +4,10 @@
 #include <game/worldobject.h>
 
 class Camera;
-class Shader;
 
 class CameraController : public WorldObject {
 public:
-	virtual void updateCamera(Camera *, Shader *) const = 0;
+	virtual void updateCamera(Camera *) const = 0;
 };
 
 #endif

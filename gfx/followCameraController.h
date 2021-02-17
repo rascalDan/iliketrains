@@ -6,7 +6,6 @@
 #include <gfx/camera_controller.h>
 
 class Camera;
-class Shader;
 
 class FollowCameraController : public CameraController {
 public:
@@ -15,7 +14,7 @@ public:
 
 	void tick(TickDuration) override { }
 
-	void updateCamera(Camera * camera, Shader * shader) const override;
+	void updateCamera(Camera * camera) const override;
 
 private:
 	VehicleWPtr target;

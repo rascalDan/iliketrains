@@ -8,7 +8,6 @@
 #include <optional>
 
 class Camera;
-class Shader;
 
 class ManualCameraController : public CameraController, public InputHandler {
 public:
@@ -16,7 +15,7 @@ public:
 
 	void tick(TickDuration) override { }
 
-	void updateCamera(Camera * camera, Shader * shader) const override;
+	void updateCamera(Camera * camera) const override;
 
 private:
 	bool ctrl {false}, mrb {false};

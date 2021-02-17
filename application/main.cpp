@@ -98,7 +98,8 @@ public:
 			const auto t_passed = std::chrono::duration_cast<WorldObject::TickDuration>(t_end - t_start);
 
 			world.apply(&WorldObject::tick, t_passed);
-			world.apply<CameraController>(&CameraController::updateCamera, &camera, &shader);
+			world.apply<CameraController>(&CameraController::updateCamera, &camera);
+			shader.setView(camera.GetViewProjection());
 			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
 			world.apply<Renderable>(&Renderable::render, shader);
 			windows.apply(&Window::SwapBuffers);

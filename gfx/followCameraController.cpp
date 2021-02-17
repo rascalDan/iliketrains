@@ -12,7 +12,7 @@
 FollowCameraController::FollowCameraController(VehicleWPtr t, Mode m) : target(std::move(t)), mode(m) { }
 
 void
-FollowCameraController::updateCamera(Camera * camera, Shader * shader) const
+FollowCameraController::updateCamera(Camera * camera) const
 {
 	const auto [pos, rot] = [this]() {
 		const auto t {target.lock()};
@@ -37,6 +37,4 @@ FollowCameraController::updateCamera(Camera * camera, Shader * shader) const
 			camera->up = glm::normalize(up - north - east);
 			break;
 	}
-
-	shader->setView(camera->GetViewProjection());
 }
