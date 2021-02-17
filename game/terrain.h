@@ -25,13 +25,9 @@ public:
 private:
 	static constexpr unsigned int NUM_BUFFERS {4};
 
-	void finish(unsigned int width, unsigned int height, unsigned int resolution);
-
-	Vertex & v(unsigned int width, unsigned int x, unsigned int z);
+	void finish(unsigned int width, unsigned int height, unsigned int resolution, std::vector<Vertex> &);
 
 	Collection<Mesh, false> meshes;
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
 	std::shared_ptr<Texture> texture;
 };
 

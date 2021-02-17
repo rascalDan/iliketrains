@@ -22,6 +22,7 @@ Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+	std::vector<Vertex> vertices;
 	vertices.reserve(verticesCount + 4);
 	vertices.resize(verticesCount, {{}, {}, {}});
 
@@ -60,7 +61,7 @@ Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 			}
 		}
 	}
-	finish(size, size, resolution);
+	finish(size, size, resolution, vertices);
 }
 
 Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture.get("terrain.png")}
@@ -72,6 +73,7 @@ Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+	std::vector<Vertex> vertices;
 	vertices.reserve((map.width * map.height) + 4);
 
 	for (auto z = 0; z < map.height; z += 1) {
@@ -83,15 +85,16 @@ Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture
 		}
 	}
 
-	finish(map.width, map.height, resolution);
+	finish(map.width, map.height, resolution, vertices);
 }
 
 void
-Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution)
+Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution, std::vector<Vertex> & vertices)
 {
 	const auto tilesCount = (width - 1) * (height - 1);
 	const auto trianglesCount = tilesCount * 2;
 	const auto indicesCount = trianglesCount * 3;
+	std::vector<unsigned int> indices;
 	indices.reserve(indicesCount + 6);
 	// Indices
 	for (auto z = 0U; z < height - 1; z += 1) {
@@ -105,6 +108,10 @@ Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution
 		}
 	}
 	// Normals
+	auto v = [&vertices](unsigned int width, unsigned int x, unsigned int z) -> Vertex & {
+		return vertices[x + (z * width)];
+	};
+
 	for (auto z = 1U; z < height - 1; z += 1) {
 		for (auto x = 1U; x < width - 1; x += 1) {
 			const auto a = v(width, x - 1, z).pos;
@@ -128,14 +135,7 @@ Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution
 	indices.push_back(verticesCount);
 	indices.push_back(verticesCount + 2);
 	indices.push_back(verticesCount + 3);
-
 	meshes.create<Mesh>(vertices, indices);
-}
-
-Vertex &
-Terrain::v(unsigned int width, unsigned int x, unsigned int z)
-{
-	return vertices[x + (z * width)];
 }
 
 static const Transform identity {};
