@@ -6,10 +6,12 @@
 #include <stdexcept>
 #include <string>
 
-Shader::Shader() : viewProjection_uniform {}, model_uniform {}, lightDir_uniform {}
+Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) :
+	viewProjection_uniform {}, model_uniform {}, lightDir_uniform {}
 {
-	glAttachShader(m_program, Source {{basicShader_vs, basicShader_vs_len}, GL_VERTEX_SHADER}.id);
-	glAttachShader(m_program, Source {{basicShader_fs, basicShader_fs_len}, GL_FRAGMENT_SHADER}.id);
+	for (const auto & srcId : srcs) {
+		glAttachShader(m_program, srcId);
+	}
 
 	glBindAttribLocation(m_program, 0, "position");
 	glBindAttribLocation(m_program, 1, "texCoord");
@@ -26,24 +28,38 @@ Shader::Shader() : viewProjection_uniform {}, model_uniform {}, lightDir_uniform
 	lightDir_uniform = glGetUniformLocation(m_program, "lightDirection");
 }
 
-void
-Shader::Bind() const
+Shader::Shader() :
+	programs {{{
+			Source {{basicShader_vs, basicShader_vs_len}, GL_VERTEX_SHADER}.id,
+			Source {{basicShader_fs, basicShader_fs_len}, GL_FRAGMENT_SHADER}.id,
+	}}}
 {
-	glUseProgram(m_program);
 }
 
 void
 Shader::setView(glm::mat4 proj) const
 {
-	glUniformMatrix4fv(viewProjection_uniform, 1, GL_FALSE, &proj[0][0]);
-	const glm::vec3 lightDir = glm::normalize(glm::vec3 {1, -1, 0});
-	glUniform3fv(lightDir_uniform, 1, &lightDir[0]);
+	for (const auto & prog : programs) {
+		glUseProgram(prog.m_program);
+		glUniformMatrix4fv(prog.viewProjection_uniform, 1, GL_FALSE, &proj[0][0]);
+	}
 }
 
 void
-Shader::setModel(glm::mat4 model) const
+Shader::setLight(glm::vec3 lightDir) const
 {
-	glUniformMatrix4fv(model_uniform, 1, GL_FALSE, &model[0][0]);
+	for (const auto & prog : programs) {
+		glUseProgram(prog.m_program);
+		glUniform3fv(prog.lightDir_uniform, 1, &lightDir[0]);
+	}
+}
+
+void
+Shader::setModel(glm::mat4 model, Program pid) const
+{
+	auto & prog = programs[(int)pid];
+	glUseProgram(prog.m_program);
+	glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, &model[0][0]);
 }
 
 void
