@@ -12,6 +12,10 @@
 #include <random>
 #include <stb_image.h>
 
+template<unsigned int Comp> class TerrainComp : public Mesh {
+	using Mesh::Mesh;
+};
+
 Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 {
 	constexpr auto size {241}; // Vertices
@@ -61,7 +65,8 @@ Terrain::Terrain() : texture {Texture::cachedTexture.get("terrain.png")}
 			}
 		}
 	}
-	finish(size, size, resolution, vertices);
+	finish(size, size, vertices);
+	addWater(size, size, resolution);
 }
 
 Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture.get("terrain.png")}
@@ -85,11 +90,12 @@ Terrain::Terrain(const std::string & fileName) : texture {Texture::cachedTexture
 		}
 	}
 
-	finish(map.width, map.height, resolution, vertices);
+	finish(map.width, map.height, vertices);
+	addWater(map.width, map.height, resolution);
 }
 
 void
-Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution, std::vector<Vertex> & vertices)
+Terrain::finish(unsigned int width, unsigned int height, std::vector<Vertex> & vertices)
 {
 	const auto tilesCount = (width - 1) * (height - 1);
 	const auto trianglesCount = tilesCount * 2;
@@ -121,7 +127,15 @@ Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution
 			v(width, x, z).normal = -glm::normalize(glm::cross(c - a, d - b));
 		}
 	}
-	const auto verticesCount = vertices.size();
+	meshes.create<TerrainComp<0>>(vertices, indices);
+}
+
+void
+Terrain::addWater(unsigned int width, unsigned int height, unsigned int resolution)
+{
+	const auto verticesCount {0U};
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
 	// Add water
 	const auto extentx {(int)((width - 1) * resolution / 2)};
 	const auto extentz {(int)((height - 1) * resolution / 2)};
@@ -135,7 +149,7 @@ Terrain::finish(unsigned int width, unsigned int height, unsigned int resolution
 	indices.push_back(verticesCount);
 	indices.push_back(verticesCount + 2);
 	indices.push_back(verticesCount + 3);
-	meshes.create<Mesh>(vertices, indices);
+	meshes.create<TerrainComp<1>>(vertices, indices);
 }
 
 static const Transform identity {};
@@ -146,5 +160,6 @@ Terrain::render(const Shader & shader) const
 {
 	shader.setModel(identityModel);
 	texture->Bind();
-	meshes.apply(&Mesh::Draw);
+	meshes.apply<TerrainComp<0>>(&Mesh::Draw);
+	meshes.apply<TerrainComp<1>>(&Mesh::Draw);
 }
