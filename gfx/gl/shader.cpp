@@ -6,8 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) :
-	viewProjection_uniform {}, model_uniform {}, lightDir_uniform {}
+Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) : viewProjection_uniform {}, model_uniform {}
 {
 	for (const auto & srcId : srcs) {
 		glAttachShader(m_program, srcId);
@@ -25,7 +24,6 @@ Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) :
 
 	viewProjection_uniform = glGetUniformLocation(m_program, "viewProjection");
 	model_uniform = glGetUniformLocation(m_program, "model");
-	lightDir_uniform = glGetUniformLocation(m_program, "lightDirection");
 }
 
 Shader::Shader() :
@@ -46,11 +44,13 @@ Shader::setView(glm::mat4 proj) const
 }
 
 void
-Shader::setLight(glm::vec3 lightDir) const
+Shader::setUniform(const GLchar * uniform, glm::vec3 v) const
 {
 	for (const auto & prog : programs) {
-		glUseProgram(prog.m_program);
-		glUniform3fv(prog.lightDir_uniform, 1, &lightDir[0]);
+		if (auto loc = glGetUniformLocation(prog.m_program, uniform); loc >= 0) {
+			glUseProgram(prog.m_program);
+			glUniform3fv(loc, 1, &v[0]);
+		}
 	}
 }
 

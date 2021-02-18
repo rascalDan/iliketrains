@@ -84,7 +84,7 @@ public:
 		camera.Pitch(0.24);
 		camera.RotateY(0.7854);
 		shader.setView(camera.GetViewProjection());
-		shader.setLight(glm::normalize(glm::vec3 {1, -1, 0}));
+		shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, -1, 0}));
 
 		auto t_start = std::chrono::high_resolution_clock::now();
 		const auto framelen = std::chrono::milliseconds {1000} / 120;

@@ -15,7 +15,7 @@ public:
 
 	void setView(glm::mat4 view) const;
 	void setModel(glm::mat4 model, Program = Program::Basic) const;
-	void setLight(glm::vec3 dir) const;
+	void setUniform(const GLchar *, glm::vec3 dir) const;
 
 private:
 	class Source {
@@ -36,7 +36,7 @@ private:
 		using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
 
 		ProgramRef m_program;
-		GLint viewProjection_uniform, model_uniform, lightDir_uniform;
+		GLint viewProjection_uniform, model_uniform;
 	};
 
 	std::array<ProgramHandle, 1> programs;
