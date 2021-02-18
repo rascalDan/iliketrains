@@ -85,6 +85,8 @@ public:
 		camera.RotateY(0.7854);
 		shader.setView(camera.GetViewProjection());
 		shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, -1, 0}));
+		shader.setUniform("lightColor", {.6, .6, .6});
+		shader.setUniform("ambientColor", {0.5, 0.5, 0.5});
 
 		auto t_start = std::chrono::high_resolution_clock::now();
 		const auto framelen = std::chrono::milliseconds {1000} / 120;
