@@ -1,15 +1,28 @@
 #include "game/network/link.h"
 #include "game/vehicles/vehicle.h"
 #include "game/worldobject.h"
+#include "gfx/models/mesh.h"
 #include <memory>
 #include <string>
 #include <vector>
 
+class Texture;
 class RailVehicle : public Vehicle {
 public:
+	struct Bogey {
+		Transform location;
+		MeshPtr mesh;
+	};
+
 	using Vehicle::Vehicle;
+	void render(const Shader & shader) const override;
+
+	std::array<Bogey, 2> bogeys;
+	MeshPtr bodyMesh;
+	std::shared_ptr<Texture> texture;
 	float wheelBase;
 	float length;
+
 	friend class RailLoco;
 };
 

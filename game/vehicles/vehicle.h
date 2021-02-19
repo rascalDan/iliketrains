@@ -1,9 +1,9 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
-#include "game/physical.h"
 #include <game/network/link.h>
 #include <game/worldobject.h>
+#include <gfx/renderable.h>
 #include <memory>
 #include <string>
 #include <utility>
@@ -22,11 +22,13 @@ private:
 	float totalLen {0.F};
 };
 
-class Vehicle : public WorldObject, public Physical {
+class Vehicle : public WorldObject, public Renderable {
 public:
-	Vehicle(const LinkPtr & link, const std::string & obj, const std::string & tex);
-	float linkDist {0}; // distance long current link
+	Vehicle(const LinkPtr & link, float linkDist = 0);
+	float linkDist; // distance long current link
 	float speed {50}; // speed in m/s (~75 km/h)
+
+	Transform location;
 
 protected:
 	LinkHistory linkHist;

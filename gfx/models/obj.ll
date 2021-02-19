@@ -43,8 +43,8 @@ falsey (0|off)
 }
 <INITIAL>"f " {
   BEGIN(FACE);
-  faces.emplace_back();
-  faces.back().emplace_back();
+  objects.back().second.emplace_back();
+  objects.back().second.back().emplace_back();
   axis = 0;
 }
 <INITIAL>"mtllib " {
@@ -81,7 +81,7 @@ falsey (0|off)
   // fprintf(stderr, "MTLLIB <%s>\n", YYText());
 }
 <OBJECT>{linestring} {
-  // fprintf(stderr, "OBJECT <%s>\n", YYText());
+  objects.emplace_back(YYText(), Faces{});
 }
 <SMOOTH>{truthy} {
   // fprintf(stderr, "Set smooth\n");
@@ -99,13 +99,13 @@ falsey (0|off)
   texCoords.back()[axis++] = std::stof(YYText());
 }
 <FACE>{index} {
-  faces.back().back()[axis] = std::stoi(YYText());
+  objects.back().second.back().back()[axis] = std::stoi(YYText());
 }
 <FACE>\/ {
   axis++;
 }
 <FACE>[ \t] {
-  faces.back().emplace_back();
+  objects.back().second.back().emplace_back();
   axis = 0;
 }
 

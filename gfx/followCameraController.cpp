@@ -16,7 +16,7 @@ FollowCameraController::updateCamera(Camera * camera) const
 {
 	const auto [pos, rot] = [this]() {
 		const auto t {target.lock()};
-		return std::tie(t->getLocation().GetPos(), t->getLocation().GetRot());
+		return std::tie(t->location.GetPos(), t->location.GetRot());
 	}();
 
 	switch (mode) {

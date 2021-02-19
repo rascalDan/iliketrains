@@ -17,9 +17,6 @@ enum MeshBufferPositions { POSITION_VB, TEXCOORD_VB, NORMAL_VB, INDEX_VB };
 
 class Mesh {
 public:
-	using Data = std::pair<std::vector<Vertex>, std::vector<unsigned int>>;
-	explicit Mesh(const std::filesystem::path & fileName);
-	explicit Mesh(const ObjParser & obj);
 	Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum = GL_TRIANGLES);
 	virtual ~Mesh();
 
@@ -29,10 +26,6 @@ public:
 	void Draw() const;
 
 private:
-	explicit Mesh(Data && vandi, GLenum = GL_TRIANGLES);
-
-	static Data packObjParser(const ObjParser &);
-
 	static constexpr unsigned int NUM_BUFFERS {4};
 
 	GLuint m_vertexArrayObject;
@@ -40,5 +33,6 @@ private:
 	size_t m_numIndices;
 	GLenum mode;
 };
+using MeshPtr = std::shared_ptr<const Mesh>;
 
 #endif

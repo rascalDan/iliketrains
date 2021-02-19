@@ -4,8 +4,7 @@
 #include <memory>
 #include <utility>
 
-Vehicle::Vehicle(const LinkPtr & l, const std::string & obj, const std::string & tex) :
-	Physical(l->ends.front().first->pos, obj, tex)
+Vehicle::Vehicle(const LinkPtr & l, float ld) : linkDist {ld}
 {
 	linkHist.add(l, 0);
 }

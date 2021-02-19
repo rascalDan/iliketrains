@@ -7,15 +7,6 @@
 #include <resource.h>
 #include <vector>
 
-Mesh::Mesh(const std::filesystem::path & fileName) : Mesh(ObjParser {Resource::mapPath(fileName)}) { }
-
-Mesh::Mesh(const ObjParser & obj) : Mesh(packObjParser(obj), GL_TRIANGLES) { }
-
-Mesh::Mesh(std::pair<std::vector<Vertex>, std::vector<unsigned int>> && vandi, GLenum m) :
-	Mesh(vandi.first, vandi.second, m)
-{
-}
-
 Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m) :
 	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {indices.size()}, mode {m}
 {
@@ -40,34 +31,6 @@ Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
-}
-
-Mesh::Data
-Mesh::packObjParser(const ObjParser & obj)
-{
-	std::vector<Vertex> vertices;
-	std::vector<ObjParser::FaceElement> vertexOrder;
-	std::vector<unsigned int> indices;
-	std::for_each(obj.faces.begin(), obj.faces.end(), [&](const ObjParser::Face & face) {
-		for (auto idx = 2U; idx < face.size(); idx += 1) {
-			auto f = [&](auto idx) {
-				const auto & fe {face[idx]};
-				if (const auto existing = std::find(vertexOrder.begin(), vertexOrder.end(), fe);
-						existing != vertexOrder.end()) {
-					indices.push_back(std::distance(vertexOrder.begin(), existing));
-				}
-				else {
-					indices.push_back(vertices.size());
-					vertices.emplace_back(obj.vertices[fe.x - 1], obj.texCoords[fe.y - 1], -obj.normals[fe.z - 1]);
-					vertexOrder.emplace_back(fe);
-				}
-			};
-			f(0);
-			f(idx);
-			f(idx - 1);
-		}
-	});
-	return std::make_pair(vertices, indices);
 }
 
 Mesh::~Mesh()
