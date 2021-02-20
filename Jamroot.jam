@@ -2,6 +2,7 @@ using gcc : 11.0.0 ;
 using pkg-config ;
 import pkg-config ;
 import type : register ;
+import type : type ;
 import generators : register-standard ;
 import testing ;
 import lex ;
@@ -17,8 +18,6 @@ project : requirements
 	<variant>debug:<warnings>extra
 	<variant>debug:<warnings-as-errors>on
 	<variant>release:<lto>on
-	<toolset>tidy:<exclude>gfx/gl/shaders/fs-basicShader.h
-	<toolset>tidy:<exclude>gfx/gl/shaders/vs-basicShader.h
 	<toolset>tidy:<exclude>gfx/models/obj.cpp
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
@@ -37,17 +36,23 @@ project : requirements
 	<toolset>tidy:<define>TIDY
 	;
 
-type.register VERTEXSHADER : vs ;
-type.register FRAGMENTSHADER : fs ;
+type.register GL_VERTEX_SHADER : vs ;
+type.register GL_FRAGMENT_SHADER : fs ;
 
-generators.register-standard xxd.i : VERTEXSHADER : C(vs-%) H(vs-%) ;
-generators.register-standard xxd.i : FRAGMENTSHADER : C(fs-%) H(fs-%) ;
+generators.register-standard embed.glsl : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) ;
+generators.register-standard embed.glsl : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) ;
 
-actions xxd.i
+actions embed.glsl
 {
-	( cd $(2:D) ; xxd -i $(2:B)$(2:S) ) | tee $(1[1]) | cproto -veo $(1[2])
+	m4 -DNAME=$(2:B) -DTYPE=$(2:S) > $(1[2]) utility/embed-glsl.h.m4
+	m4 -DSOURCE=$(2) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) > $(1[1]) utility/embed-glsl.cpp.m4
 }
-IMPORT $(__name__) : xxd.i : : xxd.i ;
+rule embed.glsl ( targets * : sources * : properties * )
+{
+	DEPENDS $(targets) : utility/embed-glsl.h.m4 utility/embed-glsl.cpp.m4 ;
+	OPTIONS on $(targets) = [ type.type $(sources) ] ;
+}
+IMPORT $(__name__) : embed.glsl : : embed.glsl ;
 
 exe iliketrains :
 	application/main.cpp

@@ -10,11 +10,10 @@
 #include <stdexcept>
 #include <string>
 
-Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) : viewProjection_uniform {}, model_uniform {}
+Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : viewProjection_uniform {}, model_uniform {}
 {
-	for (const auto & srcId : srcs) {
-		glAttachShader(m_program, srcId);
-	}
+	glAttachShader(m_program, vs);
+	glAttachShader(m_program, fs);
 
 	glBindAttribLocation(m_program, 0, "position");
 	glBindAttribLocation(m_program, 1, "texCoord");
@@ -31,17 +30,17 @@ Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) : viewP
 }
 
 Shader::Shader() :
-	programs {{ProgramHandle {
-					   Source {{basicShader_vs, basicShader_vs_len}, GL_VERTEX_SHADER}.id,
-					   Source {{basicShader_fs, basicShader_fs_len}, GL_FRAGMENT_SHADER}.id,
+	programs {{{
+					   Source {basicShader_vs}.id,
+					   Source {basicShader_fs}.id,
 			   },
-			ProgramHandle {
-					Source {{waterShader_vs, waterShader_vs_len}, GL_VERTEX_SHADER}.id,
-					Source {{waterShader_fs, waterShader_fs_len}, GL_FRAGMENT_SHADER}.id,
+			{
+					Source {waterShader_vs}.id,
+					Source {waterShader_fs}.id,
 			},
-			ProgramHandle {
-					Source {{landmassShader_vs, landmassShader_vs_len}, GL_VERTEX_SHADER}.id,
-					Source {{landmassShader_fs, landmassShader_fs_len}, GL_FRAGMENT_SHADER}.id,
+			{
+					Source {landmassShader_vs}.id,
+					Source {landmassShader_fs}.id,
 			}}}
 {
 }
@@ -99,14 +98,9 @@ Shader::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string
 	}
 }
 
-Shader::Source::Source(const std::basic_string_view<unsigned char> text, GLuint type) :
-	Source {(const GLchar *)(text.data()), (GLint)(text.length()), type}
+Shader::Source::Source(const GLsource src) : id {src.type}
 {
-}
-
-Shader::Source::Source(const GLchar * text, GLint len, unsigned int type) : id {type}
-{
-	glShaderSource(id, 1, &text, &len);
+	glShaderSource(id, 1, &src.text, &src.len);
 	glCompileShader(id);
 
 	CheckShaderError(id, GL_COMPILE_STATUS, false, "Error compiling shader!");

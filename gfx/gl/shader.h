@@ -1,6 +1,7 @@
 #ifndef SHADER_INCLUDED_H
 #define SHADER_INCLUDED_H
 
+#include "shader-source.h"
 #include <GL/glew.h>
 #include <array>
 #include <glRef.hpp>
@@ -22,8 +23,7 @@ private:
 	public:
 		using ShaderRef = glRef<GLuint, __glewCreateShader, __glewDeleteShader>;
 
-		Source(const std::basic_string_view<unsigned char> text, GLuint type);
-		Source(const GLchar * text, GLint len, GLuint type);
+		explicit Source(const GLsource src);
 
 		ShaderRef id;
 	};
@@ -32,7 +32,7 @@ private:
 
 	class ProgramHandle {
 	public:
-		explicit ProgramHandle(std::initializer_list<GLuint>);
+		ProgramHandle(GLuint, GLuint);
 		using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
 
 		ProgramRef m_program;
