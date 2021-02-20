@@ -1,6 +1,5 @@
 #include "manualCameraController.h"
 #include <gfx/gl/camera.h>
-#include <gfx/gl/shader.h>
 
 bool
 ManualCameraController::handleInput(SDL_Event & e)

@@ -1,10 +1,13 @@
 #include "game/network/link.h"
 #include "game/vehicles/vehicle.h"
 #include "game/worldobject.h"
+#include "gfx/gl/transform.h"
 #include "gfx/models/mesh.h"
+#include <array>
 #include <memory>
-#include <string>
 #include <vector>
+
+class Shader;
 
 class Texture;
 class RailVehicle : public Vehicle {
@@ -42,7 +45,7 @@ public:
 
 private:
 	void move(TickDuration dur);
-	Transform getBogeyPosition(float linkDist, float dist) const;
+	[[nodiscard]] Transform getBogeyPosition(float linkDist, float dist) const;
 	void updateRailVehiclePosition(RailVehicle *, float trailBy) const;
 	void updateWagons() const;
 };

@@ -4,14 +4,11 @@
 #include <GL/glew.h>
 #include <array>
 #include <cstddef>
-#include <filesystem>
-#include <gfx/models/vertex.hpp>
+#include <memory>
 #include <span>
 #include <special_members.hpp>
-#include <utility>
-#include <vector>
 
-class ObjParser;
+class Vertex;
 
 enum MeshBufferPositions { POSITION_VB, TEXCOORD_VB, NORMAL_VB, INDEX_VB };
 

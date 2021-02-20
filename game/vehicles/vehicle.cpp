@@ -1,6 +1,5 @@
 #include "vehicle.h"
 #include "game/network/link.h"
-#include <array>
 #include <memory>
 #include <utility>
 

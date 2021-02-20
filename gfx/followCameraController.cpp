@@ -2,7 +2,6 @@
 #include "game/vehicles/vehicle.h"
 #include "gfx/gl/transform.h"
 #include <gfx/gl/camera.h>
-#include <gfx/gl/shader.h>
 #include <glm/glm.hpp>
 #include <maths.h>
 #include <memory>

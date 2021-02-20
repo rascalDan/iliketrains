@@ -1,11 +1,5 @@
 #include "mesh.h"
-#include "obj.h"
 #include "vertex.hpp"
-#include <algorithm>
-#include <glm/glm.hpp>
-#include <iterator>
-#include <resource.h>
-#include <vector>
 
 Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m) :
 	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {indices.size()}, mode {m}

@@ -1,6 +1,12 @@
 #include "obj.h"
+#include <algorithm>
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
+#include <glm/glm.hpp>
+#include <iterator>
+#include <memory>
+#include <utility>
+#include <vector>
 
 std::vector<ObjParser::NamedMesh>
 ObjParser::createMeshes() const

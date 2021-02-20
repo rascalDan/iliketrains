@@ -1,6 +1,5 @@
 #include "terrain.h"
 #include "gfx/models/texture.h"
-#include <GL/glew.h>
 #include <cache.h>
 #include <cmath>
 #include <gfx/gl/shader.h>
@@ -9,7 +8,6 @@
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
-#include <maths.h>
 #include <random>
 #include <stb_image.h>
 

@@ -6,7 +6,9 @@
 #include <algorithm>
 #include <array>
 #include <cache.h>
+#include <filesystem>
 #include <glm/glm.hpp>
+#include <iterator>
 #include <lib/resource.h>
 #include <maths.h>
 #include <memory>
@@ -61,7 +63,7 @@ RailLoco::updateRailVehiclePosition(RailVehicle * w, float trailBy) const
 {
 	const auto overhang {(w->length - w->wheelBase) / 2};
 	const auto & b1Pos = w->bogeys[0].location = getBogeyPosition(linkDist, trailBy += overhang);
-	const auto & b2Pos = w->bogeys[1].location = getBogeyPosition(linkDist, trailBy += wheelBase);
+	const auto & b2Pos = w->bogeys[1].location = getBogeyPosition(linkDist, trailBy + wheelBase);
 	const auto diff = glm::normalize(b2Pos.GetPos() - b1Pos.GetPos());
 	w->location.GetPos() = (b1Pos.GetPos() + b2Pos.GetPos()) / 2.F;
 	w->location.GetRot() = {-vector_pitch(diff), vector_yaw(diff), 0};

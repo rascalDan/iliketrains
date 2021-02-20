@@ -2,9 +2,8 @@
 #define TERRAIN_H
 
 #include "collection.hpp"
-#include "worldobject.h"
+#include "game/worldobject.h"
 #include <gfx/models/mesh.h>
-#include <gfx/models/vertex.hpp>
 #include <gfx/renderable.h>
 #include <memory>
 #include <string>
@@ -12,6 +11,7 @@
 
 class Shader;
 class Texture;
+class Vertex;
 
 class Terrain : public WorldObject, public Renderable {
 public:

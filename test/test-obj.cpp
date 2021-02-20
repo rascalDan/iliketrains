@@ -4,6 +4,7 @@
 
 #include <gfx/models/obj.h>
 #include <memory>
+#include <utility>
 #include <vector>
 
 BOOST_AUTO_TEST_CASE(objparse)

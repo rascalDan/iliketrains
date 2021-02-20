@@ -1,11 +1,11 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include "gfx/gl/transform.h"
 #include <game/network/link.h>
 #include <game/worldobject.h>
 #include <gfx/renderable.h>
 #include <memory>
-#include <string>
 #include <utility>
 #include <vector>
 

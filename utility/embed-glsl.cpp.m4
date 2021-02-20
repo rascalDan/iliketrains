@@ -1,7 +1,8 @@
 changecom()dnl
 // NAME
 #include "substr(TYPE,1)-NAME.h"
-#include <cstring>
+#include <GL/glew.h>
+#include "gfx/gl/shader-source.h"
 
 constexpr const GLchar * src { R"GLSL-EMBED(dnl
 include(SOURCE))GLSL-EMBED" };
