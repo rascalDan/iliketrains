@@ -32,7 +32,7 @@ private:
 
 	class ProgramHandle {
 	public:
-		ProgramHandle(std::initializer_list<GLuint>);
+		explicit ProgramHandle(std::initializer_list<GLuint>);
 		using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
 
 		ProgramRef m_program;

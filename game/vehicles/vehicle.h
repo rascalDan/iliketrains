@@ -24,7 +24,7 @@ private:
 
 class Vehicle : public WorldObject, public Renderable {
 public:
-	Vehicle(const LinkPtr & link, float linkDist = 0);
+	explicit Vehicle(const LinkPtr & link, float linkDist = 0);
 	float linkDist; // distance long current link
 	float speed {50}; // speed in m/s (~75 km/h)
 

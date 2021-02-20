@@ -31,15 +31,15 @@ Shader::ProgramHandle::ProgramHandle(std::initializer_list<GLuint> srcs) : viewP
 }
 
 Shader::Shader() :
-	programs {{{
+	programs {{ProgramHandle {
 					   Source {{basicShader_vs, basicShader_vs_len}, GL_VERTEX_SHADER}.id,
 					   Source {{basicShader_fs, basicShader_fs_len}, GL_FRAGMENT_SHADER}.id,
 			   },
-			{
+			ProgramHandle {
 					Source {{waterShader_vs, waterShader_vs_len}, GL_VERTEX_SHADER}.id,
 					Source {{waterShader_fs, waterShader_fs_len}, GL_FRAGMENT_SHADER}.id,
 			},
-			{
+			ProgramHandle {
 					Source {{landmassShader_vs, landmassShader_vs_len}, GL_VERTEX_SHADER}.id,
 					Source {{landmassShader_fs, landmassShader_fs_len}, GL_FRAGMENT_SHADER}.id,
 			}}}
