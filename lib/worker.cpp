@@ -1,8 +1,9 @@
 #include "worker.h"
-#include "work.h"
-#include <algorithm>
-#include <iterator>
-#include <mutex>
+#if __cpp_lib_semaphore
+#	include "work.h"
+#	include <algorithm>
+#	include <iterator>
+#	include <mutex>
 
 Worker::Worker() : todoLen {0}
 {
@@ -44,3 +45,4 @@ Worker::worker()
 		j->doWork();
 	}
 }
+#endif

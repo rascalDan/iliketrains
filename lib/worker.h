@@ -1,14 +1,16 @@
 #ifndef WORKER_H
 #define WORKER_H
 
-#include <deque>
-#include <memory>
-#include <mutex>
-#include <semaphore>
-#include <special_members.hpp>
-#include <thread>
 #include <utility>
-#include <vector>
+
+#if __cpp_lib_semaphore
+#	include <deque>
+#	include <memory>
+#	include <mutex>
+#	include <semaphore>
+#	include <special_members.hpp>
+#	include <thread>
+#	include <vector>
 
 class Work;
 
@@ -43,4 +45,17 @@ private:
 	std::mutex todoMutex;
 };
 
+#else
+
+class Worker {
+public:
+	template<typename T, typename... Params>
+	void
+	addWork(Params &&... params)
+	{
+		T(std::forward<Params>(params)...).doWork();
+	}
+};
+
+#endif
 #endif
