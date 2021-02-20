@@ -14,7 +14,7 @@ enum MeshBufferPositions { POSITION_VB, TEXCOORD_VB, NORMAL_VB, INDEX_VB };
 
 class Mesh {
 public:
-	Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum = GL_TRIANGLES);
+	Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum = GL_TRIANGLES);
 	virtual ~Mesh();
 
 	NO_COPY(Mesh);

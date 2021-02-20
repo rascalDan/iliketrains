@@ -1,7 +1,7 @@
 #include "mesh.h"
 #include "vertex.hpp"
 
-Mesh::Mesh(std::span<Vertex> vertices, std::span<unsigned int> indices, GLenum m) :
+Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum m) :
 	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {indices.size()}, mode {m}
 {
 	glGenVertexArrays(1, &m_vertexArrayObject);
