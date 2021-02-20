@@ -17,7 +17,6 @@
 #include <memory>
 #include <special_members.hpp>
 #include <vector>
-#include <worker.h>
 
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
@@ -61,8 +60,6 @@ public:
 	{
 		Collection<Window> windows;
 		windows.create(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
-
-		Worker w;
 
 		world.create<Terrain>();
 
