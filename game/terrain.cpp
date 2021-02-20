@@ -39,22 +39,25 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 	// Add hills
 	std::mt19937 gen(std::random_device {}());
 	std::uniform_int_distribution<> rpos(2, size - 2);
-	std::uniform_int_distribution<> rsize(10, 20);
+	std::uniform_int_distribution<> rsize(10, 30);
 	std::uniform_int_distribution<> rheight(1, 3);
 	for (int h = 0; h < 500;) {
 		const glm::ivec2 hpos {rpos(gen), rpos(gen)};
 		const glm::ivec2 hsize {rsize(gen), rsize(gen)};
 		if (const auto lim1 = hpos - hsize; lim1.x > 0 && lim1.y > 0) {
 			if (const auto lim2 = hpos + hsize; lim2.x < size && lim2.y < size) {
-				auto height {rheight(gen)};
+				const float height = rheight(gen);
 				const glm::ivec2 hsizesqrd {hsize.x * hsize.x, hsize.y * hsize.y};
 				for (auto z = lim1.y; z < lim2.y; z += 1) {
 					for (auto x = lim1.x; x < lim2.x; x += 1) {
 						const auto dist {hpos - glm::ivec2 {x, z}};
 						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
-						if ((pow(x - hpos.x, 2) / pow(hsize.x, 2)) + (pow(z - hpos.y, 2) / pow(hsize.y, 2)) <= 1.0) {
+						const auto out {
+								(pow(x - hpos.x, 2) / pow(hsize.x, 2)) + (pow(z - hpos.y, 2) / pow(hsize.y, 2))};
+						if (out <= 1.0) {
 							auto & vertex = vertices[x + (z * size)];
-							vertex.pos.y += height;
+							const auto m {1.F / (7.F * out - 8.F) + 1.F};
+							vertex.pos.y += height * m;
 						}
 					}
 				}
