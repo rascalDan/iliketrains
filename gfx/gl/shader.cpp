@@ -31,16 +31,16 @@ Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : viewProjection_unif
 
 Shader::Shader() :
 	programs {{{
-					   Source {basicShader_vs}.id,
-					   Source {basicShader_fs}.id,
+					   basicShader_vs.compile(),
+					   basicShader_fs.compile(),
 			   },
 			{
-					Source {waterShader_vs}.id,
-					Source {waterShader_fs}.id,
+					waterShader_vs.compile(),
+					waterShader_fs.compile(),
 			},
 			{
-					Source {landmassShader_vs}.id,
-					Source {landmassShader_fs}.id,
+					landmassShader_vs.compile(),
+					landmassShader_fs.compile(),
 			}}}
 {
 }
@@ -98,10 +98,13 @@ Shader::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string
 	}
 }
 
-Shader::Source::Source(const GLsource src) : id {src.type}
+GLsource::ShaderRef
+GLsource::compile() const
 {
-	glShaderSource(id, 1, &src.text, &src.len);
+	ShaderRef id {type};
+	glShaderSource(id, 1, &text, &len);
 	glCompileShader(id);
 
-	CheckShaderError(id, GL_COMPILE_STATUS, false, "Error compiling shader!");
+	Shader::CheckShaderError(id, GL_COMPILE_STATUS, false, "Error compiling shader!");
+	return id;
 }

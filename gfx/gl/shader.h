@@ -1,7 +1,6 @@
 #ifndef SHADER_INCLUDED_H
 #define SHADER_INCLUDED_H
 
-#include "shader-source.h"
 #include <GL/glew.h>
 #include <array>
 #include <glRef.hpp>
@@ -18,18 +17,9 @@ public:
 	void setModel(glm::mat4 model, Program = Program::Basic) const;
 	void setUniform(const GLchar *, glm::vec3 dir) const;
 
-private:
-	class Source {
-	public:
-		using ShaderRef = glRef<GLuint, __glewCreateShader, __glewDeleteShader>;
-
-		explicit Source(const GLsource src);
-
-		ShaderRef id;
-	};
-
 	static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage);
 
+private:
 	class ProgramHandle {
 	public:
 		ProgramHandle(GLuint, GLuint);
