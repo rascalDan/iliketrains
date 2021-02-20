@@ -9,12 +9,9 @@
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
+#include <maths.h>
 #include <random>
 #include <stb_image.h>
-
-template<unsigned int Comp> class TerrainComp : public Mesh {
-	using Mesh::Mesh;
-};
 
 Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Texture::cachedTexture.get("water.png")}
 {
@@ -66,7 +63,6 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 		}
 	}
 	finish(size, size, vertices);
-	addWater(size, size, resolution);
 }
 
 Terrain::Terrain(const std::string & fileName) :
@@ -89,7 +85,6 @@ Terrain::Terrain(const std::string & fileName) :
 	}
 
 	finish(map.width, map.height, vertices);
-	addWater(map.width, map.height, resolution);
 }
 
 void
@@ -125,40 +120,27 @@ Terrain::finish(unsigned int width, unsigned int height, std::vector<Vertex> & v
 			v(width, x, z).normal = -glm::normalize(glm::cross(c - a, d - b));
 		}
 	}
-	meshes.create<TerrainComp<0>>(vertices, indices);
-}
-
-void
-Terrain::addWater(unsigned int width, unsigned int height, unsigned int resolution)
-{
-	const auto verticesCount {0U};
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	// Add water
-	const auto extentx {(int)((width - 1) * resolution / 2)};
-	const auto extentz {(int)((height - 1) * resolution / 2)};
-	vertices.emplace_back(glm::vec3 {-extentx, 0, -extentz}, glm::vec2 {0, 0}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {-extentx, 0, extentz}, glm::vec2 {0, height}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {extentx, 0, extentz}, glm::vec2 {width, height}, glm::vec3 {0, 1, 0});
-	vertices.emplace_back(glm::vec3 {extentx, 0, -extentz}, glm::vec2 {width, 0}, glm::vec3 {0, 1, 0});
-	indices.push_back(verticesCount);
-	indices.push_back(verticesCount + 1);
-	indices.push_back(verticesCount + 2);
-	indices.push_back(verticesCount);
-	indices.push_back(verticesCount + 2);
-	indices.push_back(verticesCount + 3);
-	meshes.create<TerrainComp<1>>(vertices, indices);
+	meshes.create<Mesh>(vertices, indices);
 }
 
 static const Transform identity {};
 static const auto identityModel {identity.GetModel()};
 
 void
+Terrain::tick(TickDuration dur)
+{
+	waveCycle += dur.count();
+}
+
+void
 Terrain::render(const Shader & shader) const
 {
-	shader.setModel(identityModel);
+	shader.setModel(identityModel, Shader::Program::LandMass);
 	grass->Bind();
-	meshes.apply<TerrainComp<0>>(&Mesh::Draw);
+	meshes.apply(&Mesh::Draw);
+
+	shader.setModel(identityModel, Shader::Program::Water);
+	shader.setUniform("waves", {waveCycle, 0, 0});
 	water->Bind();
-	meshes.apply<TerrainComp<1>>(&Mesh::Draw);
+	meshes.apply(&Mesh::Draw);
 }

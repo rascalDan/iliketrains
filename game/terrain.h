@@ -20,13 +20,13 @@ public:
 
 	void render(const Shader & shader) const override;
 
-	void tick(TickDuration) override { }
+	void tick(TickDuration) override;
+	float waveCycle {0.F};
 
 private:
 	static constexpr unsigned int NUM_BUFFERS {4};
 
 	void finish(unsigned int width, unsigned int height, std::vector<Vertex> &);
-	void addWater(unsigned int width, unsigned int height, unsigned int resolution);
 
 	Collection<Mesh, false> meshes;
 	std::shared_ptr<Texture> grass, water;
