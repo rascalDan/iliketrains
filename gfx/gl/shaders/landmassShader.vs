@@ -9,12 +9,10 @@ out vec3 normal0;
 out float height;
 
 uniform mat4 viewProjection;
-uniform mat4 model;
-uniform vec3 waves;
 
 void main()
 {
-	gl_Position = viewProjection * model * vec4(position, 1.0);
+	gl_Position = viewProjection * vec4(position, 1.0);
 	texCoord0 = texCoord;
 	normal0 = normal;
 	height = position.y;

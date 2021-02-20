@@ -11,5 +11,5 @@ uniform vec3 ambientColor;
 void main()
 {
 	gl_FragColor = texture(sampler, texCoord0);
-	gl_FragColor.xyz *= clamp(ambientColor + (dot(-lightDirection, normal0) * lightColor), 0.0, 1.0);
+	gl_FragColor.rgb *= clamp(ambientColor + (dot(-lightDirection, normal0) * lightColor), 0.0, 1.0);
 }

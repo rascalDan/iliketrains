@@ -13,27 +13,23 @@ const vec3 grass = vec3(.1, .4, .05);
 const vec3 sand = vec3(.76, .7, .5);
 const vec3 snow = vec3(.97, .97, .99);
 
-vec2
-grad_between(float x, float lower, float upper)
-{
-	float off = (x - lower) / (upper - lower);
-	return vec2(off, 1 - off);
-}
+const float beachline = .5;
+const float snowline_low = 28;
+const float snowline_high = 30;
 
 void
 main()
 {
 	gl_FragColor = texture(sampler, texCoord0);
-	gl_FragColor.xyz *= clamp(ambientColor + (dot(-lightDirection, normal0) * lightColor), 0.0, 1.0);
-	if (height < 0.5) {
+	gl_FragColor.rgb *= clamp(ambientColor + (dot(-lightDirection, normal0) * lightColor), 0.0, 1.0);
+	if (height < beachline) {
 		gl_FragColor.rgb *= sand;
 	}
-	else if (height > 30) {
+	else if (height > snowline_high) {
 		gl_FragColor.rgb *= snow;
 	}
-	else if (height > 28) {
-		vec2 grad = grad_between(height, 28, 30);
-		gl_FragColor.rgb *= grass + (snow - grass) * grad.x;
+	else if (height > snowline_low) {
+		gl_FragColor.rgb *= mix(grass, snow, (height - snowline_low) / (snowline_high - snowline_low));
 	}
 	else {
 		gl_FragColor.rgb *= grass;
