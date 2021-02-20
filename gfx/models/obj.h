@@ -12,6 +12,7 @@
 #include <vector>
 
 class Mesh;
+class Vertex;
 
 class ObjParser : yyFlexLexer {
 public:
@@ -38,6 +39,8 @@ public:
 	std::vector<Object> objects;
 	glm::length_t axis {0};
 
+	using NamedMeshData = std::pair<std::string, std::pair<std::vector<Vertex>, std::vector<unsigned int>>>;
+	[[nodiscard]] std::vector<NamedMeshData> createMeshData() const;
 	using NamedMesh = std::pair<std::string, std::shared_ptr<const Mesh>>;
 	[[nodiscard]] std::vector<NamedMesh> createMeshes() const;
 };

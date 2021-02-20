@@ -1,6 +1,6 @@
 #include "obj.h"
 #include <algorithm>
-#include <gfx/models/mesh.h>
+#include <gfx/models/mesh.h> // IWYU pragma: keep
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
 #include <iterator>
@@ -12,8 +12,19 @@ std::vector<ObjParser::NamedMesh>
 ObjParser::createMeshes() const
 {
 	std::vector<ObjParser::NamedMesh> out;
+	const auto data {createMeshData()};
+	std::transform(data.begin(), data.end(), std::back_inserter(out), [](auto && obj) {
+		return std::make_pair(obj.first, std::make_shared<Mesh>(obj.second.first, obj.second.second));
+	});
+	return out;
+}
+
+std::vector<ObjParser::NamedMeshData>
+ObjParser::createMeshData() const
+{
+	std::vector<ObjParser::NamedMeshData> out;
 	out.reserve(objects.size());
-	for (const auto & obj : objects) {
+	std::transform(objects.begin(), objects.end(), std::back_inserter(out), [this](auto && obj) {
 		std::vector<Vertex> overtices;
 		std::vector<ObjParser::FaceElement> vertexOrder;
 		std::vector<unsigned int> indices;
@@ -36,7 +47,7 @@ ObjParser::createMeshes() const
 				f(idx - 1);
 			}
 		}
-		out.emplace_back(obj.first, std::make_shared<Mesh>(overtices, indices));
-	}
+		return std::make_pair(obj.first, std::make_pair(overtices, indices));
+	});
 	return out;
 }

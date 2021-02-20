@@ -3,6 +3,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <gfx/models/obj.h>
+#include <gfx/models/vertex.hpp>
+#include <glm/glm.hpp>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -10,7 +12,6 @@
 BOOST_AUTO_TEST_CASE(objparse)
 {
 	ObjParser op {"/home/randomdan/dev/game/res/brush47.obj"};
-	BOOST_REQUIRE_EQUAL(0, op.yylex());
 	BOOST_CHECK_EQUAL(48, op.vertices.size());
 	BOOST_CHECK_EQUAL(104, op.texCoords.size());
 	BOOST_CHECK_EQUAL(25, op.normals.size());
@@ -26,6 +27,11 @@ BOOST_AUTO_TEST_CASE(objparse)
 BOOST_AUTO_TEST_CASE(create_meshes)
 {
 	ObjParser op {"/home/randomdan/dev/game/res/brush47.obj"};
-	const auto ms = op.createMeshes();
+	const auto ms = op.createMeshData();
 	BOOST_REQUIRE_EQUAL(3, ms.size());
+	BOOST_REQUIRE_EQUAL("Body", ms.front().first);
+	BOOST_REQUIRE_EQUAL(76, ms.front().second.first.size());
+	const auto & v = ms.front().second.first.front();
+	BOOST_REQUIRE_CLOSE(1.345, v.pos.x, 1);
+	BOOST_REQUIRE_EQUAL(120, ms.front().second.second.size());
 }
