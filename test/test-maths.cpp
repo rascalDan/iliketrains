@@ -65,6 +65,7 @@ BOOST_DATA_TEST_CASE(test_create_arc,
 				{{0, 0, 0}, south, east, {pi, half_pi * 3}},
 				{{0, 0, 0}, east, north, {-half_pi, 0}},
 				{{0, 0, 0}, south, north, {pi, two_pi}},
+				{{0, 0, 0}, east, south, {-half_pi, pi}},
 		}),
 		c, s, e, a)
 {
