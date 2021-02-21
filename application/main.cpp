@@ -65,11 +65,13 @@ public:
 
 		auto rl = world.create<RailLinks>();
 		{
-			const glm::vec3 j {-1100, 5, -1100}, k {-1100, 15, -1000}, l {-1150, 30, -1050}, m {-1050, 10, -1050};
+			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000}, l {-1150, 10, -1050}, m {-1050, 10, -1050};
 			rl->addLink<RailLinkStraight>(j, k);
 			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
 			auto l3 = rl->addLink<RailLinkStraight>(l, m);
 			rl->addLink<RailLinkCurve>(m, j, glm::vec2 {m.x, j.z});
+			rl->addLink<RailLinkCurve>(k, m, glm::vec2 {m.x, k.z});
+			rl->addLink<RailLinkCurve>(j, l, glm::vec2 {l.x, j.z});
 			auto loco = world.create<Brush47>(l3);
 			for (int n = 0; n < 6; n++) {
 				loco->wagons.push_back(world.create<Brush47Wagon>(l3));
