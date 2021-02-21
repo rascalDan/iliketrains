@@ -13,7 +13,7 @@
 #include <type_traits>
 #include <utility>
 
-constexpr std::size_t RAIL_CROSSSECTION_VERTICES {5};
+constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
 constexpr glm::vec3 RAIL_HEIGHT {0, .25F, 0};
 
 RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }

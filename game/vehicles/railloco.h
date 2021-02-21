@@ -12,7 +12,7 @@ class Shader;
 class Texture;
 class RailVehicle : public Vehicle {
 public:
-	struct Bogey {
+	struct Bogie {
 		Transform location;
 		MeshPtr mesh;
 	};
@@ -20,7 +20,7 @@ public:
 	using Vehicle::Vehicle;
 	void render(const Shader & shader) const override;
 
-	std::array<Bogey, 2> bogeys;
+	std::array<Bogie, 2> bogies;
 	MeshPtr bodyMesh;
 	std::shared_ptr<Texture> texture;
 	float wheelBase;
@@ -45,7 +45,7 @@ public:
 
 private:
 	void move(TickDuration dur);
-	[[nodiscard]] Transform getBogeyPosition(float linkDist, float dist) const;
+	[[nodiscard]] Transform getBogiePosition(float linkDist, float dist) const;
 	void updateRailVehiclePosition(RailVehicle *, float trailBy) const;
 	void updateWagons() const;
 };

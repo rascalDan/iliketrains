@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <iterator>
 #include <lib/resource.h>
+#include <map>
 #include <maths.h>
 #include <memory>
 #include <random>
@@ -21,9 +22,9 @@ void
 RailVehicle::render(const Shader & shader) const
 {
 	texture->Bind();
-	for (const auto & bogey : bogeys) {
-		shader.setModel(bogey.location.GetModel());
-		bogey.mesh->Draw();
+	for (const auto & bogie : bogies) {
+		shader.setModel(bogie.location.GetModel());
+		bogie.mesh->Draw();
 	}
 	shader.setModel(location.GetModel());
 	bodyMesh->Draw();
@@ -54,7 +55,7 @@ RailLoco::move(TickDuration dur)
 }
 
 Transform
-RailLoco::getBogeyPosition(float linkDist, float dist) const
+RailLoco::getBogiePosition(float linkDist, float dist) const
 {
 	float b2linkDist {};
 	const auto b2Link = linkHist.getAt(dist - linkDist, &b2linkDist);
@@ -65,8 +66,8 @@ void
 RailLoco::updateRailVehiclePosition(RailVehicle * w, float trailBy) const
 {
 	const auto overhang {(w->length - w->wheelBase) / 2};
-	const auto & b1Pos = w->bogeys[0].location = getBogeyPosition(linkDist, trailBy += overhang);
-	const auto & b2Pos = w->bogeys[1].location = getBogeyPosition(linkDist, trailBy + wheelBase);
+	const auto & b1Pos = w->bogies[0].location = getBogiePosition(linkDist, trailBy += overhang);
+	const auto & b2Pos = w->bogies[1].location = getBogiePosition(linkDist, trailBy + wheelBase);
 	const auto diff = glm::normalize(b2Pos.GetPos() - b1Pos.GetPos());
 	w->location.GetPos() = (b1Pos.GetPos() + b2Pos.GetPos()) / 2.F;
 	w->location.GetRot() = {-vector_pitch(diff), vector_yaw(diff), 0};
@@ -95,10 +96,10 @@ RailLoco::updateWagons() const
 void RailWagon::tick(TickDuration) { }
 
 void
-bogeyOffset(ObjParser & o)
+bogieOffset(ObjParser & o)
 {
-	// offset bogey positions so they can be set directly
-	for (int b = 1; b < 3; b++) { // bogey object index
+	// offset bogie positions so they can be set directly
+	for (int b = 1; b < 3; b++) { // bogie object index
 		std::set<std::pair<float, int>> vertexIds;
 		for (const auto & face : o.objects[b].second) {
 			for (const auto & faceElement : face) {
@@ -115,25 +116,26 @@ bogeyOffset(ObjParser & o)
 Brush47::Brush47(const LinkPtr & l) : RailLoco(l, 0)
 {
 	ObjParser o {Resource::mapPath("brush47.obj")};
-	bogeyOffset(o);
+	bogieOffset(o);
 	const auto m = o.createMeshes();
-	bodyMesh = m[0].second;
-	bogeys[0].mesh = m[1].second;
-	bogeys[1].mesh = m[2].second;
+	bodyMesh = m.at("Body");
+	bogies[0].mesh = m.at("Bogie1");
+	bogies[1].mesh = m.at("Bogie2");
 	texture = Texture::cachedTexture.get(Resource::mapPath("brush47.png"));
 	wheelBase = 12.F;
 	length = 20.F;
+	speed = 33.6F;
 	linkDist = wheelBase;
 }
 
 Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(l, 0)
 {
 	ObjParser o {Resource::mapPath("brush47.obj")};
-	bogeyOffset(o);
+	bogieOffset(o);
 	const auto m = o.createMeshes();
-	bodyMesh = m[0].second;
-	bogeys[0].mesh = m[1].second;
-	bogeys[1].mesh = m[2].second;
+	bodyMesh = m.at("Body");
+	bogies[0].mesh = m.at("Bogie1");
+	bogies[1].mesh = m.at("Bogie2");
 	texture = Texture::cachedTexture.get(Resource::mapPath("brush47.png"));
 	wheelBase = 12.F;
 	length = 20.F;

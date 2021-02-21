@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -39,10 +40,10 @@ public:
 	std::vector<Object> objects;
 	glm::length_t axis {0};
 
-	using NamedMeshData = std::pair<std::string, std::pair<std::vector<Vertex>, std::vector<unsigned int>>>;
-	[[nodiscard]] std::vector<NamedMeshData> createMeshData() const;
-	using NamedMesh = std::pair<std::string, std::shared_ptr<const Mesh>>;
-	[[nodiscard]] std::vector<NamedMesh> createMeshes() const;
+	using NamedMeshesData = std::map<std::string, std::pair<std::vector<Vertex>, std::vector<unsigned int>>>;
+	[[nodiscard]] NamedMeshesData createMeshData() const;
+	using NamedMeshes = std::map<std::string, std::shared_ptr<const Mesh>>;
+	[[nodiscard]] NamedMeshes createMeshes() const;
 };
 
 #endif

@@ -4,27 +4,27 @@
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
 #include <iterator>
+#include <map>
 #include <memory>
 #include <utility>
 #include <vector>
 
-std::vector<ObjParser::NamedMesh>
+ObjParser::NamedMeshes
 ObjParser::createMeshes() const
 {
-	std::vector<ObjParser::NamedMesh> out;
+	NamedMeshes out;
 	const auto data {createMeshData()};
-	std::transform(data.begin(), data.end(), std::back_inserter(out), [](auto && obj) {
+	std::transform(data.begin(), data.end(), std::inserter(out, out.end()), [](auto && obj) {
 		return std::make_pair(obj.first, std::make_shared<Mesh>(obj.second.first, obj.second.second));
 	});
 	return out;
 }
 
-std::vector<ObjParser::NamedMeshData>
+ObjParser::NamedMeshesData
 ObjParser::createMeshData() const
 {
-	std::vector<ObjParser::NamedMeshData> out;
-	out.reserve(objects.size());
-	std::transform(objects.begin(), objects.end(), std::back_inserter(out), [this](auto && obj) {
+	NamedMeshesData out;
+	std::transform(objects.begin(), objects.end(), std::inserter(out, out.end()), [this](auto && obj) {
 		std::vector<Vertex> overtices;
 		std::vector<ObjParser::FaceElement> vertexOrder;
 		std::vector<unsigned int> indices;
