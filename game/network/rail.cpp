@@ -122,14 +122,14 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 	const auto & e1p {ends[1].first->pos};
 	const auto slength = round_sleepers(length / 2.F);
 	const auto segs = std::round(5.F * slength / std::pow(radius, 0.7F));
-	const auto step {glm::vec3 {arc_length(arc), e0p.y - e1p.y, slength} / segs};
+	const auto step {glm::vec3 {-arc_length(arc), e0p.y - e1p.y, slength} / segs};
 	const auto trans {glm::translate(centreBase)};
 
 	int segCount = segs;
 	vertices.reserve((segCount + 1) * railCrossSection.size());
 	indices.reserve(segCount * 2 * railCrossSection.size());
 	for (glm::vec3 swing = {arc.second, e1p.y - centreBase.y, 0.F}; segCount >= 0; swing += step, --segCount) {
-		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
+		const auto t {trans * glm::rotate(swing.x - half_pi, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
 			vertices.emplace_back(m, glm::vec2 {rcs.second, swing.z}, up);
