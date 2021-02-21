@@ -12,6 +12,7 @@
 #include <lib/resource.h>
 #include <maths.h>
 #include <memory>
+#include <random>
 #include <set>
 #include <utility>
 #include <vector>
@@ -31,17 +32,19 @@ RailVehicle::render(const Shader & shader) const
 void
 RailLoco::move(TickDuration dur)
 {
+	static std::mt19937 gen(std::random_device {}());
 	linkDist += dur.count() * speed;
 	auto curLink {linkHist.getCurrent()};
 	while (linkDist > curLink.first->length) {
 		location = curLink.first->positionAt(curLink.first->length, curLink.second);
-		const auto & nexts {curLink.first->nexts[1 - curLink.second]};
-		const auto next = std::find_if(nexts.begin(), nexts.end(), [ang = location.GetRot().y](const Link::Next & n) {
-			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) < 0.1F;
+		auto nexts {curLink.first->nexts[1 - curLink.second]};
+		auto last = std::remove_if(nexts.begin(), nexts.end(), [ang = location.GetRot().y](const Link::Next & n) {
+			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) > 0.1F;
 		});
-		if (next != nexts.end()) {
+		if (last != nexts.begin()) {
+			auto off = std::uniform_int_distribution<>(0, std::distance(nexts.begin(), last) - 1)(gen);
 			linkDist -= curLink.first->length;
-			curLink = linkHist.add(next->first, next->second);
+			curLink = linkHist.add(nexts[off].first, nexts[off].second);
 		}
 		else {
 			linkDist = curLink.first->length;
