@@ -13,6 +13,8 @@
 #include <type_traits>
 #include <utility>
 
+constexpr std::size_t RAIL_CROSSSECTION_VERTICES {5};
+
 RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }
 void RailLinks::tick(TickDuration) { }
 
@@ -44,8 +46,8 @@ RailLinks::render(const Shader & shader) const
 void
 RailLink::defaultMesh()
 {
-	for (auto n = 4U; n < vertices.size(); n += 1) {
-		indices.push_back(n - 4);
+	for (auto n = RAIL_CROSSSECTION_VERTICES; n < vertices.size(); n += 1) {
+		indices.push_back(n - RAIL_CROSSSECTION_VERTICES);
 		indices.push_back(n);
 	}
 
@@ -60,13 +62,14 @@ RailLink::render(const Shader &) const
 	meshes.apply(&Mesh::Draw);
 }
 
-constexpr const std::array<std::pair<glm::vec3, float>, 4> railCrossSection {{
+constexpr const std::array<std::pair<glm::vec3, float>, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
 		//   ___________
 		// _/           \_
 		//  left to right
 		{{-1.9F, 0.F, 0.F}, 0.F},
-		{{-1.43F, .25F, 0.F}, 0.125F},
-		{{1.43F, .25F, 0.F}, 0.875F},
+		{{-.608F, RAIL_HEIGHT, 0.F}, 0.34F},
+		{{0, RAIL_HEIGHT * .7F, 0.F}, 0.5F},
+		{{.608F, RAIL_HEIGHT, 0.F}, 0.66F},
 		{{1.9F, 0.F, 0.F}, 1.F},
 }};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
