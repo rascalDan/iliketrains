@@ -14,6 +14,7 @@
 #include <utility>
 
 constexpr std::size_t RAIL_CROSSSECTION_VERTICES {5};
+constexpr glm::vec3 RAIL_HEIGHT {0, .25F, 0};
 
 RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }
 void RailLinks::tick(TickDuration) { }
@@ -67,9 +68,9 @@ constexpr const std::array<std::pair<glm::vec3, float>, RAIL_CROSSSECTION_VERTIC
 		// _/           \_
 		//  left to right
 		{{-1.9F, 0.F, 0.F}, 0.F},
-		{{-.608F, RAIL_HEIGHT, 0.F}, 0.34F},
-		{{0, RAIL_HEIGHT * .7F, 0.F}, 0.5F},
-		{{.608F, RAIL_HEIGHT, 0.F}, 0.66F},
+		{{-.608F, RAIL_HEIGHT.y, 0.F}, 0.34F},
+		{{0, RAIL_HEIGHT.y * .7F, 0.F}, 0.5F},
+		{{.608F, RAIL_HEIGHT.y, 0.F}, 0.66F},
 		{{1.9F, 0.F, 0.F}, 1.F},
 }};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
@@ -105,7 +106,7 @@ RailLinkStraight::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
 	const auto diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
-	return Transform {es.first->pos + dir * dist, {-vector_pitch(dir), vector_yaw(dir), 0}};
+	return Transform {es.first->pos + RAIL_HEIGHT + dir * dist, {-vector_pitch(dir), vector_yaw(dir), 0}};
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
@@ -148,8 +149,8 @@ RailLinkCurve::positionAt(float dist, unsigned char start) const
 	const auto ang {as.first + ((as.second - as.first) * frac)};
 	const auto angArc {ang - half_pi};
 	const auto relPos {glm::vec3 {std::cos(angArc), 0, -std::sin(angArc)} * radius};
-	const auto relClimb {
-			glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
+	const auto relClimb {RAIL_HEIGHT
+			+ glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
 	const auto pitch {vector_pitch({0, (es.first->pos.y - es.second->pos.y) / length, 0})};
 	return Transform {relPos + relClimb + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
 }
