@@ -15,7 +15,7 @@ lib pthread ;
 
 project : requirements
 	<cxxstd>20
-	<variant>debug:<warnings>extra
+	<variant>debug:<warnings>pedantic
 	<variant>debug:<warnings-as-errors>on
 	<variant>release:<lto>on
 	<toolset>tidy:<exclude>gfx/models/obj.cpp

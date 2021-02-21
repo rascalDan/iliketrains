@@ -11,7 +11,7 @@ public:
 		if (!id) {
 			throw std::runtime_error("Get function failed");
 		}
-	};
+	}
 
 	glRef(glRef && other) : id {other.id}
 	{
