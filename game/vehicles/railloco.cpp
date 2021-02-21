@@ -19,13 +19,13 @@
 void
 RailVehicle::render(const Shader & shader) const
 {
-	shader.setModel(location.GetModel());
 	texture->Bind();
-	bodyMesh->Draw();
 	for (const auto & bogey : bogeys) {
 		shader.setModel(bogey.location.GetModel());
 		bogey.mesh->Draw();
 	}
+	shader.setModel(location.GetModel());
+	bodyMesh->Draw();
 }
 
 void
