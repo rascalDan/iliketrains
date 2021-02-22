@@ -30,7 +30,7 @@ namespace std {
 		return s;
 	}
 
-	std::ostream &
+	inline std::ostream &
 	operator<<(std::ostream & s, const Arc & arc)
 	{
 		return s << arc.first << " ↺ " << arc.second;
