@@ -10,6 +10,7 @@
 #include <glm/gtx/transform.hpp>
 #include <initializer_list>
 #include <maths.h>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -34,6 +35,44 @@ RailLinks::joinLinks(const LinkPtr & l) const
 			}
 		}
 	}
+}
+
+std::shared_ptr<RailLink>
+RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
+{
+	auto node1ins = nodes.insert(std::make_shared<Node>(start));
+	auto node2ins = nodes.insert(std::make_shared<Node>(end));
+	if (node1ins.second && node2ins.second) {
+		// Both nodes are new, direct link, easy
+		return addLink<RailLinkStraight>(start, end);
+	}
+	if (node1ins.second && !node2ins.second) {
+		// node1 is new, node2 exists, but we build from existing outwards
+		std::swap(node1ins, node2ins);
+		std::swap(start, end);
+	}
+	// Find start link/end - opposite entry dir to existing link; so pi +...
+	float dir = pi + [this](const auto & n) {
+		for (const auto & l : links.objects) {
+			for (const auto & e : l->ends) {
+				if (e.first == n) {
+					return e.second;
+				}
+			}
+		}
+		throw std::runtime_error("Node exists but couldn't find it");
+	}(*node1ins.first);
+	const glm::vec2 flatStart {start.x, start.z}, flatEnd {end.x, end.z};
+	// if (node2ins.second) { // Unimplemented second arc/stright required
+	const auto diff {end - start};
+	const auto vy {vector_yaw(diff)};
+	const auto n2ed {(vy * 2) - dir - pi};
+	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};
+
+	if (centre.second) { // right hand arc
+		std::swap(start, end);
+	}
+	return addLink<RailLinkCurve>(start, end, centre.first);
 }
 
 void

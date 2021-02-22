@@ -67,6 +67,13 @@ public:
 		{
 			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000}, l {-1150, 10, -1050}, m {-1050, 10, -1050};
 			rl->addLink<RailLinkStraight>(j, k);
+			auto e = rl->addLinksBetween(k, {-1000, 20, -800})->ends[1].first->pos;
+			e = rl->addLinksBetween(e, {-900, 30, -600})->ends[0].first->pos;
+			e = rl->addLinksBetween(e, {-600, 32, -500})->ends[1].first->pos;
+			e = rl->addLinksBetween(e, {-500, 30, -800})->ends[1].first->pos;
+			e = rl->addLinksBetween(e, {-600, 25, -900})->ends[1].first->pos;
+			e = rl->addLinksBetween(e, {-1000, 10, -1129})->ends[0].first->pos;
+			e = rl->addLinksBetween(e, j)->ends[0].first->pos;
 			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
 			auto l3 = rl->addLink<RailLinkStraight>(l, m);
 			rl->addLink<RailLinkCurve>(m, j, glm::vec2 {m.x, j.z});

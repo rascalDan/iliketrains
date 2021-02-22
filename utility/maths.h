@@ -47,4 +47,6 @@ arc_length(const Arc & arc)
 
 float normalize(float ang);
 
+std::pair<glm::vec2, bool> find_arc_centre(glm::vec2 start, float entrys, glm::vec2 end, float entrye);
+
 #endif

@@ -71,6 +71,8 @@ public:
 		return l;
 	}
 
+	std::shared_ptr<RailLink> addLinksBetween(glm::vec3 start, glm::vec3 end);
+
 private:
 	using Nodes = std::set<NodePtr, PtrSorter<NodePtr>>;
 	Collection<RailLink> links;
