@@ -31,7 +31,7 @@ FollowCameraController::updateCamera(Camera * camera) const
 			break;
 
 		case Mode::ISO:
-			camera->pos = pos + ((up + north + east) * 20.F);
+			camera->pos = pos + ((up + north + east) * 40.F);
 			camera->forward = -glm::normalize(up + north + east);
 			camera->up = glm::normalize(up - north - east);
 			break;
