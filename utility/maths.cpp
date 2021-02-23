@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
-#include <initializer_list>
 #include <stdexcept>
 
 glm::mat4
@@ -66,22 +65,16 @@ find_arc_centre(glm::vec2 as, float entrys, glm::vec2 bs, float entrye)
 	if (as == bs) {
 		return {as, false};
 	}
-	for (const auto lr : {1.F, -1.F}) { // left or right turn (maybe possible with removal of positve check below)
-		const auto perps = entrys + (half_pi * lr);
-		const auto perpe = entrye - (half_pi * lr);
-		const glm::vec2 ad {std::sin(perps), std::cos(perps)};
-		const glm::vec2 bd {std::sin(perpe), std::cos(perpe)};
+	const auto perps = entrys + half_pi;
+	const auto perpe = entrye - half_pi;
+	const glm::vec2 ad {std::sin(perps), std::cos(perps)};
+	const glm::vec2 bd {std::sin(perpe), std::cos(perpe)};
 
-		const auto dx = bs.x - as.x;
-		const auto dy = bs.y - as.y;
-		const auto det = bd.x * ad.y - bd.y * ad.x;
-		if (det != 0) { // near parallel line will yield noisy results
-			const auto u = (dy * bd.x - dx * bd.y) / det;
-			const auto v = (dy * ad.x - dx * ad.y) / det;
-			if (u >= 0 && v >= 0) {
-				return {as + ad * u, lr < 0};
-			}
-		}
+	const auto det = bd.x * ad.y - bd.y * ad.x;
+	if (det != 0) { // near parallel line will yield noisy results
+		const auto d = bs - as;
+		const auto u = (d.y * bd.x - d.x * bd.y) / det;
+		return {as + ad * u, u < 0};
 	}
 	throw std::runtime_error("no intersection");
 }
