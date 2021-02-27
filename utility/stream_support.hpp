@@ -37,4 +37,6 @@ namespace std {
 	}
 }
 
+#define CLOG(x) std::clog << #x " : " << x << "\n";
+
 #endif
