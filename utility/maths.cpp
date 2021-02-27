@@ -84,6 +84,19 @@ find_arc_centre(glm::vec2 as, glm::vec2 ad, glm::vec2 bs, glm::vec2 bd)
 	throw std::runtime_error("no intersection");
 }
 
+std::pair<float, float>
+find_arcs_radius(glm::vec2 start, float entrys, glm::vec2 end, float entrye)
+{
+	const auto getrad = [&](float leftOrRight) {
+		const auto perps = entrys + leftOrRight;
+		const auto perpe = entrye + leftOrRight;
+		const glm::vec2 ad {std::sin(perps), std::cos(perps)};
+		const glm::vec2 bd {std::sin(perpe), std::cos(perpe)};
+		return find_arcs_radius(start, ad, end, bd);
+	};
+	return {getrad(-half_pi), getrad(half_pi)};
+}
+
 float
 find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd)
 {
