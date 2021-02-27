@@ -83,3 +83,33 @@ find_arc_centre(glm::vec2 as, glm::vec2 ad, glm::vec2 bs, glm::vec2 bd)
 	}
 	throw std::runtime_error("no intersection");
 }
+
+float
+find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd)
+{
+	// Short name functions for big forula
+	auto sq = [](auto v) {
+		return v * v;
+	};
+	auto sqrt = [](float v) {
+		return std::sqrt(v);
+	};
+
+	// Calculates path across both arcs along the normals... pythagorean theorem... for some known radius r
+	// (2r)^2 = ((m + (X*r)) - (o + (Z*r)))^2 + ((n + (Y*r)) - (p + (W*r)))^2
+	// According to symbolabs.com equation tool, that solves for r to give:
+	// r=(-2 m X+2 X o+2 m Z-2 o Z-2 n Y+2 Y p+2 n W-2 p W-sqrt((2 m X-2 X o-2 m Z+2 o Z+2 n Y-2 Y p-2 n W+2 p W)^(2)-4
+	// (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y W+W^(2)-4) (m^(2)-2 m o+o^(2)+n^(2)-2 n p+p^(2))))/(2 (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y
+	// W+W^(2)-4))
+
+	// These exist cos limitations of online formula rearrangement, and I'm OK with that.
+	const auto &m {start.x}, &n {start.y}, &o {end.x}, &p {end.y};
+	const auto &X {ad.x}, &Y {ad.y}, &Z {bd.x}, &W {bd.y};
+
+	return (2 * m * X - 2 * X * o - 2 * m * Z + 2 * o * Z + 2 * n * Y - 2 * Y * p - 2 * n * W + 2 * p * W
+				   - sqrt(sq(-2 * m * X + 2 * X * o + 2 * m * Z - 2 * o * Z - 2 * n * Y + 2 * Y * p + 2 * n * W
+								  - 2 * p * W)
+						   - (4 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4)
+								   * (sq(m) - 2 * m * o + sq(o) + sq(n) - 2 * n * p + sq(p)))))
+			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
+}

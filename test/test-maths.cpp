@@ -2,7 +2,6 @@
 
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
-#include <iomanip>
 #include <stream_support.hpp>
 
 #include <glm/glm.hpp>
@@ -91,4 +90,9 @@ BOOST_DATA_TEST_CASE(test_find_arc_centre,
 	BOOST_CHECK_CLOSE(exp.x, c.first.x, 1);
 	BOOST_CHECK_CLOSE(exp.y, c.first.y, 1);
 	BOOST_CHECK_EQUAL(lr, c.second);
+}
+
+BOOST_AUTO_TEST_CASE(test_find_arcs_radius)
+{
+	BOOST_CHECK_CLOSE(find_arcs_radius({10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
 }
