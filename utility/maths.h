@@ -33,6 +33,12 @@ float vector_pitch(const glm::vec3 & diff);
 
 float round_frac(const float & v, const float & frac);
 
+constexpr inline glm::vec2
+operator!(const glm::vec3 & v)
+{
+	return {v.x, v.z};
+}
+
 constexpr inline glm::vec3
 operator!(const glm::vec2 & v)
 {
