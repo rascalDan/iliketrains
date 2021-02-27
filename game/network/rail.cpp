@@ -52,7 +52,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		std::swap(start, end);
 	}
 	// Find start link/end - opposite entry dir to existing link; so pi +...
-	float dir = pi + [this](const auto & n) {
+	const auto findDir = [this](const auto & n) {
 		for (const auto & l : links.objects) {
 			for (const auto & e : l->ends) {
 				if (e.first == n) {
@@ -61,9 +61,28 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 			}
 		}
 		throw std::runtime_error("Node exists but couldn't find it");
-	}(*node1ins.first);
+	};
+	float dir = pi + findDir(*node1ins.first);
 	const glm::vec2 flatStart {start.x, start.z}, flatEnd {end.x, end.z};
-	// if (node2ins.second) { // Unimplemented second arc/stright required
+	if (!node2ins.second) {
+		float dir2 = pi + findDir(*node2ins.first);
+		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
+			const auto radius {radii.first};
+			const auto c1 = start + glm::vec3 {std::sin(dir + half_pi), 0, std::cos(dir + half_pi)} * radius;
+			const auto c2 = end + glm::vec3 {std::sin(dir2 + half_pi), 0, std::cos(dir2 + half_pi)} * radius;
+			const auto mid = (c1 + c2) / 2.F;
+			addLink<RailLinkCurve>(start, mid, !c1);
+			return addLink<RailLinkCurve>(end, mid, !c2);
+		}
+		else {
+			const auto radius {radii.second};
+			const auto c1 = start + glm::vec3 {std::sin(dir - half_pi), 0, std::cos(dir - half_pi)} * radius;
+			const auto c2 = end + glm::vec3 {std::sin(dir2 - half_pi), 0, std::cos(dir2 - half_pi)} * radius;
+			const auto mid = (c1 + c2) / 2.F;
+			addLink<RailLinkCurve>(mid, start, !(c1));
+			return addLink<RailLinkCurve>(mid, end, !c2);
+		}
+	}
 	const auto diff {end - start};
 	const auto vy {vector_yaw(diff)};
 	const auto n2ed {(vy * 2) - dir - pi};
