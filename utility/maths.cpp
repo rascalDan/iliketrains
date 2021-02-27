@@ -69,7 +69,12 @@ find_arc_centre(glm::vec2 as, float entrys, glm::vec2 bs, float entrye)
 	const auto perpe = entrye - half_pi;
 	const glm::vec2 ad {std::sin(perps), std::cos(perps)};
 	const glm::vec2 bd {std::sin(perpe), std::cos(perpe)};
+	return find_arc_centre(as, ad, bs, bd);
+}
 
+std::pair<glm::vec2, bool>
+find_arc_centre(glm::vec2 as, glm::vec2 ad, glm::vec2 bs, glm::vec2 bd)
+{
 	const auto det = bd.x * ad.y - bd.y * ad.x;
 	if (det != 0) { // near parallel line will yield noisy results
 		const auto d = bs - as;
