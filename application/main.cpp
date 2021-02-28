@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
+#include <array>
 #include <chrono>
 #include <collection.hpp>
+#include <game/network/link.h>
 #include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/vehicles/railloco.h>
@@ -16,6 +18,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <special_members.hpp>
+#include <utility>
 #include <vector>
 
 static const int DISPLAY_WIDTH = 1280;
@@ -65,20 +68,17 @@ public:
 
 		auto rl = world.create<RailLinks>();
 		{
-			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000}, l {-1150, 10, -1050}, m {-1050, 10, -1050};
-			rl->addLink<RailLinkStraight>(j, k);
+			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000};
+			auto l3 = rl->addLinksBetween(j, k);
 			auto e = rl->addLinksBetween(k, {-1000, 20, -800})->ends[1].first->pos;
 			e = rl->addLinksBetween(e, {-900, 30, -600})->ends[0].first->pos;
 			e = rl->addLinksBetween(e, {-600, 32, -500})->ends[1].first->pos;
 			e = rl->addLinksBetween(e, {-500, 30, -800})->ends[1].first->pos;
 			e = rl->addLinksBetween(e, {-600, 25, -900})->ends[1].first->pos;
-			e = rl->addLinksBetween(e, {-1000, 10, -1129})->ends[0].first->pos;
-			e = rl->addLinksBetween(e, j)->ends[0].first->pos;
-			rl->addLink<RailLinkCurve>(l, k, glm::vec2 {l.x, k.z});
-			auto l3 = rl->addLink<RailLinkStraight>(l, m);
-			rl->addLink<RailLinkCurve>(m, j, glm::vec2 {m.x, j.z});
-			rl->addLink<RailLinkCurve>(k, m, glm::vec2 {m.x, k.z});
-			rl->addLink<RailLinkCurve>(j, l, glm::vec2 {l.x, j.z});
+			auto e1 = rl->addLinksBetween(e, {-1025, 10, -1175})->ends[0].first->pos;
+			rl->addLinksBetween(e1, j);
+			auto e2 = rl->addLinksBetween(e, {-925, 10, -1075})->ends[0].first->pos;
+			rl->addLinksBetween(e2, j);
 			auto loco = world.create<Brush47>(l3);
 			for (int n = 0; n < 6; n++) {
 				loco->wagons.push_back(world.create<Brush47Wagon>(l3));
