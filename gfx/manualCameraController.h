@@ -5,12 +5,15 @@
 #include "inputHandler.h"
 #include <SDL2/SDL.h>
 #include <gfx/camera_controller.h>
-#include <optional>
+#include <glm/glm.hpp>
+#include <maths.h>
 
 class Camera;
 
 class ManualCameraController : public CameraController, public InputHandler {
 public:
+	explicit ManualCameraController(glm::vec2 f) : focus {f} { }
+
 	bool handleInput(SDL_Event & e) override;
 
 	void tick(TickDuration) override { }
@@ -19,6 +22,8 @@ public:
 
 private:
 	bool ctrl {false}, mrb {false};
-	mutable std::optional<SDL_MouseMotionEvent> motion;
+	glm::vec2 focus;
+	float direction {quarter_pi};
+	float dist {40}, pitch {quarter_pi};
 };
 #endif

@@ -1,5 +1,8 @@
 #include "manualCameraController.h"
+#include <algorithm>
+#include <cmath>
 #include <gfx/gl/camera.h>
+#include <maths.h>
 
 bool
 ManualCameraController::handleInput(SDL_Event & e)
@@ -39,9 +42,19 @@ ManualCameraController::handleInput(SDL_Event & e)
 			break;
 		case SDL_MOUSEMOTION:
 			if (mrb) {
-				motion = e.motion;
+				if (ctrl) {
+					direction -= 0.01F * e.motion.xrel;
+					pitch = std::clamp(pitch - 0.01F * e.motion.yrel, 0.1F, half_pi);
+				}
+				else {
+					focus.x += cos(direction) * e.motion.xrel + sin(direction) * e.motion.yrel;
+					focus.y += cos(direction) * e.motion.yrel - sin(direction) * e.motion.xrel;
+				}
 			}
 			return true;
+		case SDL_MOUSEWHEEL:
+			dist = std::clamp(dist - e.wheel.y * 4.F, 5.F, 200.F);
+			break;
 	}
 	return false;
 }
@@ -49,15 +62,8 @@ ManualCameraController::handleInput(SDL_Event & e)
 void
 ManualCameraController::updateCamera(Camera * camera) const
 {
-	if (motion) {
-		if (ctrl) {
-			camera->RotateY(-0.01F * motion->xrel);
-			camera->Pitch(-0.01F * motion->yrel);
-		}
-		else {
-			camera->MoveRight(motion->xrel);
-			camera->SlideForward(motion->yrel);
-		}
-		motion.reset();
-	}
+	const auto rel {glm::normalize(glm::vec3 {sin(direction), -sin(pitch), cos(direction)})};
+	camera->pos = !focus + up * 3.F - (rel * std::pow(dist, 1.3F));
+	camera->forward = glm::normalize(rel);
+	camera->up = up;
 }

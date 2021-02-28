@@ -98,7 +98,8 @@ public:
 		const auto framelen = std::chrono::milliseconds {1000} / 120;
 
 		inputStack.objects.push_back(shared_from_this());
-		inputStack.objects.insert(inputStack.objects.begin(), world.create<ManualCameraController>());
+		inputStack.objects.insert(
+				inputStack.objects.begin(), world.create<ManualCameraController>(glm::vec2 {-1150, -1150}));
 
 		while (isRunning) {
 			processInputs();
