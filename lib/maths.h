@@ -23,6 +23,7 @@ constexpr const glm::vec3 south {0, 0, -1};
 constexpr const glm::vec3 east {-1, 0, 0};
 constexpr const glm::vec3 west {1, 0, 0};
 constexpr auto half_pi {glm::half_pi<float>()};
+constexpr auto quarter_pi {half_pi / 2};
 constexpr auto pi {glm::pi<float>()};
 constexpr auto two_pi {glm::two_pi<float>()};
 

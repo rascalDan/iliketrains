@@ -7,7 +7,6 @@
 #include <glm/glm.hpp>
 #include <maths.h>
 #include <tuple>
-constexpr auto quarter_pi = pi / 4.F;
 
 using vecter_to_angle = std::tuple<glm::vec3, float>;
 BOOST_DATA_TEST_CASE(test_vector_yaw,
