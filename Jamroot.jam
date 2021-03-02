@@ -13,11 +13,13 @@ pkg-config.import glew ;
 lib stb : : : : <include>/usr/include/stb ;
 lib pthread ;
 
+variant coverage : debug ;
 project : requirements
 	<cxxstd>20
 	<variant>debug:<warnings>pedantic
 	<variant>debug:<warnings-as-errors>on
 	<variant>release:<lto>on
+	<variant>coverage:<coverage>on
 	<toolset>tidy:<exclude>gfx/models/obj.cpp
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
