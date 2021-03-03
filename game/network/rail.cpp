@@ -69,16 +69,16 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		float dir2 = pi + findDir(*node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
 			const auto radius {radii.first};
-			const auto c1 = start + glm::vec3 {std::sin(dir + half_pi), 0, std::cos(dir + half_pi)} * radius;
-			const auto c2 = end + glm::vec3 {std::sin(dir2 + half_pi), 0, std::cos(dir2 + half_pi)} * radius;
+			const auto c1 = start + !sincosf(dir + half_pi) * radius;
+			const auto c2 = end + !sincosf(dir2 + half_pi) * radius;
 			const auto mid = (c1 + c2) / 2.F;
 			addLink<RailLinkCurve>(start, mid, !c1);
 			return addLink<RailLinkCurve>(end, mid, !c2);
 		}
 		else {
 			const auto radius {radii.second};
-			const auto c1 = start + glm::vec3 {std::sin(dir - half_pi), 0, std::cos(dir - half_pi)} * radius;
-			const auto c2 = end + glm::vec3 {std::sin(dir2 - half_pi), 0, std::cos(dir2 - half_pi)} * radius;
+			const auto c1 = start + !sincosf(dir - half_pi) * radius;
+			const auto c2 = end + !sincosf(dir2 - half_pi) * radius;
 			const auto mid = (c1 + c2) / 2.F;
 			addLink<RailLinkCurve>(mid, start, !(c1));
 			return addLink<RailLinkCurve>(mid, end, !c2);
@@ -206,8 +206,7 @@ RailLinkCurve::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
 	const auto as {std::make_pair(arc[start], arc[1 - start])};
 	const auto ang {as.first + ((as.second - as.first) * frac)};
-	const auto angArc {ang - half_pi};
-	const auto relPos {glm::vec3 {std::cos(angArc), 0, -std::sin(angArc)} * radius};
+	const auto relPos {!sincosf(ang) * radius};
 	const auto relClimb {RAIL_HEIGHT
 			+ glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
 	const auto pitch {vector_pitch({0, (es.first->pos.y - es.second->pos.y) / length, 0})};

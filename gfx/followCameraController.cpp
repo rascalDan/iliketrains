@@ -26,7 +26,7 @@ FollowCameraController::updateCamera(Camera * camera) const
 
 		case Mode::Ride:
 			camera->pos = pos + (up * 4.8F);
-			camera->forward = {-std::sin(rot.y), 0.F, -std::cos(rot.y)};
+			camera->forward = !-sincosf(rot.y);
 			camera->up = up;
 			break;
 

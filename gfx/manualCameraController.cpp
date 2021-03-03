@@ -47,8 +47,9 @@ ManualCameraController::handleInput(SDL_Event & e)
 					pitch = std::clamp(pitch - 0.01F * e.motion.yrel, 0.1F, half_pi);
 				}
 				else {
-					focus.x += cos(direction) * e.motion.xrel + sin(direction) * e.motion.yrel;
-					focus.y += cos(direction) * e.motion.yrel - sin(direction) * e.motion.xrel;
+					const auto sc {sincosf(direction)};
+					focus.x += sc.x * e.motion.yrel + sc.x * e.motion.xrel;
+					focus.y += sc.x * -e.motion.xrel + sc.x * e.motion.yrel;
 				}
 			}
 			return true;
@@ -62,8 +63,7 @@ ManualCameraController::handleInput(SDL_Event & e)
 void
 ManualCameraController::updateCamera(Camera * camera) const
 {
-	const auto rel {glm::normalize(glm::vec3 {sin(direction), -sin(pitch), cos(direction)})};
-	camera->pos = !focus + up * 3.F - (rel * std::pow(dist, 1.3F));
-	camera->forward = glm::normalize(rel);
+	camera->forward = glm::normalize(sincosf(direction) ^ -sin(pitch));
+	camera->pos = !focus + up * 3.F - (camera->forward * std::pow(dist, 1.3F));
 	camera->up = up;
 }

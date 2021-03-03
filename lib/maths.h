@@ -37,11 +37,11 @@ sincosf(float a, float & s, float & c)
 	return sincosf(a, &s, &c);
 }
 
-inline std::pair<float, float>
+inline glm::vec2
 sincosf(float a)
 {
-	std::pair<float, float> sc;
-	sincosf(a, &sc.first, &sc.second);
+	glm::vec2 sc;
+	sincosf(a, sc.x, sc.y);
 	return sc;
 }
 
@@ -62,9 +62,15 @@ operator!(const glm::vec3 & v)
 }
 
 constexpr inline glm::vec3
+operator^(const glm::vec2 & v, float y)
+{
+	return {v.x, y, v.y};
+}
+
+constexpr inline glm::vec3
 operator!(const glm::vec2 & v)
 {
-	return {v.x, 0, v.y};
+	return v ^ 0.F;
 }
 
 constexpr inline float

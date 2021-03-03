@@ -112,11 +112,7 @@ find_arc_centre(glm::vec2 as, float entrys, glm::vec2 bs, float entrye)
 	if (as == bs) {
 		return {as, false};
 	}
-	const auto perps = entrys + half_pi;
-	const auto perpe = entrye - half_pi;
-	const glm::vec2 ad {std::sin(perps), std::cos(perps)};
-	const glm::vec2 bd {std::sin(perpe), std::cos(perpe)};
-	return find_arc_centre(as, ad, bs, bd);
+	return find_arc_centre(as, sincosf(entrys + half_pi), bs, sincosf(entrye - half_pi));
 }
 
 std::pair<glm::vec2, bool>
@@ -135,11 +131,7 @@ std::pair<float, float>
 find_arcs_radius(glm::vec2 start, float entrys, glm::vec2 end, float entrye)
 {
 	const auto getrad = [&](float leftOrRight) {
-		const auto perps = entrys + leftOrRight;
-		const auto perpe = entrye + leftOrRight;
-		const glm::vec2 ad {std::sin(perps), std::cos(perps)};
-		const glm::vec2 bd {std::sin(perpe), std::cos(perpe)};
-		return find_arcs_radius(start, ad, end, bd);
+		return find_arcs_radius(start, sincosf(entrys + leftOrRight), end, sincosf(entrye + leftOrRight));
 	};
 	return {getrad(-half_pi), getrad(half_pi)};
 }
