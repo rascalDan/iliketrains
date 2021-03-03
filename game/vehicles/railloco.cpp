@@ -1,6 +1,5 @@
 #include "railloco.h"
 #include "gfx/gl/shader.h"
-#include "gfx/gl/transform.h"
 #include "gfx/models/obj.h"
 #include "gfx/models/texture.h"
 #include <algorithm>
@@ -10,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <iterator>
 #include <lib/resource.h>
+#include <location.hpp>
 #include <map>
 #include <maths.h>
 #include <memory>
@@ -23,10 +23,10 @@ RailVehicle::render(const Shader & shader) const
 {
 	texture->Bind();
 	for (const auto & bogie : bogies) {
-		shader.setModel(bogie.location.GetModel());
+		shader.setModel(bogie.location);
 		bogie.mesh->Draw();
 	}
-	shader.setModel(location.GetModel());
+	shader.setModel(location);
 	bodyMesh->Draw();
 }
 
@@ -39,7 +39,7 @@ RailLoco::move(TickDuration dur)
 	while (linkDist > curLink.first->length) {
 		location = curLink.first->positionAt(curLink.first->length, curLink.second);
 		auto nexts {curLink.first->nexts[1 - curLink.second]};
-		auto last = std::remove_if(nexts.begin(), nexts.end(), [ang = location.GetRot().y](const Link::Next & n) {
+		auto last = std::remove_if(nexts.begin(), nexts.end(), [ang = location.rot.y](const Link::Next & n) {
 			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) > 0.1F;
 		});
 		if (last != nexts.begin()) {
@@ -54,7 +54,7 @@ RailLoco::move(TickDuration dur)
 	}
 }
 
-Transform
+Location
 RailLoco::getBogiePosition(float linkDist, float dist) const
 {
 	float b2linkDist {};
@@ -68,9 +68,9 @@ RailLoco::updateRailVehiclePosition(RailVehicle * w, float trailBy) const
 	const auto overhang {(w->length - w->wheelBase) / 2};
 	const auto & b1Pos = w->bogies[0].location = getBogiePosition(linkDist, trailBy += overhang);
 	const auto & b2Pos = w->bogies[1].location = getBogiePosition(linkDist, trailBy + wheelBase);
-	const auto diff = glm::normalize(b2Pos.GetPos() - b1Pos.GetPos());
-	w->location.GetPos() = (b1Pos.GetPos() + b2Pos.GetPos()) / 2.F;
-	w->location.GetRot() = {-vector_pitch(diff), vector_yaw(diff), 0};
+	const auto diff = glm::normalize(b2Pos.pos - b1Pos.pos);
+	w->location.pos = (b1Pos.pos + b2Pos.pos) / 2.F;
+	w->location.rot = {-vector_pitch(diff), vector_yaw(diff), 0};
 }
 
 void

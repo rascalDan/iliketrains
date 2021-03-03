@@ -1,8 +1,8 @@
 #include "followCameraController.h"
 #include "game/vehicles/vehicle.h"
-#include "gfx/gl/transform.h"
 #include <gfx/gl/camera.h>
 #include <glm/glm.hpp>
+#include <location.hpp>
 #include <maths.h>
 #include <memory>
 #include <tuple>
@@ -15,7 +15,7 @@ FollowCameraController::updateCamera(Camera * camera) const
 {
 	const auto [pos, rot] = [this]() {
 		const auto t {target.lock()};
-		return std::tie(t->location.GetPos(), t->location.GetRot());
+		return std::tie(t->location.pos, t->location.rot);
 	}();
 
 	switch (mode) {

@@ -3,11 +3,11 @@
 #include <cache.h>
 #include <cmath>
 #include <gfx/gl/shader.h>
-#include <gfx/gl/transform.h>
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>
+#include <location.hpp>
 #include <random>
 #include <stb_image.h>
 
@@ -121,9 +121,6 @@ Terrain::finish(unsigned int width, unsigned int height, std::vector<Vertex> & v
 	meshes.create<Mesh>(vertices, indices);
 }
 
-static const Transform identity {};
-static const auto identityModel {identity.GetModel()};
-
 void
 Terrain::tick(TickDuration dur)
 {
@@ -133,11 +130,11 @@ Terrain::tick(TickDuration dur)
 void
 Terrain::render(const Shader & shader) const
 {
-	shader.setModel(identityModel, Shader::Program::LandMass);
+	shader.setModel(Location {}, Shader::Program::LandMass);
 	grass->Bind();
 	meshes.apply(&Mesh::Draw);
 
-	shader.setModel(identityModel, Shader::Program::Water);
+	shader.setModel(Location {}, Shader::Program::Water);
 	shader.setUniform("waves", {waveCycle, 0, 0});
 	water->Bind();
 	meshes.apply(&Mesh::Draw);

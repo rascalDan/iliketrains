@@ -8,6 +8,9 @@
 #include <gfx/gl/shaders/vs-landmassShader.h>
 #include <gfx/gl/shaders/vs-waterShader.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include <location.hpp>
+#include <maths.h>
 #include <stdexcept>
 #include <string>
 
@@ -67,10 +70,11 @@ Shader::setUniform(const GLchar * uniform, glm::vec3 v) const
 }
 
 void
-Shader::setModel(glm::mat4 model, Program pid) const
+Shader::setModel(const Location & loc, Program pid) const
 {
 	auto & prog = programs[(int)pid];
 	glUseProgram(prog.m_program);
+	const auto model {glm::translate(loc.pos) * rotate_ypr(loc.rot)};
 	glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, &model[0][0]);
 }
 

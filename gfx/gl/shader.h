@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <string_view>
 
+class Location;
+
 class Shader {
 public:
 	enum class Program { Basic = 0, Water = 1, LandMass = 2 };
@@ -14,7 +16,7 @@ public:
 	Shader();
 
 	void setView(glm::mat4 view) const;
-	void setModel(glm::mat4 model, Program = Program::Basic) const;
+	void setModel(const Location &, Program = Program::Basic) const;
 	void setUniform(const GLchar *, glm::vec3 dir) const;
 
 	static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage);

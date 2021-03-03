@@ -1,10 +1,10 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
-#include "gfx/gl/transform.h"
 #include <game/network/link.h>
 #include <game/worldobject.h>
 #include <gfx/renderable.h>
+#include <location.hpp>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -28,7 +28,7 @@ public:
 	float linkDist; // distance long current link
 	float speed {50}; // speed in m/s (~75 km/h)
 
-	Transform location;
+	Location location;
 
 protected:
 	LinkHistory linkHist;

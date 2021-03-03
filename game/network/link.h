@@ -2,8 +2,8 @@
 #define LINK_H
 
 #include <array>
-#include <gfx/gl/transform.h>
 #include <glm/glm.hpp>
+#include <location.hpp>
 #include <memory>
 #include <special_members.hpp>
 #include <utility>
@@ -39,7 +39,7 @@ public:
 	NO_COPY(Link);
 	NO_MOVE(Link);
 
-	[[nodiscard]] virtual Transform positionAt(float dist, unsigned char start) const = 0;
+	[[nodiscard]] virtual Location positionAt(float dist, unsigned char start) const = 0;
 
 	std::array<End, 2> ends;
 	float length;

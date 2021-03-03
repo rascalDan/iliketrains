@@ -3,12 +3,12 @@
 
 #include "collection.hpp"
 #include "game/worldobject.h"
-#include "gfx/gl/transform.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/vertex.hpp"
 #include "gfx/renderable.h"
 #include "link.h"
 #include <glm/glm.hpp>
+#include <location.hpp>
 #include <maths.h>
 #include <memory>
 #include <set>
@@ -37,7 +37,7 @@ protected:
 class RailLinkStraight : public RailLink {
 public:
 	RailLinkStraight(const NodePtr &, const NodePtr &);
-	[[nodiscard]] Transform positionAt(float dist, unsigned char start) const override;
+	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkStraight(NodePtr, NodePtr, const glm::vec3 & diff);
@@ -46,7 +46,7 @@ private:
 class RailLinkCurve : public RailLink {
 public:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec2);
-	[[nodiscard]] Transform positionAt(float dist, unsigned char start) const override;
+	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec3, const Arc);
