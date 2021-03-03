@@ -74,8 +74,10 @@ Shader::setModel(const Location & loc, Program pid) const
 {
 	auto & prog = programs[(int)pid];
 	glUseProgram(prog.m_program);
-	const auto model {glm::translate(loc.pos) * rotate_ypr(loc.rot)};
-	glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, &model[0][0]);
+	if (prog.model_uniform >= 0) {
+		const auto model {glm::translate(loc.pos) * rotate_ypr(loc.rot)};
+		glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, &model[0][0]);
+	}
 }
 
 void
