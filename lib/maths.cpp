@@ -15,6 +15,53 @@ flat_orientation(const glm::vec3 & diff)
 	return (std::isnan(e[0][0])) ? oneeighty : e;
 }
 
+// Helper to lookup into a matrix given an xy vector coordinate
+template<typename M>
+inline auto &
+operator^(M & m, glm::ivec2 xy)
+{
+	return m[xy.x][xy.y];
+}
+
+// Create a matrix for the angle, given the targets into the matrix
+inline auto
+rotation(float a, glm::ivec2 c1, glm::ivec2 s1, glm::ivec2 c2, glm::ivec2 ms2)
+{
+	glm::mat4 m(1);
+	sincosf(a, m ^ s1, m ^ c1);
+	m ^ c2 = m ^ c1;
+	m ^ ms2 = -(m ^ s1);
+	return m;
+}
+
+// Create a roll transformation matrix
+glm::mat4
+rotate_roll(float a)
+{
+	return rotation(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
+}
+
+// Create a yaw transformation matrix
+glm::mat4
+rotate_yaw(float a)
+{
+	return rotation(a, {0, 0}, {2, 0}, {2, 2}, {0, 2});
+}
+
+// Create a pitch transformation matrix
+glm::mat4
+rotate_pitch(float a)
+{
+	return rotation(a, {1, 1}, {1, 2}, {2, 2}, {2, 1});
+}
+
+// Create a bomcined yaw, pitch, roll transformation matrix
+glm::mat4
+rotate_ypr(glm::vec3 a)
+{
+	return rotate_yaw(a.y) * rotate_pitch(a.x) * rotate_roll(a.z);
+}
+
 float
 vector_yaw(const glm::vec3 & diff)
 {

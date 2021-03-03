@@ -1,6 +1,7 @@
 #ifndef MATH_H
 #define MATH_H
 
+#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <utility>
@@ -28,6 +29,26 @@ constexpr auto pi {glm::pi<float>()};
 constexpr auto two_pi {glm::two_pi<float>()};
 
 glm::mat4 flat_orientation(const glm::vec3 & diff);
+
+// C++ wrapper for C's sincosf, but with references, not pointers
+inline auto
+sincosf(float a, float & s, float & c)
+{
+	return sincosf(a, &s, &c);
+}
+
+inline std::pair<float, float>
+sincosf(float a)
+{
+	std::pair<float, float> sc;
+	sincosf(a, &sc.first, &sc.second);
+	return sc;
+}
+
+glm::mat4 rotate_roll(float);
+glm::mat4 rotate_yaw(float);
+glm::mat4 rotate_pitch(float);
+glm::mat4 rotate_ypr(glm::vec3);
 
 float vector_yaw(const glm::vec3 & diff);
 float vector_pitch(const glm::vec3 & diff);

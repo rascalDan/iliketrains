@@ -2,7 +2,9 @@
 
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
+#include <glm/gtx/transform.hpp>
 #include <stream_support.hpp>
+#include <string_view>
 
 #include <glm/glm.hpp>
 #include <maths.h>
@@ -94,4 +96,31 @@ BOOST_DATA_TEST_CASE(test_find_arc_centre,
 BOOST_AUTO_TEST_CASE(test_find_arcs_radius)
 {
 	BOOST_CHECK_CLOSE(find_arcs_radius({10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
+}
+
+static void
+compare_rotations(float a, const glm::vec3 & axis, glm::mat4 (*rotate_func)(float), std::string_view n)
+{
+	BOOST_TEST_CONTEXT(n) {
+		const auto g {glm::rotate(a, axis)}, ilt {rotate_func(a)};
+		for (int c = 0; c < 4; c++) {
+			BOOST_TEST_CONTEXT(c) {
+				for (int r = 0; r < 4; r++) {
+					BOOST_TEST_CONTEXT(r) {
+						BOOST_CHECK_CLOSE(g[c][r], ilt[c][r], 0.0001);
+					}
+				}
+			}
+		}
+	}
+}
+const auto angs = boost::unit_test::data::make({pi, half_pi, two_pi, quarter_pi, -pi, -half_pi, -quarter_pi, 0.F});
+const auto rots = boost::unit_test::data::make<std::tuple<glm::vec3, glm::mat4 (*)(float), std::string_view>>({
+		{up, rotate_yaw, "yaw"},
+		{west, rotate_pitch, "pitch"},
+		{north, rotate_roll, "roll"},
+});
+BOOST_DATA_TEST_CASE(test_rotations, angs * rots, a, ax, func, n)
+{
+	compare_rotations(a, ax, func, n);
 }
