@@ -11,7 +11,7 @@ class Location;
 
 class Shader {
 public:
-	enum class Program { Basic = 0, Water = 1, LandMass = 2 };
+	enum class Program { Basic = 0, Water = 1, LandMass = 2, StaticPos = 3 };
 
 	Shader();
 
@@ -31,7 +31,7 @@ private:
 		GLint viewProjection_uniform, model_uniform;
 	};
 
-	std::array<ProgramHandle, 3> programs;
+	std::array<ProgramHandle, 4> programs;
 };
 
 #endif

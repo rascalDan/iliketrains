@@ -45,6 +45,10 @@ Shader::Shader() :
 			{
 					landmassShader_vs.compile(),
 					landmassShader_fs.compile(),
+			},
+			{
+					landmassShader_vs.compile(),
+					basicShader_fs.compile(),
 			}}}
 {
 }

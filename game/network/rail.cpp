@@ -98,7 +98,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 void
 RailLinks::render(const Shader & shader) const
 {
-	shader.setModel(Location {});
+	shader.setModel(Location {}, Shader::Program::StaticPos);
 	texture->Bind();
 	links.apply(&RailLink::render, shader);
 }
