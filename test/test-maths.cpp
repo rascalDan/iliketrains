@@ -114,13 +114,17 @@ compare_rotations(float a, const glm::vec3 & axis, glm::mat4 (*rotate_func)(floa
 		}
 	}
 }
-const auto angs = boost::unit_test::data::make({pi, half_pi, two_pi, quarter_pi, -pi, -half_pi, -quarter_pi, 0.F});
+
+const auto angs = boost::unit_test::data::make({pi, half_pi, two_pi, quarter_pi, -pi, -half_pi, -quarter_pi, 0.F})
+		* boost::unit_test::data::make(0);
+const auto random_angs = boost::unit_test::data::random(-two_pi, two_pi) ^ boost::unit_test::data::xrange(1000);
 const auto rots = boost::unit_test::data::make<std::tuple<glm::vec3, glm::mat4 (*)(float), std::string_view>>({
 		{up, rotate_yaw, "yaw"},
 		{west, rotate_pitch, "pitch"},
 		{north, rotate_roll, "roll"},
 });
-BOOST_DATA_TEST_CASE(test_rotations, angs * rots, a, ax, func, n)
+BOOST_DATA_TEST_CASE(test_rotations, (angs + random_angs) * rots, a, ai, ax, func, n)
 {
+	(void)ai;
 	compare_rotations(a, ax, func, n);
 }
