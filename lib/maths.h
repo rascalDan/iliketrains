@@ -45,6 +45,7 @@ sincosf(float a)
 	return sc;
 }
 
+glm::mat2 rotate_flat(float);
 glm::mat4 rotate_roll(float);
 glm::mat4 rotate_yaw(float);
 glm::mat4 rotate_pitch(float);

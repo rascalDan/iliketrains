@@ -5,6 +5,7 @@
 #include <glm/gtx/transform.hpp>
 #include <stream_support.hpp>
 #include <string_view>
+#include <type_traits>
 
 #include <glm/glm.hpp>
 #include <maths.h>

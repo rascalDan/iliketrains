@@ -24,35 +24,43 @@ operator^(M & m, glm::ivec2 xy)
 }
 
 // Create a matrix for the angle, given the targets into the matrix
+template<typename M>
 inline auto
-rotation(float a, glm::ivec2 c1, glm::ivec2 s1, glm::ivec2 c2, glm::ivec2 ms2)
+rotation(typename M::value_type a, glm::ivec2 c1, glm::ivec2 s1, glm::ivec2 c2, glm::ivec2 ms2)
 {
-	glm::mat4 m(1);
+	M m(1);
 	sincosf(a, m ^ s1, m ^ c1);
 	m ^ c2 = m ^ c1;
 	m ^ ms2 = -(m ^ s1);
 	return m;
 }
 
+// Create a flat (2D) transformation matrix
+glm::mat2
+rotate_flat(float a)
+{
+	return rotation<glm::mat2>(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
+}
+
 // Create a roll transformation matrix
 glm::mat4
 rotate_roll(float a)
 {
-	return rotation(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
+	return rotation<glm::mat4>(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
 }
 
 // Create a yaw transformation matrix
 glm::mat4
 rotate_yaw(float a)
 {
-	return rotation(a, {0, 0}, {2, 0}, {2, 2}, {0, 2});
+	return rotation<glm::mat4>(a, {0, 0}, {2, 0}, {2, 2}, {0, 2});
 }
 
 // Create a pitch transformation matrix
 glm::mat4
 rotate_pitch(float a)
 {
-	return rotation(a, {1, 1}, {1, 2}, {2, 2}, {2, 1});
+	return rotation<glm::mat4>(a, {1, 1}, {1, 2}, {2, 2}, {2, 1});
 }
 
 // Create a bomcined yaw, pitch, roll transformation matrix
