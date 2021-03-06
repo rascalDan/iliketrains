@@ -5,20 +5,30 @@
 #include <array>
 #include <location.hpp>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
 class Shader;
 class Texture;
+class ObjParser;
 
 class RailVehicleClass {
 public:
+	explicit RailVehicleClass(const std::string & name);
+
 	void render(const Shader &, const Location &, const std::array<Location, 2> &) const;
+
 	std::array<MeshPtr, 2> bogies;
 	MeshPtr bodyMesh;
 	std::shared_ptr<Texture> texture;
 	float wheelBase;
 	float length;
+
+private:
+	RailVehicleClass(std::unique_ptr<ObjParser> obj, std::shared_ptr<Texture>);
+	static float bogieOffset(ObjParser & o);
+	static float objectLength(ObjParser & o);
 };
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;
 

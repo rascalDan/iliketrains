@@ -18,6 +18,22 @@
 #include <utility>
 #include <vector>
 
+RailVehicleClass::RailVehicleClass(const std::string & name) :
+	RailVehicleClass {std::make_unique<ObjParser>(Resource::mapPath(name + ".obj")),
+			Texture::cachedTexture.get(Resource::mapPath(name + ".png"))}
+{
+}
+
+RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr<Texture> t) : texture {std::move(t)}
+{
+	wheelBase = bogieOffset(*o);
+	length = objectLength(*o);
+	const auto m = o->createMeshes();
+	bodyMesh = m.at("Body");
+	bogies[0] = m.at("Bogie1");
+	bogies[1] = m.at("Bogie2");
+}
+
 void
 RailVehicleClass::render(const Shader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
@@ -28,6 +44,38 @@ RailVehicleClass::render(const Shader & shader, const Location & location, const
 	}
 	shader.setModel(location);
 	bodyMesh->Draw();
+}
+
+float
+RailVehicleClass::bogieOffset(ObjParser & o)
+{
+	float wheelBase {0};
+	// offset bogie positions so they can be set directly
+	for (auto & object : o.objects) { // bogie object index
+		if (!object.first.starts_with("Bogie"))
+			continue;
+		std::set<std::pair<float, int>> vertexIds;
+		for (const auto & face : object.second) {
+			for (const auto & faceElement : face) {
+				vertexIds.emplace(o.vertices[faceElement.x - 1].z, faceElement.x - 1);
+			}
+		}
+		const auto offset = (vertexIds.begin()->first + vertexIds.rbegin()->first) / 2;
+		for (const auto & v : vertexIds) {
+			o.vertices[v.second].z -= offset;
+		}
+		wheelBase += std::abs(offset);
+	}
+	return wheelBase;
+}
+
+float
+RailVehicleClass::objectLength(ObjParser & o)
+{
+	const auto mme = std::minmax_element(o.vertices.begin(), o.vertices.end(), [](const auto & v1, const auto & v2) {
+		return v1.z < v2.z;
+	});
+	return mme.second->z - mme.first->z;
 }
 
 void
@@ -91,57 +139,23 @@ void
 RailLoco::updateWagons() const
 {
 	// Drag wagons
-	float trailBy {rvClass->length};
+	float trailBy {rvClass->length + 0.6F};
 	for (const auto & wagon : wagons) {
 		const auto w {wagon.lock()};
 		updateRailVehiclePosition(w.get(), trailBy);
-		trailBy += w->rvClass->length;
+		trailBy += w->rvClass->length + 0.6F;
 	}
 }
 
 void RailWagon::tick(TickDuration) { }
 
-void
-bogieOffset(ObjParser & o)
-{
-	// offset bogie positions so they can be set directly
-	for (int b = 1; b < 3; b++) { // bogie object index
-		std::set<std::pair<float, int>> vertexIds;
-		for (const auto & face : o.objects[b].second) {
-			for (const auto & faceElement : face) {
-				vertexIds.emplace(o.vertices[faceElement.x - 1].z, faceElement.x - 1);
-			}
-		}
-		auto offset = (vertexIds.begin()->first + vertexIds.rbegin()->first) / 2;
-		for (const auto & v : vertexIds) {
-			o.vertices[v.second].z -= offset;
-		}
-	}
-}
-
-class Brush47Class : public RailVehicleClass {
-public:
-	Brush47Class()
-	{
-		ObjParser o {Resource::mapPath("brush47.obj")};
-		bogieOffset(o);
-		const auto m = o.createMeshes();
-		bodyMesh = m.at("Body");
-		bogies[0] = m.at("Bogie1");
-		bogies[1] = m.at("Bogie2");
-		texture = Texture::cachedTexture.get(Resource::mapPath("brush47.png"));
-		wheelBase = 12.F;
-		length = 20.F;
-	}
-};
-
-Brush47::Brush47(const LinkPtr & l) : RailLoco(std::make_shared<Brush47Class>(), l, 0)
+Brush47::Brush47(const LinkPtr & l) : RailLoco(std::make_shared<RailVehicleClass>("brush47"), l, 0)
 {
 	speed = 33.6F;
 	linkDist = rvClass->wheelBase;
 }
 
-Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(std::make_shared<Brush47Class>(), l, 0)
+Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(std::make_shared<RailVehicleClass>("brush47"), l, 0)
 {
 	linkDist = rvClass->wheelBase;
 }
