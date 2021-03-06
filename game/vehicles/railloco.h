@@ -5,26 +5,33 @@
 #include <array>
 #include <location.hpp>
 #include <memory>
+#include <utility>
 #include <vector>
 
 class Shader;
-
 class Texture;
-class RailVehicle : public Vehicle {
+
+class RailVehicleClass {
 public:
-	struct Bogie {
-		Location location;
-		MeshPtr mesh;
-	};
-
-	using Vehicle::Vehicle;
-	void render(const Shader & shader) const override;
-
-	std::array<Bogie, 2> bogies;
+	void render(const Shader &, const Location &, const std::array<Location, 2> &) const;
+	std::array<MeshPtr, 2> bogies;
 	MeshPtr bodyMesh;
 	std::shared_ptr<Texture> texture;
 	float wheelBase;
 	float length;
+};
+using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;
+
+class RailVehicle : public Vehicle {
+public:
+	explicit RailVehicle(RailVehicleClassPtr rvc, const LinkPtr & link, float linkDist = 0) :
+		Vehicle {link, linkDist}, rvClass {std::move(rvc)}
+	{
+	}
+	void render(const Shader & shader) const override;
+
+	RailVehicleClassPtr rvClass;
+	std::array<Location, 2> bogies;
 
 	friend class RailLoco;
 };

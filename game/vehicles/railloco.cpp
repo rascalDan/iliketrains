@@ -19,15 +19,21 @@
 #include <vector>
 
 void
-RailVehicle::render(const Shader & shader) const
+RailVehicleClass::render(const Shader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
 	texture->Bind();
-	for (const auto & bogie : bogies) {
-		shader.setModel(bogie.location);
-		bogie.mesh->Draw();
+	for (auto b = 0U; b < bogies.size(); ++b) {
+		shader.setModel(bl[b]);
+		bogies[b]->Draw();
 	}
 	shader.setModel(location);
 	bodyMesh->Draw();
+}
+
+void
+RailVehicle::render(const Shader & shader) const
+{
+	rvClass->render(shader, location, bogies);
 }
 
 void
@@ -65,9 +71,9 @@ RailLoco::getBogiePosition(float linkDist, float dist) const
 void
 RailLoco::updateRailVehiclePosition(RailVehicle * w, float trailBy) const
 {
-	const auto overhang {(w->length - w->wheelBase) / 2};
-	const auto & b1Pos = w->bogies[0].location = getBogiePosition(linkDist, trailBy += overhang);
-	const auto & b2Pos = w->bogies[1].location = getBogiePosition(linkDist, trailBy + wheelBase);
+	const auto overhang {(w->rvClass->length - w->rvClass->wheelBase) / 2};
+	const auto & b1Pos = w->bogies[0] = getBogiePosition(linkDist, trailBy += overhang);
+	const auto & b2Pos = w->bogies[1] = getBogiePosition(linkDist, trailBy + rvClass->wheelBase);
 	const auto diff = glm::normalize(b2Pos.pos - b1Pos.pos);
 	w->location.pos = (b1Pos.pos + b2Pos.pos) / 2.F;
 	w->location.rot = {-vector_pitch(diff), vector_yaw(diff), 0};
@@ -85,11 +91,11 @@ void
 RailLoco::updateWagons() const
 {
 	// Drag wagons
-	float trailBy {length};
+	float trailBy {rvClass->length};
 	for (const auto & wagon : wagons) {
 		const auto w {wagon.lock()};
 		updateRailVehiclePosition(w.get(), trailBy);
-		trailBy += w->length;
+		trailBy += w->rvClass->length;
 	}
 }
 
@@ -113,31 +119,29 @@ bogieOffset(ObjParser & o)
 	}
 }
 
-Brush47::Brush47(const LinkPtr & l) : RailLoco(l, 0)
+class Brush47Class : public RailVehicleClass {
+public:
+	Brush47Class()
+	{
+		ObjParser o {Resource::mapPath("brush47.obj")};
+		bogieOffset(o);
+		const auto m = o.createMeshes();
+		bodyMesh = m.at("Body");
+		bogies[0] = m.at("Bogie1");
+		bogies[1] = m.at("Bogie2");
+		texture = Texture::cachedTexture.get(Resource::mapPath("brush47.png"));
+		wheelBase = 12.F;
+		length = 20.F;
+	}
+};
+
+Brush47::Brush47(const LinkPtr & l) : RailLoco(std::make_shared<Brush47Class>(), l, 0)
 {
-	ObjParser o {Resource::mapPath("brush47.obj")};
-	bogieOffset(o);
-	const auto m = o.createMeshes();
-	bodyMesh = m.at("Body");
-	bogies[0].mesh = m.at("Bogie1");
-	bogies[1].mesh = m.at("Bogie2");
-	texture = Texture::cachedTexture.get(Resource::mapPath("brush47.png"));
-	wheelBase = 12.F;
-	length = 20.F;
 	speed = 33.6F;
-	linkDist = wheelBase;
+	linkDist = rvClass->wheelBase;
 }
 
-Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(l, 0)
+Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(std::make_shared<Brush47Class>(), l, 0)
 {
-	ObjParser o {Resource::mapPath("brush47.obj")};
-	bogieOffset(o);
-	const auto m = o.createMeshes();
-	bodyMesh = m.at("Body");
-	bogies[0].mesh = m.at("Bogie1");
-	bogies[1].mesh = m.at("Bogie2");
-	texture = Texture::cachedTexture.get(Resource::mapPath("brush47.png"));
-	wheelBase = 12.F;
-	length = 20.F;
-	linkDist = wheelBase;
+	linkDist = rvClass->wheelBase;
 }
