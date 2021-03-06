@@ -7,6 +7,8 @@
 
 template<typename Object, bool shared = true> class Collection {
 public:
+	virtual ~Collection() = default;
+
 	using Ptr = std::conditional_t<shared, std::shared_ptr<Object>, std::unique_ptr<Object>>;
 	using Objects = std::vector<Ptr>;
 	Objects objects;
