@@ -79,9 +79,10 @@ public:
 			rl->addLinksBetween(e1, j);
 			auto e2 = rl->addLinksBetween(e, {-925, 10, -1075})->ends[0].first->pos;
 			rl->addLinksBetween(e2, j);
-			auto loco = world.create<Brush47>(l3);
+			const auto & train = world.create<Train>(l3);
+			auto b47 = std::make_shared<RailVehicleClass>("brush47");
 			for (int n = 0; n < 6; n++) {
-				loco->wagons.push_back(world.create<Brush47Wagon>(l3));
+				train->create<RailVehicle>(b47);
 			}
 		}
 

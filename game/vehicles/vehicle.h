@@ -4,10 +4,11 @@
 #include <game/network/link.h>
 #include <game/worldobject.h>
 #include <gfx/renderable.h>
-#include <location.hpp>
 #include <memory>
 #include <utility>
 #include <vector>
+
+class Location;
 
 class LinkHistory {
 public:
@@ -25,10 +26,10 @@ private:
 class Vehicle : public WorldObject, public Renderable {
 public:
 	explicit Vehicle(const LinkPtr & link, float linkDist = 0);
-	float linkDist; // distance long current link
+	float linkDist; // distance along current link
 	float speed {50}; // speed in m/s (~75 km/h)
 
-	Location location;
+	[[nodiscard]] virtual const Location & getLocation() const = 0;
 
 protected:
 	LinkHistory linkHist;

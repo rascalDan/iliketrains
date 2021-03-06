@@ -2,7 +2,9 @@
 #include "game/vehicles/vehicle.h"
 #include "game/worldobject.h"
 #include "gfx/models/mesh.h"
+#include "gfx/renderable.h"
 #include <array>
+#include <collection.hpp>
 #include <location.hpp>
 #include <memory>
 #include <string>
@@ -32,47 +34,36 @@ private:
 };
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;
 
-class RailVehicle : public Vehicle {
+class Train;
+class RailVehicle : public Renderable {
 public:
-	explicit RailVehicle(RailVehicleClassPtr rvc, const LinkPtr & link, float linkDist = 0) :
-		Vehicle {link, linkDist}, rvClass {std::move(rvc)}
-	{
-	}
+	explicit RailVehicle(RailVehicleClassPtr rvc) : rvClass {std::move(rvc)} { }
+
+	void move(const Train *, float & trailBy);
+
 	void render(const Shader & shader) const override;
+
+	Location location;
 
 	RailVehicleClassPtr rvClass;
 	std::array<Location, 2> bogies;
-
-	friend class RailLoco;
 };
+using RailVehiclePtr = std::unique_ptr<RailVehicle>;
 
-class RailWagon : public RailVehicle {
+class Train : public Vehicle, public Collection<RailVehicle, false> {
 public:
-	using RailVehicle::RailVehicle;
+	explicit Train(const LinkPtr & link, float linkDist = 0) : Vehicle {link, linkDist} { }
+
+	[[nodiscard]] const Location &
+	getLocation() const override
+	{
+		return objects.front()->location;
+	}
+
+	void render(const Shader & shader) const override;
+
 	void tick(TickDuration elapsed) override;
-};
-using RailWagonPtr = std::weak_ptr<RailWagon>;
 
-class RailLoco : public RailVehicle {
-public:
-	using RailVehicle::RailVehicle;
-	void tick(TickDuration elapsed) override;
-
-	std::vector<RailWagonPtr> wagons;
-
-private:
 	void move(TickDuration dur);
 	[[nodiscard]] Location getBogiePosition(float linkDist, float dist) const;
-	void updateRailVehiclePosition(RailVehicle *, float trailBy) const;
-	void updateWagons() const;
-};
-
-class Brush47 : public RailLoco {
-public:
-	explicit Brush47(const LinkPtr & p);
-};
-
-class Brush47Wagon : public RailWagon {
-public:
-	explicit Brush47Wagon(const LinkPtr & p);
 };

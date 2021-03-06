@@ -6,6 +6,7 @@
 #include <array>
 #include <cache.h>
 #include <filesystem>
+#include <functional>
 #include <glm/glm.hpp>
 #include <iterator>
 #include <lib/resource.h>
@@ -52,8 +53,9 @@ RailVehicleClass::bogieOffset(ObjParser & o)
 	float wheelBase {0};
 	// offset bogie positions so they can be set directly
 	for (auto & object : o.objects) { // bogie object index
-		if (!object.first.starts_with("Bogie"))
+		if (!object.first.starts_with("Bogie")) {
 			continue;
+		}
 		std::set<std::pair<float, int>> vertexIds;
 		for (const auto & face : object.second) {
 			for (const auto & faceElement : face) {
@@ -85,13 +87,13 @@ RailVehicle::render(const Shader & shader) const
 }
 
 void
-RailLoco::move(TickDuration dur)
+Train::move(TickDuration dur)
 {
 	static std::mt19937 gen(std::random_device {}());
 	linkDist += dur.count() * speed;
 	auto curLink {linkHist.getCurrent()};
 	while (linkDist > curLink.first->length) {
-		location = curLink.first->positionAt(curLink.first->length, curLink.second);
+		const auto location = curLink.first->positionAt(curLink.first->length, curLink.second);
 		auto nexts {curLink.first->nexts[1 - curLink.second]};
 		auto last = std::remove_if(nexts.begin(), nexts.end(), [ang = location.rot.y](const Link::Next & n) {
 			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) > 0.1F;
@@ -108,8 +110,14 @@ RailLoco::move(TickDuration dur)
 	}
 }
 
+void
+Train::render(const Shader & shader) const
+{
+	apply(&Renderable::render, shader);
+}
+
 Location
-RailLoco::getBogiePosition(float linkDist, float dist) const
+Train::getBogiePosition(float linkDist, float dist) const
 {
 	float b2linkDist {};
 	const auto b2Link = linkHist.getAt(dist - linkDist, &b2linkDist);
@@ -117,45 +125,22 @@ RailLoco::getBogiePosition(float linkDist, float dist) const
 }
 
 void
-RailLoco::updateRailVehiclePosition(RailVehicle * w, float trailBy) const
+RailVehicle::move(const Train * t, float & trailBy)
 {
-	const auto overhang {(w->rvClass->length - w->rvClass->wheelBase) / 2};
-	const auto & b1Pos = w->bogies[0] = getBogiePosition(linkDist, trailBy += overhang);
-	const auto & b2Pos = w->bogies[1] = getBogiePosition(linkDist, trailBy + rvClass->wheelBase);
+	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};
+	const auto & b1Pos = bogies[0] = t->getBogiePosition(t->linkDist, trailBy += overhang);
+	const auto & b2Pos = bogies[1] = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase);
 	const auto diff = glm::normalize(b2Pos.pos - b1Pos.pos);
-	w->location.pos = (b1Pos.pos + b2Pos.pos) / 2.F;
-	w->location.rot = {-vector_pitch(diff), vector_yaw(diff), 0};
+	location.pos = (b1Pos.pos + b2Pos.pos) / 2.F;
+	location.rot = {-vector_pitch(diff), vector_yaw(diff), 0};
+	trailBy += 0.6F + overhang;
 }
 
 void
-RailLoco::tick(TickDuration dur)
+Train::tick(TickDuration dur)
 {
 	move(dur);
-	updateRailVehiclePosition(this, 0);
-	updateWagons();
-}
 
-void
-RailLoco::updateWagons() const
-{
-	// Drag wagons
-	float trailBy {rvClass->length + 0.6F};
-	for (const auto & wagon : wagons) {
-		const auto w {wagon.lock()};
-		updateRailVehiclePosition(w.get(), trailBy);
-		trailBy += w->rvClass->length + 0.6F;
-	}
-}
-
-void RailWagon::tick(TickDuration) { }
-
-Brush47::Brush47(const LinkPtr & l) : RailLoco(std::make_shared<RailVehicleClass>("brush47"), l, 0)
-{
-	speed = 33.6F;
-	linkDist = rvClass->wheelBase;
-}
-
-Brush47Wagon::Brush47Wagon(const LinkPtr & l) : RailWagon(std::make_shared<RailVehicleClass>("brush47"), l, 0)
-{
-	linkDist = rvClass->wheelBase;
+	float trailBy {0.F};
+	apply(&RailVehicle::move, this, std::ref(trailBy));
 }
