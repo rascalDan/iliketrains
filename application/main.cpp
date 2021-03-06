@@ -5,7 +5,9 @@
 #include <game/network/link.h>
 #include <game/network/rail.h>
 #include <game/terrain.h>
-#include <game/vehicles/railloco.h>
+#include <game/vehicles/railVehicle.h>
+#include <game/vehicles/railVehicleClass.h>
+#include <game/vehicles/train.h>
 #include <game/world.h>
 #include <game/worldobject.h>
 #include <gfx/camera_controller.h>
