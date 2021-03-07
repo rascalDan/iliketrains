@@ -87,4 +87,23 @@ std::pair<glm::vec2, bool> find_arc_centre(glm::vec2 start, glm::vec2 ad, glm::v
 std::pair<float, float> find_arcs_radius(glm::vec2 start, float entrys, glm::vec2 end, float entrye);
 float find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd);
 
+// Conversions
+template<typename T>
+inline constexpr float
+mph_to_ms(T v)
+{
+	return v / 2.237;
+}
+
+template<typename T>
+inline constexpr float
+kph_to_ms(T v)
+{
+	return v / 3.6;
+}
+
+// ... literals are handy for now, probably go away when we load stuff externally
+float operator"" _mph(const long double v);
+float operator"" _kph(const long double v);
+
 #endif
