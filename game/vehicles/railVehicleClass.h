@@ -22,6 +22,7 @@ public:
 	std::shared_ptr<Texture> texture;
 	float wheelBase;
 	float length;
+	float maxSpeed;
 
 private:
 	RailVehicleClass(std::unique_ptr<ObjParser> obj, std::shared_ptr<Texture>);

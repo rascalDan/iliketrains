@@ -12,6 +12,7 @@
 #include <lib/resource.h>
 #include <location.hpp>
 #include <map>
+#include <maths.h>
 #include <memory>
 #include <set>
 #include <string>
@@ -24,7 +25,8 @@ RailVehicleClass::RailVehicleClass(const std::string & name) :
 {
 }
 
-RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr<Texture> t) : texture {std::move(t)}
+RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr<Texture> t) :
+	texture {std::move(t)}, maxSpeed(95._mph)
 {
 	wheelBase = bogieOffset(*o);
 	length = objectLength(*o);
