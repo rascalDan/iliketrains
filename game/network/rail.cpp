@@ -56,6 +56,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 	const auto findDir = [this](const auto & n) {
 		for (const auto & l : links.objects) {
 			for (const auto & e : l->ends) {
+				// cppcheck-suppress useStlAlgorithm
 				if (e.first == n) {
 					return e.second;
 				}
