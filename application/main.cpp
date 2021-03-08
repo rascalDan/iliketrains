@@ -2,6 +2,9 @@
 #include <array>
 #include <chrono>
 #include <collection.hpp>
+#include <game/activities/go.h>
+#include <game/activities/idle.h>
+#include <game/activity.h>
 #include <game/network/link.h>
 #include <game/network/rail.h>
 #include <game/terrain.h>
@@ -49,12 +52,25 @@ public:
 	NO_COPY(SDL_Application);
 	NO_MOVE(SDL_Application);
 
+	std::shared_ptr<Train> train;
 	bool
 	handleInput(SDL_Event & e) override
 	{
 		switch (e.type) {
 			case SDL_QUIT:
 				isRunning = false;
+				return true;
+			case SDL_KEYUP:
+				switch (e.key.keysym.scancode) {
+					case SDL_SCANCODE_G:
+						train->currentActivity = std::make_unique<Go>();
+						break;
+					case SDL_SCANCODE_I:
+						train->currentActivity = std::make_unique<Idle>();
+						break;
+					default:
+						return false;
+				}
 				return true;
 		}
 		return false;
@@ -81,7 +97,7 @@ public:
 			rl->addLinksBetween(e1, j);
 			auto e2 = rl->addLinksBetween(e, {-925, 10, -1075})->ends[0].first->pos;
 			rl->addLinksBetween(e2, j);
-			const auto & train = world.create<Train>(l3);
+			train = world.create<Train>(l3);
 			auto b47 = std::make_shared<RailVehicleClass>("brush47");
 			for (int n = 0; n < 6; n++) {
 				train->create<RailVehicle>(b47);

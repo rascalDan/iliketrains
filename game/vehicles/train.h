@@ -1,6 +1,9 @@
 #ifndef TRAIN_H
 #define TRAIN_H
 
+#include "game/activities/go.h" // IWYU pragma: keep
+#include "game/activities/idle.h" // IWYU pragma: keep
+#include "game/activity.h"
 #include "game/network/link.h"
 #include "game/worldobject.h"
 #include "railVehicle.h"
@@ -12,7 +15,7 @@
 
 class Shader;
 
-class Train : public Vehicle, public Collection<RailVehicle, false> {
+class Train : public Vehicle, public Collection<RailVehicle, false>, public Can<Go>, public Can<Idle> {
 public:
 	explicit Train(const LinkPtr & link, float linkDist = 0) : Vehicle {link, linkDist} { }
 
@@ -25,6 +28,8 @@ public:
 	void render(const Shader & shader) const override;
 
 	void tick(TickDuration elapsed) override;
+	void doActivity(const Go *, TickDuration) override;
+	void doActivity(const Idle *, TickDuration) override;
 
 	void move(TickDuration dur);
 	[[nodiscard]] Location getBogiePosition(float linkDist, float dist) const;
