@@ -1,7 +1,7 @@
 #ifndef GO_H
 #define GO_H
 
-#include "../activity.h"
+#include "../activityOf.h"
 
 class Go : public Activity::Of<Go> {
 public:
