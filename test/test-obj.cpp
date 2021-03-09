@@ -12,7 +12,7 @@
 
 BOOST_AUTO_TEST_CASE(objparse)
 {
-	ObjParser op {"/home/randomdan/dev/game/res/brush47.obj"};
+	ObjParser op {RESDIR "/brush47.obj"};
 	BOOST_CHECK_EQUAL(75, op.vertices.size());
 	BOOST_CHECK_EQUAL(112, op.texCoords.size());
 	BOOST_CHECK_EQUAL(31, op.normals.size());
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(objparse)
 
 BOOST_AUTO_TEST_CASE(create_meshes)
 {
-	ObjParser op {"/home/randomdan/dev/game/res/brush47.obj"};
+	ObjParser op {RESDIR "/brush47.obj"};
 	const auto ms = op.createMeshData();
 	BOOST_REQUIRE_EQUAL(3, ms.size());
 	BOOST_REQUIRE_EQUAL("Body", ms.begin()->first);
