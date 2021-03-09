@@ -31,7 +31,6 @@ public:
 	void doActivity(const Go *, TickDuration) override;
 	void doActivity(const Idle *, TickDuration) override;
 
-	void move(TickDuration dur);
 	[[nodiscard]] Location getBogiePosition(float linkDist, float dist) const;
 };
 

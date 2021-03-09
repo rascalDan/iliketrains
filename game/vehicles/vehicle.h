@@ -23,6 +23,7 @@ public:
 	ActivityPtr currentActivity;
 
 protected:
+	void move(TickDuration dur);
 	LinkHistory linkHist;
 };
 using VehicleWPtr = std::weak_ptr<Vehicle>;
