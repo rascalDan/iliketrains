@@ -1,11 +1,9 @@
 #include <SDL2/SDL.h>
-#include <array>
 #include <chrono>
 #include <collection.hpp>
 #include <game/activities/go.h>
 #include <game/activities/idle.h>
 #include <game/activity.h>
-#include <game/network/link.h>
 #include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
@@ -23,7 +21,6 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <special_members.hpp>
-#include <utility>
 #include <vector>
 
 static const int DISPLAY_WIDTH = 1280;
@@ -84,22 +81,32 @@ public:
 
 		world.create<Terrain>();
 
-		auto rl = world.create<RailLinks>();
 		{
-			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000};
+			auto rl = world.create<RailLinks>();
+			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000}, l {-1000, 20, -800}, m {-900, 30, -600},
+					n {-600, 32, -500}, o {-500, 30, -800}, p {-600, 25, -900}, q {-1025, 10, -1175},
+					r {-925, 10, -1075};
+			const glm::vec3 s {-1100, 15, -500}, t {-1100, 15, -450}, u {-1000, 15, -400};
 			auto l3 = rl->addLinksBetween(j, k);
-			auto e = rl->addLinksBetween(k, {-1000, 20, -800})->ends[1].first->pos;
-			e = rl->addLinksBetween(e, {-900, 30, -600})->ends[0].first->pos;
-			e = rl->addLinksBetween(e, {-600, 32, -500})->ends[1].first->pos;
-			e = rl->addLinksBetween(e, {-500, 30, -800})->ends[1].first->pos;
-			e = rl->addLinksBetween(e, {-600, 25, -900})->ends[1].first->pos;
-			auto e1 = rl->addLinksBetween(e, {-1025, 10, -1175})->ends[0].first->pos;
-			rl->addLinksBetween(e1, j);
-			auto e2 = rl->addLinksBetween(e, {-925, 10, -1075})->ends[0].first->pos;
-			rl->addLinksBetween(e2, j);
+			rl->addLinksBetween(k, l);
+			rl->addLinksBetween(l, m);
+			rl->addLinksBetween(m, n);
+			rl->addLinksBetween(n, o);
+			rl->addLinksBetween(o, p);
+			// branch 1
+			rl->addLinksBetween(p, q);
+			rl->addLinksBetween(q, j);
+			// branch 2
+			rl->addLinksBetween(p, r);
+			rl->addLinksBetween(r, j);
+			// early loop
+			rl->addLinksBetween(s, t);
+			rl->addLinksBetween(l, s);
+			rl->addLinksBetween(t, u);
+			rl->addLinksBetween(u, m);
 			train = world.create<Train>(l3);
 			auto b47 = std::make_shared<RailVehicleClass>("brush47");
-			for (int n = 0; n < 6; n++) {
+			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);
 			}
 		}
