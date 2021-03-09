@@ -65,24 +65,30 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		throw std::runtime_error("Node exists but couldn't find it");
 	};
 	float dir = pi + findDir(*node1ins.first);
-	const glm::vec2 flatStart {start.x, start.z}, flatEnd {end.x, end.z};
+	const glm::vec2 flatStart {!start}, flatEnd {!end};
 	if (!node2ins.second) {
+		auto midheight = [&](auto mid) {
+			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
+			return start.y + ((end.y - start.y) * (sm / (sm + em)));
+		};
 		float dir2 = pi + findDir(*node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
 			const auto radius {radii.first};
-			const auto c1 = start + !sincosf(dir + half_pi) * radius;
-			const auto c2 = end + !sincosf(dir2 + half_pi) * radius;
+			const auto c1 = flatStart + sincosf(dir + half_pi) * radius;
+			const auto c2 = flatEnd + sincosf(dir2 + half_pi) * radius;
 			const auto mid = (c1 + c2) / 2.F;
-			addLink<RailLinkCurve>(start, mid, !c1);
-			return addLink<RailLinkCurve>(end, mid, !c2);
+			const auto midh = mid ^ midheight(mid);
+			addLink<RailLinkCurve>(start, midh, c1);
+			return addLink<RailLinkCurve>(end, midh, c2);
 		}
 		else {
 			const auto radius {radii.second};
-			const auto c1 = start + !sincosf(dir - half_pi) * radius;
-			const auto c2 = end + !sincosf(dir2 - half_pi) * radius;
+			const auto c1 = flatStart + sincosf(dir - half_pi) * radius;
+			const auto c2 = flatEnd + sincosf(dir2 - half_pi) * radius;
 			const auto mid = (c1 + c2) / 2.F;
-			addLink<RailLinkCurve>(mid, start, !(c1));
-			return addLink<RailLinkCurve>(mid, end, !c2);
+			const auto midh = mid ^ midheight(mid);
+			addLink<RailLinkCurve>(midh, start, c1);
+			return addLink<RailLinkCurve>(midh, end, c2);
 		}
 	}
 	const auto diff {end - start};
