@@ -12,7 +12,6 @@
 #include <iterator>
 #include <location.hpp>
 #include <maths.h>
-#include <random>
 #include <utility>
 #include <vector>
 
@@ -26,7 +25,6 @@ Vehicle::Vehicle(const LinkPtr & l, float ld) : linkDist {ld}
 void
 Vehicle::move(TickDuration dur)
 {
-	static std::mt19937 gen(std::random_device {}());
 	linkDist += dur.count() * speed;
 	auto curLink {linkHist.getCurrent()};
 	while (linkDist > curLink.first->length) {
@@ -36,9 +34,10 @@ Vehicle::move(TickDuration dur)
 			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) > 0.1F;
 		});
 		if (last != nexts.begin()) {
-			auto off = std::uniform_int_distribution<>(0, std::distance(nexts.begin(), last) - 1)(gen);
+			auto next = (std::distance(nexts.begin(), last) > 1) ? orders.current()->navigate(nexts.cbegin(), last)
+																 : nexts.front();
 			linkDist -= curLink.first->length;
-			curLink = linkHist.add(nexts[off].first, nexts[off].second);
+			curLink = linkHist.add(next.first, next.second);
 		}
 		else {
 			linkDist = curLink.first->length;

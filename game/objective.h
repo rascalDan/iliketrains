@@ -2,6 +2,7 @@
 #define OBJECTIVE_H
 
 #include "activity.h"
+#include "network/link.h"
 #include <memory>
 #include <special_members.hpp>
 
@@ -15,6 +16,7 @@ public:
 
 	[[nodiscard]] virtual Objective * complete() const;
 	[[nodiscard]] virtual ActivityPtr createActivity() const = 0;
+	[[nodiscard]] virtual Link::Next navigate(Link::Nexts::const_iterator, Link::Nexts::const_iterator) const = 0;
 
 	Orders * orders;
 };

@@ -44,7 +44,8 @@ public:
 	std::array<End, 2> ends;
 	float length;
 	using Next = std::pair<LinkWPtr, unsigned char /*end*/>;
-	std::array<std::vector<Next>, 2> nexts;
+	using Nexts = std::vector<Next>;
+	std::array<Nexts, 2> nexts;
 };
 
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);
