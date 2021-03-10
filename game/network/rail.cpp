@@ -37,6 +37,15 @@ RailLinks::joinLinks(const LinkPtr & l) const
 	}
 }
 
+NodePtr
+RailLinks::findNodeAt(glm::vec3 pos) const
+{
+	if (const auto n = nodes.find(std::make_shared<Node>(pos)); n != nodes.end()) {
+		return *n;
+	}
+	return {};
+}
+
 std::shared_ptr<RailLink>
 RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 {
