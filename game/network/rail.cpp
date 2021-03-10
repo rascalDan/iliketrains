@@ -1,11 +1,10 @@
 #include "rail.h"
-#include "game/network/link.h"
+#include "network.h"
 #include <GL/glew.h>
 #include <array>
-#include <cache.h>
 #include <cassert>
-#include <gfx/gl/shader.h>
-#include <gfx/models/texture.h>
+#include <game/network/link.h>
+#include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/models/vertex.hpp>
 #include <glm/gtx/transform.hpp>
 #include <initializer_list>
@@ -14,10 +13,12 @@
 #include <stdexcept>
 #include <utility>
 
+template class NetworkOf<RailLink>;
+
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
 constexpr glm::vec3 RAIL_HEIGHT {0, .25F, 0};
 
-RailLinks::RailLinks() : texture {Texture::cachedTexture.get("rails.jpg")} { }
+RailLinks::RailLinks() : NetworkOf<RailLink> {"rails.jpg"} { }
 void RailLinks::tick(TickDuration) { }
 
 void
@@ -35,15 +36,6 @@ RailLinks::joinLinks(const LinkPtr & l) const
 			}
 		}
 	}
-}
-
-NodePtr
-RailLinks::findNodeAt(glm::vec3 pos) const
-{
-	if (const auto n = nodes.find(std::make_shared<Node>(pos)); n != nodes.end()) {
-		return *n;
-	}
-	return {};
 }
 
 std::shared_ptr<RailLink>
@@ -108,14 +100,6 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		std::swap(start, end);
 	}
 	return addLink<RailLinkCurve>(start, end, centre.first);
-}
-
-void
-RailLinks::render(const Shader & shader) const
-{
-	shader.setModel(Location {}, Shader::Program::StaticPos);
-	texture->Bind();
-	links.apply(&RailLink::render, shader);
 }
 
 void

@@ -7,17 +7,16 @@
 #include "gfx/models/vertex.hpp"
 #include "gfx/renderable.h"
 #include "link.h"
+#include "network.h"
 #include <glm/glm.hpp>
 #include <location.hpp>
 #include <maths.h>
 #include <memory>
 #include <set>
-#include <sorting.hpp>
 #include <utility>
 #include <vector>
 
 class Shader;
-class Texture;
 
 // A piece of rail track
 class RailLink : public Link, public Renderable {
@@ -57,7 +56,7 @@ private:
 
 template<typename T> concept RailLinkConcept = std::is_base_of_v<RailLink, T>;
 
-class RailLinks : public Renderable, public WorldObject {
+class RailLinks : public NetworkOf<RailLink>, public WorldObject {
 public:
 	RailLinks();
 	template<RailLinkConcept T, typename... Params>
@@ -72,16 +71,10 @@ public:
 	}
 
 	std::shared_ptr<RailLink> addLinksBetween(glm::vec3 start, glm::vec3 end);
-	[[nodiscard]] NodePtr findNodeAt(glm::vec3) const;
 
 private:
-	using Nodes = std::set<NodePtr, PtrSorter<NodePtr>>;
-	Collection<RailLink> links;
-	Nodes nodes;
-	void render(const Shader &) const override;
 	void tick(TickDuration elapsed) override;
 	void joinLinks(const LinkPtr &) const;
-	std::shared_ptr<Texture> texture;
 };
 
 #endif
