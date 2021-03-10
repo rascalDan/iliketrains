@@ -42,8 +42,7 @@ RailLinks::joinLinks(const LinkPtr & l) const
 std::shared_ptr<RailLink>
 RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 {
-	auto node1ins = nodes.insert(std::make_shared<Node>(start));
-	auto node2ins = nodes.insert(std::make_shared<Node>(end));
+	auto node1ins = newNodeAt(start), node2ins = newNodeAt(end);
 	if (node1ins.second && node2ins.second) {
 		// Both nodes are new, direct link, easy
 		return addLink<RailLinkStraight>(start, end);
@@ -65,14 +64,14 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		}
 		throw std::runtime_error("Node exists but couldn't find it");
 	};
-	float dir = pi + findDir(*node1ins.first);
+	float dir = pi + findDir(node1ins.first);
 	const glm::vec2 flatStart {!start}, flatEnd {!end};
 	if (!node2ins.second) {
 		auto midheight = [&](auto mid) {
 			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
 			return start.y + ((end.y - start.y) * (sm / (sm + em)));
 		};
-		float dir2 = pi + findDir(*node2ins.first);
+		float dir2 = pi + findDir(node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
 			const auto radius {radii.first};
 			const auto c1 = flatStart + sincosf(dir + half_pi) * radius;

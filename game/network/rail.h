@@ -10,7 +10,6 @@
 #include <location.hpp>
 #include <maths.h>
 #include <memory>
-#include <set>
 #include <span>
 #include <utility>
 
@@ -60,8 +59,7 @@ public:
 	std::shared_ptr<T>
 	addLink(glm::vec3 a, glm::vec3 b, Params &&... params)
 	{
-		const auto node1 = *nodes.insert(std::make_shared<Node>(a)).first;
-		const auto node2 = *nodes.insert(std::make_shared<Node>(b)).first;
+		const auto node1 = nodeAt(a), node2 = nodeAt(b);
 		auto l {links.create<T>(node1, node2, std::forward<Params>(params)...)};
 		joinLinks(l);
 		return l;

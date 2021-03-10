@@ -9,6 +9,7 @@
 #include <set>
 #include <sorting.hpp>
 #include <string>
+#include <utility>
 
 class Texture;
 class Shader;
@@ -18,6 +19,8 @@ public:
 	explicit Network(const std::string & textureName);
 
 	[[nodiscard]] NodePtr findNodeAt(glm::vec3) const;
+	[[nodiscard]] NodePtr nodeAt(glm::vec3);
+	[[nodiscard]] std::pair<NodePtr, bool> newNodeAt(glm::vec3);
 
 protected:
 	using Nodes = std::set<NodePtr, PtrSorter<NodePtr>>;
