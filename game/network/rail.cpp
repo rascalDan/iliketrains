@@ -2,7 +2,7 @@
 #include "network.h"
 #include <GL/glew.h>
 #include <array>
-#include <cassert>
+#include <collection.hpp>
 #include <game/network/link.h>
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/models/vertex.hpp>
@@ -12,6 +12,7 @@
 #include <maths.h>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 template class NetworkOf<RailLink>;
 
@@ -102,23 +103,22 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 	return addLink<RailLinkCurve>(start, end, centre.first);
 }
 
-void
-RailLink::defaultMesh()
+MeshPtr
+RailLink::defaultMesh(const std::span<Vertex> vertices)
 {
+	std::vector<unsigned int> indices;
 	for (auto n = RAIL_CROSSSECTION_VERTICES; n < vertices.size(); n += 1) {
 		indices.push_back(n - RAIL_CROSSSECTION_VERTICES);
 		indices.push_back(n);
 	}
 
-	assert(vertices.capacity() == vertices.size());
-	assert(indices.capacity() == indices.size());
-	meshes.create<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
+	return std::make_unique<Mesh>(vertices, indices, GL_TRIANGLE_STRIP);
 }
 
 void
 RailLink::render(const Shader &) const
 {
-	meshes.apply(&Mesh::Draw);
+	mesh->Draw();
 }
 
 constexpr const std::array<std::pair<glm::vec3, float>, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
@@ -144,8 +144,8 @@ RailLinkStraight::RailLinkStraight(const NodePtr & a, const NodePtr & b) : RailL
 RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff) :
 	RailLink({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
 {
+	std::vector<Vertex> vertices;
 	vertices.reserve(2 * railCrossSection.size());
-	indices.reserve(2 * railCrossSection.size());
 	const auto len = round_sleepers(length / 2.F);
 	const auto e {flat_orientation(diff)};
 	for (int ei = 0; ei < 2; ei++) {
@@ -155,7 +155,7 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 			vertices.emplace_back(m, glm::vec2 {rcs.second, ei ? len : 0.F}, up);
 		}
 	}
-	defaultMesh();
+	mesh = defaultMesh(vertices);
 }
 
 Location
@@ -185,8 +185,8 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 	const auto trans {glm::translate(centreBase)};
 
 	int segCount = segs;
+	std::vector<Vertex> vertices;
 	vertices.reserve((segCount + 1) * railCrossSection.size());
-	indices.reserve(segCount * 2 * railCrossSection.size());
 	for (glm::vec3 swing = {arc.second, e1p.y - centreBase.y, 0.F}; segCount >= 0; swing += step, --segCount) {
 		const auto t {trans * glm::rotate(swing.x - half_pi, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
 		for (const auto & rcs : railCrossSection) {
@@ -194,7 +194,7 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 			vertices.emplace_back(m, glm::vec2 {rcs.second, swing.z}, up);
 		}
 	}
-	defaultMesh();
+	mesh = defaultMesh(vertices);
 }
 
 Location

@@ -1,10 +1,8 @@
 #ifndef RAILLINKS_H
 #define RAILLINKS_H
 
-#include "collection.hpp"
 #include "game/worldobject.h"
 #include "gfx/models/mesh.h"
-#include "gfx/models/vertex.hpp"
 #include "gfx/renderable.h"
 #include "link.h"
 #include "network.h"
@@ -13,10 +11,11 @@
 #include <maths.h>
 #include <memory>
 #include <set>
+#include <span>
 #include <utility>
-#include <vector>
 
 class Shader;
+class Vertex;
 
 // A piece of rail track
 class RailLink : public Link, public Renderable {
@@ -26,11 +25,9 @@ public:
 	void render(const Shader &) const override;
 
 protected:
-	void defaultMesh();
+	[[nodiscard]] static MeshPtr defaultMesh(const std::span<Vertex> vertices);
 
-	Collection<Mesh, false> meshes;
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	MeshPtr mesh;
 };
 
 class RailLinkStraight : public RailLink {
