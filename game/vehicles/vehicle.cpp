@@ -29,9 +29,9 @@ Vehicle::move(TickDuration dur)
 	auto curLink {linkHist.getCurrent()};
 	while (linkDist > curLink.first->length) {
 		const auto location = curLink.first->positionAt(curLink.first->length, curLink.second);
-		auto nexts {curLink.first->nexts[1 - curLink.second]};
+		auto nexts {curLink.first->ends[1 - curLink.second].nexts};
 		auto last = std::remove_if(nexts.begin(), nexts.end(), [ang = location.rot.y](const Link::Next & n) {
-			return std::abs(normalize(n.first.lock()->ends[n.second].second - ang)) > 0.1F;
+			return std::abs(normalize(n.first.lock()->ends[n.second].dir - ang)) > 0.1F;
 		});
 		if (last != nexts.begin()) {
 			auto next = (std::distance(nexts.begin(), last) > 1) ? orders.current()->navigate(nexts.cbegin(), last)

@@ -12,7 +12,6 @@
 #include <location.hpp>
 #include <maths.h>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
@@ -28,9 +27,9 @@ RailLinks::joinLinks(const LinkPtr & l) const
 		if (l != ol) {
 			for (const auto oe : {0, 1}) {
 				for (const auto te : {0, 1}) {
-					if (l->ends[te].first == ol->ends[oe].first) {
-						l->nexts[te].emplace_back(ol, oe);
-						ol->nexts[oe].emplace_back(l, te);
+					if (l->ends[te].node == ol->ends[oe].node) {
+						l->ends[te].nexts.emplace_back(ol, oe);
+						ol->ends[oe].nexts.emplace_back(l, te);
 					}
 				}
 			}
@@ -57,8 +56,8 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		for (const auto & l : links.objects) {
 			for (const auto & e : l->ends) {
 				// cppcheck-suppress useStlAlgorithm
-				if (e.first == n) {
-					return e.second;
+				if (e.node == n) {
+					return e.dir;
 				}
 			}
 		}
@@ -157,7 +156,7 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 	const auto len = round_sleepers(length / 2.F);
 	const auto e {flat_orientation(diff)};
 	for (int ei = 0; ei < 2; ei++) {
-		const auto trans {glm::translate(ends[ei].first->pos) * e};
+		const auto trans {glm::translate(ends[ei].node->pos) * e};
 		for (const auto & rcs : railCrossSection) {
 			const glm::vec3 m {(trans * glm::vec4 {rcs.first, 1})};
 			vertices.emplace_back(m, glm::vec2 {rcs.second, ei ? len : 0.F}, up);
@@ -169,7 +168,7 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 Location
 RailLinkStraight::positionAt(float dist, unsigned char start) const
 {
-	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
+	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
 	const auto diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
 	return Location {es.first->pos + RAIL_HEIGHT + dir * dist, {-vector_pitch(dir), vector_yaw(dir), 0}};
@@ -183,10 +182,10 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, const Arc arc) :
 	RailLink({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			(glm::length(a->pos - c)) * arc_length(arc)),
-	centreBase(c), radius {glm::length(ends[0].first->pos - centreBase)}, arc {arc}
+	centreBase(c), radius {glm::length(ends[0].node->pos - centreBase)}, arc {arc}
 {
-	const auto & e0p {ends[0].first->pos};
-	const auto & e1p {ends[1].first->pos};
+	const auto & e0p {ends[0].node->pos};
+	const auto & e1p {ends[1].node->pos};
 	const auto slength = round_sleepers(length / 2.F);
 	const auto segs = std::round(5.F * slength / std::pow(radius, 0.7F));
 	const auto step {glm::vec3 {-arc_length(arc), e0p.y - e1p.y, slength} / segs};
@@ -210,7 +209,7 @@ RailLinkCurve::positionAt(float dist, unsigned char start) const
 {
 	static constexpr std::array<float, 2> dirOffset {half_pi, -half_pi};
 	const auto frac {dist / length};
-	const auto es {std::make_pair(ends[start].first.get(), ends[1 - start].first.get())};
+	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
 	const auto as {std::make_pair(arc[start], arc[1 - start])};
 	const auto ang {as.first + ((as.second - as.first) * frac)};
 	const auto relPos {!sincosf(ang) * radius};

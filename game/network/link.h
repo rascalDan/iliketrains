@@ -32,7 +32,14 @@ using LinkCPtr = std::shared_ptr<const Link>;
 using LinkWPtr = std::weak_ptr<const Link>;
 class Link {
 public:
-	using End = std::pair<NodePtr, float /*dir*/>;
+	using Next = std::pair<LinkWPtr, unsigned char /*end*/>;
+	using Nexts = std::vector<Next>;
+
+	struct End {
+		NodePtr node;
+		float dir;
+		Nexts nexts {};
+	};
 
 	Link(End, End, float);
 	virtual ~Link() = default;
@@ -43,9 +50,6 @@ public:
 
 	std::array<End, 2> ends;
 	float length;
-	using Next = std::pair<LinkWPtr, unsigned char /*end*/>;
-	using Nexts = std::vector<Next>;
-	std::array<Nexts, 2> nexts;
 };
 
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);
