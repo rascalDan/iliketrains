@@ -10,3 +10,12 @@ NetworkOf<T>::render(const Shader & shader) const
 	texture->Bind();
 	links.apply(&T::render, shader);
 }
+
+template<typename T>
+void
+NetworkOf<T>::joinLinks(const LinkPtr & l) const
+{
+	for (const auto & ol : links.objects) {
+		Network::joinLinks(l, ol);
+	}
+}

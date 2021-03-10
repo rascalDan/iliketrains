@@ -1,7 +1,9 @@
 #include "network.h"
+#include <array>
 #include <cache.h>
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
+#include <initializer_list>
 #include <utility>
 
 Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(tn)} { }
@@ -26,4 +28,19 @@ Network::findNodeAt(glm::vec3 pos) const
 		return *n;
 	}
 	return {};
+}
+
+void
+Network::joinLinks(const LinkPtr & l, const LinkPtr & ol)
+{
+	if (l != ol) {
+		for (const auto oe : {0, 1}) {
+			for (const auto te : {0, 1}) {
+				if (l->ends[te].node == ol->ends[oe].node) {
+					l->ends[te].nexts.emplace_back(ol, oe);
+					ol->ends[oe].nexts.emplace_back(l, te);
+				}
+			}
+		}
+	}
 }

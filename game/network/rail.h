@@ -11,7 +11,6 @@
 #include <maths.h>
 #include <memory>
 #include <span>
-#include <utility>
 
 class Shader;
 class Vertex;
@@ -50,26 +49,14 @@ private:
 	Arc arc;
 };
 
-template<typename T> concept RailLinkConcept = std::is_base_of_v<RailLink, T>;
-
 class RailLinks : public NetworkOf<RailLink>, public WorldObject {
 public:
 	RailLinks();
-	template<RailLinkConcept T, typename... Params>
-	std::shared_ptr<T>
-	addLink(glm::vec3 a, glm::vec3 b, Params &&... params)
-	{
-		const auto node1 = nodeAt(a), node2 = nodeAt(b);
-		auto l {links.create<T>(node1, node2, std::forward<Params>(params)...)};
-		joinLinks(l);
-		return l;
-	}
 
 	std::shared_ptr<RailLink> addLinksBetween(glm::vec3 start, glm::vec3 end);
 
 private:
 	void tick(TickDuration elapsed) override;
-	void joinLinks(const LinkPtr &) const;
 };
 
 #endif

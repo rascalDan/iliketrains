@@ -7,7 +7,6 @@
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/models/vertex.hpp>
 #include <glm/gtx/transform.hpp>
-#include <initializer_list>
 #include <location.hpp>
 #include <maths.h>
 #include <stdexcept>
@@ -21,23 +20,6 @@ constexpr glm::vec3 RAIL_HEIGHT {0, .25F, 0};
 
 RailLinks::RailLinks() : NetworkOf<RailLink> {"rails.jpg"} { }
 void RailLinks::tick(TickDuration) { }
-
-void
-RailLinks::joinLinks(const LinkPtr & l) const
-{
-	for (const auto & ol : links.objects) {
-		if (l != ol) {
-			for (const auto oe : {0, 1}) {
-				for (const auto te : {0, 1}) {
-					if (l->ends[te].node == ol->ends[oe].node) {
-						l->ends[te].nexts.emplace_back(ol, oe);
-						ol->ends[oe].nexts.emplace_back(l, te);
-					}
-				}
-			}
-		}
-	}
-}
 
 std::shared_ptr<RailLink>
 RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
