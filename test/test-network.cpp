@@ -9,7 +9,6 @@
 #include <game/network/network.h>
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <glm/glm.hpp>
-#include <location.hpp>
 #include <maths.h>
 #include <memory>
 #include <stdexcept>
@@ -17,13 +16,8 @@
 #include <utility>
 #include <vector>
 
-struct TestLink : public Link {
-	TestLink(NodePtr a, NodePtr b, float ad, float bd, float l) : Link {{std::move(a), ad}, {std::move(b), bd}, l} { }
-	[[nodiscard]] Location
-	positionAt(float, unsigned char) const override
-	{
-		throw std::runtime_error("not implemented");
-	}
+struct TestLink : public LinkStraight {
+	TestLink(NodePtr a, NodePtr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
 };
 
 constexpr glm::vec3 p000 {0, 0, 0}, p100 {1, 0, 0}, p200 {2, 0, 0}, p300 {3, 0, 0};
@@ -38,12 +32,12 @@ struct TestNetwork : public NetworkOf<TestLink> {
 		//    \       5      /
 		//     3      |     4
 		//      \-> p101 <-/
-		addLink<TestLink>(p000, p100, 0.F, pi, 1.F);
-		addLink<TestLink>(p100, p200, 0.F, pi, 1.F);
-		addLink<TestLink>(p200, p300, 0.F, pi, 1.F);
-		addLink<TestLink>(p000, p101, 0.F, pi, 2.F);
-		addLink<TestLink>(p200, p101, 0.F, pi, 2.F);
-		addLink<TestLink>(p100, p101, 0.F, pi, 1.F);
+		addLink<TestLink>(p000, p100, 1.F);
+		addLink<TestLink>(p100, p200, 1.F);
+		addLink<TestLink>(p200, p300, 1.F);
+		addLink<TestLink>(p000, p101, 2.F);
+		addLink<TestLink>(p200, p101, 2.F);
+		addLink<TestLink>(p100, p101, 1.F);
 	}
 };
 
