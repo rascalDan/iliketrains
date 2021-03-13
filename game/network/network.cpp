@@ -47,7 +47,7 @@ Network::joinLinks(const LinkPtr & l, const LinkPtr & ol)
 	}
 }
 
-std::vector<LinkWPtr>
+Link::Nexts
 Network::routeFromTo(const Link::End & start, glm::vec3 dest) const
 {
 	auto destNode {findNodeAt(dest)};
@@ -57,7 +57,7 @@ Network::routeFromTo(const Link::End & start, glm::vec3 dest) const
 	return routeFromTo(start, destNode);
 }
 
-std::vector<LinkWPtr>
+Link::Nexts
 Network::routeFromTo(const Link::End & end, const NodePtr & dest) const
 {
 	return RouteWalker().findRouteTo(end, dest);

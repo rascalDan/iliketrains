@@ -4,6 +4,7 @@
 #include <limits>
 #include <memory>
 #include <utility>
+#include <vector>
 
 RouteWalker::RouteWalker() : solutionLength {std::numeric_limits<float>::max()} { }
 
@@ -27,10 +28,10 @@ RouteWalker::findRouteTo(const Link::End & currentEnd, const NodePtr & dest, flo
 		return;
 	}
 	visited.insert(&currentEnd);
-	for (const auto & nexts : currentEnd.nexts) {
-		const auto link = nexts.first.lock();
-		currentSolution.push_back(link);
-		findRouteTo(link->ends[!nexts.second], dest, length + link->length);
+	for (const auto & next : currentEnd.nexts) {
+		const auto link = next.first.lock();
+		currentSolution.emplace_back(next);
+		findRouteTo(link->ends[!next.second], dest, length + link->length);
 		currentSolution.pop_back();
 	}
 	visited.erase(&currentEnd);

@@ -10,7 +10,6 @@
 #include <sorting.hpp>
 #include <string>
 #include <utility>
-#include <vector>
 
 class Texture;
 class Shader;
@@ -23,8 +22,8 @@ public:
 	[[nodiscard]] NodePtr nodeAt(glm::vec3);
 	[[nodiscard]] std::pair<NodePtr, bool> newNodeAt(glm::vec3);
 
-	[[nodiscard]] std::vector<LinkWPtr> routeFromTo(const Link::End &, glm::vec3) const;
-	[[nodiscard]] std::vector<LinkWPtr> routeFromTo(const Link::End &, const NodePtr &) const;
+	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
+	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const NodePtr &) const;
 
 protected:
 	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);

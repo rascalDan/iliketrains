@@ -3,11 +3,10 @@
 
 #include "link.h"
 #include <set>
-#include <vector>
 
 class RouteWalker {
 public:
-	using Solution = std::vector<LinkWPtr>;
+	using Solution = Link::Nexts;
 
 	RouteWalker();
 

@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(routeTo_upStream_to2)
 	const auto & start = links.objects.front()->ends[1];
 	auto r = this->routeFromTo(start, p200);
 	BOOST_REQUIRE_EQUAL(r.size(), 1);
-	BOOST_CHECK_EQUAL(r[0].lock().get(), links.objects[1].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[1].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_upStream_to3)
@@ -140,8 +140,8 @@ BOOST_AUTO_TEST_CASE(routeTo_upStream_to3)
 	const auto & start = links.objects[0]->ends[1];
 	auto r = this->routeFromTo(start, p300);
 	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(r[1].lock().get(), links.objects[2].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[1].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[2].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_downStream_to0)
@@ -149,8 +149,8 @@ BOOST_AUTO_TEST_CASE(routeTo_downStream_to0)
 	const auto & start = links.objects[2]->ends[0];
 	auto r = this->routeFromTo(start, p000);
 	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(r[1].lock().get(), links.objects[0].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[1].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[0].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_upStream_3to300)
@@ -158,8 +158,8 @@ BOOST_AUTO_TEST_CASE(routeTo_upStream_3to300)
 	const auto & start = links.objects[3]->ends[1];
 	auto r = this->routeFromTo(start, p300);
 	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].lock().get(), links.objects[4].get());
-	BOOST_CHECK_EQUAL(r[1].lock().get(), links.objects[2].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[4].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[2].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_downStream_3to300)
@@ -167,9 +167,9 @@ BOOST_AUTO_TEST_CASE(routeTo_downStream_3to300)
 	const auto & start = links.objects[3]->ends[0];
 	auto r = this->routeFromTo(start, p300);
 	BOOST_REQUIRE_EQUAL(r.size(), 3);
-	BOOST_CHECK_EQUAL(r[0].lock().get(), links.objects[0].get());
-	BOOST_CHECK_EQUAL(r[1].lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(r[2].lock().get(), links.objects[2].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[0].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[1].get());
+	BOOST_CHECK_EQUAL(r[2].first.lock().get(), links.objects[2].get());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
