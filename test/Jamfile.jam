@@ -17,3 +17,4 @@ project : requirements
 run test-collection.cpp ;
 run test-obj.cpp ;
 run test-maths.cpp ;
+run test-network.cpp ;

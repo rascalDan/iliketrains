@@ -1,9 +1,11 @@
 #include "network.h"
+#include "routeWalker.h"
 #include <array>
 #include <cache.h>
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
 #include <initializer_list>
+#include <stdexcept>
 #include <utility>
 
 Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(tn)} { }
@@ -43,4 +45,20 @@ Network::joinLinks(const LinkPtr & l, const LinkPtr & ol)
 			}
 		}
 	}
+}
+
+std::vector<LinkWPtr>
+Network::routeFromTo(const Link::End & start, glm::vec3 dest) const
+{
+	auto destNode {findNodeAt(dest)};
+	if (!destNode) {
+		throw std::out_of_range("Node does not exist in network");
+	}
+	return routeFromTo(start, destNode);
+}
+
+std::vector<LinkWPtr>
+Network::routeFromTo(const Link::End & end, const NodePtr & dest) const
+{
+	return RouteWalker().findRouteTo(end, dest);
 }
