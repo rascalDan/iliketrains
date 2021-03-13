@@ -6,9 +6,11 @@ template<typename T>
 void
 NetworkOf<T>::render(const Shader & shader) const
 {
-	shader.setModel(Location {}, Shader::Program::StaticPos);
-	texture->Bind();
-	links.apply(&T::render, shader);
+	if constexpr (std::is_base_of_v<Renderable, T>) {
+		shader.setModel(Location {}, Shader::Program::StaticPos);
+		texture->Bind();
+		links.apply(&Renderable::render, shader);
+	}
 }
 
 template<typename T>
