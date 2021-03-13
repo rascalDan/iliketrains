@@ -7,46 +7,45 @@
 #include "link.h"
 #include "network.h"
 #include <glm/glm.hpp>
-#include <location.hpp>
-#include <maths.h>
 #include <memory>
 #include <span>
+#include <special_members.hpp>
 
 class Shader;
 class Vertex;
+struct Arc;
 
 // A piece of rail track
-class RailLink : public Link, public Renderable {
+class RailLink : public virtual Link, public Renderable {
 public:
-	using Link::Link;
-
+	RailLink() = default;
+	inline ~RailLink() override = 0;
 	void render(const Shader &) const override;
+	NO_COPY(RailLink);
+	NO_MOVE(RailLink);
 
 protected:
+	[[nodiscard]] glm::vec3 vehiclePositionOffset() const override;
 	[[nodiscard]] static MeshPtr defaultMesh(const std::span<Vertex> vertices);
 
 	MeshPtr mesh;
 };
+RailLink::~RailLink() = default;
 
-class RailLinkStraight : public RailLink {
+class RailLinkStraight : public RailLink, public LinkStraight {
 public:
 	RailLinkStraight(const NodePtr &, const NodePtr &);
-	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkStraight(NodePtr, NodePtr, const glm::vec3 & diff);
 };
 
-class RailLinkCurve : public RailLink {
+class RailLinkCurve : public RailLink, public LinkCurve {
 public:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec2);
-	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 
 private:
 	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec3, const Arc);
-	glm::vec3 centreBase;
-	float radius;
-	Arc arc;
 };
 
 class RailLinks : public NetworkOf<RailLink>, public WorldObject {

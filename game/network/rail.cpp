@@ -7,7 +7,6 @@
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/models/vertex.hpp>
 #include <glm/gtx/transform.hpp>
-#include <location.hpp>
 #include <maths.h>
 #include <stdexcept>
 #include <utility>
@@ -123,7 +122,7 @@ round_sleepers(const float v)
 RailLinkStraight::RailLinkStraight(const NodePtr & a, const NodePtr & b) : RailLinkStraight(a, b, b->pos - a->pos) { }
 
 RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff) :
-	RailLink({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
+	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
 {
 	std::vector<Vertex> vertices;
 	vertices.reserve(2 * railCrossSection.size());
@@ -139,24 +138,15 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 	mesh = defaultMesh(vertices);
 }
 
-Location
-RailLinkStraight::positionAt(float dist, unsigned char start) const
-{
-	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
-	const auto diff {es.second->pos - es.first->pos};
-	const auto dir {glm::normalize(diff)};
-	return Location {es.first->pos + RAIL_HEIGHT + dir * dist, {-vector_pitch(dir), vector_yaw(dir), 0}};
-}
-
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
 	RailLinkCurve(a, b, {c.x, a->pos.y, c.y}, {!c, a->pos, b->pos})
 {
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, const Arc arc) :
-	RailLink({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
+	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			(glm::length(a->pos - c)) * arc_length(arc)),
-	centreBase(c), radius {glm::length(ends[0].node->pos - centreBase)}, arc {arc}
+	LinkCurve {c, glm::length(ends[0].node->pos - c), arc}
 {
 	const auto & e0p {ends[0].node->pos};
 	const auto & e1p {ends[1].node->pos};
@@ -178,17 +168,8 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 	mesh = defaultMesh(vertices);
 }
 
-Location
-RailLinkCurve::positionAt(float dist, unsigned char start) const
+glm::vec3
+RailLink::vehiclePositionOffset() const
 {
-	static constexpr std::array<float, 2> dirOffset {half_pi, -half_pi};
-	const auto frac {dist / length};
-	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
-	const auto as {std::make_pair(arc[start], arc[1 - start])};
-	const auto ang {as.first + ((as.second - as.first) * frac)};
-	const auto relPos {!sincosf(ang) * radius};
-	const auto relClimb {RAIL_HEIGHT
-			+ glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
-	const auto pitch {vector_pitch({0, (es.first->pos.y - es.second->pos.y) / length, 0})};
-	return Location {relPos + relClimb + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
+	return RAIL_HEIGHT;
 }

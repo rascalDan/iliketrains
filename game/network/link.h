@@ -4,6 +4,7 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <location.hpp>
+#include <maths.h>
 #include <memory>
 #include <special_members.hpp>
 #include <utility>
@@ -50,9 +51,42 @@ public:
 
 	std::array<End, 2> ends;
 	float length;
+
+protected:
+	[[nodiscard]] virtual glm::vec3
+	vehiclePositionOffset() const
+	{
+		return {};
+	}
 };
 
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);
 bool operator<(const Node & a, const Node & b);
+
+class LinkStraight : public virtual Link {
+public:
+	LinkStraight() = default;
+	inline ~LinkStraight() override = 0;
+	NO_COPY(LinkStraight);
+	NO_MOVE(LinkStraight);
+
+	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
+};
+LinkStraight::~LinkStraight() = default;
+
+class LinkCurve : public virtual Link {
+public:
+	inline ~LinkCurve() override = 0;
+	LinkCurve(glm::vec3, float, Arc);
+	NO_COPY(LinkCurve);
+	NO_MOVE(LinkCurve);
+
+	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
+
+	glm::vec3 centreBase;
+	float radius;
+	Arc arc;
+};
+LinkCurve::~LinkCurve() = default;
 
 #endif
