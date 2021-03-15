@@ -4,12 +4,12 @@
 #include <game/activities/go.h>
 #include <game/activities/idle.h>
 #include <game/activity.h>
+#include <game/gamestate.h>
 #include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
 #include <game/vehicles/train.h>
-#include <game/world.h>
 #include <game/worldobject.h>
 #include <gfx/camera_controller.h>
 #include <gfx/gl/camera.h>
@@ -26,7 +26,7 @@
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
 
-class SDL_Application : public InputHandler, public std::enable_shared_from_this<SDL_Application> {
+class SDL_Application : public InputHandler, public std::enable_shared_from_this<SDL_Application>, GameState {
 public:
 	SDL_Application()
 	{
@@ -160,7 +160,6 @@ private:
 
 	bool isRunning {true};
 	Collection<InputHandler> inputStack;
-	World world;
 };
 
 int
