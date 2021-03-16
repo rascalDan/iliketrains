@@ -2,6 +2,7 @@
 #define WORKER_H
 
 #include <utility>
+class Work;
 
 #if __cpp_lib_semaphore
 #	include <deque>
@@ -11,8 +12,6 @@
 #	include <special_members.hpp>
 #	include <thread>
 #	include <vector>
-
-class Work;
 
 class Worker {
 public:
@@ -26,7 +25,7 @@ public:
 
 	template<typename T, typename... Params>
 	void
-	addWork(Params &&... params)
+	addWork(Params &&... params) requires std::is_base_of_v<Work, T>
 	{
 		addWork(std::make_unique<T>(std::forward<Params>(params)...));
 	}
@@ -51,7 +50,7 @@ class Worker {
 public:
 	template<typename T, typename... Params>
 	void
-	addWork(Params &&... params)
+	addWork(Params &&... params) requires std::is_base_of_v<Work, T>
 	{
 		T(std::forward<Params>(params)...).doWork();
 	}
