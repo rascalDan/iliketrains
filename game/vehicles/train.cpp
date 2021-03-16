@@ -33,7 +33,7 @@ Train::tick(TickDuration dur)
 }
 
 void
-Train::doActivity(const Go *, TickDuration dur)
+Train::doActivity(Go *, TickDuration dur)
 {
 	const auto maxSpeed = objects.front()->rvClass->maxSpeed;
 	if (speed != maxSpeed) {
@@ -42,7 +42,7 @@ Train::doActivity(const Go *, TickDuration dur)
 }
 
 void
-Train::doActivity(const Idle *, TickDuration dur)
+Train::doActivity(Idle *, TickDuration dur)
 {
 	if (speed != 0.F) {
 		speed -= std::min(speed, 30.F * dur.count());

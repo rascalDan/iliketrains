@@ -28,8 +28,8 @@ public:
 	void render(const Shader & shader) const override;
 
 	void tick(TickDuration elapsed) override;
-	void doActivity(const Go *, TickDuration) override;
-	void doActivity(const Idle *, TickDuration) override;
+	void doActivity(Go *, TickDuration) override;
+	void doActivity(Idle *, TickDuration) override;
 
 	[[nodiscard]] Location getBogiePosition(float linkDist, float dist) const;
 };

@@ -13,7 +13,7 @@ public:
 	DEFAULT_MOVE_COPY(Activity);
 	virtual ~Activity() = default;
 
-	virtual void apply(Vehicle *, TickDuration) const = 0;
+	virtual void apply(Vehicle *, TickDuration) = 0;
 
 	template<typename T> class Of;
 };
@@ -22,7 +22,7 @@ using ActivityPtr = std::unique_ptr<Activity>;
 template<typename T> concept ActivityConcept = std::is_base_of_v<Activity, T>;
 template<ActivityConcept AC> class Can {
 public:
-	virtual void doActivity(const AC *, TickDuration) = 0;
+	virtual void doActivity(AC *, TickDuration) = 0;
 };
 
 #endif
