@@ -6,6 +6,7 @@
 #include "location.hpp"
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <utility>
 
 void
@@ -33,11 +34,24 @@ Train::tick(TickDuration dur)
 }
 
 void
-Train::doActivity(Go *, TickDuration dur)
+Train::doActivity(Go * go, TickDuration dur)
 {
 	const auto maxSpeed = objects.front()->rvClass->maxSpeed;
-	if (speed != maxSpeed) {
-		speed += ((maxSpeed - speed) * dur.count());
+	if (go->dist) {
+		*go->dist -= speed * dur.count();
+		if (*go->dist < (speed * speed) / 60.F) {
+			speed -= std::min(speed, 30.F * dur.count());
+		}
+		else {
+			if (speed != maxSpeed) {
+				speed += ((maxSpeed - speed) * dur.count());
+			}
+		}
+	}
+	else {
+		if (speed != maxSpeed) {
+			speed += ((maxSpeed - speed) * dur.count());
+		}
 	}
 }
 

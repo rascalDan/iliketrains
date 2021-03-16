@@ -1,11 +1,16 @@
 #include <SDL2/SDL.h>
+#include <array>
 #include <chrono>
 #include <collection.hpp>
 #include <game/activities/go.h>
 #include <game/activities/idle.h>
 #include <game/activity.h>
 #include <game/gamestate.h>
+#include <game/network/link.h>
 #include <game/network/rail.h>
+#include <game/objective.h>
+#include <game/objectives/goto.h>
+#include <game/orders.h>
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
@@ -109,6 +114,9 @@ public:
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);
 			}
+			train->orders.removeAll();
+			train->orders.create<GoTo>(&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100, 15, -450}));
+			train->currentActivity = train->orders.current()->createActivity();
 		}
 
 		Shader shader;
