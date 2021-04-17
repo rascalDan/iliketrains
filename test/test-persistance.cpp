@@ -2,95 +2,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <functional>
 #include <glm/glm.hpp>
 #include <iosfwd>
-#include <jsonParse.h>
+#include <jsonParse-persistance.h>
 #include <memory>
-#include <persistance.h>
 #include <string>
 #include <vector>
-
-struct TestObject;
-
-namespace Persistanace {
-	struct JsonLoadPersistanceStore : public json::jsonParser {
-		explicit JsonLoadPersistanceStore(std::istream & in) : json::jsonParser {&in} { }
-
-		Stack stk;
-
-		inline SelectionPtr &
-		current()
-		{
-			return stk.top();
-		}
-
-		template<typename T>
-		void
-		loadState(std::unique_ptr<T> & t)
-		{
-			stk.push(std::make_unique<SelectionT<std::unique_ptr<T>>>(std::ref(t)));
-			yy_push_state(0);
-			yylex();
-		}
-		void
-		BeginObject() override
-		{
-			stk.push(current()->BeginObject());
-		}
-		void
-		BeginArray() override
-		{
-			current()->BeginArray(stk);
-		}
-		template<typename T>
-		inline void
-		PushValue(T && value)
-		{
-			current()->beforeValue(stk);
-			(*current())(value);
-			stk.pop();
-		}
-		void
-		PushBoolean(bool value) override
-		{
-			PushValue(value);
-		}
-		void
-		PushNumber(float value) override
-		{
-			PushValue(value);
-		}
-		void
-		PushNull() override
-		{
-			PushValue(nullptr);
-		}
-		void
-		PushText(std::string && value) override
-		{
-			PushValue(value);
-		}
-		void
-		PushKey(std::string && k) override
-		{
-			stk.push(current()->select(k));
-		}
-		void
-		EndArray() override
-		{
-			stk.pop();
-		}
-		void
-		EndObject() override
-		{
-			stk.pop();
-		}
-	};
-}
-
-#define STORE_TYPE store.persistType(typeid(*this))
-#define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
 
 struct TestObject : public Persistanace::Persistable {
 	TestObject() = default;
@@ -132,7 +49,7 @@ BOOST_AUTO_TEST_CASE(load_object)
 {
 	Persistanace::Persistable::addFactory("TestObject", std::make_unique<TestObject>);
 	std::stringstream ss {input};
-	Persistanace::JsonLoadPersistanceStore jlps {ss};
+	Persistanace::JsonParsePersistance jlps {ss};
 	std::unique_ptr<TestObject> to;
 	jlps.loadState(to);
 

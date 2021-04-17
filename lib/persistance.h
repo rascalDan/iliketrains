@@ -198,4 +198,7 @@ namespace Persistanace {
 	};
 }
 
+#define STORE_TYPE store.persistType(typeid(*this))
+#define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
+
 #endif
