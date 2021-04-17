@@ -9,6 +9,8 @@
 
 %{
 #include <string>
+#include <utility>
+class jsonBaseFlexLexer;
 #include "jsonParse.h"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"

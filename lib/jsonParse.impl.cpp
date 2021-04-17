@@ -1,4 +1,7 @@
 #include "jsonParse.h"
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
 
 void
 json::jsonParser::LexerError(const char * msg)
@@ -16,24 +19,24 @@ void
 json::jsonParser::appendEscape(unsigned long cp, std::string & str)
 {
 	if (cp <= 0x7F) {
-		str += cp;
+		str += (char)cp;
 	}
 	else if (cp <= 0x7FF) {
-		str += (cp >> 6) + 192;
-		str += (cp & 63) + 128;
+		str += char((cp >> 6) + 192);
+		str += char((cp & 63) + 128);
 	}
 	else if (0xd800 <= cp && cp <= 0xdfff) {
 		throw std::range_error("Invalid UTF-8 sequence");
 	}
 	else if (cp <= 0xFFFF) {
-		str += (cp >> 12) + 224;
-		str += ((cp >> 6) & 63) + 128;
-		str += (cp & 63) + 128;
+		str += char((cp >> 12) + 224);
+		str += char(((cp >> 6) & 63) + 128);
+		str += char((cp & 63) + 128);
 	}
 	else if (cp <= 0x10FFFF) {
-		str += (cp >> 18) + 240;
-		str += ((cp >> 12) & 63) + 128;
-		str += ((cp >> 6) & 63) + 128;
-		str += (cp & 63) + 128;
+		str += char((cp >> 18) + 240);
+		str += char(((cp >> 12) & 63) + 128);
+		str += char(((cp >> 6) & 63) + 128);
+		str += char((cp & 63) + 128);
 	}
 }

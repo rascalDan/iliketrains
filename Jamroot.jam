@@ -21,6 +21,7 @@ project : requirements
 	<variant>release:<lto>on
 	<variant>coverage:<coverage>on
 	<toolset>tidy:<exclude>gfx/models/obj.cpp
+	<toolset>tidy:<exclude>lib/jsonParse.cpp
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
 	<toolset>tidy:<checkxx>clang-*
