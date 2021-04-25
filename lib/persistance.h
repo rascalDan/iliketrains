@@ -52,7 +52,6 @@ namespace Persistanace {
 			std::swap(v, evalue);
 		}
 
-		static constexpr bool ArrayLike {false};
 		T & v;
 	};
 
@@ -86,7 +85,6 @@ namespace Persistanace {
 			stk.push(std::make_unique<SelectionT<T>>(std::ref(v[idx++])));
 		}
 
-		static constexpr bool ArrayLike {true};
 		glm::vec<L, T, Q> & v;
 		glm::length_t idx {0};
 	};
@@ -106,7 +104,6 @@ namespace Persistanace {
 			stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
 		}
 
-		static constexpr bool ArrayLike {true};
 		std::vector<T> & v;
 	};
 

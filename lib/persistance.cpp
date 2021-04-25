@@ -69,11 +69,4 @@ namespace Persistanace {
 	Selection::EndObject(Stack &)
 	{
 	}
-
-	static_assert(!SelectionT<float>::ArrayLike);
-	static_assert(!SelectionT<bool>::ArrayLike);
-	static_assert(!SelectionT<std::string>::ArrayLike);
-	static_assert(SelectionT<std::vector<float>>::ArrayLike);
-	static_assert(SelectionT<glm::vec3>::ArrayLike);
-	static_assert(SelectionT<std::vector<glm::vec3>>::ArrayLike);
 }
