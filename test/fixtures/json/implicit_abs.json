@@ -1,0 +1,8 @@
+{
+	"@typeid": "TestObject",
+	"flt": 1,
+	"aptr": {
+		"str": "trigger"
+	},
+	"str": "after"
+}

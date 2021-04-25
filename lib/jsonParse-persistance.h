@@ -11,18 +11,18 @@
 namespace Persistanace {
 	class JsonParsePersistance : public json::jsonParser {
 	public:
-		explicit JsonParsePersistance(std::istream & in);
-
 		template<typename T>
-		void
-		loadState(T & t)
+		inline T
+		loadState(std::istream & in)
 		{
+			T t {};
 			stk.push(std::make_unique<SelectionT<T>>(std::ref(t)));
-			loadState();
+			loadState(in);
+			return t;
 		}
 
 	protected:
-		void loadState();
+		void loadState(std::istream & in);
 
 		void BeginObject() override;
 		void BeginArray() override;
@@ -34,7 +34,6 @@ namespace Persistanace {
 		void EndArray() override;
 		void EndObject() override;
 
-	private:
 		Stack stk;
 
 		template<typename T> inline void PushValue(T && value);

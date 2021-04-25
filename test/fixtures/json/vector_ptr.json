@@ -1,0 +1,13 @@
+{
+	"vptr": [
+		{
+			"@typeid": "TestObject",
+			"str": "type"
+		},
+		{
+			"flt": 3.14
+		},
+		null,
+		{}
+	]
+}

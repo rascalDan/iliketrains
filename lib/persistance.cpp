@@ -47,8 +47,8 @@ namespace Persistanace {
 		throw std::runtime_error("Unexpected array");
 	}
 
-	SelectionPtr
-	Selection::BeginObject()
+	void
+	Selection::BeginObject(Stack &)
 	{
 		throw std::runtime_error("Unexpected object");
 	}
@@ -62,7 +62,12 @@ namespace Persistanace {
 	SelectionPtr
 	Selection::select(const std::string &)
 	{
-		throw std::runtime_error("Unexpected persist");
+		throw std::runtime_error("Unexpected select");
+	}
+
+	void
+	Selection::EndObject(Stack &)
+	{
 	}
 
 	static_assert(!SelectionT<float>::ArrayLike);

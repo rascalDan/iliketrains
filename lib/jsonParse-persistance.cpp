@@ -1,11 +1,10 @@
 #include "jsonParse-persistance.h"
 
 namespace Persistanace {
-	JsonParsePersistance::JsonParsePersistance(std::istream & in) : json::jsonParser {&in} { }
-
 	void
-	JsonParsePersistance::loadState()
+	JsonParsePersistance::loadState(std::istream & in)
 	{
+		this->switch_streams(&in, nullptr);
 		yy_push_state(0);
 		yylex();
 	}
@@ -13,7 +12,8 @@ namespace Persistanace {
 	void
 	JsonParsePersistance::BeginObject()
 	{
-		stk.push(current()->BeginObject());
+		current()->beforeValue(stk);
+		current()->BeginObject(stk);
 	}
 
 	void
@@ -61,7 +61,8 @@ namespace Persistanace {
 	void
 	JsonParsePersistance::EndObject()
 	{
-		stk.pop();
+		current()->EndObject(stk);
+		current()->EndObject(stk);
 	}
 
 	template<typename T>

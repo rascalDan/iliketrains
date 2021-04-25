@@ -1,4 +1,5 @@
 import testing ;
+import sequence ;
 
 lib boost_unit_test_framework ;
 
@@ -18,4 +19,4 @@ run test-collection.cpp ;
 run test-obj.cpp ;
 run test-maths.cpp ;
 run test-network.cpp ;
-run test-persistance.cpp ;
+run test-persistance.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json ] ] ;

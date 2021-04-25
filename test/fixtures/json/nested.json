@@ -1,0 +1,21 @@
+{
+	"@typeid": "TestObject",
+	"flt": 1,
+	"ptr": {
+		"@typeid": "TestObject",
+		"flt": 2,
+		"ptr": {
+			"@typeid": "TestObject",
+			"flt": 3,
+			"ptr": {
+				"@typeid": "TestObject",
+				"flt": 4,
+				"ptr": null,
+				"str": "four"
+			},
+			"str": "three"
+		},
+		"str": "two"
+	},
+	"str": "one"
+}

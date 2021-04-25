@@ -32,7 +32,8 @@ namespace Persistanace {
 		virtual void operator()(const std::nullptr_t &);
 		virtual void operator()(std::string &);
 		virtual void BeginArray(Stack &);
-		virtual SelectionPtr BeginObject();
+		virtual void BeginObject(Stack &);
+		virtual void EndObject(Stack &);
 		virtual void beforeValue(Stack &);
 		virtual SelectionPtr select(const std::string &);
 	};
@@ -94,28 +95,13 @@ namespace Persistanace {
 		explicit SelectionT(std::vector<T> & value) : v {value} { }
 
 		void
-		BeginArray(Stack &) override
-		{
-		}
-
-		void
-		beforeValue(Stack & stk) override
+		BeginArray(Stack & stk) override
 		{
 			stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
 		}
 
-		static constexpr bool ArrayLike {true};
-		std::vector<T> & v;
-	};
-
-	template<typename T>
-	concept ArrayLike = SelectionT<T>::ArrayLike;
-
-	template<ArrayLike T> struct SelectionT<std::vector<T>> : public Selection {
-		explicit SelectionT(std::vector<T> & value) : v {value} { }
-
 		void
-		BeginArray(Stack & stk) override
+		beforeValue(Stack & stk) override
 		{
 			stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
 		}
@@ -172,10 +158,12 @@ namespace Persistanace {
 				}
 				else {
 					if (!v) {
-						if constexpr (!std::is_abstract_v<T>) {
+						if constexpr (std::is_abstract_v<T>) {
+							throw std::runtime_error("cannot select member of null object");
+						}
+						else {
 							v = std::make_unique<T>();
 						}
-						throw std::runtime_error("cannot select member of null object");
 					}
 					PersistanceStore ps {mbr};
 					v->persist(ps);
@@ -183,18 +171,48 @@ namespace Persistanace {
 				}
 			}
 
+			void
+			EndObject(Stack & stk) override
+			{
+				if (!v) {
+					if constexpr (std::is_abstract_v<T>) {
+						throw std::runtime_error("cannot default create abstract object");
+					}
+					else {
+						v = std::make_unique<T>();
+					}
+				}
+				stk.pop();
+			}
+
 			Ptr & v;
 		};
 
-		explicit SelectionT(std::unique_ptr<T> & o) : v {o} { }
+		explicit SelectionT(Ptr & o) : v {o} { }
 
-		SelectionPtr
-		BeginObject() override
+		void
+		beforeValue(Stack &) override
 		{
-			return std::make_unique<SelectionObj>(v);
 		}
 
-		std::unique_ptr<T> & v;
+		void
+		operator()(const std::nullptr_t &) override
+		{
+			v.reset();
+		}
+
+		void
+		BeginObject(Stack & stk) override
+		{
+			stk.push(std::make_unique<SelectionObj>(v));
+		}
+		void
+		EndObject(Stack & stk) override
+		{
+			stk.pop();
+		}
+
+		Ptr & v;
 	};
 }
 

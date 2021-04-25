@@ -1,0 +1,7 @@
+{
+	"aptr": {
+		"@typeid": "SubObject",
+		"base": "set base",
+		"sub": "set sub"
+	}
+}
