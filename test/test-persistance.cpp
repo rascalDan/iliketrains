@@ -13,10 +13,10 @@
 struct AbsObject : public Persistanace::Persistable {
 	std::string base;
 
-	void
+	bool
 	persist(Persistanace::PersistanceStore & store) override
 	{
-		STORE_MEMBER(base);
+		return STORE_MEMBER(base);
 	}
 
 	virtual void dummy() const = 0;
@@ -25,11 +25,10 @@ struct AbsObject : public Persistanace::Persistable {
 struct SubObject : public AbsObject {
 	std::string sub;
 
-	void
+	bool
 	persist(Persistanace::PersistanceStore & store) override
 	{
-		AbsObject::persist(store);
-		STORE_MEMBER(sub);
+		return AbsObject::persist(store) && STORE_MEMBER(sub);
 	}
 
 	void
@@ -52,10 +51,10 @@ struct TestObject : public Persistanace::Persistable {
 	std::unique_ptr<AbsObject> aptr;
 	std::vector<std::unique_ptr<TestObject>> vptr;
 
-	void
+	bool
 	persist(Persistanace::PersistanceStore & store) override
 	{
-		STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos) && STORE_MEMBER(flts)
+		return STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos) && STORE_MEMBER(flts)
 				&& STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr) && STORE_MEMBER(aptr)
 				&& STORE_MEMBER(vptr);
 	}

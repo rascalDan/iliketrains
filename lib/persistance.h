@@ -59,8 +59,8 @@ namespace Persistanace {
 	struct PersistanceStore {
 		// virtual bool persistType(const std::type_info &) = 0;
 		template<typename T>
-		bool
-		persistValue(const std::string_view & key, T & value)
+		inline bool
+		persistValue(const std::string_view key, T & value)
 		{
 			if (key == name) {
 				sel = std::make_unique<SelectionT<T>>(std::ref(value));
@@ -115,7 +115,7 @@ namespace Persistanace {
 		virtual ~Persistable() = default;
 		DEFAULT_MOVE_COPY(Persistable);
 
-		virtual void persist(PersistanceStore & store) = 0;
+		virtual bool persist(PersistanceStore & store) = 0;
 
 		static void addFactory(const std::string_view, std::function<std::unique_ptr<Persistable>()>);
 		static std::unique_ptr<Persistable> callFactory(const std::string_view);
@@ -166,7 +166,9 @@ namespace Persistanace {
 						}
 					}
 					PersistanceStore ps {mbr};
-					v->persist(ps);
+					if (v->persist(ps)) {
+						throw std::runtime_error("cannot find member: " + mbr);
+					}
 					return std::move(ps.sel);
 				}
 			}
@@ -206,6 +208,7 @@ namespace Persistanace {
 		{
 			stk.push(std::make_unique<SelectionObj>(v));
 		}
+
 		void
 		EndObject(Stack & stk) override
 		{
