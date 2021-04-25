@@ -33,9 +33,9 @@ public:
 
 using TestCollection = Collection<Base>;
 
-BOOST_TEST_DONT_PRINT_LOG_VALUE(Collection<Base>::Objects::const_iterator);
+BOOST_TEST_DONT_PRINT_LOG_VALUE(Collection<Base>::Objects::const_iterator)
 
-BOOST_FIXTURE_TEST_SUITE(tc, TestCollection);
+BOOST_FIXTURE_TEST_SUITE(tc, TestCollection)
 
 BOOST_AUTO_TEST_CASE(empty)
 {
@@ -63,4 +63,4 @@ BOOST_AUTO_TEST_CASE(a_sub)
 	BOOST_CHECK_EQUAL(*i, s);
 }
 
-BOOST_AUTO_TEST_SUITE_END();
+BOOST_AUTO_TEST_SUITE_END()
