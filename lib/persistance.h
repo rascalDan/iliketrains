@@ -36,6 +36,9 @@ namespace Persistanace {
 		virtual void EndObject(Stack &);
 		virtual void beforeValue(Stack &);
 		virtual SelectionPtr select(const std::string &);
+
+		template<typename T> static SelectionPtr make(T & value);
+		template<typename S, typename T> static SelectionPtr make_s(T & value);
 	};
 
 	template<typename T> struct SelectionT : public Selection {
@@ -55,6 +58,20 @@ namespace Persistanace {
 		T & v;
 	};
 
+	template<typename T>
+	SelectionPtr
+	Selection::make(T & value)
+	{
+		return make_s<SelectionT<T>>(value);
+	}
+
+	template<typename S, typename T>
+	SelectionPtr
+	Selection::make_s(T & value)
+	{
+		return std::make_unique<S>(value);
+	}
+
 	struct PersistanceStore {
 		// virtual bool persistType(const std::type_info &) = 0;
 		template<typename T>
@@ -62,7 +79,7 @@ namespace Persistanace {
 		persistValue(const std::string_view key, T & value)
 		{
 			if (key == name) {
-				sel = std::make_unique<SelectionT<T>>(std::ref(value));
+				sel = Selection::make(value);
 				return false;
 			}
 			return true;
@@ -80,7 +97,7 @@ namespace Persistanace {
 			void
 			beforeValue(Stack & stk) override
 			{
-				stk.push(std::make_unique<SelectionT<T>>(std::ref(v[idx++])));
+				stk.push(make(v[idx++]));
 			}
 
 			V & v;
@@ -92,7 +109,7 @@ namespace Persistanace {
 		void
 		BeginArray(Stack & stk) override
 		{
-			stk.push(std::make_unique<Members>(std::ref(v)));
+			stk.push(make_s<Members>(v));
 		}
 
 		void
@@ -112,7 +129,7 @@ namespace Persistanace {
 			void
 			beforeValue(Stack & stk) override
 			{
-				stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
+				stk.push(make(v.emplace_back()));
 			}
 
 			V & v;
@@ -123,7 +140,7 @@ namespace Persistanace {
 		void
 		BeginArray(Stack & stk) override
 		{
-			stk.push(std::make_unique<Members>(std::ref(v)));
+			stk.push(make_s<Members>(v));
 		}
 
 		void
@@ -178,7 +195,7 @@ namespace Persistanace {
 					if (v) {
 						throw std::runtime_error("cannot set object type after creation");
 					}
-					return std::make_unique<MakeObjectByTypeName>(std::ref(v));
+					return make_s<MakeObjectByTypeName>(v);
 				}
 				else {
 					if (!v) {
@@ -230,7 +247,7 @@ namespace Persistanace {
 		void
 		BeginObject(Stack & stk) override
 		{
-			stk.push(std::make_unique<SelectionObj>(v));
+			stk.push(make_s<SelectionObj>(v));
 		}
 
 		void
