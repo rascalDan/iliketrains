@@ -72,36 +72,63 @@ namespace Persistanace {
 	};
 
 	template<glm::length_t L, typename T, glm::qualifier Q> struct SelectionT<glm::vec<L, T, Q>> : public Selection {
-		explicit SelectionT(glm::vec<L, float, Q> & value) : v {value} { }
+		using V = glm::vec<L, float, Q>;
 
-		void
-		BeginArray(Stack &) override
-		{
-		}
+		struct Members : public Selection {
+			explicit Members(V & value) : v {value} { }
 
-		void
-		beforeValue(Stack & stk) override
-		{
-			stk.push(std::make_unique<SelectionT<T>>(std::ref(v[idx++])));
-		}
+			void
+			beforeValue(Stack & stk) override
+			{
+				stk.push(std::make_unique<SelectionT<T>>(std::ref(v[idx++])));
+			}
 
-		glm::vec<L, T, Q> & v;
-		glm::length_t idx {0};
-	};
+			V & v;
+			glm::length_t idx {0};
+		};
 
-	template<typename T> struct SelectionT<std::vector<T>> : public Selection {
-		explicit SelectionT(std::vector<T> & value) : v {value} { }
+		explicit SelectionT(V & value) : v {value} { }
 
 		void
 		BeginArray(Stack & stk) override
 		{
-			stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
+			stk.push(std::make_unique<Members>(std::ref(v)));
 		}
 
 		void
-		beforeValue(Stack & stk) override
+		beforeValue(Stack &) override
 		{
-			stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
+		}
+
+		V & v;
+	};
+
+	template<typename T> struct SelectionT<std::vector<T>> : public Selection {
+		using V = std::vector<T>;
+
+		struct Members : public Selection {
+			explicit Members(V & value) : v {value} { }
+
+			void
+			beforeValue(Stack & stk) override
+			{
+				stk.push(std::make_unique<SelectionT<T>>(std::ref(v.emplace_back())));
+			}
+
+			V & v;
+		};
+
+		explicit SelectionT(V & value) : v {value} { }
+
+		void
+		BeginArray(Stack & stk) override
+		{
+			stk.push(std::make_unique<Members>(std::ref(v)));
+		}
+
+		void
+		beforeValue(Stack &) override
+		{
 		}
 
 		std::vector<T> & v;

@@ -19,6 +19,7 @@ namespace Persistanace {
 	void
 	JsonParsePersistance::BeginArray()
 	{
+		current()->beforeValue(stk);
 		current()->BeginArray(stk);
 	}
 
@@ -55,6 +56,7 @@ namespace Persistanace {
 	void
 	JsonParsePersistance::EndArray()
 	{
+		stk.pop();
 		stk.pop();
 	}
 
