@@ -47,22 +47,22 @@ text [^\\\"]*
 %%
 
 <ARRAY_ITEM,INITIAL>{true} {
-	PushBoolean(true);
+	pushBoolean(true);
 	yy_pop_state();
 }
 
 <ARRAY_ITEM,INITIAL>{false} {
-	PushBoolean(false);
+	pushBoolean(false);
 	yy_pop_state();
 }
 
 <ARRAY_ITEM,INITIAL>{number} {
-	PushNumber(std::strtof(YYText(), NULL));
+	pushNumber(std::strtof(YYText(), NULL));
 	yy_pop_state();
 }
 
 <ARRAY_ITEM,INITIAL>{null} {
-	PushNull();
+	pushNull();
 	yy_pop_state();
 }
 
@@ -71,12 +71,12 @@ text [^\\\"]*
 }
 
 <ARRAY_ITEM,INITIAL>{beginobj} {
-	BeginObject();
+	beginObject();
 	BEGIN(OBJECT_ITEM_OR_END);
 }
 
 <ARRAY_ITEM,INITIAL>{beginarray} {
-	BeginArray();
+	beginArray();
 	BEGIN(ARRAY_NEXT);
 	yy_push_state(ARRAY_ITEM);
 }
@@ -86,12 +86,12 @@ text [^\\\"]*
 	switch (YY_START) {
 		case ARRAY_ITEM:
 		case INITIAL:
-			PushText(std::move(buf));
+			pushText(std::move(buf));
 			yy_pop_state();
 			break;
 		case OBJECT_ITEM:
 		case OBJECT_ITEM_OR_END:
-			PushKey(std::move(buf));
+			pushKey(std::move(buf));
 			BEGIN(COLON);
 			break;
 	}
@@ -99,18 +99,18 @@ text [^\\\"]*
 }
 
 <OBJECT_NEXT,OBJECT_ITEM_OR_END>{endobj} {
-	EndObject();
+	endObject();
 	yy_pop_state();
 }
 
 <ARRAY_ITEM>{endarray} {
-	EndArray();
+	endArray();
 	yy_pop_state();
 	yy_pop_state();
 }
 
 <ARRAY_NEXT>{endarray} {
-	EndArray();
+	endArray();
 	yy_pop_state();
 }
 

@@ -18,37 +18,37 @@ namespace Persistanace {
 	}
 
 	void
-	Selection::operator()(float &)
+	Selection::setValue(float &)
 	{
 		throw std::runtime_error("Unexpected float");
 	}
 
 	void
-	Selection::operator()(bool &)
+	Selection::setValue(bool &)
 	{
 		throw std::runtime_error("Unexpected bool");
 	}
 
 	void
-	Selection::operator()(const std::nullptr_t &)
+	Selection::setValue(const std::nullptr_t &)
 	{
 		throw std::runtime_error("Unexpected null");
 	}
 
 	void
-	Selection::operator()(std::string &)
+	Selection::setValue(std::string &)
 	{
 		throw std::runtime_error("Unexpected string");
 	}
 
 	void
-	Selection::BeginArray(Stack &)
+	Selection::beginArray(Stack &)
 	{
 		throw std::runtime_error("Unexpected array");
 	}
 
 	void
-	Selection::BeginObject(Stack &)
+	Selection::beginObject(Stack &)
 	{
 		throw std::runtime_error("Unexpected object");
 	}
@@ -66,7 +66,7 @@ namespace Persistanace {
 	}
 
 	void
-	Selection::EndObject(Stack &)
+	Selection::endObject(Stack &)
 	{
 	}
 }

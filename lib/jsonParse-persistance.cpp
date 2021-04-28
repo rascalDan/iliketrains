@@ -10,69 +10,69 @@ namespace Persistanace {
 	}
 
 	void
-	JsonParsePersistance::BeginObject()
+	JsonParsePersistance::beginObject()
 	{
 		current()->beforeValue(stk);
-		current()->BeginObject(stk);
+		current()->beginObject(stk);
 	}
 
 	void
-	JsonParsePersistance::BeginArray()
+	JsonParsePersistance::beginArray()
 	{
 		current()->beforeValue(stk);
-		current()->BeginArray(stk);
+		current()->beginArray(stk);
 	}
 
 	void
-	JsonParsePersistance::PushBoolean(bool value)
+	JsonParsePersistance::pushBoolean(bool value)
 	{
-		PushValue(value);
+		pushValue(value);
 	}
 
 	void
-	JsonParsePersistance::PushNumber(float value)
+	JsonParsePersistance::pushNumber(float value)
 	{
-		PushValue(value);
+		pushValue(value);
 	}
 
 	void
-	JsonParsePersistance::PushNull()
+	JsonParsePersistance::pushNull()
 	{
-		PushValue(nullptr);
+		pushValue(nullptr);
 	}
 
 	void
-	JsonParsePersistance::PushText(std::string && value)
+	JsonParsePersistance::pushText(std::string && value)
 	{
-		PushValue(value);
+		pushValue(value);
 	}
 
 	void
-	JsonParsePersistance::PushKey(std::string && k)
+	JsonParsePersistance::pushKey(std::string && k)
 	{
 		stk.push(current()->select(k));
 	}
 
 	void
-	JsonParsePersistance::EndArray()
+	JsonParsePersistance::endArray()
 	{
 		stk.pop();
 		stk.pop();
 	}
 
 	void
-	JsonParsePersistance::EndObject()
+	JsonParsePersistance::endObject()
 	{
-		current()->EndObject(stk);
-		current()->EndObject(stk);
+		current()->endObject(stk);
+		current()->endObject(stk);
 	}
 
 	template<typename T>
 	inline void
-	JsonParsePersistance::PushValue(T && value)
+	JsonParsePersistance::pushValue(T && value)
 	{
 		current()->beforeValue(stk);
-		(*current())(value);
+		current()->setValue(value);
 		stk.pop();
 	}
 

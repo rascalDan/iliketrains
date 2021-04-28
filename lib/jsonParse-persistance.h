@@ -24,19 +24,19 @@ namespace Persistanace {
 	protected:
 		void loadState(std::istream & in);
 
-		void BeginObject() override;
-		void BeginArray() override;
-		void PushBoolean(bool value) override;
-		void PushNumber(float value) override;
-		void PushNull() override;
-		void PushText(std::string && value) override;
-		void PushKey(std::string && k) override;
-		void EndArray() override;
-		void EndObject() override;
+		void beginObject() override;
+		void beginArray() override;
+		void pushBoolean(bool value) override;
+		void pushNumber(float value) override;
+		void pushNull() override;
+		void pushText(std::string && value) override;
+		void pushKey(std::string && k) override;
+		void endArray() override;
+		void endObject() override;
 
 		Stack stk;
 
-		template<typename T> inline void PushValue(T && value);
+		template<typename T> inline void pushValue(T && value);
 		inline SelectionPtr & current();
 	};
 }

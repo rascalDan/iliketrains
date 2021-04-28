@@ -27,13 +27,13 @@ namespace Persistanace {
 		virtual ~Selection() = default;
 		DEFAULT_MOVE_COPY(Selection);
 
-		virtual void operator()(float &);
-		virtual void operator()(bool &);
-		virtual void operator()(const std::nullptr_t &);
-		virtual void operator()(std::string &);
-		virtual void BeginArray(Stack &);
-		virtual void BeginObject(Stack &);
-		virtual void EndObject(Stack &);
+		virtual void setValue(float &);
+		virtual void setValue(bool &);
+		virtual void setValue(const std::nullptr_t &);
+		virtual void setValue(std::string &);
+		virtual void beginArray(Stack &);
+		virtual void beginObject(Stack &);
+		virtual void endObject(Stack &);
 		virtual void beforeValue(Stack &);
 		virtual SelectionPtr select(const std::string &);
 
@@ -50,7 +50,7 @@ namespace Persistanace {
 		}
 
 		void
-		operator()(T & evalue) override
+		setValue(T & evalue) override
 		{
 			std::swap(v, evalue);
 		}
@@ -107,7 +107,7 @@ namespace Persistanace {
 		explicit SelectionT(V & value) : v {value} { }
 
 		void
-		BeginArray(Stack & stk) override
+		beginArray(Stack & stk) override
 		{
 			stk.push(make_s<Members>(v));
 		}
@@ -138,7 +138,7 @@ namespace Persistanace {
 		explicit SelectionT(V & value) : v {value} { }
 
 		void
-		BeginArray(Stack & stk) override
+		beginArray(Stack & stk) override
 		{
 			stk.push(make_s<Members>(v));
 		}
@@ -174,7 +174,7 @@ namespace Persistanace {
 				}
 
 				void
-				operator()(std::string & type) override
+				setValue(std::string & type) override
 				{
 					auto no = Persistable::callFactory(type);
 					if (dynamic_cast<T *>(no.get())) {
@@ -215,7 +215,7 @@ namespace Persistanace {
 			}
 
 			void
-			EndObject(Stack & stk) override
+			endObject(Stack & stk) override
 			{
 				if (!v) {
 					if constexpr (std::is_abstract_v<T>) {
@@ -239,19 +239,19 @@ namespace Persistanace {
 		}
 
 		void
-		operator()(const std::nullptr_t &) override
+		setValue(const std::nullptr_t &) override
 		{
 			v.reset();
 		}
 
 		void
-		BeginObject(Stack & stk) override
+		beginObject(Stack & stk) override
 		{
 			stk.push(make_s<SelectionObj>(v));
 		}
 
 		void
-		EndObject(Stack & stk) override
+		endObject(Stack & stk) override
 		{
 			stk.pop();
 		}

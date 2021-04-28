@@ -22,17 +22,17 @@ namespace json {
 		static void appendEscape(unsigned long, std::string &);
 
 	protected:
-		virtual void BeginObject() = 0;
-		virtual void BeginArray() = 0;
+		virtual void beginObject() = 0;
+		virtual void beginArray() = 0;
 
-		virtual void PushBoolean(bool) = 0;
-		virtual void PushNumber(float) = 0;
-		virtual void PushNull() = 0;
-		virtual void PushText(std::string &&) = 0;
-		virtual void PushKey(std::string &&) = 0;
+		virtual void pushBoolean(bool) = 0;
+		virtual void pushNumber(float) = 0;
+		virtual void pushNull() = 0;
+		virtual void pushText(std::string &&) = 0;
+		virtual void pushKey(std::string &&) = 0;
 
-		virtual void EndArray() = 0;
-		virtual void EndObject() = 0;
+		virtual void endArray() = 0;
+		virtual void endObject() = 0;
 
 		void LexerError(const char * msg) override;
 
