@@ -36,41 +36,43 @@ namespace Persistanace {
 		virtual void endObject(Stack &);
 		virtual void beforeValue(Stack &);
 		virtual SelectionPtr select(const std::string &);
-
-		template<typename T> static SelectionPtr make(T & value);
-		template<typename S, typename T> static SelectionPtr make_s(T & value);
 	};
 
-	template<typename T> struct SelectionT : public Selection {
-		explicit SelectionT(T & value) : v {value} { }
+	template<typename T> struct SelectionT;
+
+	template<typename T> struct SelectionV : public Selection {
+		explicit SelectionV(T & value) : v {value} { }
 
 		void
 		beforeValue(Stack &) override
 		{
 		}
 
-		void
-		setValue(T & evalue) override
+		static SelectionPtr
+		make(T & value)
 		{
-			std::swap(v, evalue);
+			return make_s<SelectionT<T>>(value);
+		}
+
+		template<typename S>
+		static SelectionPtr
+		make_s(T & value)
+		{
+			return std::make_unique<S>(value);
 		}
 
 		T & v;
 	};
 
-	template<typename T>
-	SelectionPtr
-	Selection::make(T & value)
-	{
-		return make_s<SelectionT<T>>(value);
-	}
+	template<typename T> struct SelectionT : public SelectionV<T> {
+		using SelectionV<T>::SelectionV;
 
-	template<typename S, typename T>
-	SelectionPtr
-	Selection::make_s(T & value)
-	{
-		return std::make_unique<S>(value);
-	}
+		void
+		setValue(T & evalue) override
+		{
+			std::swap(this->v, evalue);
+		}
+	};
 
 	struct PersistanceStore {
 		// virtual bool persistType(const std::type_info &) = 0;
@@ -79,7 +81,7 @@ namespace Persistanace {
 		persistValue(const std::string_view key, T & value)
 		{
 			if (key == name) {
-				sel = Selection::make(value);
+				sel = SelectionV<T>::make(value);
 				return false;
 			}
 			return true;
@@ -88,67 +90,51 @@ namespace Persistanace {
 		SelectionPtr sel {};
 	};
 
-	template<glm::length_t L, typename T, glm::qualifier Q> struct SelectionT<glm::vec<L, T, Q>> : public Selection {
-		using V = glm::vec<L, float, Q>;
+	template<glm::length_t L, typename T, glm::qualifier Q>
+	struct SelectionT<glm::vec<L, T, Q>> : public SelectionV<glm::vec<L, T, Q>> {
+		using V = glm::vec<L, T, Q>;
 
-		struct Members : public Selection {
-			explicit Members(V & value) : v {value} { }
+		struct Members : public SelectionV<V> {
+			using SelectionV<V>::SelectionV;
 
 			void
 			beforeValue(Stack & stk) override
 			{
-				stk.push(make(v[idx++]));
+				stk.push(SelectionV<T>::make(this->v[idx++]));
 			}
 
-			V & v;
 			glm::length_t idx {0};
 		};
 
-		explicit SelectionT(V & value) : v {value} { }
+		using SelectionV<V>::SelectionV;
 
 		void
 		beginArray(Stack & stk) override
 		{
-			stk.push(make_s<Members>(v));
+			stk.push(make_s<Members>(this->v));
 		}
-
-		void
-		beforeValue(Stack &) override
-		{
-		}
-
-		V & v;
 	};
 
-	template<typename T> struct SelectionT<std::vector<T>> : public Selection {
+	template<typename T> struct SelectionT<std::vector<T>> : public SelectionV<std::vector<T>> {
 		using V = std::vector<T>;
 
-		struct Members : public Selection {
-			explicit Members(V & value) : v {value} { }
+		struct Members : public SelectionV<V> {
+			using SelectionV<V>::SelectionV;
 
 			void
 			beforeValue(Stack & stk) override
 			{
-				stk.push(make(v.emplace_back()));
+				stk.push(SelectionV<T>::make(this->v.emplace_back()));
 			}
-
-			V & v;
 		};
 
-		explicit SelectionT(V & value) : v {value} { }
+		using SelectionV<V>::SelectionV;
 
 		void
 		beginArray(Stack & stk) override
 		{
-			stk.push(make_s<Members>(v));
+			stk.push(make_s<Members>(this->v));
 		}
-
-		void
-		beforeValue(Stack &) override
-		{
-		}
-
-		std::vector<T> & v;
 	};
 
 	struct Persistable {
@@ -162,52 +148,45 @@ namespace Persistanace {
 		static std::unique_ptr<Persistable> callFactory(const std::string_view);
 	};
 
-	template<typename T> struct SelectionT<std::unique_ptr<T>> : public Selection {
+	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionV<std::unique_ptr<T>> {
 		using Ptr = std::unique_ptr<T>;
-		struct SelectionObj : public Selection {
-			struct MakeObjectByTypeName : public Selection {
-				explicit MakeObjectByTypeName(Ptr & o) : o {o} { }
-
-				void
-				beforeValue(Stack &) override
-				{
-				}
+		struct SelectionObj : public SelectionV<Ptr> {
+			struct MakeObjectByTypeName : public SelectionV<Ptr> {
+				using SelectionV<Ptr>::SelectionV;
 
 				void
 				setValue(std::string & type) override
 				{
 					auto no = Persistable::callFactory(type);
 					if (dynamic_cast<T *>(no.get())) {
-						o.reset(static_cast<T *>(no.release()));
+						this->v.reset(static_cast<T *>(no.release()));
 					}
 				}
-
-				Ptr & o;
 			};
 
-			explicit SelectionObj(Ptr & o) : v {o} { }
+			using SelectionV<Ptr>::SelectionV;
 
 			SelectionPtr
 			select(const std::string & mbr) override
 			{
 				using namespace std::literals;
 				if (mbr == "@typeid"sv) {
-					if (v) {
+					if (this->v) {
 						throw std::runtime_error("cannot set object type after creation");
 					}
-					return make_s<MakeObjectByTypeName>(v);
+					return make_s<MakeObjectByTypeName>(this->v);
 				}
 				else {
-					if (!v) {
+					if (!this->v) {
 						if constexpr (std::is_abstract_v<T>) {
 							throw std::runtime_error("cannot select member of null object");
 						}
 						else {
-							v = std::make_unique<T>();
+							this->v = std::make_unique<T>();
 						}
 					}
 					PersistanceStore ps {mbr};
-					if (v->persist(ps)) {
+					if (this->v->persist(ps)) {
 						throw std::runtime_error("cannot find member: " + mbr);
 					}
 					return std::move(ps.sel);
@@ -217,37 +196,30 @@ namespace Persistanace {
 			void
 			endObject(Stack & stk) override
 			{
-				if (!v) {
+				if (!this->v) {
 					if constexpr (std::is_abstract_v<T>) {
 						throw std::runtime_error("cannot default create abstract object");
 					}
 					else {
-						v = std::make_unique<T>();
+						this->v = std::make_unique<T>();
 					}
 				}
 				stk.pop();
 			}
-
-			Ptr & v;
 		};
 
-		explicit SelectionT(Ptr & o) : v {o} { }
-
-		void
-		beforeValue(Stack &) override
-		{
-		}
+		using SelectionV<Ptr>::SelectionV;
 
 		void
 		setValue(const std::nullptr_t &) override
 		{
-			v.reset();
+			this->v.reset();
 		}
 
 		void
 		beginObject(Stack & stk) override
 		{
-			stk.push(make_s<SelectionObj>(v));
+			stk.push(make_s<SelectionObj>(this->v));
 		}
 
 		void
@@ -255,8 +227,6 @@ namespace Persistanace {
 		{
 			stk.pop();
 		}
-
-		Ptr & v;
 	};
 }
 
