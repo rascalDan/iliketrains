@@ -16,7 +16,7 @@ struct AbsObject : public Persistanace::Persistable {
 	bool
 	persist(Persistanace::PersistanceStore & store) override
 	{
-		return STORE_MEMBER(base);
+		return STORE_TYPE && STORE_MEMBER(base);
 	}
 
 	virtual void dummy() const = 0;
@@ -28,7 +28,7 @@ struct SubObject : public AbsObject {
 	bool
 	persist(Persistanace::PersistanceStore & store) override
 	{
-		return AbsObject::persist(store) && STORE_MEMBER(sub);
+		return AbsObject::persist(store) && STORE_TYPE && STORE_MEMBER(sub);
 	}
 
 	void
@@ -54,17 +54,11 @@ struct TestObject : public Persistanace::Persistable {
 	bool
 	persist(Persistanace::PersistanceStore & store) override
 	{
-		return STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos) && STORE_MEMBER(flts)
-				&& STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr) && STORE_MEMBER(aptr)
-				&& STORE_MEMBER(vptr);
+		return STORE_TYPE && STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos)
+				&& STORE_MEMBER(flts) && STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr)
+				&& STORE_MEMBER(aptr) && STORE_MEMBER(vptr);
 	}
 };
-
-BOOST_AUTO_TEST_CASE(setup)
-{
-	Persistanace::Persistable::addFactory("TestObject", std::make_unique<TestObject>);
-	Persistanace::Persistable::addFactory("SubObject", std::make_unique<SubObject>);
-}
 
 struct JPP : public Persistanace::JsonParsePersistance {
 	template<typename T>

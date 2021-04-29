@@ -75,7 +75,8 @@ namespace Persistanace {
 	};
 
 	struct PersistanceStore {
-		// virtual bool persistType(const std::type_info &) = 0;
+		template<typename T> inline bool persistType() const;
+
 		template<typename T>
 		inline bool
 		persistValue(const std::string_view key, T & value)
@@ -144,9 +145,36 @@ namespace Persistanace {
 
 		virtual bool persist(PersistanceStore & store) = 0;
 
+		template<typename T>
+		constexpr static auto
+		typeName()
+		{
+			constexpr std::string_view name {__PRETTY_FUNCTION__};
+			constexpr auto s {name.find("T = ") + 4}, e {name.rfind(']')};
+			return name.substr(s, e - s);
+		}
+
+		template<typename T> static void addFactory() __attribute__((constructor));
 		static void addFactory(const std::string_view, std::function<std::unique_ptr<Persistable>()>);
 		static std::unique_ptr<Persistable> callFactory(const std::string_view);
 	};
+
+	template<typename T>
+	void
+	Persistable::addFactory()
+	{
+		addFactory(typeName<T>(), std::make_unique<T>);
+	}
+
+	template<typename T>
+	inline bool
+	PersistanceStore::persistType() const
+	{
+		if constexpr (!std::is_abstract_v<T>) {
+			[[maybe_unused]] constexpr auto f = &Persistable::addFactory<T>;
+		}
+		return true;
+	}
 
 	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionV<std::unique_ptr<T>> {
 		using Ptr = std::unique_ptr<T>;
@@ -230,7 +258,7 @@ namespace Persistanace {
 	};
 }
 
-#define STORE_TYPE store.persistType(typeid(*this))
+#define STORE_TYPE store.persistType<std::decay_t<decltype(*this)>>()
 #define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
 
 #endif
