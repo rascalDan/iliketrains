@@ -1,0 +1,8 @@
+{
+	"@typeid": "SharedTestObject",
+	"sptr": {
+		"@typeid": "SubObject",
+		"@id": "someid"
+	},
+	"ssptr": "someid"
+}

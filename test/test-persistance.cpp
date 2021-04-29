@@ -68,6 +68,7 @@ struct JPP : public Persistanace::JsonParsePersistance {
 		BOOST_TEST_CONTEXT(path) {
 			std::ifstream ss {path};
 			auto to = loadState<T>(ss);
+			Persistanace::sharedObjects.clear();
 			BOOST_CHECK(stk.empty());
 			BOOST_REQUIRE(to);
 			return to;
@@ -176,4 +177,37 @@ BOOST_FIXTURE_TEST_CASE(load_vector_ptr, JPP)
 	BOOST_CHECK_CLOSE(to->vptr.at(1)->flt, 3.14, .01);
 	BOOST_CHECK(!to->vptr.at(2));
 	BOOST_CHECK(to->vptr.at(3)->str.empty());
+}
+
+struct SharedTestObject : public Persistanace::Persistable {
+	SharedTestObject() = default;
+
+	std::shared_ptr<AbsObject> sptr;
+	std::shared_ptr<SubObject> ssptr;
+
+	bool
+	persist(Persistanace::PersistanceStore & store) override
+	{
+		return STORE_TYPE && STORE_MEMBER(sptr) && STORE_MEMBER(ssptr);
+	}
+};
+
+BOOST_FIXTURE_TEST_CASE(load_shared_object1, JPP)
+{
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr1.json");
+	BOOST_CHECK(to->sptr);
+	BOOST_CHECK(to->ssptr);
+	BOOST_CHECK_NE(to->sptr, to->ssptr);
+	BOOST_CHECK_EQUAL(to->sptr.use_count(), 1);
+	BOOST_CHECK_EQUAL(to->ssptr.use_count(), 1);
+}
+
+BOOST_FIXTURE_TEST_CASE(load_shared_object2, JPP)
+{
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr2.json");
+	BOOST_CHECK(to->sptr);
+	BOOST_CHECK(to->ssptr);
+	BOOST_CHECK_EQUAL(to->sptr, to->ssptr);
+	BOOST_CHECK_EQUAL(to->sptr.use_count(), 2);
+	BOOST_CHECK_EQUAL(to->ssptr.use_count(), 2);
 }
