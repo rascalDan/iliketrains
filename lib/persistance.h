@@ -111,7 +111,7 @@ namespace Persistanace {
 		void
 		beginArray(Stack & stk) override
 		{
-			stk.push(make_s<Members>(this->v));
+			stk.push(this->template make_s<Members>(this->v));
 		}
 	};
 
@@ -133,7 +133,7 @@ namespace Persistanace {
 		void
 		beginArray(Stack & stk) override
 		{
-			stk.push(make_s<Members>(this->v));
+			stk.push(this->template make_s<Members>(this->v));
 		}
 	};
 
@@ -174,7 +174,7 @@ namespace Persistanace {
 					if (this->v) {
 						throw std::runtime_error("cannot set object type after creation");
 					}
-					return make_s<MakeObjectByTypeName>(this->v);
+					return this->template make_s<MakeObjectByTypeName>(this->v);
 				}
 				else {
 					if (!this->v) {
@@ -219,7 +219,7 @@ namespace Persistanace {
 		void
 		beginObject(Stack & stk) override
 		{
-			stk.push(make_s<SelectionObj>(this->v));
+			stk.push(this->template make_s<SelectionObj>(this->v));
 		}
 
 		void
