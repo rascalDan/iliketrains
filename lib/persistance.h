@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -155,15 +156,17 @@ namespace Persistanace {
 		}
 
 		template<typename T> static void addFactory() __attribute__((constructor));
-		static void addFactory(const std::string_view, std::function<std::unique_ptr<Persistable>()>);
+		static void addFactory(const std::string_view, std::function<std::unique_ptr<Persistable>()>,
+				std::function<std::shared_ptr<Persistable>()>);
 		static std::unique_ptr<Persistable> callFactory(const std::string_view);
+		static std::shared_ptr<Persistable> callSharedFactory(const std::string_view);
 	};
 
 	template<typename T>
 	void
 	Persistable::addFactory()
 	{
-		addFactory(typeName<T>(), std::make_unique<T>);
+		addFactory(typeName<T>(), std::make_unique<T>, std::make_shared<T>);
 	}
 
 	template<typename T>
