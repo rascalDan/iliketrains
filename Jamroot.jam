@@ -1,4 +1,4 @@
-using gcc : 11.0.1 ;
+using gcc : 11.1.0 ;
 using pkg-config ;
 import pkg-config ;
 import type : register ;
