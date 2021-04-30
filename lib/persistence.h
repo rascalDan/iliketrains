@@ -18,7 +18,7 @@ namespace glm {
 	template<glm::length_t L, typename T, glm::qualifier Q> struct vec;
 }
 
-namespace Persistanace {
+namespace Persistence {
 	struct Selection;
 	using SelectionPtr = std::unique_ptr<Selection>;
 	using Stack = std::stack<SelectionPtr>;
@@ -75,7 +75,7 @@ namespace Persistanace {
 		}
 	};
 
-	struct PersistanceStore {
+	struct PersistenceStore {
 		template<typename T> inline bool persistType() const;
 
 		template<typename T>
@@ -144,7 +144,7 @@ namespace Persistanace {
 		virtual ~Persistable() = default;
 		DEFAULT_MOVE_COPY(Persistable);
 
-		virtual bool persist(PersistanceStore & store) = 0;
+		virtual bool persist(PersistenceStore & store) = 0;
 
 		template<typename T>
 		constexpr static auto
@@ -171,7 +171,7 @@ namespace Persistanace {
 
 	template<typename T>
 	inline bool
-	PersistanceStore::persistType() const
+	PersistenceStore::persistType() const
 	{
 		if constexpr (!std::is_abstract_v<T>) {
 			[[maybe_unused]] constexpr auto f = &Persistable::addFactory<T>;
@@ -216,7 +216,7 @@ namespace Persistanace {
 							this->v = std::make_unique<T>();
 						}
 					}
-					PersistanceStore ps {mbr};
+					PersistenceStore ps {mbr};
 					if (this->v->persist(ps)) {
 						throw std::runtime_error("cannot find member: " + mbr);
 					}
@@ -314,7 +314,7 @@ namespace Persistanace {
 							this->v = std::make_shared<T>();
 						}
 					}
-					PersistanceStore ps {mbr};
+					PersistenceStore ps {mbr};
 					if (this->v->persist(ps)) {
 						throw std::runtime_error("cannot find member: " + mbr);
 					}

@@ -2,14 +2,14 @@
 #define JSONPARSE_PERSISTANCE
 
 #include "jsonParse.h" // IWYU pragma: export
-#include "persistance.h" // IWYU pragma: export
+#include "persistence.h" // IWYU pragma: export
 #include <functional>
 #include <iosfwd>
 #include <memory>
 #include <string>
 
-namespace Persistanace {
-	class JsonParsePersistance : public json::jsonParser {
+namespace Persistence {
+	class JsonParsePersistence : public json::jsonParser {
 	public:
 		template<typename T>
 		inline T

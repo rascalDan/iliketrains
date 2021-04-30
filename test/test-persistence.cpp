@@ -1,20 +1,20 @@
-#define BOOST_TEST_MODULE test_persistance
+#define BOOST_TEST_MODULE test_persistence
 
 #include <boost/test/unit_test.hpp>
 
 #include <glm/glm.hpp>
 #include <iosfwd>
-#include <jsonParse-persistance.h>
+#include <jsonParse-persistence.h>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-struct AbsObject : public Persistanace::Persistable {
+struct AbsObject : public Persistence::Persistable {
 	std::string base;
 
 	bool
-	persist(Persistanace::PersistanceStore & store) override
+	persist(Persistence::PersistenceStore & store) override
 	{
 		return STORE_TYPE && STORE_MEMBER(base);
 	}
@@ -26,7 +26,7 @@ struct SubObject : public AbsObject {
 	std::string sub;
 
 	bool
-	persist(Persistanace::PersistanceStore & store) override
+	persist(Persistence::PersistenceStore & store) override
 	{
 		return AbsObject::persist(store) && STORE_TYPE && STORE_MEMBER(sub);
 	}
@@ -37,7 +37,7 @@ struct SubObject : public AbsObject {
 	}
 };
 
-struct TestObject : public Persistanace::Persistable {
+struct TestObject : public Persistence::Persistable {
 	TestObject() = default;
 
 	float flt {};
@@ -52,7 +52,7 @@ struct TestObject : public Persistanace::Persistable {
 	std::vector<std::unique_ptr<TestObject>> vptr;
 
 	bool
-	persist(Persistanace::PersistanceStore & store) override
+	persist(Persistence::PersistenceStore & store) override
 	{
 		return STORE_TYPE && STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos)
 				&& STORE_MEMBER(flts) && STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr)
@@ -60,7 +60,7 @@ struct TestObject : public Persistanace::Persistable {
 	}
 };
 
-struct JPP : public Persistanace::JsonParsePersistance {
+struct JPP : public Persistence::JsonParsePersistence {
 	template<typename T>
 	T
 	load_json(const char * path)
@@ -68,7 +68,7 @@ struct JPP : public Persistanace::JsonParsePersistance {
 		BOOST_TEST_CONTEXT(path) {
 			std::ifstream ss {path};
 			auto to = loadState<T>(ss);
-			Persistanace::sharedObjects.clear();
+			Persistence::sharedObjects.clear();
 			BOOST_CHECK(stk.empty());
 			BOOST_REQUIRE(to);
 			return to;
@@ -179,14 +179,14 @@ BOOST_FIXTURE_TEST_CASE(load_vector_ptr, JPP)
 	BOOST_CHECK(to->vptr.at(3)->str.empty());
 }
 
-struct SharedTestObject : public Persistanace::Persistable {
+struct SharedTestObject : public Persistence::Persistable {
 	SharedTestObject() = default;
 
 	std::shared_ptr<AbsObject> sptr;
 	std::shared_ptr<SubObject> ssptr;
 
 	bool
-	persist(Persistanace::PersistanceStore & store) override
+	persist(Persistence::PersistenceStore & store) override
 	{
 		return STORE_TYPE && STORE_MEMBER(sptr) && STORE_MEMBER(ssptr);
 	}

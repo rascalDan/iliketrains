@@ -1,8 +1,8 @@
-#include "jsonParse-persistance.h"
+#include "jsonParse-persistence.h"
 
-namespace Persistanace {
+namespace Persistence {
 	void
-	JsonParsePersistance::loadState(std::istream & in)
+	JsonParsePersistence::loadState(std::istream & in)
 	{
 		this->switch_streams(&in, nullptr);
 		yy_push_state(0);
@@ -10,58 +10,58 @@ namespace Persistanace {
 	}
 
 	void
-	JsonParsePersistance::beginObject()
+	JsonParsePersistence::beginObject()
 	{
 		current()->beforeValue(stk);
 		current()->beginObject(stk);
 	}
 
 	void
-	JsonParsePersistance::beginArray()
+	JsonParsePersistence::beginArray()
 	{
 		current()->beforeValue(stk);
 		current()->beginArray(stk);
 	}
 
 	void
-	JsonParsePersistance::pushBoolean(bool value)
+	JsonParsePersistence::pushBoolean(bool value)
 	{
 		pushValue(value);
 	}
 
 	void
-	JsonParsePersistance::pushNumber(float value)
+	JsonParsePersistence::pushNumber(float value)
 	{
 		pushValue(value);
 	}
 
 	void
-	JsonParsePersistance::pushNull()
+	JsonParsePersistence::pushNull()
 	{
 		pushValue(nullptr);
 	}
 
 	void
-	JsonParsePersistance::pushText(std::string && value)
+	JsonParsePersistence::pushText(std::string && value)
 	{
 		pushValue(value);
 	}
 
 	void
-	JsonParsePersistance::pushKey(std::string && k)
+	JsonParsePersistence::pushKey(std::string && k)
 	{
 		stk.push(current()->select(k));
 	}
 
 	void
-	JsonParsePersistance::endArray()
+	JsonParsePersistence::endArray()
 	{
 		stk.pop();
 		stk.pop();
 	}
 
 	void
-	JsonParsePersistance::endObject()
+	JsonParsePersistence::endObject()
 	{
 		current()->endObject(stk);
 		current()->endObject(stk);
@@ -69,7 +69,7 @@ namespace Persistanace {
 
 	template<typename T>
 	inline void
-	JsonParsePersistance::pushValue(T && value)
+	JsonParsePersistence::pushValue(T && value)
 	{
 		current()->beforeValue(stk);
 		current()->setValue(value);
@@ -77,7 +77,7 @@ namespace Persistanace {
 	}
 
 	inline SelectionPtr &
-	JsonParsePersistance::current()
+	JsonParsePersistence::current()
 	{
 		return stk.top();
 	}

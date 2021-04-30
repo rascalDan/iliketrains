@@ -1,7 +1,7 @@
-#include "persistance.h"
+#include "persistence.h"
 #include <map>
 
-namespace Persistanace {
+namespace Persistence {
 	using Factories
 			= std::pair<std::function<std::unique_ptr<Persistable>()>, std::function<std::shared_ptr<Persistable>()>>;
 	using NamedTypeFactories = std::map<std::string_view, Factories>;
