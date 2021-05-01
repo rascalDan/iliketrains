@@ -215,6 +215,14 @@ BOOST_FIXTURE_TEST_CASE(load_shared_object2, JPP)
 	BOOST_CHECK_EQUAL(to->ssptr.use_count(), 2);
 }
 
+BOOST_FIXTURE_TEST_CASE(load_shared_object3, JPP)
+{
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr3.json");
+	BOOST_CHECK(to->sptr);
+	BOOST_CHECK(to->ssptr);
+	BOOST_CHECK_NE(to->sptr, to->ssptr);
+}
+
 BOOST_FIXTURE_TEST_CASE(load_shared_object_null, JPP)
 {
 	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_null.json");

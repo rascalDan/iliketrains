@@ -179,93 +179,12 @@ namespace Persistence {
 		return true;
 	}
 
-	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionV<std::unique_ptr<T>> {
-		using Ptr = std::unique_ptr<T>;
-		struct SelectionObj : public SelectionV<Ptr> {
-			struct MakeObjectByTypeName : public SelectionV<Ptr> {
-				using SelectionV<Ptr>::SelectionV;
-
-				void
-				setValue(std::string & type) override
-				{
-					auto no = Persistable::callFactory(type);
-					if (dynamic_cast<T *>(no.get())) {
-						this->v.reset(static_cast<T *>(no.release()));
-					}
-				}
-			};
-
-			using SelectionV<Ptr>::SelectionV;
-
-			SelectionPtr
-			select(const std::string & mbr) override
-			{
-				using namespace std::literals;
-				if (mbr == "@typeid"sv) {
-					if (this->v) {
-						throw std::runtime_error("cannot set object type after creation");
-					}
-					return this->template make_s<MakeObjectByTypeName>(this->v);
-				}
-				else {
-					if (!this->v) {
-						if constexpr (std::is_abstract_v<T>) {
-							throw std::runtime_error("cannot select member of null object");
-						}
-						else {
-							this->v = std::make_unique<T>();
-						}
-					}
-					PersistenceStore ps {mbr};
-					if (this->v->persist(ps)) {
-						throw std::runtime_error("cannot find member: " + mbr);
-					}
-					return std::move(ps.sel);
-				}
-			}
-
-			void
-			endObject(Stack & stk) override
-			{
-				if (!this->v) {
-					if constexpr (std::is_abstract_v<T>) {
-						throw std::runtime_error("cannot default create abstract object");
-					}
-					else {
-						this->v = std::make_unique<T>();
-					}
-				}
-				stk.pop();
-			}
-		};
-
-		using SelectionV<Ptr>::SelectionV;
-
-		void
-		setValue(const std::nullptr_t &) override
-		{
-			this->v.reset();
-		}
-
-		void
-		beginObject(Stack & stk) override
-		{
-			stk.push(this->template make_s<SelectionObj>(this->v));
-		}
-
-		void
-		endObject(Stack & stk) override
-		{
-			stk.pop();
-		}
-	};
-
 	// TODO Move this
 	using SharedObjects = std::map<std::string, std::shared_ptr<Persistable>>;
 	inline SharedObjects sharedObjects;
 
-	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionV<std::shared_ptr<T>> {
-		using Ptr = std::shared_ptr<T>;
+	template<typename Ptr, bool shared> struct SelectionPtrBase : public SelectionV<Ptr> {
+		using T = typename Ptr::element_type;
 		struct SelectionObj : public SelectionV<Ptr> {
 			struct MakeObjectByTypeName : public SelectionV<Ptr> {
 				using SelectionV<Ptr>::SelectionV;
@@ -273,9 +192,17 @@ namespace Persistence {
 				void
 				setValue(std::string & type) override
 				{
-					auto no = Persistable::callSharedFactory(type);
-					if (auto tno = std::dynamic_pointer_cast<T>(no)) {
-						this->v = std::move(tno);
+					if constexpr (shared) {
+						auto no = Persistable::callSharedFactory(type);
+						if (auto tno = std::dynamic_pointer_cast<T>(no)) {
+							this->v = std::move(tno);
+						}
+					}
+					else {
+						auto no = Persistable::callFactory(type);
+						if (dynamic_cast<T *>(no.get())) {
+							this->v.reset(static_cast<T *>(no.release()));
+						}
 					}
 				}
 			};
@@ -302,40 +229,42 @@ namespace Persistence {
 					}
 					return this->template make_s<MakeObjectByTypeName>(this->v);
 				}
-				else if (mbr == "@id"sv) {
-					return this->template make_s<RememberObjectById>(this->v);
-				}
-				else {
-					if (!this->v) {
-						if constexpr (std::is_abstract_v<T>) {
-							throw std::runtime_error("cannot select member of null object");
-						}
-						else {
-							this->v = std::make_shared<T>();
-						}
+				if constexpr (shared) {
+					if (mbr == "@id"sv) {
+						return this->template make_s<RememberObjectById>(this->v);
 					}
-					PersistenceStore ps {mbr};
-					if (this->v->persist(ps)) {
-						throw std::runtime_error("cannot find member: " + mbr);
-					}
-					return std::move(ps.sel);
 				}
+				make_default_as_needed(this->v);
+				PersistenceStore ps {mbr};
+				if (this->v->persist(ps)) {
+					throw std::runtime_error("cannot find member: " + mbr);
+				}
+				return std::move(ps.sel);
 			}
 
 			void
 			endObject(Stack & stk) override
 			{
-				if (!this->v) {
-					if constexpr (std::is_abstract_v<T>) {
-						throw std::runtime_error("cannot default create abstract object");
-					}
-					else {
-						this->v = std::make_shared<T>();
-					}
-				}
+				make_default_as_needed(this->v);
 				stk.pop();
 			}
 		};
+
+		static inline void
+		make_default_as_needed(Ptr & v)
+		{
+			if (!v) {
+				if constexpr (std::is_abstract_v<T>) {
+					throw std::runtime_error("cannot select member of null abstract object");
+				}
+				else if constexpr (shared) {
+					v = std::make_shared<T>();
+				}
+				else {
+					v = std::make_unique<T>();
+				}
+			}
+		}
 
 		using SelectionV<Ptr>::SelectionV;
 
@@ -343,14 +272,6 @@ namespace Persistence {
 		setValue(const std::nullptr_t &) override
 		{
 			this->v.reset();
-		}
-
-		void
-		setValue(std::string & id) override
-		{
-			if (auto teo = std::dynamic_pointer_cast<T>(sharedObjects.at(id))) {
-				this->v = std::move(teo);
-			}
 		}
 
 		void
@@ -363,6 +284,22 @@ namespace Persistence {
 		endObject(Stack & stk) override
 		{
 			stk.pop();
+		}
+	};
+
+	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionPtrBase<std::unique_ptr<T>, false> {
+		using SelectionPtrBase<std::unique_ptr<T>, false>::SelectionPtrBase;
+	};
+
+	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionPtrBase<std::shared_ptr<T>, true> {
+		using SelectionPtrBase<std::shared_ptr<T>, true>::SelectionPtrBase;
+
+		void
+		setValue(std::string & id) override
+		{
+			if (auto teo = std::dynamic_pointer_cast<T>(sharedObjects.at(id))) {
+				this->v = std::move(teo);
+			}
 		}
 	};
 }
