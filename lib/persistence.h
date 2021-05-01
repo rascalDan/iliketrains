@@ -196,14 +196,17 @@ namespace Persistence {
 						auto no = Persistable::callSharedFactory(type);
 						if (auto tno = std::dynamic_pointer_cast<T>(no)) {
 							this->v = std::move(tno);
+							return;
 						}
 					}
 					else {
 						auto no = Persistable::callFactory(type);
 						if (dynamic_cast<T *>(no.get())) {
 							this->v.reset(static_cast<T *>(no.release()));
+							return;
 						}
 					}
+					throw std::runtime_error("Named type doesn't cast to target type");
 				}
 			};
 
