@@ -44,7 +44,7 @@ namespace Persistence {
 	void
 	JsonParsePersistence::pushText(std::string && value)
 	{
-		pushValue(value);
+		pushValue(std::move(value));
 	}
 
 	void
@@ -72,7 +72,7 @@ namespace Persistence {
 	JsonParsePersistence::pushValue(T && value)
 	{
 		current()->beforeValue(stk);
-		current()->setValue(value);
+		current()->setValue(std::forward<T>(value));
 		stk.pop();
 	}
 

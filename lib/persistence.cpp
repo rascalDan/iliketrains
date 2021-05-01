@@ -27,25 +27,24 @@ namespace Persistence {
 	}
 
 	void
-	Selection::setValue(float &)
+	Selection::setValue(float)
 	{
 		throw std::runtime_error("Unexpected float");
 	}
 
 	void
-	Selection::setValue(bool &)
+	Selection::setValue(bool)
 	{
 		throw std::runtime_error("Unexpected bool");
 	}
 
-	void
-	Selection::setValue(const std::nullptr_t &)
+	void Selection::setValue(std::nullptr_t)
 	{
 		throw std::runtime_error("Unexpected null");
 	}
 
 	void
-	Selection::setValue(std::string &)
+	Selection::setValue(std::string &&)
 	{
 		throw std::runtime_error("Unexpected string");
 	}

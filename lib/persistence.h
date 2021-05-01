@@ -28,10 +28,10 @@ namespace Persistence {
 		virtual ~Selection() = default;
 		DEFAULT_MOVE_COPY(Selection);
 
-		virtual void setValue(float &);
-		virtual void setValue(bool &);
-		virtual void setValue(const std::nullptr_t &);
-		virtual void setValue(std::string &);
+		virtual void setValue(float);
+		virtual void setValue(bool);
+		virtual void setValue(std::nullptr_t);
+		virtual void setValue(std::string &&);
 		virtual void beginArray(Stack &);
 		virtual void beginObject(Stack &);
 		virtual void endObject(Stack &);
@@ -67,9 +67,10 @@ namespace Persistence {
 
 	template<typename T> struct SelectionT : public SelectionV<T> {
 		using SelectionV<T>::SelectionV;
+		using P = std::conditional_t<std::is_scalar_v<T>, T, T &&>;
 
 		void
-		setValue(T & evalue) override
+		setValue(P evalue) override
 		{
 			std::swap(this->v, evalue);
 		}
@@ -190,7 +191,7 @@ namespace Persistence {
 				using SelectionV<Ptr>::SelectionV;
 
 				void
-				setValue(std::string & type) override
+				setValue(std::string && type) override
 				{
 					if constexpr (shared) {
 						auto no = Persistable::callSharedFactory(type);
@@ -214,7 +215,7 @@ namespace Persistence {
 				using SelectionV<Ptr>::SelectionV;
 
 				void
-				setValue(std::string & id) override
+				setValue(std::string && id) override
 				{
 					sharedObjects.emplace(id, this->v);
 				}
@@ -271,8 +272,7 @@ namespace Persistence {
 
 		using SelectionV<Ptr>::SelectionV;
 
-		void
-		setValue(const std::nullptr_t &) override
+		void setValue(std::nullptr_t) override
 		{
 			this->v.reset();
 		}
@@ -298,7 +298,7 @@ namespace Persistence {
 		using SelectionPtrBase<std::shared_ptr<T>, true>::SelectionPtrBase;
 
 		void
-		setValue(std::string & id) override
+		setValue(std::string && id) override
 		{
 			if (auto teo = std::dynamic_pointer_cast<T>(sharedObjects.at(id))) {
 				this->v = std::move(teo);
