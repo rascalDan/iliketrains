@@ -156,8 +156,7 @@ fixtures_in(const std::filesystem::path & root)
 
 BOOST_DATA_TEST_CASE_F(JPP, various_parse_failures, fixtures_in(FIXTURESDIR "json/bad"), path)
 {
-	std::ifstream ss {path};
-	BOOST_CHECK_THROW(loadState<std::unique_ptr<TestObject>>(ss), std::runtime_error);
+	BOOST_CHECK_THROW(load_json<std::unique_ptr<TestObject>>(path), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(load_abs_object, JPP)
