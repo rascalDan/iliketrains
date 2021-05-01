@@ -38,6 +38,19 @@ struct SubObject : public AbsObject {
 	}
 };
 
+struct SubObject2 : public AbsObject {
+	bool
+	persist(Persistence::PersistenceStore & store) override
+	{
+		return AbsObject::persist(store) && STORE_TYPE;
+	}
+
+	void
+	dummy() const override
+	{
+	}
+};
+
 struct TestObject : public Persistence::Persistable {
 	TestObject() = default;
 
@@ -225,6 +238,12 @@ BOOST_FIXTURE_TEST_CASE(load_shared_object_diff_default, JPP)
 	BOOST_CHECK(to->sptr);
 	BOOST_CHECK(to->ssptr);
 	BOOST_CHECK_NE(to->sptr, to->ssptr);
+}
+
+BOOST_FIXTURE_TEST_CASE(load_shared_object_wrong_type, JPP)
+{
+	BOOST_CHECK_THROW(load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_wrong_type.json"),
+			std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(load_shared_object_null, JPP)

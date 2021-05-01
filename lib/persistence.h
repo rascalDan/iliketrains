@@ -303,6 +303,9 @@ namespace Persistence {
 			if (auto teo = std::dynamic_pointer_cast<T>(sharedObjects.at(id))) {
 				this->v = std::move(teo);
 			}
+			else {
+				throw std::runtime_error("Named type doesn't cast to target type");
+			}
 		}
 	};
 }
