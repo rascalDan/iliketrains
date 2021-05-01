@@ -25,7 +25,7 @@ json::jsonParser::appendEscape(unsigned long cp, std::string & str)
 		str += char((cp >> 6) + 192);
 		str += char((cp & 63) + 128);
 	}
-	else if (0xd800 <= cp && cp <= 0xdfff) {
+	else if ((0xd800 <= cp && cp <= 0xdfff) || cp > 0x10FFFF) {
 		throw std::range_error("Invalid UTF-8 sequence");
 	}
 	else if (cp <= 0xFFFF) {
@@ -33,13 +33,10 @@ json::jsonParser::appendEscape(unsigned long cp, std::string & str)
 		str += char(((cp >> 6) & 63) + 128);
 		str += char((cp & 63) + 128);
 	}
-	else if (cp <= 0x10FFFF) {
+	else {
 		str += char((cp >> 18) + 240);
 		str += char(((cp >> 12) & 63) + 128);
 		str += char(((cp >> 6) & 63) + 128);
 		str += char((cp & 63) + 128);
-	}
-	else {
-		throw std::range_error("Invalid UTF-8 sequence");
 	}
 }

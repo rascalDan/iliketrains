@@ -3,12 +3,15 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <iosfwd>
 #include <jsonParse-persistence.h>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <vector>
 
 struct AbsObject : public Persistence::Persistable {

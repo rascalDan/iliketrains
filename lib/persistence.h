@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -36,7 +37,7 @@ namespace Persistence {
 		virtual void beginObject(Stack &);
 		virtual void endObject(Stack &);
 		virtual void beforeValue(Stack &);
-		virtual SelectionPtr select(const std::string &);
+		[[nodiscard]] virtual SelectionPtr select(const std::string &);
 	};
 
 	template<typename T> struct SelectionT;
@@ -49,14 +50,14 @@ namespace Persistence {
 		{
 		}
 
-		static SelectionPtr
+		[[nodiscard]] static SelectionPtr
 		make(T & value)
 		{
 			return make_s<SelectionT<T>>(value);
 		}
 
 		template<typename S>
-		static SelectionPtr
+		[[nodiscard]] static SelectionPtr
 		make_s(T & value)
 		{
 			return std::make_unique<S>(value);
@@ -77,10 +78,10 @@ namespace Persistence {
 	};
 
 	struct PersistenceStore {
-		template<typename T> inline bool persistType() const;
+		template<typename T> [[nodiscard]] inline bool persistType() const;
 
 		template<typename T>
-		inline bool
+		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
 		{
 			if (key == name) {
@@ -148,7 +149,7 @@ namespace Persistence {
 		virtual bool persist(PersistenceStore & store) = 0;
 
 		template<typename T>
-		constexpr static auto
+		[[nodiscard]] constexpr static auto
 		typeName()
 		{
 			constexpr std::string_view name {__PRETTY_FUNCTION__};
@@ -159,8 +160,8 @@ namespace Persistence {
 		template<typename T> static void addFactory() __attribute__((constructor));
 		static void addFactory(const std::string_view, std::function<std::unique_ptr<Persistable>()>,
 				std::function<std::shared_ptr<Persistable>()>);
-		static std::unique_ptr<Persistable> callFactory(const std::string_view);
-		static std::shared_ptr<Persistable> callSharedFactory(const std::string_view);
+		[[nodiscard]] static std::unique_ptr<Persistable> callFactory(const std::string_view);
+		[[nodiscard]] static std::shared_ptr<Persistable> callSharedFactory(const std::string_view);
 	};
 
 	template<typename T>
@@ -223,7 +224,7 @@ namespace Persistence {
 
 			using SelectionV<Ptr>::SelectionV;
 
-			SelectionPtr
+			[[nodiscard]] SelectionPtr
 			select(const std::string & mbr) override
 			{
 				using namespace std::literals;

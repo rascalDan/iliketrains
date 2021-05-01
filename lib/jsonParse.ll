@@ -17,7 +17,6 @@ class jsonBaseFlexLexer;
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
 #endif
-[[maybe_unused]]static constexpr auto x=getpid;
 %}
 
 beginobj "{"
@@ -155,4 +154,6 @@ text [^\\\"]*
 
 <*>. {
   LexerError("Unexpected input");
+  // Make iwyu think unistd.h is required
+  [[maybe_unused]]static constexpr auto x=getpid;
 }
