@@ -159,6 +159,11 @@ BOOST_DATA_TEST_CASE_F(JPP, various_parse_failures, fixtures_in(FIXTURESDIR "jso
 	BOOST_CHECK_THROW(load_json<std::unique_ptr<TestObject>>(path), std::runtime_error);
 }
 
+BOOST_FIXTURE_TEST_CASE(load_obj_no_such_type, JPP)
+{
+	BOOST_CHECK_THROW(load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/bad_type.json"), std::out_of_range);
+}
+
 BOOST_FIXTURE_TEST_CASE(load_abs_object, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/abs.json");
