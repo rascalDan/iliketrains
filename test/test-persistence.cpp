@@ -199,9 +199,9 @@ struct SharedTestObject : public Persistence::Persistable {
 	}
 };
 
-BOOST_FIXTURE_TEST_CASE(load_shared_object1, JPP)
+BOOST_FIXTURE_TEST_CASE(load_shared_object_diff, JPP)
 {
-	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr1.json");
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_diff.json");
 	BOOST_CHECK(to->sptr);
 	BOOST_CHECK(to->ssptr);
 	BOOST_CHECK_NE(to->sptr, to->ssptr);
@@ -209,9 +209,9 @@ BOOST_FIXTURE_TEST_CASE(load_shared_object1, JPP)
 	BOOST_CHECK_EQUAL(to->ssptr.use_count(), 1);
 }
 
-BOOST_FIXTURE_TEST_CASE(load_shared_object2, JPP)
+BOOST_FIXTURE_TEST_CASE(load_shared_object_same, JPP)
 {
-	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr2.json");
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_same.json");
 	BOOST_CHECK(to->sptr);
 	BOOST_CHECK(to->ssptr);
 	BOOST_CHECK_EQUAL(to->sptr, to->ssptr);
@@ -219,9 +219,9 @@ BOOST_FIXTURE_TEST_CASE(load_shared_object2, JPP)
 	BOOST_CHECK_EQUAL(to->ssptr.use_count(), 2);
 }
 
-BOOST_FIXTURE_TEST_CASE(load_shared_object3, JPP)
+BOOST_FIXTURE_TEST_CASE(load_shared_object_diff_default, JPP)
 {
-	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr3.json");
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_diff_default.json");
 	BOOST_CHECK(to->sptr);
 	BOOST_CHECK(to->ssptr);
 	BOOST_CHECK_NE(to->sptr, to->ssptr);
