@@ -1,5 +1,6 @@
 #define BOOST_TEST_MODULE test_persistence
 
+#include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <glm/glm.hpp>
@@ -63,7 +64,7 @@ struct TestObject : public Persistence::Persistable {
 struct JPP : public Persistence::JsonParsePersistence {
 	template<typename T>
 	T
-	load_json(const char * path)
+	load_json(const std::filesystem::path & path)
 	{
 		BOOST_TEST_CONTEXT(path) {
 			std::ifstream ss {path};
@@ -147,14 +148,16 @@ BOOST_FIXTURE_TEST_CASE(load_empty_object, JPP)
 	BOOST_CHECK_EQUAL(to->str, "after");
 }
 
-BOOST_FIXTURE_TEST_CASE(fail_implicit_abs_object, JPP)
+static std::vector<std::filesystem::path>
+fixtures_in(const std::filesystem::path & root)
 {
-	BOOST_CHECK_THROW(load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/implicit_abs.json"), std::runtime_error);
+	return {std::filesystem::directory_iterator {root}, {}};
 }
 
-BOOST_FIXTURE_TEST_CASE(fail_empty_abs_object, JPP)
+BOOST_DATA_TEST_CASE_F(JPP, various_parse_failures, fixtures_in(FIXTURESDIR "json/bad"), path)
 {
-	BOOST_CHECK_THROW(load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/empty_abs.json"), std::runtime_error);
+	std::ifstream ss {path};
+	BOOST_CHECK_THROW(loadState<std::unique_ptr<TestObject>>(ss), std::runtime_error);
 }
 
 BOOST_FIXTURE_TEST_CASE(load_abs_object, JPP)
@@ -210,4 +213,53 @@ BOOST_FIXTURE_TEST_CASE(load_shared_object2, JPP)
 	BOOST_CHECK_EQUAL(to->sptr, to->ssptr);
 	BOOST_CHECK_EQUAL(to->sptr.use_count(), 2);
 	BOOST_CHECK_EQUAL(to->ssptr.use_count(), 2);
+}
+
+BOOST_FIXTURE_TEST_CASE(load_shared_object_null, JPP)
+{
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_null.json");
+	BOOST_CHECK(to->sptr);
+	BOOST_CHECK(!to->ssptr);
+}
+
+using svs = std::tuple<const char * const, std::string_view>;
+BOOST_DATA_TEST_CASE_F(JPP, load_strings,
+		boost::unit_test::data::make<svs>({
+				{R"J("")J", ""},
+				{R"J("non empty")J", "non empty"},
+				{R"J("new\nline")J", "new\nline"},
+				{R"J("quote\"mark")J", "quote\"mark"},
+				{R"J("tab\t")J", "tab\t"},
+				{R"J("back\bspace?")J", "back\bspace?"},
+				{R"J("form\ffeed?")J", "form\ffeed?"},
+				{R"J("forward\/slash")J", "forward/slash"},
+				{R"J("\u00a5 yen")J", "¥ yen"},
+				{R"J("gbp \u00a3")J", "gbp £"},
+				{R"J("\u007E tilde")J", "~ tilde"},
+				{R"J("\u056b ARMENIAN SMALL LETTER INI")J", "ի ARMENIAN SMALL LETTER INI"},
+				{R"J("\u0833 SAMARITAN PUNCTUATION BAU")J", "࠳ SAMARITAN PUNCTUATION BAU"},
+		}),
+		in, exp)
+{
+	std::stringstream str {in};
+	BOOST_CHECK_EQUAL(loadState<std::string>(str), exp);
+}
+
+using cpstr = std::tuple<unsigned long, std::string_view>;
+BOOST_DATA_TEST_CASE(utf8_decode,
+		boost::unit_test::data::make<cpstr>({
+				{9, "\t"},
+				{0x00010000, "𐀀"},
+		}),
+		cp, str)
+{
+	std::string out;
+	BOOST_CHECK_NO_THROW(json::jsonParser::appendEscape(cp, out));
+	BOOST_CHECK_EQUAL(out, str);
+}
+
+BOOST_DATA_TEST_CASE(utf8_decode_bad, boost::unit_test::data::make<unsigned long>({0xd800, 0xdfff, 0x110000}), cp)
+{
+	std::string out;
+	BOOST_CHECK_THROW(json::jsonParser::appendEscape(cp, out), std::runtime_error);
 }

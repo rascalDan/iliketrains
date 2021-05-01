@@ -12,7 +12,7 @@ json::jsonParser::LexerError(const char * msg)
 void
 json::jsonParser::appendEscape(const char * cphs, std::string & str)
 {
-	appendEscape(std::strtoul(cphs, nullptr, 16), str);
+	appendEscape(std::strtoul(cphs + 1, nullptr, 16), str);
 }
 
 void
@@ -38,5 +38,8 @@ json::jsonParser::appendEscape(unsigned long cp, std::string & str)
 		str += char(((cp >> 12) & 63) + 128);
 		str += char(((cp >> 6) & 63) + 128);
 		str += char((cp & 63) + 128);
+	}
+	else {
+		throw std::range_error("Invalid UTF-8 sequence");
 	}
 }

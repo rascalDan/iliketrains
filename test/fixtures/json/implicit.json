@@ -2,7 +2,8 @@
 	"@typeid": "TestObject",
 	"flt": 1,
 	"ptr": {
-		"str": "trigger"
+		"str": "trigger",
+		"bl": false
 	},
 	"str": "after"
 }

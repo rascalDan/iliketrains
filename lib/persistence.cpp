@@ -62,6 +62,7 @@ namespace Persistence {
 		throw std::runtime_error("Unexpected object");
 	}
 
+	/// LCOV_EXCL_START Don't think we can trigger these from something lexer will parse
 	void
 	Selection::beforeValue(Stack &)
 	{
@@ -78,4 +79,5 @@ namespace Persistence {
 	Selection::endObject(Stack &)
 	{
 	}
+	/// LCOV_EXCL_STOP
 }

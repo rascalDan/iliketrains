@@ -19,4 +19,4 @@ run test-collection.cpp ;
 run test-obj.cpp ;
 run test-maths.cpp ;
 run test-network.cpp ;
-run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json ] ] ;
+run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json fixtures/json/bad/*.json ] ] ;
