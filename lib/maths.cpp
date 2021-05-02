@@ -148,9 +148,6 @@ float
 find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd)
 {
 	// Short name functions for big forula
-	auto sq = [](auto v) {
-		return v * v;
-	};
 	auto sqrt = [](float v) {
 		return std::sqrt(v);
 	};

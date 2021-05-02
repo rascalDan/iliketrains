@@ -17,6 +17,6 @@ Link::Next
 FreeRoam::navigate(Link::Nexts::const_iterator begin, Link::Nexts::const_iterator end) const
 {
 	static std::mt19937 gen(std::random_device {}());
-	auto off = std::uniform_int_distribution<>(0, std::distance(begin, end) - 1)(gen);
+	auto off = std::uniform_int_distribution<long>(0, std::distance(begin, end) - 1)(gen);
 	return begin[off];
 }

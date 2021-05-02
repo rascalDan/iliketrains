@@ -155,7 +155,7 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 	const auto step {glm::vec3 {-arc_length(arc), e0p.y - e1p.y, slength} / segs};
 	const auto trans {glm::translate(centreBase)};
 
-	int segCount = segs;
+	auto segCount = std::lround(segs);
 	std::vector<Vertex> vertices;
 	vertices.reserve((segCount + 1) * railCrossSection.size());
 	for (glm::vec3 swing = {arc.second, e1p.y - centreBase.y, 0.F}; segCount >= 0; swing += step, --segCount) {

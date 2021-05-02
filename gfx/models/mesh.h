@@ -3,7 +3,6 @@
 
 #include <GL/glew.h>
 #include <array>
-#include <cstddef>
 #include <memory>
 #include <span>
 #include <special_members.hpp>
@@ -27,7 +26,7 @@ private:
 
 	GLuint m_vertexArrayObject;
 	std::array<GLuint, NUM_BUFFERS> m_vertexArrayBuffers;
-	size_t m_numIndices;
+	GLsizei m_numIndices;
 	GLenum mode;
 };
 using MeshPtr = std::shared_ptr<const Mesh>;

@@ -129,7 +129,6 @@ public:
 		shader.setUniform("ambientColor", {0.5, 0.5, 0.5});
 
 		auto t_start = std::chrono::high_resolution_clock::now();
-		const auto framelen = std::chrono::milliseconds {1000} / 120;
 
 		inputStack.objects.push_back(shared_from_this());
 		inputStack.objects.insert(
@@ -147,9 +146,6 @@ public:
 			world.apply<Renderable>(&Renderable::render, shader);
 			windows.apply(&Window::SwapBuffers);
 
-			if (const auto snz = framelen - t_passed; snz.count() > 0) {
-				SDL_Delay(snz.count());
-			}
 			t_start = t_end;
 		}
 

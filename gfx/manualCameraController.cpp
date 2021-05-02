@@ -43,8 +43,8 @@ ManualCameraController::handleInput(SDL_Event & e)
 		case SDL_MOUSEMOTION:
 			if (mrb) {
 				if (ctrl) {
-					direction -= 0.01F * e.motion.xrel;
-					pitch = std::clamp(pitch - 0.01F * e.motion.yrel, 0.1F, half_pi);
+					direction -= 0.01F * (float)e.motion.xrel;
+					pitch = std::clamp(pitch - 0.01F * (float)e.motion.yrel, 0.1F, half_pi);
 				}
 				else {
 					focus += rotate_flat(-direction) * glm::vec2 {e.motion.xrel, e.motion.yrel};
@@ -52,7 +52,7 @@ ManualCameraController::handleInput(SDL_Event & e)
 			}
 			return true;
 		case SDL_MOUSEWHEEL:
-			dist = std::clamp(dist - e.wheel.y * 4.F, 5.F, 200.F);
+			dist = std::clamp(dist - (float)e.wheel.y * 4.F, 5.F, 200.F);
 			break;
 	}
 	return false;

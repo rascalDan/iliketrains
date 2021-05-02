@@ -17,7 +17,7 @@ GoTo::GoTo(Orders * o, const Link::End & cp, float d, const NodePtr & dest) :
 ActivityPtr
 GoTo::createActivity() const
 {
-	return std::make_unique<Go>(std::accumulate(links.begin(), links.end(), 0,
+	return std::make_unique<Go>(std::accumulate(links.begin(), links.end(), 0.F,
 										[](auto p, const auto & l) {
 											return p += l.first.lock()->length;
 										})

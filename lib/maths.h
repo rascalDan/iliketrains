@@ -56,6 +56,20 @@ float vector_pitch(const glm::vec3 & diff);
 
 float round_frac(const float & v, const float & frac);
 
+template<typename T>
+inline constexpr auto
+sq(T v)
+{
+	return v * v;
+}
+
+template<typename R = float, typename Ta, typename Tb>
+inline constexpr auto
+rdiv(Ta a, Tb b)
+{
+	return ((R)a / (R)b);
+}
+
 constexpr inline glm::vec2
 operator!(const glm::vec3 & v)
 {
