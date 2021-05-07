@@ -78,5 +78,11 @@ namespace Persistence {
 	Selection::endObject(Stack &)
 	{
 	}
+
+	void
+	Selection::write(const Writer &) const
+	{
+		throw std::logic_error("Default write op shouldn't ever get called");
+	}
 	/// LCOV_EXCL_STOP
 }

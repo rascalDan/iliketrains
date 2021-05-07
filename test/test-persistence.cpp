@@ -32,7 +32,7 @@ struct SubObject : public AbsObject {
 	bool
 	persist(Persistence::PersistenceStore & store) override
 	{
-		return AbsObject::persist(store) && STORE_TYPE && STORE_MEMBER(sub);
+		return STORE_TYPE && AbsObject::persist(store) && STORE_MEMBER(sub);
 	}
 
 	void
@@ -45,7 +45,7 @@ struct SubObject2 : public AbsObject {
 	bool
 	persist(Persistence::PersistenceStore & store) override
 	{
-		return AbsObject::persist(store) && STORE_TYPE;
+		return STORE_TYPE && AbsObject::persist(store);
 	}
 
 	void
@@ -296,4 +296,53 @@ BOOST_DATA_TEST_CASE(utf8_decode_bad, boost::unit_test::data::make<unsigned long
 {
 	std::string out;
 	BOOST_CHECK_THROW(json::jsonParser::appendEscape(cp, out), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(write_test_null)
+{
+	std::unique_ptr<TestObject> to {};
+	std::stringstream ss;
+	Persistence::JsonWritePersistence {ss}.saveState(to);
+	BOOST_CHECK_EQUAL(ss.str(), "null");
+}
+
+BOOST_AUTO_TEST_CASE(write_test_dfl)
+{
+	auto to = std::make_unique<TestObject>();
+	std::stringstream ss;
+	Persistence::JsonWritePersistence {ss}.saveState(to);
+	// TODO We can omit writing explicit nulls
+	BOOST_CHECK_EQUAL(ss.str(),
+			R"({"@typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"ptr":null,"aptr":null,"vptr":[]})");
+}
+
+BOOST_FIXTURE_TEST_CASE(write_test_loaded, JPP)
+{
+	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/load_object.json");
+	std::stringstream ss;
+	Persistence::JsonWritePersistence {ss}.saveState(to);
+	// TODO We can omit writing explicit nulls
+	BOOST_CHECK_EQUAL(ss.str(),
+			R"({"@typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":true,"pos":[3.14,6.28,1.57],"flts":[3.14,6.28,1.57,0,-1,-3.14],"poss":[[3.14,6.28,1.57],[0,-1,-3.14]],"nest":[[["a","b"],["c","d","e"]],[["f"]],[]],"ptr":{"@typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"ptr":null,"aptr":null,"vptr":[]},"aptr":null,"vptr":[]})");
+}
+
+BOOST_FIXTURE_TEST_CASE(write_test_loaded_abs, JPP)
+{
+	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/abs.json");
+	std::stringstream ss;
+	Persistence::JsonWritePersistence {ss}.saveState(to);
+	// TODO We can omit writing explicit nulls
+	BOOST_CHECK_EQUAL(ss.str(),
+			R"({"@typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"ptr":null,"aptr":{"@typeid":"SubObject","base":"set base","sub":"set sub"},"vptr":[]})");
+}
+
+BOOST_FIXTURE_TEST_CASE(write_test_loaded_shared, JPP)
+{
+	auto to = load_json<std::unique_ptr<SharedTestObject>>(FIXTURESDIR "json/shared_ptr_same.json");
+	std::stringstream ss;
+	Persistence::JsonWritePersistence {ss}.saveState(to);
+	// TODO We can omit writing explicit nulls
+	// TODO Also not really implemented, but it runs :)
+	// BOOST_CHECK_EQUAL(ss.str(),
+	// R"({"@typeid":"SharedTestObject","sptr":{"@typeid":"SubObject","@id":"someid"},"ssptr":"someid"})");
 }

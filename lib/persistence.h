@@ -12,6 +12,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 
@@ -23,6 +24,19 @@ namespace Persistence {
 	struct Selection;
 	using SelectionPtr = std::unique_ptr<Selection>;
 	using Stack = std::stack<SelectionPtr>;
+
+	struct Writer {
+		virtual void beginObject() const = 0;
+		virtual void beginArray() const = 0;
+		virtual void pushValue(bool value) const = 0;
+		virtual void pushValue(float value) const = 0;
+		virtual void pushValue(std::nullptr_t) const = 0;
+		virtual void pushValue(std::string_view value) const = 0;
+		virtual void nextValue() const = 0;
+		virtual void pushKey(std::string_view k) const = 0;
+		virtual void endArray() const = 0;
+		virtual void endObject() const = 0;
+	};
 
 	struct Selection {
 		Selection() = default;
@@ -38,6 +52,8 @@ namespace Persistence {
 		virtual void endObject(Stack &);
 		virtual void beforeValue(Stack &);
 		[[nodiscard]] virtual SelectionPtr select(const std::string &);
+
+		virtual void write(const Writer &) const;
 	};
 
 	template<typename T> struct SelectionT;
@@ -75,23 +91,88 @@ namespace Persistence {
 		{
 			std::swap(this->v, evalue);
 		}
+
+		void
+		write(const Writer & out) const override
+		{
+			out.pushValue(this->v);
+		}
 	};
 
 	struct PersistenceStore {
-		template<typename T> [[nodiscard]] inline bool persistType() const;
+		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 
+		enum class NameAction { Push, HandleAndContinue, Ignore };
 		template<typename T>
 		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
 		{
-			if (key == name) {
+			const auto act {setName(key)};
+			if (act != NameAction::Ignore) {
 				sel = SelectionV<T>::make(value);
-				return false;
+				if (act == NameAction::HandleAndContinue) {
+					selHandler();
+				}
 			}
-			return true;
+			return (act != NameAction::Push);
 		}
-		const std::string & name;
+
+		virtual NameAction setName(const std::string_view key) = 0;
+		virtual void selHandler() {};
+		virtual void setType(const std::string_view) = 0;
+
 		SelectionPtr sel {};
+	};
+
+	struct PersistenceSelect : public PersistenceStore {
+		explicit PersistenceSelect(const std::string & n) : name {n} { }
+
+		NameAction
+		setName(const std::string_view key) override
+		{
+			return (key == name) ? NameAction::Push : NameAction::Ignore;
+		}
+
+		void
+		setType(const std::string_view) override
+		{
+		}
+
+		const std::string & name;
+	};
+
+	struct PersistenceWrite : public PersistenceStore {
+		explicit PersistenceWrite(const Writer & o) : out {o} { }
+
+		NameAction
+		setName(const std::string_view key) override
+		{
+			if (!first) {
+				out.nextValue();
+			}
+			else {
+				first = false;
+			}
+			out.pushKey(key);
+			return NameAction::HandleAndContinue;
+		}
+
+		void
+		selHandler() override
+		{
+			this->sel->write(out);
+		};
+
+		void
+		setType(const std::string_view tn) override
+		{
+			out.pushKey("@typeid");
+			out.pushValue(tn);
+			first = false;
+		}
+
+		bool first {true};
+		const Writer & out;
 	};
 
 	template<glm::length_t L, typename T, glm::qualifier Q>
@@ -108,6 +189,17 @@ namespace Persistence {
 			}
 
 			glm::length_t idx {0};
+
+			void
+			write(const Writer & out) const override
+			{
+				for (glm::length_t idx = 0; idx < L; idx += 1) {
+					if (idx) {
+						out.nextValue();
+					}
+					SelectionT<T> {this->v[idx]}.write(out);
+				}
+			}
 		};
 
 		using SelectionV<V>::SelectionV;
@@ -116,6 +208,14 @@ namespace Persistence {
 		beginArray(Stack & stk) override
 		{
 			stk.push(this->template make_s<Members>(this->v));
+		}
+
+		void
+		write(const Writer & out) const override
+		{
+			out.beginArray();
+			Members {this->v}.write(out);
+			out.endArray();
 		}
 	};
 
@@ -130,6 +230,17 @@ namespace Persistence {
 			{
 				stk.push(SelectionV<T>::make(this->v.emplace_back()));
 			}
+
+			void
+			write(const Writer & out) const override
+			{
+				for (std::size_t idx = 0; idx < this->v.size(); idx += 1) {
+					if (idx) {
+						out.nextValue();
+					}
+					SelectionT<T> {this->v[idx]}.write(out);
+				}
+			}
 		};
 
 		using SelectionV<V>::SelectionV;
@@ -138,6 +249,14 @@ namespace Persistence {
 		beginArray(Stack & stk) override
 		{
 			stk.push(this->template make_s<Members>(this->v));
+		}
+
+		void
+		write(const Writer & out) const override
+		{
+			out.beginArray();
+			Members {this->v}.write(out);
+			out.endArray();
 		}
 	};
 
@@ -173,10 +292,13 @@ namespace Persistence {
 
 	template<typename T>
 	inline bool
-	PersistenceStore::persistType() const
+	PersistenceStore::persistType(const T * const, const std::type_info & ti)
 	{
 		if constexpr (!std::is_abstract_v<T>) {
 			[[maybe_unused]] constexpr auto f = &Persistable::addFactory<T>;
+		}
+		if (typeid(std::decay_t<T>) == ti) {
+			setType(Persistable::typeName<T>());
 		}
 		return true;
 	}
@@ -240,7 +362,7 @@ namespace Persistence {
 					}
 				}
 				make_default_as_needed(this->v);
-				PersistenceStore ps {mbr};
+				PersistenceSelect ps {mbr};
 				if (this->v->persist(ps)) {
 					throw std::runtime_error("cannot find member: " + mbr);
 				}
@@ -252,6 +374,15 @@ namespace Persistence {
 			{
 				make_default_as_needed(this->v);
 				stk.pop();
+			}
+
+			void
+			write(const Writer & out) const override
+			{
+				out.beginObject();
+				PersistenceWrite pw {out};
+				this->v->persist(pw);
+				out.endObject();
 			}
 		};
 
@@ -289,6 +420,17 @@ namespace Persistence {
 		{
 			stk.pop();
 		}
+
+		void
+		write(const Writer & out) const override
+		{
+			if (this->v) {
+				SelectionObj {this->v}.write(out);
+			}
+			else {
+				out.pushValue(nullptr);
+			}
+		}
 	};
 
 	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionPtrBase<std::unique_ptr<T>, false> {
@@ -311,7 +453,7 @@ namespace Persistence {
 	};
 }
 
-#define STORE_TYPE store.persistType<std::decay_t<decltype(*this)>>()
+#define STORE_TYPE store.persistType(this, typeid(*this))
 #define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
 
 #endif

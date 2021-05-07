@@ -1,4 +1,8 @@
 #include "jsonParse-persistence.h"
+#include <algorithm>
+#include <array>
+#include <iomanip>
+#include <ostream>
 #include <type_traits>
 #include <utility>
 
@@ -82,5 +86,117 @@ namespace Persistence {
 	JsonParsePersistence::current()
 	{
 		return stk.top();
+	}
+
+	static inline void
+	wrv(std::ostream & strm, char ch)
+	{
+		strm.put(ch);
+	};
+	static inline void
+	wrh(std::ostream & strm, char ch)
+	{
+		using namespace std::literals;
+		strm << R"(\u)"sv << std::setw(4) << std::hex << (int)ch << std::setw(1);
+	}
+	static inline void
+	wre(std::ostream & strm, char e)
+	{
+		strm << '\\' << e;
+	}
+	template<char E>
+	static inline void
+	wre(std::ostream & strm, char)
+	{
+		wre(strm, E);
+	}
+
+	using OutFunc = void (*)(std::ostream &, char);
+	using OutFuncs = std::array<OutFunc, 255>;
+	static constexpr OutFuncs outFuncs {[]() {
+		OutFuncs outFuncs;
+		outFuncs.fill(&wrv);
+		for (int x = 0; x < 0x20; x += 1) {
+			outFuncs[x] = &wrh;
+		}
+		outFuncs['\"'] = &wre<'"'>;
+		outFuncs['\\'] = &wre<'\\'>;
+		outFuncs['\b'] = &wre<'b'>;
+		outFuncs['\f'] = &wre<'f'>;
+		outFuncs['\n'] = &wre<'n'>;
+		outFuncs['\r'] = &wre<'r'>;
+		outFuncs['\t'] = &wre<'t'>;
+		return outFuncs;
+	}()};
+
+	JsonWritePersistence::JsonWritePersistence(std::ostream & s) : strm {s}
+	{
+		strm << std::boolalpha // for Boolean
+			 << std::defaultfloat // for Number
+			 << std::setfill('0'); // for String \uNNNN
+	}
+
+	void
+	JsonWritePersistence::beginObject() const
+	{
+		strm << '{';
+	}
+
+	void
+	JsonWritePersistence::beginArray() const
+	{
+		strm << '[';
+	}
+
+	void
+	JsonWritePersistence::pushValue(bool value) const
+	{
+		strm << value;
+	}
+
+	void
+	JsonWritePersistence::pushValue(float value) const
+	{
+		strm << value;
+	}
+
+	void JsonWritePersistence::pushValue(std::nullptr_t) const
+	{
+		strm << "null";
+	}
+
+	void
+	JsonWritePersistence::pushValue(const std::string_view value) const
+	{
+		strm << '"';
+		std::for_each(value.begin(), value.end(), [this](char ch) {
+			outFuncs[ch](strm, ch);
+		});
+		strm << '"';
+	}
+
+	void
+	JsonWritePersistence::nextValue() const
+	{
+		strm << ',';
+	}
+
+	void
+	JsonWritePersistence::pushKey(const std::string_view k) const
+	{
+		pushValue(k);
+		strm << ':';
+	}
+
+	void
+	JsonWritePersistence::endArray() const
+	{
+		strm << ']';
+	}
+
+	void
+	JsonWritePersistence::endObject() const
+	{
+		strm << '}';
 	}
 }
