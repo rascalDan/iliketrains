@@ -99,6 +99,7 @@ namespace Persistence {
 		}
 	};
 
+	struct Persistable;
 	struct PersistenceStore {
 		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 
@@ -119,60 +120,33 @@ namespace Persistence {
 
 		virtual NameAction setName(const std::string_view key) = 0;
 		virtual void selHandler() {};
-		virtual void setType(const std::string_view) = 0;
+		virtual void setType(const std::string_view, const Persistable *) = 0;
 
 		SelectionPtr sel {};
 	};
 
 	struct PersistenceSelect : public PersistenceStore {
-		explicit PersistenceSelect(const std::string & n) : name {n} { }
+		explicit PersistenceSelect(const std::string & n);
 
-		NameAction
-		setName(const std::string_view key) override
-		{
-			return (key == name) ? NameAction::Push : NameAction::Ignore;
-		}
+		NameAction setName(const std::string_view key) override;
 
-		void
-		setType(const std::string_view) override
-		{
-		}
+		void setType(const std::string_view, const Persistable *) override;
 
 		const std::string & name;
 	};
 
 	struct PersistenceWrite : public PersistenceStore {
-		explicit PersistenceWrite(const Writer & o) : out {o} { }
+		explicit PersistenceWrite(const Writer & o, bool sh);
 
-		NameAction
-		setName(const std::string_view key) override
-		{
-			if (!first) {
-				out.nextValue();
-			}
-			else {
-				first = false;
-			}
-			out.pushKey(key);
-			return NameAction::HandleAndContinue;
-		}
+		NameAction setName(const std::string_view key) override;
 
-		void
-		selHandler() override
-		{
-			this->sel->write(out);
-		};
+		void selHandler() override;
 
-		void
-		setType(const std::string_view tn) override
-		{
-			out.pushKey("@typeid");
-			out.pushValue(tn);
-			first = false;
-		}
+		void setType(const std::string_view tn, const Persistable * p) override;
 
 		bool first {true};
 		const Writer & out;
+		bool shared;
 	};
 
 	template<glm::length_t L, typename T, glm::qualifier Q>
@@ -267,6 +241,8 @@ namespace Persistence {
 
 		virtual bool persist(PersistenceStore & store) = 0;
 
+		[[nodiscard]] virtual std::string getId() const;
+
 		template<typename T>
 		[[nodiscard]] constexpr static auto
 		typeName()
@@ -292,20 +268,22 @@ namespace Persistence {
 
 	template<typename T>
 	inline bool
-	PersistenceStore::persistType(const T * const, const std::type_info & ti)
+	PersistenceStore::persistType(const T * const v, const std::type_info & ti)
 	{
 		if constexpr (!std::is_abstract_v<T>) {
 			[[maybe_unused]] constexpr auto f = &Persistable::addFactory<T>;
 		}
 		if (typeid(std::decay_t<T>) == ti) {
-			setType(Persistable::typeName<T>());
+			setType(Persistable::typeName<T>(), v);
 		}
 		return true;
 	}
 
-	// TODO Move this
+	// TODO Move these
 	using SharedObjects = std::map<std::string, std::shared_ptr<Persistable>>;
 	inline SharedObjects sharedObjects;
+	using SeenSharedObjects = std::map<void *, std::string>;
+	inline SeenSharedObjects seenSharedObjects;
 
 	template<typename Ptr, bool shared> struct SelectionPtrBase : public SelectionV<Ptr> {
 		using T = typename Ptr::element_type;
@@ -380,7 +358,7 @@ namespace Persistence {
 			write(const Writer & out) const override
 			{
 				out.beginObject();
-				PersistenceWrite pw {out};
+				PersistenceWrite pw {out, shared};
 				this->v->persist(pw);
 				out.endObject();
 			}
@@ -425,6 +403,14 @@ namespace Persistence {
 		write(const Writer & out) const override
 		{
 			if (this->v) {
+				if constexpr (shared) {
+					if (const auto existing = seenSharedObjects.find(std::to_address(this->v));
+							existing != seenSharedObjects.end()) {
+						out.pushValue(existing->second);
+						return;
+					}
+					seenSharedObjects.emplace(std::to_address(this->v), this->v->getId());
+				}
 				SelectionObj {this->v}.write(out);
 			}
 			else {

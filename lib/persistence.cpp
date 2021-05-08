@@ -1,5 +1,6 @@
 #include "persistence.h"
 #include <map>
+#include <sstream>
 
 namespace Persistence {
 	using Factories
@@ -24,6 +25,61 @@ namespace Persistence {
 	Persistable::callSharedFactory(const std::string_view t)
 	{
 		return namedTypeFactories.at(t).second();
+	}
+
+	[[nodiscard]] std::string
+	Persistable::getId() const
+	{
+		std::stringstream ss;
+		ss << std::hex << this;
+		return ss.str();
+	}
+
+	PersistenceSelect::PersistenceSelect(const std::string & n) : name {n} { }
+
+	PersistenceStore::NameAction
+	PersistenceSelect::setName(const std::string_view key)
+	{
+		return (key == name) ? NameAction::Push : NameAction::Ignore;
+	}
+
+	void
+	PersistenceSelect::setType(const std::string_view, const Persistable *)
+	{
+	}
+
+	PersistenceWrite::PersistenceWrite(const Writer & o, bool sh) : out {o}, shared {sh} { }
+
+	PersistenceStore::NameAction
+	PersistenceWrite::setName(const std::string_view key)
+	{
+		if (!first) {
+			out.nextValue();
+		}
+		else {
+			first = false;
+		}
+		out.pushKey(key);
+		return NameAction::HandleAndContinue;
+	}
+
+	void
+	PersistenceWrite::selHandler()
+	{
+		this->sel->write(out);
+	};
+
+	void
+	PersistenceWrite::setType(const std::string_view tn, const Persistable * p)
+	{
+		out.pushKey("@typeid");
+		out.pushValue(tn);
+		first = false;
+		if (shared) {
+			out.nextValue();
+			out.pushKey("@id");
+			out.pushValue(p->getId());
+		}
 	}
 
 	void
