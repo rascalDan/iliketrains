@@ -439,6 +439,7 @@ namespace Persistence {
 
 	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionPtrBase<std::shared_ptr<T>, true> {
 		using SelectionPtrBase<std::shared_ptr<T>, true>::SelectionPtrBase;
+		using SelectionPtrBase<std::shared_ptr<T>, true>::setValue;
 
 		void
 		setValue(std::string && id) override
