@@ -170,7 +170,7 @@ namespace Persistence {
 	{
 		strm << '"';
 		std::for_each(value.begin(), value.end(), [this](char ch) {
-			outFuncs[ch](strm, ch);
+			outFuncs[(unsigned char)ch](strm, ch);
 		});
 		strm << '"';
 	}

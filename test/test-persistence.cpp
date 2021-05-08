@@ -257,23 +257,25 @@ BOOST_FIXTURE_TEST_CASE(load_shared_object_null, JPP)
 }
 
 using svs = std::tuple<const char * const, std::string_view>;
-BOOST_DATA_TEST_CASE_F(JPP, load_strings,
-		boost::unit_test::data::make<svs>({
-				{R"J("")J", ""},
-				{R"J("non empty")J", "non empty"},
-				{R"J("new\nline")J", "new\nline"},
-				{R"J("quote\"mark")J", "quote\"mark"},
-				{R"J("tab\t")J", "tab\t"},
-				{R"J("back\bspace?")J", "back\bspace?"},
-				{R"J("form\ffeed?")J", "form\ffeed?"},
-				{R"J("forward\/slash")J", "forward/slash"},
-				{R"J("\u00a5 yen")J", "¥ yen"},
-				{R"J("gbp \u00a3")J", "gbp £"},
-				{R"J("\u007E tilde")J", "~ tilde"},
-				{R"J("\u056b ARMENIAN SMALL LETTER INI")J", "ի ARMENIAN SMALL LETTER INI"},
-				{R"J("\u0833 SAMARITAN PUNCTUATION BAU")J", "࠳ SAMARITAN PUNCTUATION BAU"},
-		}),
-		in, exp)
+auto const TEST_STRINGS = boost::unit_test::data::make<svs>({
+		{R"J("")J", ""},
+		{R"J("non empty")J", "non empty"},
+		{R"J("new\nline")J", "new\nline"},
+		{R"J("quote\"mark")J", "quote\"mark"},
+		{R"J("tab\t")J", "tab\t"},
+		{R"J("back\bspace?")J", "back\bspace?"},
+		{R"J("form\ffeed?")J", "form\ffeed?"},
+		{R"J("a \u0007 bell")J", "a \a bell"},
+});
+auto const TEST_STRINGS_DECODE_ONLY = boost::unit_test::data::make<svs>({
+		{R"J("forward\/slash")J", "forward/slash"},
+		{R"J("\u00a5 yen")J", "¥ yen"},
+		{R"J("gbp \u00a3")J", "gbp £"},
+		{R"J("\u007E tilde")J", "~ tilde"},
+		{R"J("\u056b ARMENIAN SMALL LETTER INI")J", "ի ARMENIAN SMALL LETTER INI"},
+		{R"J("\u0833 SAMARITAN PUNCTUATION BAU")J", "࠳ SAMARITAN PUNCTUATION BAU"},
+});
+BOOST_DATA_TEST_CASE_F(JPP, load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, exp)
 {
 	std::stringstream str {in};
 	BOOST_CHECK_EQUAL(loadState<std::string>(str), exp);
@@ -345,4 +347,12 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded_shared, JPP)
 	// TODO Also not really implemented, but it runs :)
 	// BOOST_CHECK_EQUAL(ss.str(),
 	// R"({"@typeid":"SharedTestObject","sptr":{"@typeid":"SubObject","@id":"someid"},"ssptr":"someid"})");
+}
+
+BOOST_DATA_TEST_CASE(write_special_strings, TEST_STRINGS, exp, in)
+{
+	std::stringstream ss;
+	std::string copy(in);
+	Persistence::JsonWritePersistence {ss}.saveState(copy);
+	BOOST_CHECK_EQUAL(ss.str(), exp);
 }
