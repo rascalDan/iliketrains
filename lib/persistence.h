@@ -53,6 +53,7 @@ namespace Persistence {
 		virtual void beforeValue(Stack &);
 		[[nodiscard]] virtual SelectionPtr select(const std::string &);
 
+		[[nodiscard]] virtual bool needsWrite() const;
 		virtual void write(const Writer &) const;
 	};
 
@@ -108,9 +109,10 @@ namespace Persistence {
 		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
 		{
-			const auto act {setName(key)};
+			SelectionT<T> s {value};
+			const auto act {setName(key, s)};
 			if (act != NameAction::Ignore) {
-				sel = SelectionV<T>::make(value);
+				sel = std::make_unique<decltype(s)>(std::move(s));
 				if (act == NameAction::HandleAndContinue) {
 					selHandler();
 				}
@@ -118,7 +120,7 @@ namespace Persistence {
 			return (act != NameAction::Push);
 		}
 
-		virtual NameAction setName(const std::string_view key) = 0;
+		virtual NameAction setName(const std::string_view key, const Selection &) = 0;
 		virtual void selHandler() {};
 		virtual void setType(const std::string_view, const Persistable *) = 0;
 
@@ -128,7 +130,7 @@ namespace Persistence {
 	struct PersistenceSelect : public PersistenceStore {
 		explicit PersistenceSelect(const std::string & n);
 
-		NameAction setName(const std::string_view key) override;
+		NameAction setName(const std::string_view key, const Selection &) override;
 
 		void setType(const std::string_view, const Persistable *) override;
 
@@ -138,7 +140,7 @@ namespace Persistence {
 	struct PersistenceWrite : public PersistenceStore {
 		explicit PersistenceWrite(const Writer & o, bool sh);
 
-		NameAction setName(const std::string_view key) override;
+		NameAction setName(const std::string_view key, const Selection &) override;
 
 		void selHandler() override;
 
@@ -397,6 +399,12 @@ namespace Persistence {
 		endObject(Stack & stk) override
 		{
 			stk.pop();
+		}
+
+		[[nodiscard]] bool
+		needsWrite() const override
+		{
+			return this->v != nullptr;
 		}
 
 		void

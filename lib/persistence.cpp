@@ -38,7 +38,7 @@ namespace Persistence {
 	PersistenceSelect::PersistenceSelect(const std::string & n) : name {n} { }
 
 	PersistenceStore::NameAction
-	PersistenceSelect::setName(const std::string_view key)
+	PersistenceSelect::setName(const std::string_view key, const Selection &)
 	{
 		return (key == name) ? NameAction::Push : NameAction::Ignore;
 	}
@@ -51,16 +51,19 @@ namespace Persistence {
 	PersistenceWrite::PersistenceWrite(const Writer & o, bool sh) : out {o}, shared {sh} { }
 
 	PersistenceStore::NameAction
-	PersistenceWrite::setName(const std::string_view key)
+	PersistenceWrite::setName(const std::string_view key, const Selection & s)
 	{
-		if (!first) {
-			out.nextValue();
+		if (s.needsWrite()) {
+			if (!first) {
+				out.nextValue();
+			}
+			else {
+				first = false;
+			}
+			out.pushKey(key);
+			return NameAction::HandleAndContinue;
 		}
-		else {
-			first = false;
-		}
-		out.pushKey(key);
-		return NameAction::HandleAndContinue;
+		return NameAction::Ignore;
 	}
 
 	void
@@ -133,6 +136,12 @@ namespace Persistence {
 	void
 	Selection::endObject(Stack &)
 	{
+	}
+
+	bool
+	Selection::needsWrite() const
+	{
+		return true;
 	}
 
 	void
