@@ -18,11 +18,13 @@ struct Arc : public std::pair<float, float> {
 	}
 };
 
-constexpr const glm::vec3 up {0, 1, 0};
-constexpr const glm::vec3 north {0, 0, 1};
-constexpr const glm::vec3 south {0, 0, -1};
-constexpr const glm::vec3 east {-1, 0, 0};
-constexpr const glm::vec3 west {1, 0, 0};
+constexpr const glm::vec3 origin {0, 0, 0};
+constexpr const glm::vec3 up {0, 0, 1};
+constexpr const glm::vec3 down {0, 0, -1};
+constexpr const glm::vec3 north {0, 1, 0};
+constexpr const glm::vec3 south {0, -1, 0};
+constexpr const glm::vec3 east {1, 0, 0};
+constexpr const glm::vec3 west {-1, 0, 0};
 constexpr auto half_pi {glm::half_pi<float>()};
 constexpr auto quarter_pi {half_pi / 2};
 constexpr auto pi {glm::pi<float>()};
@@ -73,13 +75,13 @@ rdiv(Ta a, Tb b)
 constexpr inline glm::vec2
 operator!(const glm::vec3 & v)
 {
-	return {v.x, v.z};
+	return {v.x, v.y};
 }
 
 constexpr inline glm::vec3
-operator^(const glm::vec2 & v, float y)
+operator^(const glm::vec2 & v, float z)
 {
-	return {v.x, y, v.y};
+	return {v.x, v.y, z};
 }
 
 constexpr inline glm::vec3

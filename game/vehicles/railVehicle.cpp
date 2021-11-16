@@ -21,6 +21,6 @@ RailVehicle::move(const Train * t, float & trailBy)
 	const auto & b2Pos = bogies[1] = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase);
 	const auto diff = glm::normalize(b2Pos.pos - b1Pos.pos);
 	location.pos = (b1Pos.pos + b2Pos.pos) / 2.F;
-	location.rot = {-vector_pitch(diff), vector_yaw(diff), 0};
+	location.rot = {vector_pitch(diff), vector_yaw(diff), 0};
 	trailBy += 0.6F + overhang;
 }

@@ -15,10 +15,13 @@
 template class NetworkOf<RailLink>;
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
-constexpr glm::vec3 RAIL_HEIGHT {0, .25F, 0};
+constexpr glm::vec3 RAIL_HEIGHT {0, 0, .25F};
 
 RailLinks::RailLinks() : NetworkOf<RailLink> {"rails.jpg"} { }
-void RailLinks::tick(TickDuration) { }
+void
+RailLinks::tick(TickDuration)
+{
+}
 
 std::shared_ptr<RailLink>
 RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
@@ -46,11 +49,14 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		throw std::runtime_error("Node exists but couldn't find it");
 	};
 	float dir = pi + findDir(node1ins.first);
+	if (dir == vector_yaw(end - start)) {
+		return addLink<RailLinkStraight>(start, end);
+	}
 	const glm::vec2 flatStart {!start}, flatEnd {!end};
 	if (!node2ins.second) {
 		auto midheight = [&](auto mid) {
 			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
-			return start.y + ((end.y - start.y) * (sm / (sm + em)));
+			return start.z + ((end.z - start.z) * (sm / (sm + em)));
 		};
 		float dir2 = pi + findDir(node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
@@ -106,9 +112,9 @@ constexpr const std::array<std::pair<glm::vec3, float>, RAIL_CROSSSECTION_VERTIC
 		// _/           \_
 		//  left to right
 		{{-1.9F, 0.F, 0.F}, 0.F},
-		{{-.608F, RAIL_HEIGHT.y, 0.F}, 0.34F},
-		{{0, RAIL_HEIGHT.y * .7F, 0.F}, 0.5F},
-		{{.608F, RAIL_HEIGHT.y, 0.F}, 0.66F},
+		{{-.608F, 0.F, RAIL_HEIGHT.z}, 0.34F},
+		{{0, 0.F, RAIL_HEIGHT.z * .7F}, 0.5F},
+		{{.608F, 0.F, RAIL_HEIGHT.z}, 0.66F},
 		{{1.9F, 0.F, 0.F}, 1.F},
 }};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
@@ -124,22 +130,24 @@ RailLinkStraight::RailLinkStraight(const NodePtr & a, const NodePtr & b) : RailL
 RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
 {
-	std::vector<Vertex> vertices;
-	vertices.reserve(2 * railCrossSection.size());
-	const auto len = round_sleepers(length / 2.F);
-	const auto e {flat_orientation(diff)};
-	for (int ei = 0; ei < 2; ei++) {
-		const auto trans {glm::translate(ends[ei].node->pos) * e};
-		for (const auto & rcs : railCrossSection) {
-			const glm::vec3 m {(trans * glm::vec4 {rcs.first, 1})};
-			vertices.emplace_back(m, glm::vec2 {rcs.second, ei ? len : 0.F}, up);
+	if (glGenVertexArrays) {
+		std::vector<Vertex> vertices;
+		vertices.reserve(2 * railCrossSection.size());
+		const auto len = round_sleepers(length / 2.F);
+		const auto e {flat_orientation(diff)};
+		for (int ei : {1, 0}) {
+			const auto trans {glm::translate(ends[ei].node->pos) * e};
+			for (const auto & rcs : railCrossSection) {
+				const glm::vec3 m {(trans * glm::vec4 {rcs.first, 1})};
+				vertices.emplace_back(m, glm::vec2 {rcs.second, len * static_cast<float>(ei)}, up);
+			}
 		}
+		mesh = defaultMesh(vertices);
 	}
-	mesh = defaultMesh(vertices);
 }
 
 RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
-	RailLinkCurve(a, b, {c.x, a->pos.y, c.y}, {!c, a->pos, b->pos})
+	RailLinkCurve(a, b, c ^ a->pos.z, {!c, a->pos, b->pos})
 {
 }
 
@@ -148,24 +156,27 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 			(glm::length(a->pos - c)) * arc_length(arc)),
 	LinkCurve {c, glm::length(ends[0].node->pos - c), arc}
 {
-	const auto & e0p {ends[0].node->pos};
-	const auto & e1p {ends[1].node->pos};
-	const auto slength = round_sleepers(length / 2.F);
-	const auto segs = std::round(5.F * slength / std::pow(radius, 0.7F));
-	const auto step {glm::vec3 {-arc_length(arc), e0p.y - e1p.y, slength} / segs};
-	const auto trans {glm::translate(centreBase)};
+	if (glGenVertexArrays) {
+		const auto & e0p {ends[0].node->pos};
+		const auto & e1p {ends[1].node->pos};
+		const auto slength = round_sleepers(length / 2.F);
+		const auto segs = std::round(15.F * slength / std::pow(radius, 0.7F));
+		const auto step {glm::vec3 {arc_length(arc), e1p.z - e0p.z, slength} / segs};
+		const auto trans {glm::translate(centreBase)};
 
-	auto segCount = std::lround(segs);
-	std::vector<Vertex> vertices;
-	vertices.reserve((segCount + 1) * railCrossSection.size());
-	for (glm::vec3 swing = {arc.second, e1p.y - centreBase.y, 0.F}; segCount >= 0; swing += step, --segCount) {
-		const auto t {trans * glm::rotate(swing.x - half_pi, up) * glm::translate(glm::vec3 {radius, swing.y, 0.F})};
-		for (const auto & rcs : railCrossSection) {
-			const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
-			vertices.emplace_back(m, glm::vec2 {rcs.second, swing.z}, up);
+		auto segCount = std::lround(segs);
+		std::vector<Vertex> vertices;
+		vertices.reserve((segCount + 1) * railCrossSection.size());
+		for (glm::vec3 swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount >= 0; swing += step, --segCount) {
+			const auto t {
+					trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, 0.F, swing.y})};
+			for (const auto & rcs : railCrossSection) {
+				const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
+				vertices.emplace_back(m, glm::vec2 {rcs.second, swing.z}, up);
+			}
 		}
+		mesh = defaultMesh(vertices);
 	}
-	mesh = defaultMesh(vertices);
 }
 
 glm::vec3

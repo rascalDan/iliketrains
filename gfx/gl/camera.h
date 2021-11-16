@@ -9,12 +9,6 @@ public:
 
 	[[nodiscard]] glm::mat4 GetViewProjection() const;
 
-	void MoveForward(float amt);
-	void SlideForward(float amt);
-	void MoveRight(float amt);
-	void Pitch(float angle);
-	void RotateY(float angle);
-
 	glm::vec3 pos;
 	glm::vec3 forward;
 	glm::vec3 up;

@@ -23,12 +23,12 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 	vertices.resize(verticesCount, {{}, {}, {}});
 
 	// Initial coordinates
-	for (auto z = 0; z < size; z += 1) {
+	for (auto y = 0; y < size; y += 1) {
 		for (auto x = 0; x < size; x += 1) {
-			auto & vertex = vertices[x + (z * size)];
-			vertex.pos = {resolution * (x - offset), -1.5, resolution * (z - offset)};
-			vertex.normal = {0, 1, 0};
-			vertex.texCoord = {x, z};
+			auto & vertex = vertices[x + (y * size)];
+			vertex.pos = {resolution * (x - offset), resolution * (y - offset), -1.5};
+			vertex.normal = up;
+			vertex.texCoord = {x, y};
 		}
 	}
 	// Add hills
@@ -43,15 +43,15 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 			if (const auto lim2 = hpos + hsize; lim2.x < size && lim2.y < size) {
 				const auto height = (float)rheight(gen);
 				const glm::ivec2 hsizesqrd {hsize.x * hsize.x, hsize.y * hsize.y};
-				for (auto z = lim1.y; z < lim2.y; z += 1) {
+				for (auto y = lim1.y; y < lim2.y; y += 1) {
 					for (auto x = lim1.x; x < lim2.x; x += 1) {
-						const auto dist {hpos - glm::ivec2 {x, z}};
+						const auto dist {hpos - glm::ivec2 {x, y}};
 						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
-						const auto out {rdiv(sq(x - hpos.x), sq(hsize.x)) + rdiv(sq(z - hpos.y), sq(hsize.y))};
+						const auto out {rdiv(sq(x - hpos.x), sq(hsize.x)) + rdiv(sq(y - hpos.y), sq(hsize.y))};
 						if (out <= 1.0) {
-							auto & vertex = vertices[x + (z * size)];
+							auto & vertex = vertices[x + (y * size)];
 							const auto m {1.F / (7.F * out - 8.F) + 1.F};
-							vertex.pos.y += height * m;
+							vertex.pos.z += height * m;
 						}
 					}
 				}
@@ -72,12 +72,11 @@ Terrain::Terrain(const std::string & fileName) :
 	std::vector<Vertex> vertices;
 	vertices.reserve((map.width * map.height) + 4);
 
-	for (auto z = 0; z < map.height; z += 1) {
+	for (auto y = 0; y < map.height; y += 1) {
 		for (auto x = 0; x < map.width; x += 1) {
-			vertices.emplace_back(
-					glm::vec3 {resolution * (x - (map.width / 2)), ((float)map.data[x + (z * map.width)] * 0.1F) - 1.5F,
-							resolution * (z - (map.height / 2))},
-					glm::vec2 {(x % 2) / 2.01, (z % 2) / 2.01}, glm::vec3 {0, 1, 0});
+			vertices.emplace_back(glm::vec3 {resolution * (x - (map.width / 2)), resolution * (y - (map.height / 2)),
+										  ((float)map.data[x + (y * map.width)] * 0.1F) - 1.5F},
+					glm::vec2 {(x % 2) / 2.01, (y % 2) / 2.01}, up);
 		}
 	}
 
@@ -93,28 +92,28 @@ Terrain::finish(unsigned int width, unsigned int height, std::vector<Vertex> & v
 	std::vector<unsigned int> indices;
 	indices.reserve(indicesCount + 6);
 	// Indices
-	for (auto z = 0U; z < height - 1; z += 1) {
+	for (auto y = 0U; y < height - 1; y += 1) {
 		for (auto x = 0U; x < width - 1; x += 1) {
-			indices.push_back(x + (z * width));
-			indices.push_back((x + 1) + ((z + 1) * width));
-			indices.push_back((x + 1) + (z * width));
-			indices.push_back(x + (z * width));
-			indices.push_back(x + ((z + 1) * width));
-			indices.push_back((x + 1) + ((z + 1) * width));
+			indices.push_back(x + (y * width));
+			indices.push_back((x + 1) + (y * width));
+			indices.push_back((x + 1) + ((y + 1) * width));
+			indices.push_back(x + (y * width));
+			indices.push_back((x + 1) + ((y + 1) * width));
+			indices.push_back(x + ((y + 1) * width));
 		}
 	}
 	// Normals
-	auto v = [&vertices](unsigned int width, unsigned int x, unsigned int z) -> Vertex & {
-		return vertices[x + (z * width)];
+	auto v = [&vertices](unsigned int width, unsigned int x, unsigned int y) -> Vertex & {
+		return vertices[x + (y * width)];
 	};
 
-	for (auto z = 1U; z < height - 1; z += 1) {
+	for (auto y = 1U; y < height - 1; y += 1) {
 		for (auto x = 1U; x < width - 1; x += 1) {
-			const auto a = v(width, x - 1, z).pos;
-			const auto b = v(width, x, z - 1).pos;
-			const auto c = v(width, x + 1, z).pos;
-			const auto d = v(width, x, z + 1).pos;
-			v(width, x, z).normal = -glm::normalize(glm::cross(c - a, d - b));
+			const auto a = v(width, x - 1, y).pos;
+			const auto b = v(width, x, y - 1).pos;
+			const auto c = v(width, x + 1, y).pos;
+			const auto d = v(width, x, y + 1).pos;
+			v(width, x, y).normal = -glm::normalize(glm::cross(b - d, a - c));
 		}
 	}
 	meshes.create<Mesh>(vertices, indices);

@@ -14,9 +14,9 @@ void main()
 {
 	vec3 wpos = vec3(
 			position.x + cos(waves.x),
-			cos(waves.x + position.x + (position.z / 8)) * .3,
-			position.z + cos(waves.x * waves.z / 2));
+			position.y + cos(waves.x * waves.y / 2),
+			cos(waves.x + position.x + (position.y / 8)) * .3);
 	gl_Position = viewProjection * vec4(wpos, 1.0);
 	texCoord0 = texCoord;
-	depth = position.y;
+	depth = position.z;
 }

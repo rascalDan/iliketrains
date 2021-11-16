@@ -34,6 +34,6 @@ BOOST_AUTO_TEST_CASE(create_meshes)
 	const auto & o = ms.at("Body");
 	BOOST_REQUIRE_EQUAL(88, o.first.size());
 	const auto & v = o.first.front();
-	BOOST_REQUIRE_CLOSE(1.345, v.pos.x, 1);
+	BOOST_REQUIRE_CLOSE(-1.345, v.pos.x, 1);
 	BOOST_REQUIRE_EQUAL(138, o.second.size());
 }

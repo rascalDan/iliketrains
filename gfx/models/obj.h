@@ -17,16 +17,8 @@ class Vertex;
 
 class ObjParser : yyFlexLexer {
 public:
-	explicit ObjParser(const std::filesystem::path & fileName) : ObjParser {std::make_unique<std::ifstream>(fileName)}
-	{
-	}
-
-	explicit ObjParser(std::unique_ptr<std::istream> in) : yyFlexLexer(in.get())
-	{
-		assert(in);
-		ObjParser::yylex();
-		assert(in->good());
-	}
+	explicit ObjParser(const std::filesystem::path & fileName);
+	explicit ObjParser(std::unique_ptr<std::istream> in);
 
 	int yylex() override;
 

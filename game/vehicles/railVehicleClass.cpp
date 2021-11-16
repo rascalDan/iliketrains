@@ -60,12 +60,12 @@ RailVehicleClass::bogieOffset(ObjParser & o)
 		std::set<std::pair<float, int>> vertexIds;
 		for (const auto & face : object.second) {
 			for (const auto & faceElement : face) {
-				vertexIds.emplace(o.vertices[faceElement.x - 1].z, faceElement.x - 1);
+				vertexIds.emplace(o.vertices[faceElement.x - 1].y, faceElement.x - 1);
 			}
 		}
 		const auto offset = (vertexIds.begin()->first + vertexIds.rbegin()->first) / 2;
 		for (const auto & v : vertexIds) {
-			o.vertices[v.second].z -= offset;
+			o.vertices[v.second].y -= offset;
 		}
 		wheelBase += std::abs(offset);
 	}
@@ -76,7 +76,7 @@ float
 RailVehicleClass::objectLength(ObjParser & o)
 {
 	const auto mme = std::minmax_element(o.vertices.begin(), o.vertices.end(), [](const auto & v1, const auto & v2) {
-		return v1.z < v2.z;
+		return v1.y < v2.y;
 	});
-	return mme.second->z - mme.first->z;
+	return mme.second->y - mme.first->y;
 }

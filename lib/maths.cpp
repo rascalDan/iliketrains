@@ -9,7 +9,7 @@ glm::mat4
 flat_orientation(const glm::vec3 & diff)
 {
 	static const auto oneeighty {glm::rotate(pi, up)};
-	const auto flatdiff {glm::normalize(glm::vec3 {diff.x, 0, diff.z})};
+	const auto flatdiff {glm::normalize(!!diff)};
 	auto e {glm::orientation(flatdiff, north)};
 	// Handle if diff is exactly opposite to north
 	return (std::isnan(e[0][0])) ? oneeighty : e;
@@ -42,16 +42,16 @@ rotate_flat(float a)
 	return rotation<glm::mat2>(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
 }
 
-// Create a roll transformation matrix
-glm::mat4
-rotate_roll(float a)
-{
-	return rotation<glm::mat4>(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
-}
-
 // Create a yaw transformation matrix
 glm::mat4
 rotate_yaw(float a)
+{
+	return rotation<glm::mat4>(a, {0, 0}, {1, 0}, {1, 1}, {0, 1});
+}
+
+// Create a roll transformation matrix
+glm::mat4
+rotate_roll(float a)
 {
 	return rotation<glm::mat4>(a, {0, 0}, {2, 0}, {2, 2}, {0, 2});
 }
@@ -63,7 +63,7 @@ rotate_pitch(float a)
 	return rotation<glm::mat4>(a, {1, 1}, {1, 2}, {2, 2}, {2, 1});
 }
 
-// Create a bomcined yaw, pitch, roll transformation matrix
+// Create a combined yaw, pitch, roll transformation matrix
 glm::mat4
 rotate_ypr(glm::vec3 a)
 {
@@ -73,13 +73,13 @@ rotate_ypr(glm::vec3 a)
 float
 vector_yaw(const glm::vec3 & diff)
 {
-	return std::atan2(diff.x, diff.z);
+	return std::atan2(diff.x, diff.y);
 }
 
 float
 vector_pitch(const glm::vec3 & diff)
 {
-	return std::atan(diff.y);
+	return std::atan(diff.z);
 }
 
 float

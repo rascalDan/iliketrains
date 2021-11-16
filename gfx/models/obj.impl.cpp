@@ -9,6 +9,19 @@
 #include <utility>
 #include <vector>
 
+ObjParser::ObjParser(const std::filesystem::path & fileName) : ObjParser {std::make_unique<std::ifstream>(fileName)} { }
+
+ObjParser::ObjParser(std::unique_ptr<std::istream> in) : yyFlexLexer(in.get())
+{
+	assert(in);
+	ObjParser::yylex();
+	assert(in->good());
+	std::for_each(vertices.begin(), vertices.end(), [](auto & v) {
+		std::swap(v.y, v.z);
+		v.x = -v.x;
+	});
+}
+
 ObjParser::NamedMeshes
 ObjParser::createMeshes() const
 {

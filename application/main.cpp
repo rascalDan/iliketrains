@@ -88,10 +88,10 @@ public:
 
 		{
 			auto rl = world.create<RailLinks>();
-			const glm::vec3 j {-1100, 15, -1100}, k {-1100, 15, -1000}, l {-1000, 20, -800}, m {-900, 30, -600},
-					n {-600, 32, -500}, o {-500, 30, -800}, p {-600, 25, -900}, q {-1025, 10, -1175},
-					r {-925, 10, -1075};
-			const glm::vec3 s {-1100, 15, -500}, t {-1100, 15, -450}, u {-1000, 15, -400};
+			const glm::vec3 j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
+					n {-600, -500, 32}, o {-500, -800, 30}, p {-600, -900, 25}, q {-1025, -1175, 10},
+					r {-925, -1075, 10};
+			const glm::vec3 s {-1100, -500, 15}, t {-1100, -450, 15}, u {-1000, -400, 15};
 			auto l3 = rl->addLinksBetween(j, k);
 			rl->addLinksBetween(k, l);
 			rl->addLinksBetween(l, m);
@@ -115,16 +115,14 @@ public:
 				train->create<RailVehicle>(b47);
 			}
 			train->orders.removeAll();
-			train->orders.create<GoTo>(&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100, 15, -450}));
+			train->orders.create<GoTo>(&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100, -450, 15}));
 			train->currentActivity = train->orders.current()->createActivity();
 		}
 
 		Shader shader;
-		Camera camera({-1250.0F, 35.0F, -1250.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 10000.0F);
-		camera.Pitch(0.24);
-		camera.RotateY(0.7854);
+		Camera camera({-1250.0F, -1250.0F, 35.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 10000.0F);
 		shader.setView(camera.GetViewProjection());
-		shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, -1, 0}));
+		shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
 		shader.setUniform("lightColor", {.6, .6, .6});
 		shader.setUniform("ambientColor", {0.5, 0.5, 0.5});
 

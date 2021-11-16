@@ -12,7 +12,7 @@ bool
 operator<(const glm::vec3 & a, const glm::vec3 & b)
 {
 	// NOLINTNEXTLINE(hicpp-use-nullptr,modernize-use-nullptr)
-	return std::tie(a.x, a.z, a.y) < std::tie(b.x, b.z, b.y);
+	return std::tie(a.x, a.y, a.z) < std::tie(b.x, b.y, b.z);
 }
 
 bool
@@ -27,7 +27,7 @@ LinkStraight::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
 	const auto diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
-	return Location {es.first->pos + vehiclePositionOffset() + dir * dist, {-vector_pitch(dir), vector_yaw(dir), 0}};
+	return Location {es.first->pos + vehiclePositionOffset() + dir * dist, {vector_pitch(dir), vector_yaw(dir), 0}};
 }
 
 Location
@@ -40,7 +40,7 @@ LinkCurve::positionAt(float dist, unsigned char start) const
 	const auto ang {as.first + ((as.second - as.first) * frac)};
 	const auto relPos {!sincosf(ang) * radius};
 	const auto relClimb {vehiclePositionOffset()
-			+ glm::vec3 {0, -centreBase.y + es.first->pos.y + ((es.second->pos.y - es.first->pos.y) * frac), 0}};
-	const auto pitch {vector_pitch({0, (es.first->pos.y - es.second->pos.y) / length, 0})};
+			+ glm::vec3 {0, 0, es.first->pos.z - centreBase.z + ((es.second->pos.z - es.first->pos.z) * frac)}};
+	const auto pitch {vector_pitch({0, 0, (es.second->pos.z - es.first->pos.z) / length})};
 	return Location {relPos + relClimb + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
 }

@@ -15,5 +15,5 @@ void main()
 	gl_Position = viewProjection * vec4(position, 1.0);
 	texCoord0 = texCoord;
 	normal0 = normal;
-	height = position.y;
+	height = position.z;
 }

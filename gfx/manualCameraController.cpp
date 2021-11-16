@@ -47,7 +47,7 @@ ManualCameraController::handleInput(SDL_Event & e)
 					pitch = std::clamp(pitch - 0.01F * (float)e.motion.yrel, 0.1F, half_pi);
 				}
 				else {
-					focus += rotate_flat(-direction) * glm::vec2 {e.motion.xrel, e.motion.yrel};
+					focus += rotate_flat(-direction) * glm::vec2 {-e.motion.xrel, e.motion.yrel};
 				}
 			}
 			return true;
