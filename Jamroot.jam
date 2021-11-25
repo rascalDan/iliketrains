@@ -73,12 +73,11 @@ run application/main.cpp
 lib ilt :
 	[ glob-tree *.cpp *.c *.vs *.fs *.ll : bin test ]
 	:
-	<variant>release:<link>static
 	<include>.
 	<include>lib
-	<library>sdl2/<link>shared
-	<library>glew/<link>shared
-	<library>pthread/<link>shared
+	<library>sdl2
+	<library>glew
+	<library>pthread
 	<use>stb
 	: :
 	<include>.
