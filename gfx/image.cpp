@@ -1,6 +1,6 @@
 #include "image.h"
 #include <cstddef>
-#include <stb_image.h>
+#include <stb/stb_image.h>
 #include <stdexcept>
 
 Image::Image(const char * fileName, int flags) : width {}, height {}, numComponents {}

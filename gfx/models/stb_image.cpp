@@ -5,5 +5,5 @@
 #	ifndef __clang__
 #		pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #	endif
-#	include "stb_image.h"
+#	include "stb/stb_image.h"
 #endif

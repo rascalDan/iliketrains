@@ -1,8 +1,8 @@
 #include "texture.h"
-#include "stb_image.h"
 #include <cache.h>
 #include <gfx/image.h>
 #include <resource.h>
+#include <stb/stb_image.h>
 
 Cache<Texture> Texture::cachedTexture;
 

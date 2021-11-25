@@ -9,7 +9,7 @@
 #include <location.hpp>
 #include <maths.h>
 #include <random>
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Texture::cachedTexture.get("water.png")}
 {
