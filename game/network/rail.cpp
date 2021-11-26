@@ -135,7 +135,7 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 		vertices.reserve(2 * railCrossSection.size());
 		const auto len = round_sleepers(length / 2.F);
 		const auto e {flat_orientation(diff)};
-		for (int ei : {1, 0}) {
+		for (auto ei : {1U, 0U}) {
 			const auto trans {glm::translate(ends[ei].node->pos) * e};
 			for (const auto & rcs : railCrossSection) {
 				const glm::vec3 m {(trans * glm::vec4 {rcs.first, 1})};
@@ -164,10 +164,10 @@ RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, 
 		const auto step {glm::vec3 {arc_length(arc), e1p.z - e0p.z, slength} / segs};
 		const auto trans {glm::translate(centreBase)};
 
-		auto segCount = std::lround(segs);
+		auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
 		std::vector<Vertex> vertices;
-		vertices.reserve((segCount + 1) * railCrossSection.size());
-		for (glm::vec3 swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount >= 0; swing += step, --segCount) {
+		vertices.reserve(segCount * railCrossSection.size());
+		for (glm::vec3 swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
 			const auto t {
 					trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, 0.F, swing.y})};
 			for (const auto & rcs : railCrossSection) {

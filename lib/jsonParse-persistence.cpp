@@ -97,7 +97,7 @@ namespace Persistence {
 	wrh(std::ostream & strm, char ch)
 	{
 		using namespace std::literals;
-		strm << R"(\u)"sv << std::setw(4) << std::hex << (int)ch << std::setw(1);
+		strm << R"(\u)"sv << std::setw(4) << std::hex << static_cast<int>(ch) << std::setw(1);
 	}
 	static inline void
 	wre(std::ostream & strm, char e)
@@ -116,7 +116,7 @@ namespace Persistence {
 	static constexpr OutFuncs outFuncs {[]() {
 		OutFuncs outFuncs;
 		outFuncs.fill(&wrv);
-		for (int x = 0; x < 0x20; x += 1) {
+		for (auto x = 0U; x < 0x20U; x += 1) {
 			outFuncs[x] = &wrh;
 		}
 		outFuncs['\"'] = &wre<'"'>;
@@ -160,7 +160,8 @@ namespace Persistence {
 		strm << value;
 	}
 
-	void JsonWritePersistence::pushValue(std::nullptr_t) const
+	void
+	JsonWritePersistence::pushValue(std::nullptr_t) const
 	{
 		strm << "null";
 	}
@@ -170,7 +171,7 @@ namespace Persistence {
 	{
 		strm << '"';
 		std::for_each(value.begin(), value.end(), [this](char ch) {
-			outFuncs[(unsigned char)ch](strm, ch);
+			outFuncs[static_cast<unsigned char>(ch)](strm, ch);
 		});
 		strm << '"';
 	}

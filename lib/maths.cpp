@@ -173,10 +173,10 @@ find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd)
 
 float operator"" _mph(const long double v)
 {
-	return mph_to_ms(v);
+	return static_cast<float>(mph_to_ms(v));
 }
 
 float operator"" _kph(const long double v)
 {
-	return kph_to_ms(v);
+	return static_cast<float>(kph_to_ms(v));
 }

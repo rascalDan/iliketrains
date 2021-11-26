@@ -57,7 +57,7 @@ RailVehicleClass::bogieOffset(ObjParser & o)
 		if (!object.first.starts_with("Bogie")) {
 			continue;
 		}
-		std::set<std::pair<float, int>> vertexIds;
+		std::set<std::pair<float, std::size_t>> vertexIds;
 		for (const auto & face : object.second) {
 			for (const auto & faceElement : face) {
 				vertexIds.emplace(o.vertices[faceElement.x - 1].y, faceElement.x - 1);

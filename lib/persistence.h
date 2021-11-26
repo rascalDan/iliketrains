@@ -26,6 +26,10 @@ namespace Persistence {
 	using Stack = std::stack<SelectionPtr>;
 
 	struct Writer {
+		Writer() = default;
+		virtual ~Writer() = default;
+		DEFAULT_MOVE_COPY(Writer);
+
 		virtual void beginObject() const = 0;
 		virtual void beginArray() const = 0;
 		virtual void pushValue(bool value) const = 0;
@@ -85,6 +89,7 @@ namespace Persistence {
 
 	template<typename T> struct SelectionT : public SelectionV<T> {
 		using SelectionV<T>::SelectionV;
+		using Selection::setValue;
 		using P = std::conditional_t<std::is_scalar_v<T>, T, T &&>;
 
 		void
@@ -102,6 +107,8 @@ namespace Persistence {
 
 	struct Persistable;
 	struct PersistenceStore {
+		virtual ~PersistenceStore() = default;
+
 		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 
 		enum class NameAction { Push, HandleAndContinue, Ignore };
@@ -292,6 +299,7 @@ namespace Persistence {
 		struct SelectionObj : public SelectionV<Ptr> {
 			struct MakeObjectByTypeName : public SelectionV<Ptr> {
 				using SelectionV<Ptr>::SelectionV;
+				using Selection::setValue;
 
 				void
 				setValue(std::string && type) override
@@ -316,6 +324,7 @@ namespace Persistence {
 
 			struct RememberObjectById : public SelectionV<Ptr> {
 				using SelectionV<Ptr>::SelectionV;
+				using Selection::setValue;
 
 				void
 				setValue(std::string && id) override
@@ -383,8 +392,10 @@ namespace Persistence {
 		}
 
 		using SelectionV<Ptr>::SelectionV;
+		using Selection::setValue;
 
-		void setValue(std::nullptr_t) override
+		void
+		setValue(std::nullptr_t) override
 		{
 			this->v.reset();
 		}

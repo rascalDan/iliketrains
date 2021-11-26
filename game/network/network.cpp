@@ -36,8 +36,8 @@ void
 Network::joinLinks(const LinkPtr & l, const LinkPtr & ol)
 {
 	if (l != ol) {
-		for (const auto oe : {0, 1}) {
-			for (const auto te : {0, 1}) {
+		for (const auto oe : {0U, 1U}) {
+			for (const auto te : {0U, 1U}) {
 				if (l->ends[te].node == ol->ends[oe].node) {
 					l->ends[te].nexts.emplace_back(ol, oe);
 					ol->ends[oe].nexts.emplace_back(l, te);

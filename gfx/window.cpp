@@ -3,8 +3,9 @@
 #include <stdexcept>
 
 Window::Window(int width, int height, const std::string & title) :
-	m_window {m_window.create(SDL_CreateWindow, SDL_DestroyWindow, title.c_str(), SDL_WINDOWPOS_CENTERED,
-			SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL)},
+	m_window {m_window.create(SDL_CreateWindow, SDL_DestroyWindow, title.c_str(),
+			static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), width, height,
+			static_cast<Uint32>(SDL_WINDOW_OPENGL))},
 	m_glContext {m_glContext.create(SDL_GL_CreateContext, SDL_GL_DeleteContext, m_window)}
 {
 	if (glewInit() != GLEW_OK) {

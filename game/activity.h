@@ -19,9 +19,12 @@ public:
 };
 using ActivityPtr = std::unique_ptr<Activity>;
 
-template<typename T> concept ActivityConcept = std::is_base_of_v<Activity, T>;
+template<typename T>
+concept ActivityConcept = std::is_base_of_v<Activity, T>;
 template<ActivityConcept AC> class Can {
 public:
+	virtual ~Can() = default;
+
 	virtual void doActivity(AC *, TickDuration) = 0;
 };
 

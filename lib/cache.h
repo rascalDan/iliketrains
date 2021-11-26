@@ -7,6 +7,9 @@
 template<typename Obj> class Cache {
 public:
 	using Ptr = std::shared_ptr<Obj>;
+
+	virtual ~Cache() = default;
+
 	[[nodiscard]] Ptr
 	get(const std::string & key)
 	{

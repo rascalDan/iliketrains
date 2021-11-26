@@ -52,15 +52,15 @@ ObjParser::createMeshData() const
 					const auto & fe {face[idx]};
 					if (const auto existing = std::find(vertexOrder.begin(), vertexOrder.end(), fe);
 							existing != vertexOrder.end()) {
-						indices.push_back(std::distance(vertexOrder.begin(), existing));
+						indices.push_back(static_cast<unsigned int>(std::distance(vertexOrder.begin(), existing)));
 					}
 					else {
-						indices.push_back(overtices.size());
+						indices.push_back(static_cast<unsigned int>(overtices.size()));
 						overtices.emplace_back(vertices[fe.x - 1], texCoords[fe.y - 1], -normals[fe.z - 1]);
 						vertexOrder.emplace_back(fe);
 					}
 				};
-				f(0);
+				f(0U);
 				f(idx);
 				f(idx - 1);
 			}

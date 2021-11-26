@@ -76,7 +76,7 @@ Shader::setUniform(const GLchar * uniform, glm::vec3 v) const
 void
 Shader::setModel(const Location & loc, Program pid) const
 {
-	auto & prog = programs[(int)pid];
+	auto & prog = programs[static_cast<std::size_t>(pid)];
 	glUseProgram(prog.m_program);
 	if (prog.model_uniform >= 0) {
 		const auto model {glm::translate(loc.pos) * rotate_ypr(loc.rot)};

@@ -69,7 +69,7 @@ template<typename R = float, typename Ta, typename Tb>
 inline constexpr auto
 rdiv(Ta a, Tb b)
 {
-	return ((R)a / (R)b);
+	return (static_cast<R>(a) / static_cast<R>(b));
 }
 
 constexpr inline glm::vec2
@@ -105,14 +105,14 @@ float find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 b
 
 // Conversions
 template<typename T>
-inline constexpr float
+inline constexpr auto
 mph_to_ms(T v)
 {
 	return v / 2.237;
 }
 
 template<typename T>
-inline constexpr float
+inline constexpr auto
 kph_to_ms(T v)
 {
 	return v / 3.6;

@@ -120,7 +120,7 @@ public:
 		}
 
 		Shader shader;
-		Camera camera({-1250.0F, -1250.0F, 35.0F}, 70.0F, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, 0.1F, 10000.0F);
+		Camera camera({-1250.0F, -1250.0F, 35.0F}, 70.0F, rdiv(DISPLAY_WIDTH, DISPLAY_HEIGHT), 0.1F, 10000.0F);
 		shader.setView(camera.GetViewProjection());
 		shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
 		shader.setUniform("lightColor", {.6, .6, .6});

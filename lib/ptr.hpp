@@ -16,9 +16,9 @@ public:
 
 	template<typename... Args, typename... Params>
 	static auto
-	create(Obj * (*factory)(Args...), void (*deleter)(Obj *), Params &&... params)
+	create(Obj * (*factory)(Params...), void (*deleter)(Obj *), Args &&... args)
 	{
-		return wrapped_ptr<Obj> {factory(std::forward<Params>(params)...), deleter};
+		return wrapped_ptr<Obj> {factory(std::forward<Args>(args)...), deleter};
 	}
 };
 

@@ -14,7 +14,7 @@ public:
 	NO_COPY(Image);
 	NO_MOVE(Image);
 
-	int width, height, numComponents;
+	unsigned int width, height, numComponents;
 	std::span<unsigned char> data;
 };
 

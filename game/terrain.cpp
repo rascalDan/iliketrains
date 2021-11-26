@@ -25,7 +25,7 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 	// Initial coordinates
 	for (auto y = 0; y < size; y += 1) {
 		for (auto x = 0; x < size; x += 1) {
-			auto & vertex = vertices[x + (y * size)];
+			auto & vertex = vertices[static_cast<std::size_t>(x + (y * size))];
 			vertex.pos = {resolution * (x - offset), resolution * (y - offset), -1.5};
 			vertex.normal = up;
 			vertex.texCoord = {x, y};
@@ -35,21 +35,21 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 	std::mt19937 gen(std::random_device {}());
 	std::uniform_int_distribution<> rpos(2, size - 2);
 	std::uniform_int_distribution<> rsize(10, 30);
-	std::uniform_int_distribution<> rheight(1, 3);
+	std::uniform_real_distribution<float> rheight(1, 3);
 	for (int h = 0; h < 500;) {
 		const glm::ivec2 hpos {rpos(gen), rpos(gen)};
 		const glm::ivec2 hsize {rsize(gen), rsize(gen)};
 		if (const auto lim1 = hpos - hsize; lim1.x > 0 && lim1.y > 0) {
 			if (const auto lim2 = hpos + hsize; lim2.x < size && lim2.y < size) {
-				const auto height = (float)rheight(gen);
+				const auto height = rheight(gen);
 				const glm::ivec2 hsizesqrd {hsize.x * hsize.x, hsize.y * hsize.y};
 				for (auto y = lim1.y; y < lim2.y; y += 1) {
 					for (auto x = lim1.x; x < lim2.x; x += 1) {
 						const auto dist {hpos - glm::ivec2 {x, y}};
 						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
 						const auto out {rdiv(sq(x - hpos.x), sq(hsize.x)) + rdiv(sq(y - hpos.y), sq(hsize.y))};
-						if (out <= 1.0) {
-							auto & vertex = vertices[x + (y * size)];
+						if (out <= 1.0F) {
+							auto & vertex = vertices[static_cast<std::size_t>(x + (y * size))];
 							const auto m {1.F / (7.F * out - 8.F) + 1.F};
 							vertex.pos.z += height * m;
 						}
@@ -72,10 +72,10 @@ Terrain::Terrain(const std::string & fileName) :
 	std::vector<Vertex> vertices;
 	vertices.reserve((map.width * map.height) + 4);
 
-	for (auto y = 0; y < map.height; y += 1) {
-		for (auto x = 0; x < map.width; x += 1) {
+	for (auto y = 0U; y < map.height; y += 1) {
+		for (auto x = 0U; x < map.width; x += 1) {
 			vertices.emplace_back(glm::vec3 {resolution * (x - (map.width / 2)), resolution * (y - (map.height / 2)),
-										  ((float)map.data[x + (y * map.width)] * 0.1F) - 1.5F},
+										  (map.data[x + (y * map.width)] * 0.1F) - 1.5F},
 					glm::vec2 {(x % 2) / 2.01, (y % 2) / 2.01}, up);
 		}
 	}

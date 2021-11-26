@@ -25,7 +25,7 @@ public:
 	std::vector<glm::vec4> vertices;
 	std::vector<glm::vec3> texCoords;
 	std::vector<glm::vec3> normals;
-	using FaceElement = glm::vec<3, int>;
+	using FaceElement = glm::vec<3, unsigned int>;
 	using Face = std::vector<FaceElement>;
 	using Faces = std::vector<Face>;
 	using Object = std::pair<std::string, Faces>;
