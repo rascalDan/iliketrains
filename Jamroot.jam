@@ -62,6 +62,7 @@ exe iliketrains :
 	<library>ilt
 	;
 
+explicit main ;
 run application/main.cpp
 	: -- :
 	[ sequence.insertion-sort [ glob res/* ] ]
