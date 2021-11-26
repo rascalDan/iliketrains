@@ -12,11 +12,6 @@
 #include <utility>
 class jsonBaseFlexLexer;
 #include "jsonParse.h"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Wnull-conversion"
-#endif
 %}
 
 beginobj "{"

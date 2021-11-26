@@ -7,11 +7,6 @@
 %option prefix="objbase"
 
 %{
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#if __clang__
-#pragma GCC diagnostic ignored "-Wnull-conversion"
-#endif
 #include <gfx/models/obj.h>
 #include <glm/glm.hpp>
 #include <memory>

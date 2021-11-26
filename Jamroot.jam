@@ -70,7 +70,14 @@ run application/main.cpp
 	;
 
 lib ilt :
-	[ glob-tree *.cpp *.c *.vs *.fs *.ll : bin test ]
+	[ glob-tree *.cpp *.vs *.fs : bin test ]
+	[ lib generated : [ glob-tree *.ll *.c ] :
+		<include>.
+		<include>lib
+		<variant>release
+		<link>static
+		<cflags>-fPIC
+	]
 	:
 	<include>.
 	<include>lib
