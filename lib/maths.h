@@ -108,14 +108,14 @@ template<typename T>
 inline constexpr auto
 mph_to_ms(T v)
 {
-	return v / 2.237;
+	return v / 2.237L;
 }
 
 template<typename T>
 inline constexpr auto
 kph_to_ms(T v)
 {
-	return v / 3.6;
+	return v / 3.6L;
 }
 
 // ... literals are handy for now, probably go away when we load stuff externally

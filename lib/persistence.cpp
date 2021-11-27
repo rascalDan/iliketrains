@@ -70,7 +70,7 @@ namespace Persistence {
 	PersistenceWrite::selHandler()
 	{
 		this->sel->write(out);
-	};
+	}
 
 	void
 	PersistenceWrite::setType(const std::string_view tn, const Persistable * p)
@@ -97,7 +97,8 @@ namespace Persistence {
 		throw std::runtime_error("Unexpected bool");
 	}
 
-	void Selection::setValue(std::nullptr_t)
+	void
+	Selection::setValue(std::nullptr_t)
 	{
 		throw std::runtime_error("Unexpected null");
 	}

@@ -176,11 +176,11 @@ namespace Persistence {
 			void
 			write(const Writer & out) const override
 			{
-				for (glm::length_t idx = 0; idx < L; idx += 1) {
-					if (idx) {
+				for (glm::length_t n = 0; n < L; n += 1) {
+					if (n) {
 						out.nextValue();
 					}
-					SelectionT<T> {this->v[idx]}.write(out);
+					SelectionT<T> {this->v[n]}.write(out);
 				}
 			}
 		};
@@ -217,11 +217,11 @@ namespace Persistence {
 			void
 			write(const Writer & out) const override
 			{
-				for (std::size_t idx = 0; idx < this->v.size(); idx += 1) {
-					if (idx) {
+				for (auto & member : this->v) {
+					if (&member != &this->v.front()) {
 						out.nextValue();
 					}
-					SelectionT<T> {this->v[idx]}.write(out);
+					SelectionT<T> {member}.write(out);
 				}
 			}
 		};

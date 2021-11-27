@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_find_arcs_radius)
 }
 
 struct TestLinkStraight : public LinkStraight {
-	TestLinkStraight(glm::vec3 v) :
+	explicit TestLinkStraight(glm::vec3 v) :
 		Link {{std::make_shared<Node>(origin), vector_yaw(v)}, {std::make_shared<Node>(v), vector_yaw(-v)},
 				glm::length(v)}
 	{
@@ -200,7 +200,7 @@ BOOST_DATA_TEST_CASE(straight1,
 }
 
 struct TestLinkCurve : public LinkCurve {
-	TestLinkCurve(glm::vec3 e0, glm::vec3 e1, glm::vec3 ctr) :
+	explicit TestLinkCurve(glm::vec3 e0, glm::vec3 e1, glm::vec3 ctr) :
 		Link {{std::make_shared<Node>(e0), normalize(vector_yaw(ctr - e0) - half_pi)},
 				{std::make_shared<Node>(e1), normalize(vector_yaw(ctr - e1) - half_pi)}, glm::length(e1 - e0)},
 		LinkCurve(ctr, glm::length(e0 - ctr), {ctr, e0, e1})

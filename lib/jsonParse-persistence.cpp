@@ -92,7 +92,7 @@ namespace Persistence {
 	wrv(std::ostream & strm, char ch)
 	{
 		strm.put(ch);
-	};
+	}
 	static inline void
 	wrh(std::ostream & strm, char ch)
 	{

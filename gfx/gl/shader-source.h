@@ -17,9 +17,11 @@ struct GLsource {
 constexpr auto
 constexpr_strlen(const GLchar * const s)
 {
-	auto e {s};
-	while (*++e) { }
-	return e - s;
+	std::size_t ch {};
+	while (s[ch]) {
+		ch++;
+	}
+	return ch;
 }
 
 #endif
