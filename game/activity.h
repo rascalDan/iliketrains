@@ -23,7 +23,9 @@ template<typename T>
 concept ActivityConcept = std::is_base_of_v<Activity, T>;
 template<ActivityConcept AC> class Can {
 public:
+	Can() = default;
 	virtual ~Can() = default;
+	DEFAULT_MOVE_COPY(Can);
 
 	virtual void doActivity(AC *, TickDuration) = 0;
 };

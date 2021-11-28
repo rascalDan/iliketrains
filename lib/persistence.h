@@ -107,7 +107,9 @@ namespace Persistence {
 
 	struct Persistable;
 	struct PersistenceStore {
+		PersistenceStore() = default;
 		virtual ~PersistenceStore() = default;
+		DEFAULT_MOVE_NO_COPY(PersistenceStore);
 
 		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 

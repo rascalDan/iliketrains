@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cache.h>
+#include <cstddef>
 #include <filesystem>
 #include <glm/glm.hpp>
 #include <iterator>

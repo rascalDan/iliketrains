@@ -1,6 +1,7 @@
 #include "shader.h"
 #include "gfx/gl/shader-source.h"
 #include <array>
+#include <cstddef>
 #include <gfx/gl/shaders/fs-basicShader.h>
 #include <gfx/gl/shaders/fs-landmassShader.h>
 #include <gfx/gl/shaders/fs-waterShader.h>

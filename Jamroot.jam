@@ -15,30 +15,15 @@ lib pthread ;
 variant coverage : debug ;
 project : requirements
 	<cxxstd>20
-	<variant>debug:<warnings>pedantic
-	<variant>debug:<warnings-as-errors>on
-	<variant>debug:<cflags>-Wnon-virtual-dtor
-	<variant>debug:<cflags>-Wold-style-cast
-	<variant>debug:<cflags>-Wcast-align
-	<variant>debug:<cflags>-Wunused
-	<variant>debug:<cflags>-Woverloaded-virtual
-	<variant>debug:<cflags>-Wpedantic
-	<variant>debug:<cflags>-Wconversion
-	<variant>debug:<cflags>-Wsign-conversion
-	<variant>debug:<cflags>-Wnull-dereference
-	<variant>debug:<cflags>-Wdouble-promotion
-	<variant>debug:<cflags>-Wformat=2
-	<toolset>gcc,<variant>debug:<cflags>-Wduplicated-cond
-	<toolset>gcc,<variant>debug:<cflags>-Wduplicated-branches
-	<toolset>gcc,<variant>debug:<cflags>-Wlogical-op
-	<toolset>gcc,<variant>debug:<cflags>-Wuseless-cast
 	<variant>release:<lto>on
 	<variant>coverage:<coverage>on
 	<toolset>tidy:<exclude>gfx/models/obj.cpp
 	<toolset>tidy:<exclude>lib/jsonParse.cpp
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
+	<toolset>tidy:<xcheckxx>bugprone-easily-swappable-parameters
 	<toolset>tidy:<checkxx>clang-*
+	<toolset>tidy:<xcheckxx>clang-analyzer-cplusplus.NewDeleteLeaks
 	<toolset>tidy:<checkxx>misc-*
 	<toolset>tidy:<xcheckxx>misc-non-private-member-variables-in-classes
 	<toolset>tidy:<checkxx>modernize-*
@@ -90,11 +75,27 @@ lib ilt :
 	[ lib generated : [ glob-tree *.ll *.c ] :
 		<include>.
 		<include>lib
-		<variant>release
 		<link>static
 		<cflags>-fPIC
 	]
 	:
+	<variant>debug:<warnings>pedantic
+	<variant>debug:<warnings-as-errors>on
+	<variant>debug:<cflags>-Wnon-virtual-dtor
+	<variant>debug:<cflags>-Wold-style-cast
+	<variant>debug:<cflags>-Wcast-align
+	<variant>debug:<cflags>-Wunused
+	<variant>debug:<cflags>-Woverloaded-virtual
+	<variant>debug:<cflags>-Wpedantic
+	<variant>debug:<cflags>-Wconversion
+	<variant>debug:<cflags>-Wsign-conversion
+	<variant>debug:<cflags>-Wnull-dereference
+	<variant>debug:<cflags>-Wdouble-promotion
+	<variant>debug:<cflags>-Wformat=2
+	<toolset>gcc,<variant>debug:<cflags>-Wduplicated-cond
+	<toolset>gcc,<variant>debug:<cflags>-Wduplicated-branches
+	<toolset>gcc,<variant>debug:<cflags>-Wlogical-op
+	<toolset>gcc,<variant>debug:<cflags>-Wuseless-cast
 	<include>.
 	<include>lib
 	<library>sdl2

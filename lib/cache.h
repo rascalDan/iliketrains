@@ -1,14 +1,19 @@
 #ifndef CACHE_H
 #define CACHE_H
 
+#include "special_members.hpp"
 #include <map>
 #include <memory>
+#include <string>
 
 template<typename Obj> class Cache {
 public:
 	using Ptr = std::shared_ptr<Obj>;
 
+	Cache() = default;
 	virtual ~Cache() = default;
+	DEFAULT_MOVE(Cache);
+	NO_COPY(Cache);
 
 	[[nodiscard]] Ptr
 	get(const std::string & key)

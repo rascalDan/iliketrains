@@ -1,5 +1,8 @@
 #include "obj.h"
 #include <algorithm>
+#include <cassert>
+#include <filesystem>
+#include <fstream>
 #include <gfx/models/mesh.h> // IWYU pragma: keep
 #include <gfx/models/vertex.hpp>
 #include <glm/glm.hpp>

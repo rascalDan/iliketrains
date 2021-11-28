@@ -1,6 +1,7 @@
 #include "terrain.h"
 #include "gfx/models/texture.h"
 #include <cache.h>
+#include <cstddef>
 #include <gfx/gl/shader.h>
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>
@@ -23,10 +24,11 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 	vertices.resize(verticesCount, {{}, {}, {}});
 
 	// Initial coordinates
-	for (auto y = 0; y < size; y += 1) {
-		for (auto x = 0; x < size; x += 1) {
-			auto & vertex = vertices[static_cast<std::size_t>(x + (y * size))];
-			vertex.pos = {resolution * (x - offset), resolution * (y - offset), -1.5};
+	for (auto y = 0U; y < size; y += 1) {
+		for (auto x = 0U; x < size; x += 1) {
+			auto & vertex = vertices[x + (y * size)];
+			vertex.pos
+					= {resolution * (static_cast<int>(x) - offset), resolution * (static_cast<int>(y) - offset), -1.5};
 			vertex.normal = up;
 			vertex.texCoord = {x, y};
 		}
@@ -49,7 +51,8 @@ Terrain::Terrain() : grass {Texture::cachedTexture.get("grass.png")}, water {Tex
 						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
 						const auto out {rdiv(sq(x - hpos.x), sq(hsize.x)) + rdiv(sq(y - hpos.y), sq(hsize.y))};
 						if (out <= 1.0F) {
-							auto & vertex = vertices[static_cast<std::size_t>(x + (y * size))];
+							auto & vertex
+									= vertices[static_cast<std::size_t>(x) + (static_cast<std::size_t>(y) * size)];
 							const auto m {1.F / (7.F * out - 8.F) + 1.F};
 							vertex.pos.z += height * m;
 						}
@@ -75,7 +78,7 @@ Terrain::Terrain(const std::string & fileName) :
 	for (auto y = 0U; y < map.height; y += 1) {
 		for (auto x = 0U; x < map.width; x += 1) {
 			vertices.emplace_back(glm::vec3 {resolution * (x - (map.width / 2)), resolution * (y - (map.height / 2)),
-										  (map.data[x + (y * map.width)] * 0.1F) - 1.5F},
+										  (static_cast<float>(map.data[x + (y * map.width)]) * 0.1F) - 1.5F},
 					glm::vec2 {(x % 2) / 2.01, (y % 2) / 2.01}, up);
 		}
 	}

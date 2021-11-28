@@ -1,5 +1,5 @@
 #include "camera.h"
-#include <glm/gtx/transform.hpp>
+#include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <maths.h>
 
 Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
