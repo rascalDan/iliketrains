@@ -6,25 +6,31 @@ namespace Persistence {
 	using Factories
 			= std::pair<std::function<std::unique_ptr<Persistable>()>, std::function<std::shared_ptr<Persistable>()>>;
 	using NamedTypeFactories = std::map<std::string_view, Factories>;
-	static NamedTypeFactories namedTypeFactories;
+
+	inline static auto &
+	namedTypeFactories()
+	{
+		static NamedTypeFactories namedTypeFactories;
+		return namedTypeFactories;
+	}
 
 	void
 	Persistable::addFactory(const std::string_view t, std::function<std::unique_ptr<Persistable>()> fu,
 			std::function<std::shared_ptr<Persistable>()> fs)
 	{
-		namedTypeFactories.emplace(t, std::make_pair(std::move(fu), std::move(fs)));
+		namedTypeFactories().emplace(t, std::make_pair(std::move(fu), std::move(fs)));
 	}
 
 	std::unique_ptr<Persistable>
 	Persistable::callFactory(const std::string_view t)
 	{
-		return namedTypeFactories.at(t).first();
+		return namedTypeFactories().at(t).first();
 	}
 
 	std::shared_ptr<Persistable>
 	Persistable::callSharedFactory(const std::string_view t)
 	{
-		return namedTypeFactories.at(t).second();
+		return namedTypeFactories().at(t).second();
 	}
 
 	[[nodiscard]] std::string
