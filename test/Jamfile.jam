@@ -13,6 +13,10 @@ project : requirements
 	<library>boost_unit_test_framework
 	<library>..//ilt
 	<toolset>tidy:<xcheckxx>hicpp-vararg
+	<toolset>tidy:<suppress>accessMoved
+	<toolset>tidy:<xcheckxx>bugprone-use-after-move
+	<toolset>tidy:<xcheckxx>hicpp-invalid-access-moved
+	<toolset>tidy:<xcheckxx>clang-analyzer-cplusplus.Move
 	;
 
 run test-collection.cpp ;

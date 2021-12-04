@@ -19,8 +19,11 @@ public:
 	void SwapBuffers() const;
 
 private:
-	wrapped_ptr<SDL_Window> m_window;
-	wrapped_ptr<std::remove_pointer_t<SDL_GLContext>> m_glContext;
+	using GL_Context = std::remove_pointer_t<SDL_GLContext>;
+	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
+	using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContext, SDL_GL_DeleteContext>;
+	SDL_WindowPtr m_window;
+	SDL_GLContextPtr m_glContext;
 };
 
 #endif

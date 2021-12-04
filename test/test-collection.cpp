@@ -4,6 +4,7 @@
 
 #include <collection.hpp>
 #include <memory>
+#include <ptr.hpp>
 #include <special_members.hpp>
 #include <vector>
 
@@ -64,3 +65,40 @@ BOOST_AUTO_TEST_CASE(a_sub)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_CASE(wrapped_ptr_file_cons)
+{
+	using FilePtr = wrapped_ptr<FILE, &fclose>;
+	FilePtr fp {fopen, "/dev/null", "r"};
+	BOOST_REQUIRE(fp);
+	BOOST_CHECK_NO_THROW(fflush(fp));
+
+	BOOST_CHECK_EQUAL(fp.get(), fp.operator->());
+	BOOST_CHECK_EQUAL(fp.get(), fp.operator FILE *());
+}
+
+BOOST_AUTO_TEST_CASE(wrapped_ptr_file_move)
+{
+	using FilePtr = wrapped_ptr<FILE, &fclose>;
+	FilePtr fp {fopen, "/dev/null", "r"};
+	BOOST_REQUIRE(fp);
+
+	FilePtr fp2 {std::move(fp)};
+	BOOST_REQUIRE(!fp);
+	BOOST_REQUIRE(fp2);
+
+	fp = std::move(fp2);
+	BOOST_REQUIRE(fp);
+	BOOST_REQUIRE(!fp2);
+
+	FilePtr fp3 {fopen, "/dev/null", "r"};
+	fp = std::move(fp3);
+}
+
+BOOST_AUTO_TEST_CASE(wrapped_ptr_file_typed)
+{
+	using FilePtr = wrapped_ptrt<FILE, &fopen, &fclose>;
+	FilePtr fp {"/dev/null", "r"};
+	BOOST_REQUIRE(fp);
+	BOOST_CHECK_NO_THROW(fflush(fp));
+}
