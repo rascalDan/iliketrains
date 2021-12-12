@@ -9,6 +9,7 @@
 #include <gfx/gl/shaders/vs-landmassShader.h>
 #include <gfx/gl/shaders/vs-waterShader.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <location.hpp>
 #include <maths.h>
@@ -59,7 +60,7 @@ Shader::setView(glm::mat4 proj) const
 {
 	for (const auto & prog : programs) {
 		glUseProgram(prog.m_program);
-		glUniformMatrix4fv(prog.viewProjection_uniform, 1, GL_FALSE, &proj[0][0]);
+		glUniformMatrix4fv(prog.viewProjection_uniform, 1, GL_FALSE, glm::value_ptr(proj));
 	}
 }
 
@@ -69,7 +70,7 @@ Shader::setUniform(const GLchar * uniform, glm::vec3 v) const
 	for (const auto & prog : programs) {
 		if (auto loc = glGetUniformLocation(prog.m_program, uniform); loc >= 0) {
 			glUseProgram(prog.m_program);
-			glUniform3fv(loc, 1, &v[0]);
+			glUniform3fv(loc, 1, glm::value_ptr(v));
 		}
 	}
 }
@@ -81,7 +82,7 @@ Shader::setModel(const Location & loc, Program pid) const
 	glUseProgram(prog.m_program);
 	if (prog.model_uniform >= 0) {
 		const auto model {glm::translate(loc.pos) * rotate_ypr(loc.rot)};
-		glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 	}
 }
 
