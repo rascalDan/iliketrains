@@ -12,6 +12,7 @@ struct GLsource {
 	GLuint type;
 
 	[[nodiscard]] ShaderRef compile() const;
+	static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage);
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include "shader.h"
-#include "gfx/gl/shader-source.h"
+#include "gfx/gl/glSource.h"
 #include <array>
 #include <cstddef>
 #include <gfx/gl/shaders/fs-basicShader.h>
@@ -26,10 +26,10 @@ Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : viewProjection_unif
 	glBindAttribLocation(m_program, 2, "normal");
 
 	glLinkProgram(m_program);
-	CheckShaderError(m_program, GL_LINK_STATUS, true, "Error linking shader program");
+	GLsource::CheckShaderError(m_program, GL_LINK_STATUS, true, "Error linking shader program");
 
 	glValidateProgram(m_program);
-	CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Invalid shader program");
+	GLsource::CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Invalid shader program");
 
 	viewProjection_uniform = glGetUniformLocation(m_program, "viewProjection");
 	model_uniform = glGetUniformLocation(m_program, "model");
@@ -86,38 +86,3 @@ Shader::setModel(const Location & loc, Program pid) const
 	}
 }
 
-void
-Shader::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage)
-{
-	GLint success = 0;
-	std::array<GLchar, 1024> error {};
-
-	if (isProgram) {
-		glGetProgramiv(shader, flag, &success);
-	}
-	else {
-		glGetShaderiv(shader, flag, &success);
-	}
-
-	if (success == GL_FALSE) {
-		if (isProgram) {
-			glGetProgramInfoLog(shader, error.size(), nullptr, error.data());
-		}
-		else {
-			glGetShaderInfoLog(shader, error.size(), nullptr, error.data());
-		}
-
-		throw std::runtime_error {std::string {errorMessage} + ": '" + std::string {error.data(), error.size()} + "'"};
-	}
-}
-
-GLsource::ShaderRef
-GLsource::compile() const
-{
-	ShaderRef id {type};
-	glShaderSource(id, 1, &text, &len);
-	glCompileShader(id);
-
-	Shader::CheckShaderError(id, GL_COMPILE_STATUS, false, "Error compiling shader!");
-	return id;
-}

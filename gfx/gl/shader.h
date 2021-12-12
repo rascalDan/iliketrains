@@ -19,8 +19,6 @@ public:
 	void setModel(const Location &, Program = Program::Basic) const;
 	void setUniform(const GLchar *, glm::vec3 dir) const;
 
-	static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage);
-
 private:
 	class ProgramHandle {
 	public:

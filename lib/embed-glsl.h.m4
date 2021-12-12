@@ -1,4 +1,4 @@
 // NAME
-#include <gfx/gl/shader-source.h>
+#include <gfx/gl/glSource.h>
 
 extern const GLsource NAME`_'substr(TYPE,1);
