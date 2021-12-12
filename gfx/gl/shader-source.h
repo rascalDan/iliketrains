@@ -14,14 +14,4 @@ struct GLsource {
 	[[nodiscard]] ShaderRef compile() const;
 };
 
-constexpr auto
-constexpr_strlen(const GLchar * const s)
-{
-	std::size_t ch {};
-	while (s[ch]) {
-		ch++;
-	}
-	return ch;
-}
-
 #endif
