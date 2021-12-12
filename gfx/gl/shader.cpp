@@ -76,4 +76,3 @@ Shader::setModel(const Location & loc, Program pid) const
 		glUniformMatrix4fv(prog.model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 	}
 }
-
