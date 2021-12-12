@@ -9,6 +9,15 @@
 
 class Location;
 
+class ProgramHandleBase {
+public:
+	ProgramHandleBase(GLuint, GLuint);
+	using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
+
+	ProgramRef m_program;
+	GLint viewProjection_uniform, model_uniform;
+};
+
 class Shader {
 public:
 	enum class Program { Basic = 0, Water = 1, LandMass = 2, StaticPos = 3 };
@@ -20,13 +29,9 @@ public:
 	void setUniform(const GLchar *, glm::vec3 dir) const;
 
 private:
-	class ProgramHandle {
+	class ProgramHandle : public ProgramHandleBase {
 	public:
 		ProgramHandle(GLuint, GLuint);
-		using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
-
-		ProgramRef m_program;
-		GLint viewProjection_uniform, model_uniform;
 	};
 
 	std::array<ProgramHandle, 4> programs;
