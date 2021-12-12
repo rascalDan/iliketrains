@@ -16,18 +16,6 @@
 #include <stdexcept>
 #include <string>
 
-ProgramHandleBase::ProgramHandleBase(GLuint vs, GLuint fs) : viewProjection_uniform {}, model_uniform {}
-{
-	glAttachShader(m_program, vs);
-	glAttachShader(m_program, fs);
-
-	glLinkProgram(m_program);
-	GLsource::CheckShaderError(m_program, GL_LINK_STATUS, true, "Error linking shader program");
-
-	glValidateProgram(m_program);
-	GLsource::CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Invalid shader program");
-}
-
 Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : ProgramHandleBase {vs, fs}
 {
 	glBindAttribLocation(m_program, 0, "position");

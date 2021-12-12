@@ -1,6 +1,7 @@
 #ifndef SHADER_INCLUDED_H
 #define SHADER_INCLUDED_H
 
+#include "programHandle.h"
 #include <GL/glew.h>
 #include <array>
 #include <glRef.hpp>
@@ -8,15 +9,6 @@
 #include <string_view>
 
 class Location;
-
-class ProgramHandleBase {
-public:
-	ProgramHandleBase(GLuint, GLuint);
-	using ProgramRef = glRef<GLuint, __glewCreateProgram, __glewDeleteProgram>;
-
-	ProgramRef m_program;
-	GLint viewProjection_uniform, model_uniform;
-};
 
 class Shader {
 public:
