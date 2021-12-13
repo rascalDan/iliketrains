@@ -1,4 +1,5 @@
 #include "window.h"
+#include "ui/inputHandler.h"
 #include <GL/glew.h>
 #include <stdexcept>
 
@@ -11,7 +12,6 @@ Window::Window(int width, int height, const std::string & title) :
 		throw std::runtime_error {"Glew failed to initialize!"};
 	}
 
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
@@ -29,4 +29,14 @@ void
 Window::SwapBuffers() const
 {
 	SDL_GL_SwapWindow(m_window);
+}
+
+bool
+Window::handleInput(const SDL_Event & e)
+{
+	if (SDL_GetWindowID(m_window) == e.window.windowID) {
+		inputStack.applyOne(&InputHandler::handleInput, e);
+		return true;
+	}
+	return false;
 }

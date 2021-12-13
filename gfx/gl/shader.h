@@ -4,9 +4,7 @@
 #include "programHandle.h"
 #include <GL/glew.h>
 #include <array>
-#include <glRef.hpp>
 #include <glm/glm.hpp>
-#include <string_view>
 
 class Location;
 

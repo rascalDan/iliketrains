@@ -2,6 +2,7 @@
 #include "gfx/gl/glSource.h"
 #include <array>
 #include <cstddef>
+#include <gfx/gl/programHandle.h>
 #include <gfx/gl/shaders/fs-basicShader.h>
 #include <gfx/gl/shaders/fs-landmassShader.h>
 #include <gfx/gl/shaders/fs-waterShader.h>
@@ -13,8 +14,6 @@
 #include <glm/gtx/transform.hpp>
 #include <location.hpp>
 #include <maths.h>
-#include <stdexcept>
-#include <string>
 
 Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : ProgramHandleBase {vs, fs}
 {

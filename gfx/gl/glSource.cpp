@@ -1,5 +1,7 @@
 #include "glSource.h"
 #include <array>
+#include <stdexcept>
+#include <string>
 
 GLsource::ShaderRef
 GLsource::compile() const

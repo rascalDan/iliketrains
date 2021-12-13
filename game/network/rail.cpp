@@ -2,6 +2,7 @@
 #include "network.h"
 #include <GL/glew.h>
 #include <array>
+#include <cmath>
 #include <collection.hpp>
 #include <cstddef>
 #include <game/network/link.h>

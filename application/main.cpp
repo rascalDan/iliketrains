@@ -16,22 +16,19 @@
 #include <game/vehicles/railVehicleClass.h>
 #include <game/vehicles/train.h>
 #include <game/worldobject.h>
-#include <gfx/camera_controller.h>
-#include <gfx/gl/camera.h>
-#include <gfx/gl/shader.h>
-#include <gfx/inputHandler.h>
-#include <gfx/manualCameraController.h>
-#include <gfx/renderable.h>
-#include <gfx/window.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <memory>
 #include <special_members.hpp>
+#include <ui/gameMainWindow.h>
+#include <ui/inputHandler.h>
+#include <ui/window.h>
 #include <vector>
 
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
 
-class SDL_Application : public InputHandler, public std::enable_shared_from_this<SDL_Application>, GameState {
+class SDL_Application : public GameState {
 public:
 	SDL_Application()
 	{
@@ -46,7 +43,7 @@ public:
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	}
 
-	~SDL_Application() override
+	~SDL_Application()
 	{
 		SDL_Quit();
 	}
@@ -54,35 +51,12 @@ public:
 	NO_COPY(SDL_Application);
 	NO_MOVE(SDL_Application);
 
-	std::shared_ptr<Train> train;
-	bool
-	handleInput(SDL_Event & e) override
-	{
-		switch (e.type) {
-			case SDL_QUIT:
-				isRunning = false;
-				return true;
-			case SDL_KEYUP:
-				switch (e.key.keysym.scancode) {
-					case SDL_SCANCODE_G:
-						train->currentActivity = std::make_unique<Go>();
-						break;
-					case SDL_SCANCODE_I:
-						train->currentActivity = std::make_unique<Idle>();
-						break;
-					default:
-						return false;
-				}
-				return true;
-		}
-		return false;
-	}
-
+	using Windows = Collection<Window>;
 	int
 	run()
 	{
-		Collection<Window> windows;
-		windows.create(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
+		Windows windows;
+		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 		world.create<Terrain>();
 
@@ -109,7 +83,7 @@ public:
 			rl->addLinksBetween(l, s);
 			rl->addLinksBetween(t, u);
 			rl->addLinksBetween(u, m);
-			train = world.create<Train>(l3);
+			std::shared_ptr<Train> train = world.create<Train>(l3);
 			auto b47 = std::make_shared<RailVehicleClass>("brush47");
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);
@@ -119,49 +93,38 @@ public:
 			train->currentActivity = train->orders.current()->createActivity();
 		}
 
-		Shader shader;
-		Camera camera({-1250.0F, -1250.0F, 35.0F}, 70.0F, rdiv(DISPLAY_WIDTH, DISPLAY_HEIGHT), 0.1F, 10000.0F);
-		shader.setView(camera.GetViewProjection());
-		shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
-		shader.setUniform("lightColor", {.6, .6, .6});
-		shader.setUniform("ambientColor", {0.5, 0.5, 0.5});
-
 		auto t_start = std::chrono::high_resolution_clock::now();
-
-		inputStack.objects.push_back(shared_from_this());
-		inputStack.objects.insert(
-				inputStack.objects.begin(), world.create<ManualCameraController>(glm::vec2 {-1150, -1150}));
-
 		while (isRunning) {
-			processInputs();
+			processInputs(windows);
 			const auto t_end = std::chrono::high_resolution_clock::now();
 			const auto t_passed = std::chrono::duration_cast<TickDuration>(t_end - t_start);
 
 			world.apply(&WorldObject::tick, t_passed);
-			world.apply<CameraController>(&CameraController::updateCamera, &camera);
-			shader.setView(camera.GetViewProjection());
+			windows.apply(&Window::tick, t_passed);
 			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
-			world.apply<Renderable>(&Renderable::render, shader);
+			windows.apply(&Window::Refresh, this);
 			windows.apply(&Window::SwapBuffers);
 
 			t_start = t_end;
 		}
 
-		inputStack.removeAll();
 		return 0;
 	}
 
 private:
 	void
-	processInputs()
+	processInputs(const Windows & windows)
 	{
 		for (SDL_Event e; SDL_PollEvent(&e);) {
-			inputStack.applyOne(&InputHandler::handleInput, e);
+			if (e.type == SDL_QUIT) {
+				isRunning = false;
+				return;
+			}
+			windows.applyOne(&Window::handleInput, e);
 		}
 	}
 
 	bool isRunning {true};
-	Collection<InputHandler> inputStack;
 };
 
 int

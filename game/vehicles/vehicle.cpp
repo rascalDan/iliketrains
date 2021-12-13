@@ -7,7 +7,7 @@
 #include "game/vehicles/linkHistory.h"
 #include <algorithm>
 #include <array>
-#include <game/worldobject.h>
+#include <cmath>
 #include <glm/glm.hpp>
 #include <iterator>
 #include <location.hpp>

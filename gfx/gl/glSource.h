@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <glRef.hpp>
+#include <string_view>
 
 struct GLsource {
 	using ShaderRef = glRef<GLuint, __glewCreateShader, __glewDeleteShader>;

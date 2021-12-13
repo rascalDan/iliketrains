@@ -2,7 +2,8 @@
 #define UISHADER_H
 
 #include "programHandle.h"
-#include <cstdint>
+#include <GL/glew.h>
+#include <cstddef>
 
 class UIShader {
 public:

@@ -1,114 +1,130 @@
 [
-    {
-        "include": [
-            "<ext/alloc_traits.h>",
-            "private",
-            "<memory>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@\"SDL.*.h\"",
-            "private",
-            "<SDL2/SDL.h>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@<glm/detail/.*>",
-            "private",
-            "<glm/glm.hpp>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@<glm/ext/.*>",
-            "private",
-            "<glm/glm.hpp>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@<glm/gtc/constants.inl>",
-            "private",
-            "<glm/gtc/constants.hpp>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@<glm/gtx/vector_angle.inl>",
-            "private",
-            "<glm/gtx/vector_angle.hpp>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@<glm/gtx/rotate_vector.inl>",
-            "private",
-            "<glm/gtx/rotate_vector.hpp>",
-            "public"
-        ]
-    },
-    {
-        "include": [
-            "@<glm/gtx/transform.inl>",
-            "private",
-            "<glm/gtx/transform.hpp>",
-            "public"
-        ]
-    },
-		{
-        "include": [
-            "<boost/test/unit_test_suite.hpp>",
-            "private",
-            "<boost/test/unit_test.hpp>",
-            "public"
-        ]
-    },
-		{
-        "include": [
-            "@<boost/test/utils/.*>",
-            "private",
-            "<boost/test/unit_test.hpp>",
-            "public"
-        ]
-    },
-		{
-        "include": [
-            "@<boost/test/data/.*>",
-            "private",
-            "<boost/test/data/test_case.hpp>",
-            "public"
-        ]
-    },
-		{
-        "include": [
-            "@<boost/test/tools/.*>",
-            "private",
-            "<boost/test/unit_test.hpp>",
-            "public"
-        ]
-    },
-		{
-        "include": [
-            "@<boost/preprocessor/.*>",
-            "private",
-            "<boost/test/unit_test.hpp>",
-            "public"
-        ]
-    },
-    {
-        "symbol": [
-            "std::__atomic_wait",
-            "private",
-            "<mutex>",
-            "public"
-        ]
-    }
+	{
+		"include": [
+			"<ext/alloc_traits.h>",
+			"private",
+			"<memory>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@\"SDL.*.h\"",
+			"private",
+			"<SDL2/SDL.h>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/detail/.*>",
+			"private",
+			"<glm/glm.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/ext/.*>",
+			"private",
+			"<glm/glm.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/gtc/constants.inl>",
+			"private",
+			"<glm/gtc/constants.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/gtx/vector_angle.inl>",
+			"private",
+			"<glm/gtx/vector_angle.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/gtx/rotate_vector.inl>",
+			"private",
+			"<glm/gtx/rotate_vector.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/gtx/transform.inl>",
+			"private",
+			"<glm/gtx/transform.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<glm/gtc/type_ptr.inl>",
+			"private",
+			"<glm/gtc/type_ptr.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"<boost/test/unit_test_suite.hpp>",
+			"private",
+			"<boost/test/unit_test.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<boost/test/utils/.*>",
+			"private",
+			"<boost/test/unit_test.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<boost/test/data/.*>",
+			"private",
+			"<boost/test/data/test_case.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<boost/test/tools/.*>",
+			"private",
+			"<boost/test/unit_test.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
+			"@<boost/preprocessor/.*>",
+			"private",
+			"<boost/test/unit_test.hpp>",
+			"public"
+		]
+	},
+	{
+		"symbol": [
+			"std::abs",
+			"private",
+			"<cmath>",
+			"public"
+		]
+	},
+	{
+		"symbol": [
+			"std::__atomic_wait",
+			"private",
+			"<mutex>",
+			"public"
+		]
+	}
 ]

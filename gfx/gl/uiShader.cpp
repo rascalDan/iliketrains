@@ -1,8 +1,10 @@
 #include "uiShader.h"
+#include <gfx/gl/glSource.h>
+#include <gfx/gl/programHandle.h>
 #include <gfx/gl/shaders/fs-uiShader.h>
 #include <gfx/gl/shaders/vs-uiShader.h>
+#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
 
 UIShader::UIShader(size_t width, size_t height) : program {uiShader_vs.compile(), uiShader_fs.compile()}
 {

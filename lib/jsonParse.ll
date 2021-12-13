@@ -151,4 +151,5 @@ text [^\\\"]*
   LexerError("Unexpected input");
   // Make iwyu think unistd.h is required
   [[maybe_unused]]static constexpr auto x=getpid;
+  [[maybe_unused]]static constexpr auto y=printf;
 }

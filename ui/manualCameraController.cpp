@@ -5,7 +5,7 @@
 #include <maths.h>
 
 bool
-ManualCameraController::handleInput(SDL_Event & e)
+ManualCameraController::handleInput(const SDL_Event & e)
 {
 	switch (e.type) {
 		case SDL_KEYDOWN:

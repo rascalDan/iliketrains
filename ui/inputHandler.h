@@ -12,7 +12,7 @@ public:
 
 	DEFAULT_MOVE_COPY(InputHandler);
 
-	virtual bool handleInput(SDL_Event &) = 0;
+	virtual bool handleInput(const SDL_Event &) = 0;
 };
 
 #endif
