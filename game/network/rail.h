@@ -1,6 +1,7 @@
 #ifndef RAILLINKS_H
 #define RAILLINKS_H
 
+#include "chronology.hpp"
 #include "game/worldobject.h"
 #include "gfx/models/mesh.h"
 #include "gfx/renderable.h"

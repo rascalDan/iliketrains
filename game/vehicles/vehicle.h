@@ -1,6 +1,7 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include "chronology.hpp"
 #include "linkHistory.h"
 #include <game/activity.h>
 #include <game/network/link.h>

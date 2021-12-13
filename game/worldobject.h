@@ -1,10 +1,8 @@
 #ifndef WORLDOBJECT_H
 #define WORLDOBJECT_H
 
-#include <chrono>
+#include "chronology.hpp"
 #include <special_members.hpp>
-
-using TickDuration = std::chrono::duration<float, std::chrono::seconds::period>;
 
 class WorldObject {
 public:

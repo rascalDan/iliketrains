@@ -1,11 +1,11 @@
 #ifndef TRAIN_H
 #define TRAIN_H
 
+#include "chronology.hpp"
 #include "game/activities/go.h" // IWYU pragma: keep
 #include "game/activities/idle.h" // IWYU pragma: keep
 #include "game/activity.h"
 #include "game/network/link.h"
-#include "game/worldobject.h"
 #include "railVehicle.h"
 #include "vehicle.h"
 #include <collection.hpp>

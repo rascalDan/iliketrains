@@ -1,6 +1,7 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
+#include "chronology.hpp"
 #include "collection.hpp"
 #include "game/worldobject.h"
 #include <gfx/models/mesh.h>
