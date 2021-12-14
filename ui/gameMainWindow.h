@@ -16,7 +16,7 @@ public:
 
 	void tick(TickDuration) override;
 
-	void Refresh(const GameState * gameState) const override;
+	void render(const GameState * gameState) const override;
 
 private:
 	UIShader uiShader;

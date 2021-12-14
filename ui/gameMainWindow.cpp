@@ -33,9 +33,8 @@ GameMainWindow::tick(TickDuration)
 }
 
 void
-GameMainWindow::Refresh(const GameState * gameState) const
+GameMainWindow::render(const GameState * gameState) const
 {
-	SDL_GL_MakeCurrent(m_window, m_glContext);
 	glEnable(GL_DEPTH_TEST);
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
 	glDisable(GL_DEPTH_TEST);

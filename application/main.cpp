@@ -101,9 +101,7 @@ public:
 
 			world.apply(&WorldObject::tick, t_passed);
 			windows.apply(&Window::tick, t_passed);
-			windows.apply(&Window::Clear, 0.0F, 0.0F, 0.0F, 1.0F);
-			windows.apply(&Window::Refresh, this);
-			windows.apply(&Window::SwapBuffers);
+			windows.apply(&Window::refresh, this);
 
 			t_start = t_end;
 		}
