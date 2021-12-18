@@ -16,6 +16,7 @@ variant coverage : debug ;
 project : requirements
 	<cxxstd>20
 	<variant>release:<lto>on
+	<variant>profile:<lto>on
 	<variant>coverage:<coverage>on
 	<toolset>tidy:<exclude>gfx/models/obj.cpp
 	<toolset>tidy:<exclude>lib/jsonParse.cpp
