@@ -13,10 +13,7 @@
 #include <memory>
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
-	Window {static_cast<int>(w), static_cast<int>(h), "I Like Trains"}, uiShader {w, h}, camera {{-1250.0F, -1250.0F,
-																										 35.0F},
-																								 70.0F, rdiv(w, h),
-																								 0.1F, 10000.0F}
+	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, 70.0F, rdiv(w, h), 0.1F, 10000.0F}
 {
 	inputStack.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 

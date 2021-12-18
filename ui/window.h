@@ -3,6 +3,7 @@
 
 #include "chronology.hpp"
 #include "collection.hpp"
+#include "gfx/gl/uiShader.h"
 #include "inputHandler.h" // IWYU pragma: keep
 #include "ptr.hpp"
 #include <SDL2/SDL.h>
@@ -14,7 +15,7 @@ class GameState;
 
 class Window {
 public:
-	Window(int width, int height, const std::string & title);
+	Window(size_t width, size_t height, const std::string & title);
 	virtual ~Window() = default;
 
 	NO_COPY(Window);
@@ -34,6 +35,7 @@ protected:
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
 	SDL_WindowPtr m_window;
 	Collection<InputHandler> inputStack;
+	UIShader uiShader;
 };
 
 #endif

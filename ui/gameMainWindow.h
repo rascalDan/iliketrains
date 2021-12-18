@@ -19,7 +19,6 @@ public:
 	void render(const GameState * gameState) const override;
 
 private:
-	UIShader uiShader;
 	Shader shader;
 	Camera camera;
 };

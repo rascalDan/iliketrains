@@ -21,11 +21,16 @@ SDL_GL_CreateContextAndGlewInit(SDL_Window * w)
 using GL_Context = std::remove_pointer_t<SDL_GLContext>;
 using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContextAndGlewInit, SDL_GL_DeleteContext>;
 
-Window::Window(int width, int height, const std::string & title) :
-	m_window {title.c_str(), static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), width,
-			height, static_cast<Uint32>(SDL_WINDOW_OPENGL)}
+Window::Window(size_t width, size_t height, const std::string & title) :
+	m_window {title.c_str(), static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED),
+			static_cast<int>(width), static_cast<int>(height), static_cast<Uint32>(SDL_WINDOW_OPENGL)},
+	uiShader {[this](auto w) {
+				  // must call glContent before creating the shader
+				  glContext();
+				  return w;
+			  }(width),
+			height}
 {
-	glContext();
 }
 
 void
