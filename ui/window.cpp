@@ -1,5 +1,6 @@
 #include "window.h"
-#include "ui/inputHandler.h"
+#include "inputHandler.h"
+#include "uiComponent.h"
 #include <GL/glew.h>
 #include <optional>
 #include <stdexcept>
@@ -72,4 +73,12 @@ Window::refresh(const GameState * gameState) const
 	render(gameState);
 
 	swapBuffers();
+}
+
+void
+Window::render(const GameState *) const
+{
+	uiShader.use();
+	glDisable(GL_DEPTH_TEST);
+	inputStack.apply<UIComponent>(&UIComponent::render, uiShader);
 }

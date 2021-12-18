@@ -30,7 +30,7 @@ public:
 
 protected:
 	SDL_GLContext glContext() const;
-	virtual void render(const GameState *) const = 0;
+	virtual void render(const GameState *) const;
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
 	SDL_WindowPtr m_window;

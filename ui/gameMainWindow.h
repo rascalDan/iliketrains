@@ -4,7 +4,6 @@
 #include "chronology.hpp"
 #include "gfx/gl/camera.h"
 #include "gfx/gl/shader.h"
-#include "gfx/gl/uiShader.h"
 #include "window.h"
 #include <cstddef>
 

@@ -34,6 +34,5 @@ GameMainWindow::render(const GameState * gameState) const
 {
 	glEnable(GL_DEPTH_TEST);
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
-	glDisable(GL_DEPTH_TEST);
-	// do ui bits
+	Window::render(gameState);
 }
