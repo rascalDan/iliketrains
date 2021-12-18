@@ -64,12 +64,7 @@ exe iliketrains :
 	;
 
 explicit main ;
-run application/main.cpp
-	: -- :
-	[ sequence.insertion-sort [ glob res/* ] ]
-	:
-	<library>ilt
-	;
+run iliketrains : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.* ] ] : : main ;
 
 lib ilt :
 	[ glob-tree *.cpp *.vs *.fs : application bin test ]
