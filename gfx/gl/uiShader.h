@@ -8,6 +8,7 @@
 class UIShader {
 public:
 	UIShader(std::size_t width, std::size_t height);
+	void use() const;
 
 private:
 	class UIProgramHandle : public ProgramHandleBase {

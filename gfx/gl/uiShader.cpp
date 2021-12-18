@@ -14,3 +14,8 @@ UIShader::UIShader(size_t width, size_t height) : program {uiShader_vs.compile()
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(uiProjection));
 	}
 }
+void
+UIShader::use() const
+{
+	glUseProgram(program.m_program);
+}
