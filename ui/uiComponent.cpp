@@ -23,5 +23,10 @@ UIComponent::Position::operator&(const glm::vec2 & pos) const
 bool
 UIComponent::Position::operator&(const SDL_MouseButtonEvent & pos) const
 {
-	return *this & glm::vec2 {pos.x, pos.y};
+	switch (pos.type) {
+		case SDL_MOUSEBUTTONUP:
+		case SDL_MOUSEBUTTONDOWN:
+			return *this & glm::vec2 {pos.x, pos.y};
+	}
+	return false;
 }
