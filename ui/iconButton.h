@@ -3,7 +3,8 @@
 
 #include "icon.h"
 #include "uiComponent.h"
-#include <GL/glew.h>
+#include <glBuffers.h>
+#include <glVertexArrays.h>
 #include <glm/glm.hpp>
 #include <string>
 
@@ -21,7 +22,8 @@ public:
 
 	Icon icon;
 	UIEvent click;
-	GLuint m_vertexArrayObject, m_vertexArrayBuffer;
+	glVertexArray m_vertexArrayObject;
+	glBuffer m_vertexArrayBuffer;
 };
 
 #endif

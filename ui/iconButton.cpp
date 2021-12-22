@@ -1,6 +1,9 @@
 #include "iconButton.h"
+#include "glBuffers.h"
+#include "glVertexArrays.h"
 #include "ui/icon.h"
 #include "ui/uiComponent.h"
+#include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <array>
 #include <filesystem>
@@ -9,13 +12,9 @@
 #include <utility>
 
 IconButton::IconButton(const std::string & icon_, glm::vec2 position_, UIEvent click_) :
-	UIComponent {{position_, ICON_SIZE}}, icon {icon_}, click {std::move(click_)}, m_vertexArrayObject {},
-	m_vertexArrayBuffer {}
+	UIComponent {{position_, ICON_SIZE}}, icon {icon_}, click {std::move(click_)}
 {
-	glGenVertexArrays(1, &m_vertexArrayObject);
 	glBindVertexArray(m_vertexArrayObject);
-
-	glGenBuffers(1, &m_vertexArrayBuffer);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer);
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(glm::vec4) * 4), nullptr, GL_DYNAMIC_DRAW);

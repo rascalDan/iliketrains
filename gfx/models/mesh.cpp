@@ -1,16 +1,15 @@
 #include "mesh.h"
+#include "glBuffers.h"
+#include "glVertexArrays.h"
 #include "vertex.hpp"
 #include <cstddef>
 
 #define offset_ptr(T, m) ((reinterpret_cast<char *>(1)) + offsetof(T, m) - 1)
 
 Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum m) :
-	m_vertexArrayObject {}, m_vertexArrayBuffers {}, m_numIndices {static_cast<GLsizei>(indices.size())}, mode {m}
+	m_vertexArrayBuffers {}, m_numIndices {static_cast<GLsizei>(indices.size())}, mode {m}
 {
-	glGenVertexArrays(1, &m_vertexArrayObject);
 	glBindVertexArray(m_vertexArrayObject);
-
-	glGenBuffers(2, m_vertexArrayBuffers.data());
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffers[0]);
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(Vertex) * vertices.size()), vertices.data(),
@@ -30,12 +29,6 @@ Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const unsigne
 			GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
-}
-
-Mesh::~Mesh()
-{
-	glDeleteBuffers(NUM_BUFFERS, m_vertexArrayBuffers.data());
-	glDeleteVertexArrays(1, &m_vertexArrayObject);
 }
 
 void
