@@ -21,7 +21,6 @@
 #include <memory>
 #include <special_members.hpp>
 #include <ui/gameMainWindow.h>
-#include <ui/inputHandler.h>
 #include <ui/window.h>
 #include <vector>
 

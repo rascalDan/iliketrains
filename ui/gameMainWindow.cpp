@@ -1,21 +1,36 @@
 #include "gameMainWindow.h"
-#include "collection.hpp"
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
-#include "ui/window.h"
+#include "maths.h"
+#include "toolbar.h"
+#include "window.h"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
+#include <collection.hpp>
 #include <game/gamestate.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
-#include <maths.h>
 #include <memory>
+
+class GameMainToolbar : public Toolbar {
+public:
+	GameMainToolbar() :
+		Toolbar {
+				{"ui/icon/network.png",
+						[](const SDL_Event &) {
+							// fprintf(stderr, "network click\n");
+						}},
+		}
+	{
+	}
+};
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, 70.0F, rdiv(w, h), 0.1F, 10000.0F}
 {
-	inputStack.create<ManualCameraController>(glm::vec2 {-1150, -1150});
+	uiComponents.create<GameMainToolbar>();
+	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 
 	shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
 	shader.setUniform("lightColor", {.6, .6, .6});
@@ -25,7 +40,7 @@ GameMainWindow::GameMainWindow(size_t w, size_t h) :
 void
 GameMainWindow::tick(TickDuration)
 {
-	inputStack.apply<CameraController>(&CameraController::updateCamera, &camera);
+	uiComponents.apply<CameraController>(&CameraController::updateCamera, &camera);
 	shader.setView(camera.GetViewProjection());
 }
 

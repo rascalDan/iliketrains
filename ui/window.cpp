@@ -1,9 +1,10 @@
 #include "window.h"
-#include "inputHandler.h"
 #include "uiComponent.h"
 #include <GL/glew.h>
-#include <optional>
+#include <glm/glm.hpp>
 #include <stdexcept>
+#include <tuple>
+#include <type_traits>
 
 static SDL_GLContext
 SDL_GL_CreateContextAndGlewInit(SDL_Window * w)
@@ -27,7 +28,7 @@ Window::Window(size_t width, size_t height, const std::string & title) :
 			static_cast<int>(width), static_cast<int>(height), static_cast<Uint32>(SDL_WINDOW_OPENGL)},
 	uiShader {[this](auto w) {
 				  // must call glContent before creating the shader
-				  glContext();
+				  std::ignore = glContext();
 				  return w;
 			  }(width),
 			height}
@@ -51,7 +52,17 @@ bool
 Window::handleInput(const SDL_Event & e)
 {
 	if (SDL_GetWindowID(m_window) == e.window.windowID) {
-		inputStack.applyOne(&InputHandler::handleInput, e);
+		SDL_Event eAdjusted {e};
+		glm::ivec2 size {};
+		switch (e.type) {
+			// SDL and OpenGL have coordinates that are vertically opposed.
+			case SDL_MOUSEBUTTONDOWN:
+			case SDL_MOUSEBUTTONUP:
+				SDL_GetWindowSize(m_window, &size.x, &size.y);
+				eAdjusted.button.y = size.y - e.button.y;
+				break;
+		}
+		uiComponents.applyOne(&UIComponent::handleInput, eAdjusted, UIComponent::Position {{}, size});
 		return true;
 	}
 	return false;
@@ -80,5 +91,5 @@ Window::render(const GameState *) const
 {
 	uiShader.use();
 	glDisable(GL_DEPTH_TEST);
-	inputStack.apply<UIComponent>(&UIComponent::render, uiShader);
+	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
 }

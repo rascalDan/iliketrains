@@ -4,12 +4,12 @@
 #include "chronology.hpp"
 #include "collection.hpp"
 #include "gfx/gl/uiShader.h"
-#include "inputHandler.h" // IWYU pragma: keep
 #include "ptr.hpp"
+#include "uiComponent.h" // IWYU pragma: keep
 #include <SDL2/SDL.h>
+#include <cstddef>
 #include <special_members.hpp>
 #include <string>
-#include <type_traits>
 
 class GameState;
 
@@ -29,12 +29,12 @@ public:
 	void swapBuffers() const;
 
 protected:
-	SDL_GLContext glContext() const;
+	[[nodiscard]] SDL_GLContext glContext() const;
 	virtual void render(const GameState *) const;
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
 	SDL_WindowPtr m_window;
-	Collection<InputHandler> inputStack;
+	Collection<UIComponent> uiComponents;
 	UIShader uiShader;
 };
 

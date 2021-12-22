@@ -1,19 +1,21 @@
 #ifndef MANUAL_CAMERA_CONTROLLER_H
 #define MANUAL_CAMERA_CONTROLLER_H
 
-#include "inputHandler.h"
+#include "uiComponent.h"
 #include <SDL2/SDL.h>
 #include <gfx/camera_controller.h>
 #include <glm/glm.hpp>
 #include <maths.h>
 
+class UIShader;
 class Camera;
 
-class ManualCameraController : public CameraController, public InputHandler {
+class ManualCameraController : public CameraController, public UIComponent {
 public:
-	explicit ManualCameraController(glm::vec2 f) : focus {f} { }
+	explicit ManualCameraController(glm::vec2 f) : UIComponent {{}}, focus {f} { }
 
-	bool handleInput(const SDL_Event & e) override;
+	bool handleInput(const SDL_Event & e, const Position &) override;
+	void render(const UIShader &, const Position & parentPos) const override;
 
 	void updateCamera(Camera * camera) const override;
 
