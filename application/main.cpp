@@ -55,7 +55,7 @@ public:
 	run()
 	{
 		Windows windows;
-		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT, this);
 
 		world.create<Terrain>();
 

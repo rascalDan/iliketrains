@@ -22,6 +22,18 @@ ManualCameraController::handleInput(const SDL_Event & e, const Position &)
 				case SDLK_RCTRL:
 					ctrl = false;
 					return true;
+				case SDLK_KP_8:
+					direction = 0;
+					break;
+				case SDLK_KP_4:
+					direction = -half_pi;
+					break;
+				case SDLK_KP_6:
+					direction = half_pi;
+					break;
+				case SDLK_KP_2:
+					direction = pi;
+					break;
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:

@@ -11,7 +11,7 @@ class GameState;
 
 class GameMainWindow : public Window {
 public:
-	GameMainWindow(size_t w, size_t h);
+	GameMainWindow(size_t w, size_t h, const GameState *);
 
 	void tick(TickDuration) override;
 

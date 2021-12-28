@@ -49,6 +49,14 @@
 	},
 	{
 		"include": [
+			"@<glm/gtx/intersect.inl>",
+			"private",
+			"<glm/gtx/intersect.hpp>",
+			"public"
+		]
+	},
+	{
+		"include": [
 			"@<glm/gtx/rotate_vector.inl>",
 			"private",
 			"<glm/gtx/rotate_vector.hpp>",

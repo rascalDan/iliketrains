@@ -51,6 +51,7 @@ glm::mat2 rotate_flat(float);
 glm::mat4 rotate_roll(float);
 glm::mat4 rotate_yaw(float);
 glm::mat4 rotate_pitch(float);
+glm::mat4 rotate_yp(glm::vec2);
 glm::mat4 rotate_ypr(glm::vec3);
 
 float vector_yaw(const glm::vec3 & diff);
@@ -82,6 +83,12 @@ constexpr inline glm::vec3
 operator^(const glm::vec2 & v, float z)
 {
 	return {v.x, v.y, z};
+}
+
+constexpr inline glm::vec4
+operator^(const glm::vec3 & v, float w)
+{
+	return {v.x, v.y, v.z, w};
 }
 
 constexpr inline glm::vec3

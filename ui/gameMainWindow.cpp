@@ -3,15 +3,20 @@
 #include "manualCameraController.h"
 #include "maths.h"
 #include "toolbar.h"
+#include "ui/uiComponent.h"
 #include "window.h"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <collection.hpp>
 #include <game/gamestate.h>
+#include <game/selectable.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
+#include <tuple>
+
+class UIShader;
 
 class GameMainToolbar : public Toolbar {
 public:
@@ -26,9 +31,45 @@ public:
 	}
 };
 
-GameMainWindow::GameMainWindow(size_t w, size_t h) :
-	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, 70.0F, rdiv(w, h), 0.1F, 10000.0F}
+class GameMainSelector : public UIComponent {
+public:
+	GameMainSelector(const Camera * c, glm::vec2 size, const GameState * gs) :
+		UIComponent {{{}, size}}, camera {c}, gameState {gs}
+	{
+	}
+
+	void
+	render(const UIShader &, const Position &) const override
+	{
+	}
+
+	bool
+	handleInput(const SDL_Event & e, const Position &) override
+	{
+		switch (e.type) {
+			case SDL_MOUSEBUTTONDOWN:
+				if (e.button.button == SDL_BUTTON_LEFT) {
+					const auto mouse = glm::vec2 {e.button.x, e.button.y} / position.size;
+
+					glm::vec2 baryPos {};
+					float eh;
+
+					std::ignore = gameState->world.applyOne<Selectable>(
+							&Selectable::intersectRay, camera->pos, camera->unProject(mouse), &baryPos, &eh);
+				}
+		}
+		return false;
+	}
+
+private:
+	const Camera * camera;
+	const GameState * gameState;
+};
+
+GameMainWindow::GameMainWindow(size_t w, size_t h, const GameState * gameState) :
+	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h), 0.1F, 10000.0F}
 {
+	uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h}, gameState);
 	uiComponents.create<GameMainToolbar>();
 	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 

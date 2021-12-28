@@ -23,6 +23,12 @@ Train::getBogiePosition(float linkDist, float dist) const
 	return b2Link.first->positionAt(b2linkDist, b2Link.second);
 }
 
+bool
+Train::intersectRay(const glm::vec3 & pos, const glm::vec3 & dir, glm::vec2 * baryPos, float * eh) const
+{
+	return applyOne(&RailVehicle::intersectRay, pos, dir, baryPos, eh) != end();
+}
+
 void
 Train::tick(TickDuration dur)
 {

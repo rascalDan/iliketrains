@@ -12,3 +12,10 @@ Camera::GetViewProjection() const
 {
 	return projection * glm::lookAt(pos, pos + forward, up);
 }
+
+glm::vec3
+Camera::unProject(const glm::vec2 & mouse) const
+{
+	static constexpr const glm::vec4 screen {0, 0, 1, 1};
+	return glm::normalize(glm::unProject(mouse ^ 1, glm::lookAt(::origin, forward, up), projection, screen));
+}

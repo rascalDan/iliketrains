@@ -70,6 +70,12 @@ rotate_ypr(glm::vec3 a)
 	return rotate_yaw(a.y) * rotate_pitch(a.x) * rotate_roll(a.z);
 }
 
+glm::mat4
+rotate_yp(glm::vec2 a)
+{
+	return rotate_yaw(a.y) * rotate_pitch(a.x);
+}
+
 float
 vector_yaw(const glm::vec3 & diff)
 {

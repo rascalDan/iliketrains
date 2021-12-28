@@ -9,6 +9,7 @@
 #include "railVehicle.h"
 #include "vehicle.h"
 #include <collection.hpp>
+#include <glm/glm.hpp>
 #include <location.hpp>
 #include <memory>
 #include <vector>
@@ -26,6 +27,8 @@ public:
 	}
 
 	void render(const Shader & shader) const override;
+
+	[[nodiscard]] bool intersectRay(const glm::vec3 &, const glm::vec3 &, glm::vec2 *, float *) const override;
 
 	void tick(TickDuration elapsed) override;
 	void doActivity(Go *, TickDuration) override;

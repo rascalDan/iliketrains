@@ -6,13 +6,14 @@
 #include <game/activity.h>
 #include <game/network/link.h>
 #include <game/orders.h>
+#include <game/selectable.h>
 #include <game/worldobject.h>
 #include <gfx/renderable.h>
 #include <memory>
 
 class Location;
 
-class Vehicle : public WorldObject, public Renderable {
+class Vehicle : public WorldObject, public Renderable, public Selectable {
 public:
 	explicit Vehicle(const LinkPtr & link, float linkDist = 0);
 	float linkDist; // distance along current link
