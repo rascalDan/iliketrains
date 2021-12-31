@@ -25,4 +25,8 @@
 	DEFAULT_MOVE(TYPE); \
 	NO_COPY(TYPE)
 
+#define CUSTOM_MOVE(TYPE) \
+	TYPE(TYPE &&) noexcept; \
+	TYPE & operator=(TYPE &&) noexcept
+
 #endif

@@ -2,6 +2,7 @@
 #define GLVERTEXARRAYS_H
 
 #include <GL/glew.h>
+#include <algorithm> // IWYU pragma: keep
 #include <array>
 #include <cstddef>
 #include <special_members.hpp>
@@ -25,7 +26,7 @@ public:
 	}
 
 	NO_COPY(glVertexArrays);
-	NO_MOVE(glVertexArrays);
+	CUSTOM_MOVE(glVertexArrays);
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)
 	operator GLuint() const
@@ -43,6 +44,21 @@ public:
 private:
 	std::array<GLuint, N> ids {};
 };
+
+template<size_t N> glVertexArrays<N>::glVertexArrays(glVertexArrays<N> && src) noexcept : ids {src.ids}
+{
+	std::fill(src.ids.begin(), src.ids.end(), -1);
+}
+
+template<size_t N>
+glVertexArrays<N> &
+glVertexArrays<N>::operator=(glVertexArrays<N> && src) noexcept
+{
+	ids = src.ids;
+	std::fill(src.ids.begin(), src.ids.end(), -1);
+	return *this;
+}
+
 using glVertexArray = glVertexArrays<1>;
 
 #endif
