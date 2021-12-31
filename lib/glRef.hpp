@@ -44,6 +44,12 @@ public:
 		return id;
 	}
 
+	auto
+	operator->() const
+	{
+		return id;
+	}
+
 	operator IdType() const
 	{
 		return id;
