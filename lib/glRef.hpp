@@ -4,9 +4,9 @@
 #include <special_members.hpp>
 #include <stdexcept>
 
-template<typename IdType, auto & get, auto & release, auto... fixed> class glRef {
+template<typename IdType, auto get, auto release, auto... fixed> class glRef {
 public:
-	template<typename... Args> explicit glRef(Args &&... args) : id {get(fixed..., std::forward<Args>(args)...)}
+	template<typename... Args> explicit glRef(Args &&... args) : id {(*get)(fixed..., std::forward<Args>(args)...)}
 	{
 		if (!id) {
 			throw std::runtime_error("Get function failed");
@@ -21,7 +21,7 @@ public:
 	~glRef()
 	{
 		if (id) {
-			release(id);
+			(*release)(id);
 		}
 	}
 
