@@ -97,6 +97,20 @@ operator!(const glm::vec2 & v)
 	return v ^ 0.F;
 }
 
+template<glm::length_t L1, glm::length_t L2, typename T, glm::qualifier Q>
+inline constexpr glm::vec<L1 + L2, T, Q>
+operator||(const glm::vec<L1, T, Q> v1, const glm::vec<L2, T, Q> v2)
+{
+	return {v1, v2};
+}
+
+template<glm::length_t L, typename T, glm::qualifier Q>
+inline constexpr glm::vec<L + 1, T, Q>
+operator||(const glm::vec<L, T, Q> v1, const T v2)
+{
+	return {v1, v2};
+}
+
 constexpr inline float
 arc_length(const Arc & arc)
 {
