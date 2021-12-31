@@ -7,7 +7,7 @@
 #define offset_ptr(T, m) ((reinterpret_cast<char *>(1)) + offsetof(T, m) - 1)
 
 Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum m) :
-	m_vertexArrayBuffers {}, m_numIndices {static_cast<GLsizei>(indices.size())}, mode {m}
+	m_numIndices {static_cast<GLsizei>(indices.size())}, mode {m}
 {
 	glBindVertexArray(m_vertexArrayObject);
 
