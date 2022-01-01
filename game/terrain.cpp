@@ -2,6 +2,7 @@
 #include "gfx/models/texture.h"
 #include <cache.h>
 #include <cstddef>
+#include <filesystem>
 #include <gfx/gl/shader.h>
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>

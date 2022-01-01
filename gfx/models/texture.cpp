@@ -6,7 +6,7 @@
 #include <resource.h>
 #include <stb/stb_image.h>
 
-Cache<Texture> Texture::cachedTexture;
+Cache<Texture, std::filesystem::path> Texture::cachedTexture;
 
 Texture::Texture(const std::filesystem::path & fileName)
 {

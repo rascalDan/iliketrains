@@ -11,7 +11,7 @@ class Texture {
 public:
 	explicit Texture(const std::filesystem::path & fileName);
 
-	static Cache<Texture> cachedTexture;
+	static Cache<Texture, std::filesystem::path> cachedTexture;
 
 	void Bind() const;
 

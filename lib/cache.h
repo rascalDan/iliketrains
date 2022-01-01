@@ -2,13 +2,15 @@
 #define CACHE_H
 
 #include "special_members.hpp"
+#include <functional>
 #include <map>
 #include <memory>
-#include <string>
+#include <tuple>
 
-template<typename Obj> class Cache {
+template<typename Obj, typename... KeyParts> class Cache {
 public:
 	using Ptr = std::shared_ptr<Obj>;
+	using Key = std::tuple<KeyParts...>;
 
 	Cache() = default;
 	virtual ~Cache() = default;
@@ -16,22 +18,23 @@ public:
 	NO_COPY(Cache);
 
 	[[nodiscard]] Ptr
-	get(const std::string & key)
+	get(const KeyParts &... keyparts)
 	{
+		auto key = std::tie(keyparts...);
 		if (auto e = cached.find(key); e != cached.end()) {
 			return e->second;
 		}
-		return cached.emplace(key, construct(key)).first->second;
+		return cached.emplace(key, construct(keyparts...)).first->second;
 	}
 
 	[[nodiscard]] virtual Ptr
-	construct(const std::string & key) const
+	construct(const KeyParts &... keyparts) const
 	{
-		return std::make_shared<Obj>(key);
+		return std::make_shared<Obj>(keyparts...);
 	}
 
 private:
-	std::map<std::string, Ptr> cached;
+	std::map<Key, Ptr, std::less<>> cached;
 };
 // IWYU pragma: no_forward_declare Cache
 

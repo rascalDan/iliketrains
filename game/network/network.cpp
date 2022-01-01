@@ -2,6 +2,7 @@
 #include "routeWalker.h"
 #include <array>
 #include <cache.h>
+#include <filesystem>
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
 #include <initializer_list>
