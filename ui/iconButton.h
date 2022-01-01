@@ -3,8 +3,7 @@
 
 #include "icon.h"
 #include "uiComponent.h"
-#include <glBuffers.h>
-#include <glVertexArrays.h>
+#include <glArrays.h>
 #include <glm/glm.hpp>
 #include <string>
 

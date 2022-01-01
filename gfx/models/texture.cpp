@@ -1,4 +1,6 @@
 #include "texture.h"
+#include "glArrays.h"
+#include <GL/glew.h>
 #include <cache.h>
 #include <gfx/image.h>
 #include <resource.h>
@@ -6,11 +8,10 @@
 
 Cache<Texture> Texture::cachedTexture;
 
-Texture::Texture(const std::filesystem::path & fileName) : m_texture {}
+Texture::Texture(const std::filesystem::path & fileName)
 {
 	const Image tex {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha};
 
-	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -20,11 +21,6 @@ Texture::Texture(const std::filesystem::path & fileName) : m_texture {}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
-}
-
-Texture::~Texture()
-{
-	glDeleteTextures(1, &m_texture);
 }
 
 void

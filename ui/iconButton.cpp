@@ -1,6 +1,5 @@
 #include "iconButton.h"
-#include "glBuffers.h"
-#include "glVertexArrays.h"
+#include "glArrays.h"
 #include "ui/icon.h"
 #include "ui/uiComponent.h"
 #include <GL/glew.h>

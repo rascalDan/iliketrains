@@ -1,4 +1,6 @@
 #include "icon.h"
+#include "glArrays.h"
+#include <GL/glew.h>
 #include <gfx/image.h>
 #include <resource.h>
 #include <stb/stb_image.h>
@@ -7,9 +9,8 @@ Icon::Icon(const std::filesystem::path & fileName) : Icon {Image {Resource::mapP
 {
 }
 
-Icon::Icon(const Image & tex) : size {tex.width, tex.height}, m_texture {}
+Icon::Icon(const Image & tex) : size {tex.width, tex.height}
 {
-	glGenTextures(1, &m_texture);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -19,11 +20,6 @@ Icon::Icon(const Image & tex) : size {tex.width, tex.height}, m_texture {}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
-}
-
-Icon::~Icon()
-{
-	glDeleteTextures(1, &m_texture);
 }
 
 void

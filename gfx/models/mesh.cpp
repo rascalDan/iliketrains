@@ -1,6 +1,5 @@
 #include "mesh.h"
-#include "glBuffers.h"
-#include "glVertexArrays.h"
+#include "glArrays.h"
 #include "vertex.hpp"
 #include <cstddef>
 

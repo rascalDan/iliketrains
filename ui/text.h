@@ -2,8 +2,7 @@
 
 #include "uiComponent.h"
 #include <GL/glew.h>
-#include <glBuffers.h>
-#include <glVertexArrays.h>
+#include <glArrays.h>
 #include <glm/glm.hpp>
 #include <string_view>
 #include <vector>

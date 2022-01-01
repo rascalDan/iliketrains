@@ -2,8 +2,7 @@
 #define MESH_INCLUDED_H
 
 #include <GL/glew.h>
-#include <glBuffers.h>
-#include <glVertexArrays.h>
+#include <glArrays.h>
 #include <memory>
 #include <span>
 
