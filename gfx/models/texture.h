@@ -1,10 +1,11 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include <cache.h>
 #include <filesystem>
 #include <glArrays.h>
 
-template<typename Obj> class Cache;
+// IWYU pragma: no_forward_declare Cache
 
 class Texture {
 public:

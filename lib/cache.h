@@ -33,5 +33,6 @@ public:
 private:
 	std::map<std::string, Ptr> cached;
 };
+// IWYU pragma: no_forward_declare Cache
 
 #endif
