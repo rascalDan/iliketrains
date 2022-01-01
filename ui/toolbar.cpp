@@ -1,4 +1,5 @@
 #include "toolbar.h"
+#include "gfx/gl/uiShader.h"
 #include "ui/iconButton.h"
 #include "ui/uiComponent.h"
 #include "uiComponentPlacer.h"
@@ -17,6 +18,7 @@ Toolbar::Toolbar(const std::initializer_list<InitInfo> & initInfo) : UIComponent
 void
 Toolbar::render(const UIShader & uiShader, const Position & parentPos) const
 {
+	uiShader.useDefault();
 	const auto absPos = this->position + parentPos;
 	icons.apply(&UIComponent::render, uiShader, absPos);
 }

@@ -10,6 +10,8 @@ import sequence ;
 
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
+pkg-config.import freetype2 ;
+pkg-config.import glib-2.0 ;
 lib pthread ;
 
 variant coverage : debug ;
@@ -72,6 +74,7 @@ lib ilt :
 		<include>.
 		<include>lib
 		<link>static
+		<use>glib-2.0
 		<cflags>-fPIC
 	]
 	:
@@ -96,6 +99,8 @@ lib ilt :
 	<include>lib
 	<library>sdl2
 	<library>glew
+	<library>freetype2
+	<library>glib-2.0
 	<library>pthread
 	: :
 	<include>.

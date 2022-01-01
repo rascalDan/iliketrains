@@ -17,6 +17,14 @@
 	},
 	{
 		"include": [
+			"@\"freetype/.*\"",
+			"private",
+			"<freetype/freetype.h>",
+			"public"
+		]
+	},
+	{
+		"include": [
 			"@<glm/detail/.*>",
 			"private",
 			"<glm/glm.hpp>",
@@ -116,6 +124,14 @@
 			"@<boost/preprocessor/.*>",
 			"private",
 			"<boost/test/unit_test.hpp>",
+			"public"
+		]
+	},
+	{
+		"symbol": [
+			"FT_FREETYPE_H",
+			"private",
+			"<ft2build.h>",
 			"public"
 		]
 	},

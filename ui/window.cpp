@@ -13,6 +13,7 @@ SDL_GL_CreateContextAndGlewInit(SDL_Window * w)
 	if (glewInit() != GLEW_OK) {
 		throw std::runtime_error {"Glew failed to initialize!"};
 	}
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
@@ -89,7 +90,6 @@ Window::refresh(const GameState * gameState) const
 void
 Window::render(const GameState *) const
 {
-	uiShader.use();
 	glDisable(GL_DEPTH_TEST);
 	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
 }
