@@ -10,8 +10,6 @@
 #include <special_members.hpp>
 #include <string>
 
-class GameState;
-
 class Window {
 public:
 	Window(size_t width, size_t height, const std::string & title);
@@ -21,7 +19,7 @@ public:
 	NO_MOVE(Window);
 
 	virtual void tick(TickDuration elapsed) = 0;
-	void refresh(const GameState *) const;
+	void refresh() const;
 	bool handleInput(const SDL_Event & e);
 
 	void clear(float r, float g, float b, float a) const;
@@ -29,7 +27,7 @@ public:
 
 protected:
 	[[nodiscard]] SDL_GLContext glContext() const;
-	virtual void render(const GameState *) const;
+	virtual void render() const;
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
 	SDL_WindowPtr m_window;

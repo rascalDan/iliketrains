@@ -59,7 +59,7 @@ public:
 		geoData->generateRandom();
 
 		Windows windows;
-		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT, this);
+		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 		world.create<Terrain>(geoData);
 
@@ -104,7 +104,7 @@ public:
 
 			world.apply(&WorldObject::tick, t_passed);
 			windows.apply(&Window::tick, t_passed);
-			windows.apply(&Window::refresh, this);
+			windows.apply(&Window::refresh);
 
 			t_start = t_end;
 		}

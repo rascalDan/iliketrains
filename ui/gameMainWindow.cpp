@@ -33,10 +33,7 @@ public:
 
 class GameMainSelector : public UIComponent {
 public:
-	GameMainSelector(const Camera * c, glm::vec2 size, const GameState * gs) :
-		UIComponent {{{}, size}}, camera {c}, gameState {gs}
-	{
-	}
+	GameMainSelector(const Camera * c, glm::vec2 size) : UIComponent {{{}, size}}, camera {c} { }
 
 	void
 	render(const UIShader &, const Position &) const override
@@ -63,13 +60,12 @@ public:
 
 private:
 	const Camera * camera;
-	const GameState * gameState;
 };
 
-GameMainWindow::GameMainWindow(size_t w, size_t h, const GameState * gameState) :
+GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h), 0.1F, 10000.0F}
 {
-	uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h}, gameState);
+	uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
 	uiComponents.create<GameMainToolbar>();
 	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 
@@ -86,9 +82,9 @@ GameMainWindow::tick(TickDuration)
 }
 
 void
-GameMainWindow::render(const GameState * gameState) const
+GameMainWindow::render() const
 {
 	glEnable(GL_DEPTH_TEST);
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
-	Window::render(gameState);
+	Window::render();
 }

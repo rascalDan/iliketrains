@@ -77,18 +77,18 @@ Window::glContext() const
 }
 
 void
-Window::refresh(const GameState * gameState) const
+Window::refresh() const
 {
 	SDL_GL_MakeCurrent(m_window, glContext());
 	clear(0.0F, 0.0F, 0.0F, 1.0F);
 
-	render(gameState);
+	render();
 
 	swapBuffers();
 }
 
 void
-Window::render(const GameState *) const
+Window::render() const
 {
 	glDisable(GL_DEPTH_TEST);
 	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});

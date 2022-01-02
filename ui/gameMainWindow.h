@@ -6,15 +6,13 @@
 #include "window.h"
 #include <cstddef>
 
-class GameState;
-
 class GameMainWindow : public Window {
 public:
-	GameMainWindow(size_t w, size_t h, const GameState *);
+	GameMainWindow(size_t w, size_t h);
 
 	void tick(TickDuration) override;
 
-	void render(const GameState * gameState) const override;
+	void render() const override;
 
 private:
 	Shader shader;
