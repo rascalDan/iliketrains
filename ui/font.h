@@ -3,17 +3,21 @@
 
 #include <GL/glew.h>
 #include <array>
+#include <cache.h>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
+#include <glArrays.h>
 #include <glm/glm.hpp>
 #include <map>
-#include <string>
 #include <string_view>
 #include <vector>
 
 class Font {
 public:
-	Font(const char * const path, unsigned int height);
+	static Cache<Font, std::filesystem::path, unsigned int> cachedFontRenderings;
+
+	Font(std::filesystem::path path, unsigned int height);
 
 	using Quad = std::array<glm::vec4, 4>;
 	using Quads = std::vector<Quad>;
@@ -28,7 +32,7 @@ public:
 		long advance;
 	};
 	struct FontTexture {
-		GLuint texture;
+		glTexture texture;
 		unsigned int used;
 	};
 
@@ -39,7 +43,7 @@ protected:
 	const CharData getChar(char) const;
 	std::size_t getTextureWithSpace(unsigned int adv) const;
 
-	std::string path;
+	std::filesystem::path path;
 	glm::uvec3 size;
 	mutable std::map<uint32_t, CharData> charsData;
 	mutable std::vector<FontTexture> fontTextures;

@@ -1,13 +1,16 @@
 #include "font.h"
 #include <algorithm>
+#include <cache.h>
 #include <cctype>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include "glArrays.h"
 #include <glRef.hpp>
 #include <maths.h>
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <unicode.h>
 #include <utility>
 // IWYU pragma: no_forward_declare FT_LibraryRec_
@@ -56,7 +59,9 @@ using Face = glRef<FT_Face,
 		},
 		FT_Done_Face>;
 
-Font::Font(const char * const p, unsigned s) : path {p}, size {getTextureSize(s)}
+Cache<Font, std::filesystem::path, unsigned int> Font::cachedFontRenderings;
+
+Font::Font(std::filesystem::path p, unsigned s) : path {std::move(p)}, size {getTextureSize(s)}
 {
 	generateChars(BASIC_CHARS);
 }
@@ -115,7 +120,6 @@ Font::getTextureWithSpace(unsigned int adv) const
 	}
 
 	auto & texture = fontTextures.emplace_back();
-	glGenTextures(1, &texture.texture);
 	glBindTexture(GL_TEXTURE_2D, texture.texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y), 0, GL_RED,
 			GL_UNSIGNED_BYTE, nullptr);

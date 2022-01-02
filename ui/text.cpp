@@ -3,15 +3,19 @@
 #include "gfx/gl/uiShader.h"
 #include "uiComponent.h"
 #include <array>
+#include <cache.h>
+#include <filesystem>
 #include <glArrays.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <map>
+#include <memory>
 #include <utility>
 
-const auto font {"/usr/share/fonts/hack/Hack-Regular.ttf"};
+const std::filesystem::path font {"/usr/share/fonts/hack/Hack-Regular.ttf"};
 Text::Text(std::string_view s, Position pos, glm::vec3 c) : UIComponent {pos}, colour {c}
 {
-	for (const auto & textureQuads : Font {font, static_cast<unsigned int>(pos.size.y)}.render(s)) {
+	for (const auto & textureQuads :
+			Font::cachedFontRenderings.get(font, static_cast<unsigned int>(pos.size.y))->render(s)) {
 		auto & rendering
 				= models.emplace_back(textureQuads.first, static_cast<GLsizei>(6 * textureQuads.second.size()));
 		glBindVertexArray(rendering.vao);
