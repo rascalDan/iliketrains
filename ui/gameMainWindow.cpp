@@ -52,7 +52,7 @@ public:
 					float eh;
 
 					std::ignore = gameState->world.applyOne<Selectable>(
-							&Selectable::intersectRay, camera->pos, camera->unProject(mouse), &baryPos, &eh);
+							&Selectable::intersectRay, camera->unProject(mouse), &baryPos, &eh);
 				}
 		}
 		return false;

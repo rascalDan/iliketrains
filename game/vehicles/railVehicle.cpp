@@ -9,6 +9,7 @@
 #include <location.hpp>
 #include <maths.h>
 #include <memory>
+#include <ray.hpp>
 
 void
 RailVehicle::render(const Shader & shader) const
@@ -29,7 +30,7 @@ RailVehicle::move(const Train * t, float & trailBy)
 }
 
 bool
-RailVehicle::intersectRay(const glm::vec3 & pos, const glm::vec3 & dir, glm::vec2 * baryPos, float * eh) const
+RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * eh) const
 {
 	constexpr const auto X = 1.35F;
 	const auto Y = this->rvClass->length / 2.F;
@@ -63,8 +64,8 @@ RailVehicle::intersectRay(const glm::vec3 & pos, const glm::vec3 & dir, glm::vec
 			{3, 6, 7},
 	}};
 	return std::any_of(
-			triangles.begin(), triangles.end(), [&cornerVertices, &pos, &dir, &baryPos, &eh](const glm::uvec3 idx) {
-				return glm::intersectRayTriangle(pos, dir, cornerVertices[idx[0]], cornerVertices[idx[1]],
-						cornerVertices[idx[2]], *baryPos, *eh);
+			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &eh](const glm::uvec3 idx) {
+				return glm::intersectRayTriangle(ray.start, ray.direction, cornerVertices[idx[0]],
+						cornerVertices[idx[1]], cornerVertices[idx[2]], *baryPos, *eh);
 			});
 }

@@ -9,6 +9,8 @@
 #include <optional>
 #include <utility>
 
+class Ray;
+
 void
 Train::render(const Shader & shader) const
 {
@@ -24,9 +26,9 @@ Train::getBogiePosition(float linkDist, float dist) const
 }
 
 bool
-Train::intersectRay(const glm::vec3 & pos, const glm::vec3 & dir, glm::vec2 * baryPos, float * eh) const
+Train::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * eh) const
 {
-	return applyOne(&RailVehicle::intersectRay, pos, dir, baryPos, eh) != end();
+	return applyOne(&RailVehicle::intersectRay, ray, baryPos, eh) != end();
 }
 
 void

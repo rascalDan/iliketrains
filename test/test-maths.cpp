@@ -254,35 +254,36 @@ BOOST_DATA_TEST_CASE(curve1,
 
 BOOST_AUTO_TEST_CASE(camera_clicks)
 {
-	Camera camera {{0, 0, 0}, ::half_pi, 1.25F, .1F, 10000.F};
+	Camera camera {::origin, ::half_pi, 1.25F, .1F, 10000.F};
 	constexpr float centre {0.5F}, right {0.9F}, left {0.1F}, top {1.F}, bottom {0.F};
 	camera.forward = ::north;
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}), ::north);
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}), glm::normalize(::north + ::west));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}), glm::normalize(::north + ::east));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}), glm::normalize(::north + ::up));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, bottom}), glm::normalize(::north + ::down));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, top}), glm::normalize(::north + ::west + ::up));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, top}), glm::normalize(::north + ::east + ::up));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, bottom}), glm::normalize(::north + ::west + ::down));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, bottom}), glm::normalize(::north + ::east + ::down));
+	BOOST_CHECK_EQUAL(camera.unProject({centre, centre}).start, ::origin);
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, ::north);
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}).direction, glm::normalize(::north + ::west));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}).direction, glm::normalize(::north + ::east));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}).direction, glm::normalize(::north + ::up));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, bottom}).direction, glm::normalize(::north + ::down));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, top}).direction, glm::normalize(::north + ::west + ::up));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, top}).direction, glm::normalize(::north + ::east + ::up));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, bottom}).direction, glm::normalize(::north + ::west + ::down));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, bottom}).direction, glm::normalize(::north + ::east + ::down));
 
 	camera.forward = ::east;
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}), ::east);
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}), glm::normalize(::north + ::east));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}), glm::normalize(::south + ::east));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, ::east);
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}).direction, glm::normalize(::north + ::east));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}).direction, glm::normalize(::south + ::east));
 
 	camera.forward = glm::normalize(::north + ::down);
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}), glm::normalize(::north + ::down));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}), glm::normalize(::north));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, glm::normalize(::north + ::down));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}).direction, glm::normalize(::north));
 
 	camera.forward = glm::normalize(::north + ::west + ::down);
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}), glm::normalize(::north + ::west + ::down));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}), glm::normalize(::north + ::west + ::up * 0.2F));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, glm::normalize(::north + ::west + ::down));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}).direction, glm::normalize(::north + ::west + ::up * 0.2F));
 
 	camera.forward = glm::normalize(::north + ::west);
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}), glm::normalize(::north + ::west));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}), glm::normalize(::north + ::west + ::up * 1.2F));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}), glm::normalize(::north));
-	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}), glm::normalize(::west));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, glm::normalize(::north + ::west));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, top}).direction, glm::normalize(::north + ::west + ::up * 1.2F));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}).direction, glm::normalize(::north));
+	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}).direction, glm::normalize(::west));
 }
