@@ -1,5 +1,4 @@
-#ifndef ACTIVITY_H
-#define ACTIVITY_H
+#pragma once
 
 #include <game/worldobject.h>
 #include <memory>
@@ -29,5 +28,3 @@ public:
 
 	virtual void doActivity(AC *, TickDuration) = 0;
 };
-
-#endif

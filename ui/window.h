@@ -1,5 +1,4 @@
-#ifndef DISPLAY_INCLUDED_H
-#define DISPLAY_INCLUDED_H
+#pragma once
 
 #include "chronology.hpp"
 #include "collection.hpp"
@@ -37,5 +36,3 @@ protected:
 	Collection<UIComponent> uiComponents;
 	UIShader uiShader;
 };
-
-#endif

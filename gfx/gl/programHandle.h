@@ -1,5 +1,4 @@
-#ifndef PROGRAM_HANDLE_H
-#define PROGRAM_HANDLE_H
+#pragma once
 
 #include <GL/glew.h>
 #include <glRef.hpp>
@@ -12,5 +11,3 @@ public:
 	ProgramRef m_program;
 	GLint viewProjection_uniform, model_uniform;
 };
-
-#endif

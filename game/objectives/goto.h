@@ -1,5 +1,4 @@
-#ifndef GOTO_H
-#define GOTO_H
+#pragma once
 
 #include <game/activity.h>
 #include <game/network/link.h>
@@ -18,5 +17,3 @@ private:
 	Link::Nexts links;
 	float startDist;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef COLLECTION_H
-#define COLLECTION_H
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -69,5 +68,3 @@ public:
 		return objects.end();
 	}
 };
-
-#endif

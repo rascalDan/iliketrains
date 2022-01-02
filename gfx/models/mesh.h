@@ -1,5 +1,4 @@
-#ifndef MESH_INCLUDED_H
-#define MESH_INCLUDED_H
+#pragma once
 
 #include <GL/glew.h>
 #include <glArrays.h>
@@ -21,5 +20,3 @@ private:
 	GLenum mode;
 };
 using MeshPtr = std::shared_ptr<const Mesh>;
-
-#endif

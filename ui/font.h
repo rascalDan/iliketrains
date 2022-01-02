@@ -1,5 +1,4 @@
-#ifndef FONT_H
-#define FONT_H
+#pragma once
 
 #include <GL/glew.h>
 #include <array>
@@ -48,5 +47,3 @@ protected:
 	mutable std::map<uint32_t, CharData> charsData;
 	mutable std::vector<FontTexture> fontTextures;
 };
-
-#endif

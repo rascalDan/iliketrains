@@ -1,5 +1,4 @@
-#ifndef GLREF_H
-#define GLREF_H
+#pragma once
 
 #include <special_members.hpp>
 #include <stdexcept>
@@ -58,5 +57,3 @@ public:
 private:
 	IdType id;
 };
-
-#endif

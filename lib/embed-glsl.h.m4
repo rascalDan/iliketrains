@@ -1,3 +1,5 @@
+#pragma once
+
 // NAME
 #include <gfx/gl/glSource.h>
 

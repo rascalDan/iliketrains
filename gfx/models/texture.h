@@ -1,5 +1,4 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
 
 #include <cache.h>
 #include <filesystem>
@@ -18,5 +17,3 @@ public:
 private:
 	glTexture m_texture;
 };
-
-#endif

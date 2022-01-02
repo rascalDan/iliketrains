@@ -1,5 +1,4 @@
-#ifndef WORK_H
-#define WORK_H
+#pragma once
 
 #include <special_members.hpp>
 
@@ -11,5 +10,3 @@ public:
 
 	virtual void doWork() = 0;
 };
-
-#endif

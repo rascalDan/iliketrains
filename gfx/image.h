@@ -1,5 +1,4 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#pragma once
 
 #include <span> // IWYU pragma: export
 #include <special_members.hpp>
@@ -17,5 +16,3 @@ public:
 	unsigned int width, height, numComponents;
 	std::span<unsigned char> data;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef LINKHISTORY_H
-#define LINKHISTORY_H
+#pragma once
 
 #include <game/network/link.h>
 #include <utility>
@@ -17,5 +16,3 @@ private:
 	std::vector<WEntry> links;
 	float totalLen {0.F};
 };
-
-#endif

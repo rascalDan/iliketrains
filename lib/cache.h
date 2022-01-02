@@ -1,5 +1,4 @@
-#ifndef CACHE_H
-#define CACHE_H
+#pragma once
 
 #include "special_members.hpp"
 #include <functional>
@@ -37,5 +36,3 @@ private:
 	std::map<Key, Ptr, std::less<>> cached;
 };
 // IWYU pragma: no_forward_declare Cache
-
-#endif

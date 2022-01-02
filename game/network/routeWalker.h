@@ -1,5 +1,4 @@
-#ifndef ROUTEWALKER_H
-#define ROUTEWALKER_H
+#pragma once
 
 #include "link.h"
 #include <set>
@@ -19,5 +18,3 @@ private:
 	Solution bestSolution, currentSolution;
 	float solutionLength;
 };
-
-#endif

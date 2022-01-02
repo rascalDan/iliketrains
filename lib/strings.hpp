@@ -1,5 +1,6 @@
-#ifndef STRINGS_HPP
-#define STRINGS_HPP
+#pragma once
+
+#include <GL/glew.h>
 
 constexpr auto
 constexpr_strlen(const GLchar * const s)
@@ -10,5 +11,3 @@ constexpr_strlen(const GLchar * const s)
 	}
 	return ch;
 }
-
-#endif

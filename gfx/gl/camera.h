@@ -1,5 +1,4 @@
-#ifndef CAMERA_INCLUDED_H
-#define CAMERA_INCLUDED_H
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -17,5 +16,3 @@ public:
 private:
 	glm::mat4 projection;
 };
-
-#endif

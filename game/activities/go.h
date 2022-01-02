@@ -1,5 +1,4 @@
-#ifndef GO_H
-#define GO_H
+#pragma once
 
 #include "../activity.h"
 #include "../activityOf.h"
@@ -12,5 +11,3 @@ public:
 
 	std::optional<float> dist;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef PERSISTANCE_H
-#define PERSISTANCE_H
+#pragma once
 
 #include <functional>
 #include <glm/glm.hpp>
@@ -463,5 +462,3 @@ namespace Persistence {
 
 #define STORE_TYPE store.persistType(this, typeid(*this))
 #define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
-
-#endif

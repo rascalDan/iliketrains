@@ -1,5 +1,4 @@
-#ifndef OBJ_H
-#define OBJ_H
+#pragma once
 
 #ifndef yyFlexLexer
 #	define yyFlexLexer objbaseFlexLexer
@@ -37,5 +36,3 @@ public:
 	using NamedMeshes = std::map<std::string, std::shared_ptr<const Mesh>>;
 	[[nodiscard]] NamedMeshes createMeshes() const;
 };
-
-#endif

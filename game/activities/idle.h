@@ -1,10 +1,7 @@
-#ifndef IDLE_H
-#define IDLE_H
+#pragma once
 
 #include "../activityOf.h"
 
 class Idle : public Activity::Of<Idle> {
 public:
 };
-
-#endif

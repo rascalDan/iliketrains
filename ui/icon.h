@@ -1,5 +1,4 @@
-#ifndef ICON_H
-#define ICON_H
+#pragma once
 
 #include <filesystem>
 #include <glArrays.h>
@@ -18,5 +17,3 @@ public:
 private:
 	glTexture m_texture;
 };
-
-#endif

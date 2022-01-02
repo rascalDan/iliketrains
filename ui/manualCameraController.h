@@ -1,5 +1,4 @@
-#ifndef MANUAL_CAMERA_CONTROLLER_H
-#define MANUAL_CAMERA_CONTROLLER_H
+#pragma once
 
 #include "uiComponent.h"
 #include <SDL2/SDL.h>
@@ -25,4 +24,3 @@ private:
 	float direction {quarter_pi};
 	float dist {40}, pitch {quarter_pi};
 };
-#endif

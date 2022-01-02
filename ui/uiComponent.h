@@ -1,5 +1,4 @@
-#ifndef UICOMPONENT_H
-#define UICOMPONENT_H
+#pragma once
 
 #include <functional>
 #include <glm/glm.hpp>
@@ -30,5 +29,3 @@ public:
 
 	Position position;
 };
-
-#endif

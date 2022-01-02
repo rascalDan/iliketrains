@@ -1,5 +1,4 @@
-#ifndef ORDERS_H
-#define ORDERS_H
+#pragma once
 
 #include <collection.hpp>
 #include <memory>
@@ -12,5 +11,3 @@ public:
 	Objective * next();
 };
 using OrdersPtr = std::shared_ptr<Orders>;
-
-#endif

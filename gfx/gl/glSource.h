@@ -1,5 +1,4 @@
-#ifndef SHADER_SOURCE_H
-#define SHADER_SOURCE_H
+#pragma once
 
 #include <GL/glew.h>
 #include <glRef.hpp>
@@ -15,5 +14,3 @@ struct GLsource {
 	[[nodiscard]] ShaderRef compile() const;
 	static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage);
 };
-
-#endif

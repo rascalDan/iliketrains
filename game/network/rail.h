@@ -1,5 +1,4 @@
-#ifndef RAILLINKS_H
-#define RAILLINKS_H
+#pragma once
 
 #include "chronology.hpp"
 #include "game/worldobject.h"
@@ -58,5 +57,3 @@ public:
 private:
 	void tick(TickDuration elapsed) override;
 };
-
-#endif

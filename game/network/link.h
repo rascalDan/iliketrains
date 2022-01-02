@@ -1,5 +1,4 @@
-#ifndef LINK_H
-#define LINK_H
+#pragma once
 
 #include <array>
 #include <glm/glm.hpp>
@@ -88,5 +87,3 @@ public:
 	Arc arc;
 };
 LinkCurve::~LinkCurve() = default;
-
-#endif

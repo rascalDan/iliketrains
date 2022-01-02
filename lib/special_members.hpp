@@ -1,5 +1,4 @@
-#ifndef SPECIAL_MEMBERS_H
-#define SPECIAL_MEMBERS_H
+#pragma once
 
 #define NO_COPY(TYPE) \
 	TYPE(const TYPE &) = delete; \
@@ -28,5 +27,3 @@
 #define CUSTOM_MOVE(TYPE) \
 	TYPE(TYPE &&) noexcept; \
 	TYPE & operator=(TYPE &&) noexcept
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ICONBUTTON_H
-#define ICONBUTTON_H
+#pragma once
 
 #include "icon.h"
 #include "uiComponent.h"
@@ -24,5 +23,3 @@ public:
 	glVertexArray m_vertexArrayObject;
 	glBuffer m_vertexArrayBuffer;
 };
-
-#endif

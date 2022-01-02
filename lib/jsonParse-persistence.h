@@ -1,5 +1,4 @@
-#ifndef JSONPARSE_PERSISTANCE
-#define JSONPARSE_PERSISTANCE
+#pragma once
 
 #include "jsonParse.h" // IWYU pragma: export
 #include "persistence.h" // IWYU pragma: export
@@ -68,5 +67,3 @@ namespace Persistence {
 		std::ostream & strm;
 	};
 }
-
-#endif

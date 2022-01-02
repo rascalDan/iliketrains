@@ -1,5 +1,4 @@
-#ifndef SHADER_INCLUDED_H
-#define SHADER_INCLUDED_H
+#pragma once
 
 #include "programHandle.h"
 #include <GL/glew.h>
@@ -26,5 +25,3 @@ private:
 
 	std::array<ProgramHandle, 4> programs;
 };
-
-#endif

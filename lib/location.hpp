@@ -1,5 +1,4 @@
-#ifndef LOCATION_H
-#define LOCATION_H
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -10,5 +9,3 @@ public:
 	glm::vec3 pos;
 	glm::vec3 rot;
 };
-
-#endif

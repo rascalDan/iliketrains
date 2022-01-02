@@ -1,5 +1,4 @@
-#ifndef RESOURCE_H
-#define RESOURCE_H
+#pragma once
 
 #include <filesystem>
 
@@ -18,6 +17,4 @@ public:
 	}
 };
 BOOST_GLOBAL_FIXTURE(SetResourcePath);
-#endif
-
 #endif

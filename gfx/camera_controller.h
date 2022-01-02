@@ -1,5 +1,4 @@
-#ifndef CAMERA_CONTROLLER_H
-#define CAMERA_CONTROLLER_H
+#pragma once
 
 #include <special_members.hpp>
 
@@ -13,5 +12,3 @@ public:
 
 	virtual void updateCamera(Camera *) const = 0;
 };
-
-#endif

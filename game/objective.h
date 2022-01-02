@@ -1,5 +1,4 @@
-#ifndef OBJECTIVE_H
-#define OBJECTIVE_H
+#pragma once
 
 #include "activity.h"
 #include "network/link.h"
@@ -21,5 +20,3 @@ public:
 	Orders * orders;
 };
 using ObjectivePtr = std::unique_ptr<Objective>;
-
-#endif

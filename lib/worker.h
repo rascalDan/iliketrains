@@ -1,5 +1,4 @@
-#ifndef WORKER_H
-#define WORKER_H
+#pragma once
 
 #include <utility>
 class Work;
@@ -56,5 +55,4 @@ public:
 	}
 };
 
-#endif
 #endif

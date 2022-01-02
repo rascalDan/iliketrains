@@ -1,5 +1,4 @@
-#ifndef RAILVEHICLE_H
-#define RAILVEHICLE_H
+#pragma once
 
 #include "gfx/renderable.h"
 #include "railVehicleClass.h"
@@ -28,5 +27,3 @@ public:
 	std::array<Location, 2> bogies;
 };
 using RailVehiclePtr = std::unique_ptr<RailVehicle>;
-
-#endif

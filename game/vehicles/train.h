@@ -1,5 +1,4 @@
-#ifndef TRAIN_H
-#define TRAIN_H
+#pragma once
 
 #include "chronology.hpp"
 #include "game/activities/go.h" // IWYU pragma: keep
@@ -36,5 +35,3 @@ public:
 
 	[[nodiscard]] Location getBogiePosition(float linkDist, float dist) const;
 };
-
-#endif

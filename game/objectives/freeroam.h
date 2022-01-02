@@ -1,5 +1,4 @@
-#ifndef FREEROAM_H
-#define FREEROAM_H
+#pragma once
 
 #include <game/activity.h>
 #include <game/network/link.h>
@@ -12,5 +11,3 @@ public:
 	[[nodiscard]] ActivityPtr createActivity() const override;
 	[[nodiscard]] Link::Next navigate(Link::Nexts::const_iterator, Link::Nexts::const_iterator) const override;
 };
-
-#endif

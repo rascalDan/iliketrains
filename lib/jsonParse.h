@@ -1,5 +1,4 @@
-#ifndef JSONFLEXLEXER_H
-#define JSONFLEXLEXER_H
+#pragma once
 
 #ifndef FLEX_SCANNER
 #	define yyFlexLexer jsonBaseFlexLexer
@@ -39,5 +38,3 @@ namespace json {
 		std::string buf;
 	};
 }
-
-#endif

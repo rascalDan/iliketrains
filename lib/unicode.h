@@ -1,5 +1,4 @@
-#ifndef UNICODE_H
-#define UNICODE_H
+#pragma once
 
 // Wrappers of some glib functions (why are we using glib then?) which we want, but glib.h is a bit C like
 
@@ -15,6 +14,4 @@ uint32_t get_codepoint(const char *);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

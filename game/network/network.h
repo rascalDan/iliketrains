@@ -1,5 +1,4 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#pragma once
 
 #include "link.h"
 #include <collection.hpp>
@@ -53,5 +52,3 @@ public:
 
 	void render(const Shader &) const override;
 };
-
-#endif

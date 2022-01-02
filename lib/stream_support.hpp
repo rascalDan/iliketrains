@@ -1,5 +1,4 @@
-#ifndef STREAM_SUPPORT_H
-#define STREAM_SUPPORT_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <iostream>
@@ -38,5 +37,3 @@ namespace std {
 }
 
 #define CLOG(x) std::clog << #x " : " << x << "\n";
-
-#endif

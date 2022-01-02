@@ -1,5 +1,4 @@
-#ifndef TERRAIN_H
-#define TERRAIN_H
+#pragma once
 
 #include "chronology.hpp"
 #include "collection.hpp"
@@ -28,5 +27,3 @@ private:
 	Collection<Mesh, false> meshes;
 	std::shared_ptr<Texture> grass, water;
 };
-
-#endif

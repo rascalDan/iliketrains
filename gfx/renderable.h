@@ -1,5 +1,4 @@
-#ifndef RENDERABLE_H
-#define RENDERABLE_H
+#pragma once
 
 #include <special_members.hpp>
 
@@ -13,5 +12,3 @@ public:
 
 	virtual void render(const Shader & shader) const = 0;
 };
-
-#endif

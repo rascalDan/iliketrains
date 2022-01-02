@@ -1,5 +1,4 @@
-#ifndef TEST_HELPERS_H
-#define TEST_HELPERS_H
+#pragma once
 
 #include <boost/test/tools/context.hpp>
 #include <boost/test/tools/interface.hpp>
@@ -14,5 +13,3 @@
 		BOOST_CHECK_LE(b, a); \
 		BOOST_CHECK_GE(c, a); \
 	}
-
-#endif

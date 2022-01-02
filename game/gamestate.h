@@ -1,5 +1,4 @@
-#ifndef GAMESTATE_H
-#define GAMESTATE_H
+#pragma once
 
 #include <collection.hpp>
 #include <memory>
@@ -19,5 +18,3 @@ public:
 	std::shared_ptr<GeoData> geoData;
 };
 extern GameState * gameState;
-
-#endif

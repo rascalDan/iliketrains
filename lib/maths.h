@@ -1,5 +1,4 @@
-#ifndef MATH_H
-#define MATH_H
+#pragma once
 
 #include <cmath>
 #include <glm/glm.hpp>
@@ -142,5 +141,3 @@ kph_to_ms(T v)
 // ... literals are handy for now, probably go away when we load stuff externally
 float operator"" _mph(const long double v);
 float operator"" _kph(const long double v);
-
-#endif

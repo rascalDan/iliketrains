@@ -1,5 +1,4 @@
-#ifndef RAILVEHICLECLASS_H
-#define RAILVEHICLECLASS_H
+#pragma once
 
 #include "gfx/models/mesh.h"
 #include <array>
@@ -30,5 +29,3 @@ private:
 	static float objectLength(ObjParser & o);
 };
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;
-
-#endif

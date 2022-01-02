@@ -1,5 +1,4 @@
-#ifndef FOLLOW_CAMERA_CONTROLLER_H
-#define FOLLOW_CAMERA_CONTROLLER_H
+#pragma once
 
 #include <game/vehicles/vehicle.h>
 #include <gfx/camera_controller.h>
@@ -17,4 +16,3 @@ private:
 	VehicleWPtr target;
 	Mode mode;
 };
-#endif

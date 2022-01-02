@@ -1,5 +1,4 @@
-#ifndef WORLDOBJECT_H
-#define WORLDOBJECT_H
+#pragma once
 
 #include "chronology.hpp"
 #include <special_members.hpp>
@@ -13,5 +12,3 @@ public:
 
 	virtual void tick(TickDuration elapsed) = 0;
 };
-
-#endif

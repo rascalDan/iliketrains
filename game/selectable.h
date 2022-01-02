@@ -1,5 +1,4 @@
-#ifndef SELECTABLE_H
-#define SELECTABLE_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <special_members.hpp>
@@ -12,5 +11,3 @@ public:
 
 	[[nodiscard]] virtual bool intersectRay(const glm::vec3 &, const glm::vec3 &, glm::vec2 *, float *) const = 0;
 };
-
-#endif

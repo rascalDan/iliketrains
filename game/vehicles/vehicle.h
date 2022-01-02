@@ -1,5 +1,4 @@
-#ifndef VEHICLE_H
-#define VEHICLE_H
+#pragma once
 
 #include "chronology.hpp"
 #include "linkHistory.h"
@@ -29,5 +28,3 @@ protected:
 	LinkHistory linkHist;
 };
 using VehicleWPtr = std::weak_ptr<Vehicle>;
-
-#endif

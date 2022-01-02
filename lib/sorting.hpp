@@ -1,5 +1,4 @@
-#ifndef SORTING_H
-#define SORTING_H
+#pragma once
 
 template<typename T> struct PtrSorter {
 	bool
@@ -8,5 +7,3 @@ template<typename T> struct PtrSorter {
 		return *a < *b;
 	}
 };
-
-#endif

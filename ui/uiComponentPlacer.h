@@ -1,5 +1,4 @@
-#ifndef UICOMPONENTPLACER_H
-#define UICOMPONENTPLACER_H
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -18,5 +17,3 @@ private:
 	float current {};
 	float max {};
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TOOLBAR_H
-#define TOOLBAR_H
+#pragma once
 
 #include "collection.hpp"
 #include "iconButton.h"
@@ -22,5 +21,3 @@ public:
 
 	Collection<IconButton, false> icons;
 };
-
-#endif

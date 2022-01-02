@@ -1,5 +1,4 @@
-#ifndef ACTIVITYOF_H
-#define ACTIVITYOF_H
+#pragma once
 
 #include "activity.h"
 #include "vehicles/vehicle.h"
@@ -13,5 +12,3 @@ template<typename T> class Activity::Of : public Activity {
 		}
 	}
 };
-
-#endif

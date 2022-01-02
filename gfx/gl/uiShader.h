@@ -1,5 +1,4 @@
-#ifndef UISHADER_H
-#define UISHADER_H
+#pragma once
 
 #include "programHandle.h"
 #include <GL/glew.h>
@@ -18,5 +17,3 @@ private:
 	};
 	UIProgramHandle progDefault, progText;
 };
-
-#endif

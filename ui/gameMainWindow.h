@@ -1,5 +1,4 @@
-#ifndef UI_GAMEMAINWINDOW_H
-#define UI_GAMEMAINWINDOW_H
+#pragma once
 
 #include "chronology.hpp"
 #include "gfx/gl/camera.h"
@@ -21,5 +20,3 @@ private:
 	Shader shader;
 	Camera camera;
 };
-
-#endif

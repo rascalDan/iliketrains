@@ -1,5 +1,4 @@
-#ifndef PTR_H
-#define PTR_H
+#pragma once
 
 #include <memory>
 #include <special_members.hpp>
@@ -66,5 +65,3 @@ public:
 	{
 	}
 };
-
-#endif
