@@ -7,17 +7,14 @@
 #include <gfx/models/mesh.h>
 #include <gfx/renderable.h>
 #include <memory>
-#include <string>
-#include <vector>
 
 class Shader;
 class Texture;
-class Vertex;
+class GeoData;
 
 class Terrain : public WorldObject, public Renderable {
 public:
-	Terrain();
-	explicit Terrain(const std::string &);
+	explicit Terrain(std::shared_ptr<GeoData>);
 
 	void render(const Shader & shader) const override;
 
@@ -25,10 +22,9 @@ public:
 	float waveCycle {0.F};
 
 private:
-	static constexpr unsigned int NUM_BUFFERS {4};
+	void generateMeshes();
 
-	void finish(unsigned int width, unsigned int height, std::vector<Vertex> &);
-
+	std::shared_ptr<GeoData> geoData;
 	Collection<Mesh, false> meshes;
 	std::shared_ptr<Texture> grass, water;
 };

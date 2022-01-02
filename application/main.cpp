@@ -6,6 +6,7 @@
 #include <game/activities/idle.h>
 #include <game/activity.h>
 #include <game/gamestate.h>
+#include <game/geoData.h>
 #include <game/network/link.h>
 #include <game/network/rail.h>
 #include <game/objective.h>
@@ -54,10 +55,13 @@ public:
 	int
 	run()
 	{
+		geoData = std::make_shared<GeoData>(GeoData::Limits {{-120, -120}, {120, 120}}, 10.F);
+		geoData->generateRandom();
+
 		Windows windows;
 		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT, this);
 
-		world.create<Terrain>();
+		world.create<Terrain>(geoData);
 
 		{
 			auto rl = world.create<RailLinks>();
