@@ -69,3 +69,28 @@ BOOST_FIXTURE_TEST_CASE(load_uk_heightmap, TestGeoData)
 		return n.height > 0;
 	}));
 }
+
+BOOST_FIXTURE_TEST_CASE(get_height_at, TestGeoData)
+{
+	// at(x,y) is index based
+	nodes[at(0, 0)].height = 1;
+	nodes[at(1, 0)].height = 2;
+	nodes[at(0, 1)].height = 3;
+	nodes[at(1, 1)].height = 4;
+
+	// positionAt(x,y) is world based
+	// Corners
+	BOOST_CHECK_EQUAL(positionAt({0, 0}), glm::vec3(0, 0, 1));
+	BOOST_CHECK_EQUAL(positionAt({5, 0}), glm::vec3(5, 0, 2));
+	BOOST_CHECK_EQUAL(positionAt({0, 5}), glm::vec3(0, 5, 3));
+	BOOST_CHECK_EQUAL(positionAt({5, 5}), glm::vec3(5, 5, 4));
+
+	// Edge midpoints
+	BOOST_CHECK_EQUAL(positionAt({0, 2.5F}), glm::vec3(0, 2.5F, 2));
+	BOOST_CHECK_EQUAL(positionAt({5, 2.5F}), glm::vec3(5, 2.5F, 3));
+	BOOST_CHECK_EQUAL(positionAt({2.5F, 0}), glm::vec3(2.5F, 0, 1.5F));
+	BOOST_CHECK_EQUAL(positionAt({2.5F, 5}), glm::vec3(2.5F, 5, 3.5F));
+
+	// Centre
+	BOOST_CHECK_EQUAL(positionAt({2.5F, 2.5F}), glm::vec3(2.5F, 2.5F, 2.5F));
+}

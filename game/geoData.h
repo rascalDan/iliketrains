@@ -20,6 +20,8 @@ public:
 	void generateRandom();
 	void loadFromImages(const std::filesystem::path &, float scale);
 
+	[[nodiscard]] glm::vec3 positionAt(glm::vec2) const;
+
 	[[nodiscard]] unsigned int at(glm::ivec2) const;
 	[[nodiscard]] unsigned int at(int x, int y) const;
 

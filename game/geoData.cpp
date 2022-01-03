@@ -1,11 +1,14 @@
 #include "geoData.h"
 #include "gfx/image.h"
 #include <algorithm>
+#include <array>
+#include <cmath>
 #include <cstddef>
 #include <maths.h>
 #include <random>
 #include <stb/stb_image.h>
 #include <stdexcept>
+#include <util.h>
 
 GeoData::GeoData(Limits l, float s) :
 	limit {std::move(l)}, size {(limit.second - limit.first) + 1}, scale {s}, nodes {[this]() {
@@ -63,6 +66,26 @@ GeoData::loadFromImages(const std::filesystem::path & fileName, float scale_)
 	std::transform(map.data.data(), map.data.data() + points, nodes.begin(), [](auto d) {
 		return Node {(d * 0.1F) - 1.5F};
 	});
+}
+
+glm::vec3
+GeoData::positionAt(const glm::vec2 wcoord) const
+{
+	const auto coord {wcoord / scale};
+	const std::array<glm::vec2, 4> gridCorner {
+			{{std::floor(coord.x), std::floor(coord.y)}, {std::floor(coord.x), std::ceil(coord.y)},
+					{std::ceil(coord.x), std::floor(coord.y)}, {std::ceil(coord.x), std::ceil(coord.y)}}};
+
+	const auto point {transform_array(gridCorner, [this](const auto c) {
+		return nodes[at(c)].height;
+	})};
+
+	const glm::vec2 frac = coord - gridCorner.front();
+	const auto heightFloor = point[0] + ((point[2] - point[0]) * frac.x),
+			   heightCeil = point[1] + ((point[3] - point[1]) * frac.x),
+			   heightMid = heightFloor + ((heightCeil - heightFloor) * frac.y);
+
+	return wcoord || heightMid;
 }
 
 unsigned int
