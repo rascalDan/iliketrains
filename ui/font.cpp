@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <string>
 #include <unicode.h>
+#include <util.h>
 #include <utility>
 // IWYU pragma: no_forward_declare FT_LibraryRec_
 
@@ -173,12 +174,11 @@ Font::render(const std::string_view chars) const
 		const auto charPos = pos + glm::vec2 {ch.bearing.x, ch.bearing.y - static_cast<int>(ch.size.y)};
 		const auto size = glm::vec2 {ch.size};
 
-		Quad q;
-		std::transform(C.begin(), C.end(), q.begin(), [&size, &charPos, &ch, this](const auto & c) {
-			return (charPos + (size * c.first))
-					|| ((glm::vec2 {ch.position} + (glm::vec2 {ch.size} * c.second)) / glm::vec2 {this->size});
-		});
-		out[fontTextures[ch.textureIdx].texture].emplace_back(q);
+		out[fontTextures[ch.textureIdx].texture].emplace_back(
+				transform_array(C, [&size, &charPos, &ch, this](const auto & c) {
+					return (charPos + (size * c.first))
+							|| ((glm::vec2 {ch.position} + (glm::vec2 {ch.size} * c.second)) / glm::vec2 {this->size});
+				}));
 
 		pos.x += static_cast<float>(ch.advance);
 	}
