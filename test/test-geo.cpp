@@ -11,7 +11,9 @@ struct TestGeoData : public GeoData {
 	TestGeoData() : GeoData {{{-10, -5}, {30, 40}}, 5.F} { }
 };
 
-BOOST_FIXTURE_TEST_CASE(initialize, TestGeoData)
+BOOST_FIXTURE_TEST_SUITE(tgd, TestGeoData)
+
+BOOST_AUTO_TEST_CASE(initialize)
 {
 	BOOST_CHECK_EQUAL(limit.first, glm::ivec2(-10, -5));
 	BOOST_CHECK_EQUAL(limit.second, glm::ivec2(30, 40));
@@ -23,7 +25,7 @@ BOOST_FIXTURE_TEST_CASE(initialize, TestGeoData)
 	}));
 }
 
-BOOST_FIXTURE_TEST_CASE(coords, TestGeoData)
+BOOST_AUTO_TEST_CASE(coords)
 {
 	BOOST_CHECK_EQUAL(at(-10, -5), 0);
 	BOOST_CHECK_EQUAL(at(-9, -5), 1);
@@ -32,7 +34,7 @@ BOOST_FIXTURE_TEST_CASE(coords, TestGeoData)
 	BOOST_CHECK_EQUAL(at(30, 40), 1885);
 }
 
-BOOST_FIXTURE_TEST_CASE(coords_bad, TestGeoData)
+BOOST_AUTO_TEST_CASE(coords_bad)
 {
 	BOOST_CHECK_THROW(std::ignore = at(-11, -5), std::range_error);
 	BOOST_CHECK_THROW(std::ignore = at(-10, -6), std::range_error);
@@ -42,7 +44,7 @@ BOOST_FIXTURE_TEST_CASE(coords_bad, TestGeoData)
 	BOOST_CHECK_THROW(std::ignore = at(31, 41), std::range_error);
 }
 
-BOOST_FIXTURE_TEST_CASE(gen_random, TestGeoData)
+BOOST_AUTO_TEST_CASE(gen_random)
 {
 	// Can only really its sanity
 	generateRandom();
@@ -61,7 +63,7 @@ BOOST_FIXTURE_TEST_CASE(gen_random, TestGeoData)
 	}
 }
 
-BOOST_FIXTURE_TEST_CASE(load_uk_heightmap, TestGeoData)
+BOOST_AUTO_TEST_CASE(load_uk_heightmap)
 {
 	loadFromImages(FIXTURESDIR "/height/V0txo.jpg", 100.F);
 	// Some terrain above sea level
@@ -70,7 +72,7 @@ BOOST_FIXTURE_TEST_CASE(load_uk_heightmap, TestGeoData)
 	}));
 }
 
-BOOST_FIXTURE_TEST_CASE(get_height_at, TestGeoData)
+BOOST_AUTO_TEST_CASE(get_height_at)
 {
 	// at(x,y) is index based
 	nodes[at(0, 0)].height = 1;
@@ -94,3 +96,5 @@ BOOST_FIXTURE_TEST_CASE(get_height_at, TestGeoData)
 	// Centre
 	BOOST_CHECK_EQUAL(positionAt({2.5F, 2.5F}), glm::vec3(2.5F, 2.5F, 2.5F));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
