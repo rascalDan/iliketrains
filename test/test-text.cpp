@@ -5,7 +5,11 @@
 #include <boost/test/unit_test.hpp>
 #include <stream_support.hpp>
 
+#include <array>
+#include <glm/glm.hpp>
+#include <span>
 #include <ui/font.h>
+#include <vector>
 
 struct FontTest : public Font {
 	FontTest() : Font {"/usr/share/fonts/corefonts/arial.ttf", 48} { }
@@ -89,3 +93,23 @@ BOOST_AUTO_TEST_CASE(render_text)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_CASE(stream_vec)
+{
+	BOOST_CHECK_EQUAL(streamed_string(glm::vec3 {1.2, 2.3, 3.4}), "(1.2, 2.3, 3.4)");
+}
+
+BOOST_AUTO_TEST_CASE(stream_array)
+{
+	BOOST_CHECK_EQUAL(streamed_string(std::array {1.2, 2.3, 3.4}), "(1.2, 2.3, 3.4)");
+}
+
+BOOST_AUTO_TEST_CASE(stream_vector)
+{
+	BOOST_CHECK_EQUAL(streamed_string(std::vector {1.2, 2.3, 3.4}), "(1.2, 2.3, 3.4)");
+}
+
+BOOST_AUTO_TEST_CASE(stream_mat)
+{
+	BOOST_CHECK_EQUAL(streamed_string(glm::mat2 {1.2, 2.3, 3.4, 4.5}), "((1.2, 2.3), (3.4, 4.5))");
+}
