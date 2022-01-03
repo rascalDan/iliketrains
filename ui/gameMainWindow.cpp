@@ -2,6 +2,8 @@
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
 #include "maths.h"
+#include "ray.hpp"
+#include "text.h"
 #include "toolbar.h"
 #include "ui/uiComponent.h"
 #include "window.h"
@@ -9,12 +11,17 @@
 #include <SDL2/SDL.h>
 #include <collection.hpp>
 #include <game/gamestate.h>
+#include <game/geoData.h>
 #include <game/selectable.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <tuple>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 class UIShader;
 
@@ -31,13 +38,18 @@ public:
 	}
 };
 
+#include <stream_support.hpp>
+
 class GameMainSelector : public UIComponent {
 public:
 	GameMainSelector(const Camera * c, glm::vec2 size) : UIComponent {{{}, size}}, camera {c} { }
 
 	void
-	render(const UIShader &, const Position &) const override
+	render(const UIShader & shader, const Position & pos) const override
 	{
+		if (!clicked.empty()) {
+			Text {clicked, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, pos);
+		}
 	}
 
 	bool
@@ -51,8 +63,24 @@ public:
 					glm::vec2 baryPos {};
 					float eh;
 
-					std::ignore = gameState->world.applyOne<Selectable>(
-							&Selectable::intersectRay, camera->unProject(mouse), &baryPos, &eh);
+					const auto ray = camera->unProject(mouse);
+					if (const auto selected
+							= gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, &baryPos, &eh);
+							selected != gameState->world.end()) {
+						const auto & ref = *selected.base()->get();
+						clicked = typeid(ref).name();
+					}
+					else {
+						try {
+							const auto dist = camera->pos.z / -ray.direction.z;
+							const auto pos = !camera->pos + (!ray.direction * dist);
+
+							clicked = streamed_string(gameState->geoData->positionAt(pos));
+						}
+						catch (std::range_error &) {
+							clicked.clear();
+						}
+					}
 				}
 		}
 		return false;
@@ -60,6 +88,7 @@ public:
 
 private:
 	const Camera * camera;
+	std::string clicked;
 };
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
