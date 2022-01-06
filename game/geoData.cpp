@@ -69,25 +69,27 @@ GeoData::loadFromImages(const std::filesystem::path & fileName, float scale_)
 }
 
 GeoData::Quad
-GeoData::quad(glm::vec2 coord) const
+GeoData::quad(glm::vec2 wcoord) const
 {
-	const std::array<glm::vec2, 4> gridCorner {
-			{{std::floor(coord.x), std::floor(coord.y)}, {std::floor(coord.x), std::ceil(coord.y)},
-					{std::ceil(coord.x), std::floor(coord.y)}, {std::ceil(coord.x), std::ceil(coord.y)}}};
-
-	return transform_array(gridCorner, [this](const auto c) {
-		return c || nodes[at(c)].height;
-	});
+	constexpr static const std::array<glm::vec2, 4> corners {{{0, 0}, {0, 1}, {1, 0}, {1, 1}}};
+	return transform_array(transform_array(corners,
+								   [coord = (wcoord / scale)](const auto c) {
+									   return glm::vec2 {std::floor(coord.x), std::floor(coord.y)} + c;
+								   }),
+			[this](const auto c) {
+				return (c * scale) || nodes[at(c)].height;
+			});
 }
 
 glm::vec3
 GeoData::positionAt(const glm::vec2 wcoord) const
 {
-	const auto coord {wcoord / scale};
-	const auto point {quad(coord)};
-	const glm::vec2 frac = coord - !point.front();
-	const auto heightFloor = point[0].z + ((point[2].z - point[0].z) * frac.x),
-			   heightCeil = point[1].z + ((point[3].z - point[1].z) * frac.x),
+	const auto point {quad(wcoord)};
+	const glm::vec2 frac = (wcoord - !point.front()) / scale;
+	auto edge = [&point, &frac](auto offset) {
+		return point[offset].z + ((point[offset + 2].z - point[offset].z) * frac.x);
+	};
+	const auto heightFloor = edge(0U), heightCeil = edge(1U),
 			   heightMid = heightFloor + ((heightCeil - heightFloor) * frac.y);
 
 	return wcoord || heightMid;
