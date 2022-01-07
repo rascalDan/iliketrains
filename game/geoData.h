@@ -32,6 +32,19 @@ public:
 	[[nodiscard]] float getScale() const;
 	[[nodiscard]] std::span<const Node> getNodes() const;
 
+	class RayTracer {
+	public:
+		RayTracer(glm::vec2 p0, glm::vec2 p1, float scale);
+
+		glm::vec2 next();
+
+	private:
+		glm::vec2 p;
+		const glm::vec2 d;
+		float error;
+		glm::vec3 inc;
+	};
+
 protected:
 	Limits limit {}; // Base grid limits first(x,y) -> second(x,y)
 	glm::uvec2 size {};

@@ -95,6 +95,45 @@ GeoData::positionAt(const glm::vec2 wcoord) const
 	return wcoord || heightMid;
 }
 
+GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1, float scale) : p {glm::floor(p0)}, d {glm::abs(p1 - p0)}
+{
+	using Limits = std::numeric_limits<typename glm::vec2::value_type>;
+	static_assert(Limits::has_infinity);
+	static constexpr const glm::vec2 inf {Limits::infinity(), -Limits::infinity()};
+
+	auto byAxis = [this, p0, p1, scale](auto axis) {
+		if (d[axis] == 0) {
+			inc[axis] = 0;
+			return inf[axis];
+		}
+		else if (p1[axis] > p0[axis]) {
+			inc[axis] = scale;
+			return (std::floor(p0[axis]) + 1 - p0[axis]) * d[1 - axis];
+		}
+		else {
+			inc[axis] = -scale;
+			return (p0[axis] - std::floor(p0[axis])) * d[1 - axis];
+		}
+	};
+
+	error = byAxis(0);
+	error -= byAxis(1);
+	inc.z = scale;
+}
+
+glm::vec2
+GeoData::RayTracer::next()
+{
+	glm::vec2 cur {p};
+
+	static constexpr const glm::vec2 m {1, -1};
+	const int axis = (error > 0) ? 1 : 0;
+	p[axis] += inc[axis];
+	error += d[1 - axis] * m[axis] * inc.z;
+
+	return cur;
+}
+
 unsigned int
 GeoData::at(glm::ivec2 coord) const
 {

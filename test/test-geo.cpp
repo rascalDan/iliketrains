@@ -97,4 +97,44 @@ BOOST_AUTO_TEST_CASE(get_height_at)
 	BOOST_CHECK_EQUAL(positionAt({2.5F, 2.5F}), glm::vec3(2.5F, 2.5F, 2.5F));
 }
 
+using TestRayTracerData = std::tuple<glm::vec2, glm::vec2, float, std::vector<glm::vec2>>;
+BOOST_DATA_TEST_CASE(raytracer,
+		boost::unit_test::data::make<TestRayTracerData>({
+				{{0, 0}, {0, 0}, 3,
+						{
+								{0, 0},
+						}},
+				{{0, 0}, {4, 5}, 4,
+						{
+								{0, 0},
+								{0, 4},
+								{4, 4},
+								{4, 8},
+								{8, 8},
+								{8, 12},
+								{12, 12},
+								{12, 16},
+								{16, 16},
+								{16, 20},
+						}},
+				{{-1, -1}, {-4, -5}, 5,
+						{
+								{-1, -1},
+								{-6, -1},
+								{-6, -6},
+								{-6, -11},
+								{-11, -11},
+								{-11, -16},
+								{-16, -16},
+								{-16, -21},
+						}},
+		}),
+		start, end, scale, points)
+{
+	GeoData::RayTracer rt {start, end, scale};
+	for (const auto & point : points) {
+		BOOST_CHECK_CLOSE_VEC(point, rt.next());
+	}
+}
+
 BOOST_AUTO_TEST_SUITE_END()
