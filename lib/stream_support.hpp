@@ -64,4 +64,4 @@ streamed_string(const T & v)
 	return ss.str();
 }
 
-#define CLOG(x) std::clog << #x " : " << x << "\n";
+#define CLOG(x) std::cerr << #x " : " << x << "\n";
