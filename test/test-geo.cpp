@@ -97,14 +97,11 @@ BOOST_AUTO_TEST_CASE(get_height_at)
 	BOOST_CHECK_EQUAL(positionAt({2.5F, 2.5F}), glm::vec3(2.5F, 2.5F, 2.5F));
 }
 
-using TestRayTracerData = std::tuple<glm::vec2, glm::vec2, float, std::vector<glm::vec2>>;
+using TestRayTracerData = std::tuple<glm::vec2, glm::vec2, glm::vec2::value_type, std::vector<glm::vec2>>;
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
 BOOST_DATA_TEST_CASE(raytracer,
 		boost::unit_test::data::make<TestRayTracerData>({
-				{{0, 0}, {0, 0}, 3,
-						{
-								{0, 0},
-						}},
-				{{0, 0}, {4, 5}, 4,
+				{{1, 2}, {4, 5}, 4,
 						{
 								{0, 0},
 								{0, 4},
@@ -114,26 +111,26 @@ BOOST_DATA_TEST_CASE(raytracer,
 								{8, 12},
 								{12, 12},
 								{12, 16},
-								{16, 16},
+								{12, 20},
 								{16, 20},
 						}},
 				{{-1, -1}, {-4, -5}, 5,
 						{
-								{-1, -1},
-								{-6, -1},
-								{-6, -6},
-								{-6, -11},
-								{-11, -11},
-								{-11, -16},
-								{-16, -16},
-								{-16, -21},
+								{-5, -5},
+								{-5, -10},
+								{-10, -10},
+								{-10, -15},
+								{-15, -15},
+								{-15, -20},
+								{-20, -20},
+								{-20, -25},
 						}},
 		}),
-		start, end, scale, points)
+		start, dir, scale, points)
 {
-	GeoData::RayTracer rt {start, end, scale};
+	GeoData::RayTracer rt {start / scale, glm::normalize(dir)};
 	for (const auto & point : points) {
-		BOOST_CHECK_CLOSE_VEC(point, rt.next());
+		BOOST_CHECK_CLOSE_VEC(point, rt.next() * scale);
 	}
 }
 

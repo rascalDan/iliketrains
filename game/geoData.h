@@ -34,7 +34,7 @@ public:
 
 	class RayTracer {
 	public:
-		RayTracer(glm::vec2 p0, glm::vec2 p1, float scale);
+		RayTracer(glm::vec2 p0, glm::vec2 p1);
 
 		glm::vec2 next();
 
@@ -42,7 +42,7 @@ public:
 		glm::vec2 p;
 		const glm::vec2 d;
 		float error;
-		glm::vec3 inc;
+		glm::vec2 inc;
 	};
 
 protected:
