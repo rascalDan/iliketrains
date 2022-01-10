@@ -70,16 +70,11 @@ public:
 						const auto & ref = *selected.base()->get();
 						clicked = typeid(ref).name();
 					}
+					else if (const auto pos = gameState->geoData->intersectRay(ray)) {
+						clicked = streamed_string(*pos);
+					}
 					else {
-						try {
-							const auto dist = camera->pos.z / -ray.direction.z;
-							const auto pos = !camera->pos + (!ray.direction * dist);
-
-							clicked = streamed_string(gameState->geoData->positionAt(pos));
-						}
-						catch (std::range_error &) {
-							clicked.clear();
-						}
+						clicked.clear();
 					}
 				}
 		}

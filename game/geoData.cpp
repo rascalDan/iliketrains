@@ -4,8 +4,10 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <glm/gtx/intersect.hpp>
 #include <maths.h>
 #include <random>
+#include <ray.hpp>
 #include <stb/stb_image.h>
 #include <stdexcept>
 #include <util.h>
@@ -130,6 +132,38 @@ GeoData::RayTracer::next()
 	error += d[1 - axis] * m[axis];
 
 	return cur;
+}
+
+std::optional<glm::vec3>
+GeoData::intersectRay(const Ray & ray) const
+{
+	if (glm::length(!ray.direction) <= 0) {
+		return {};
+	}
+	RayTracer rt {ray.start / scale, ray.direction};
+	while (true) {
+		const auto n {rt.next() * scale};
+		try {
+			const auto point = quad(n);
+			for (auto offset : {0U, 1U}) {
+				glm::vec2 bary;
+				float distance;
+				if (glm::intersectRayTriangle(ray.start, ray.direction, point[offset], point[offset + 1],
+							point[offset + 2], bary, distance)) {
+					return point[offset] + ((point[offset + 1] - point[offset]) * bary[0])
+							+ ((point[offset + 2] - point[offset]) * bary[1]);
+				}
+			}
+		}
+		catch (std::range_error &) {
+			const auto rel = n / !ray.direction;
+			if (rel.x > 0 && rel.y > 0) {
+				return {};
+			}
+		}
+	}
+
+	return {};
 }
 
 unsigned int

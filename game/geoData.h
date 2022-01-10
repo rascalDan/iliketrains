@@ -2,9 +2,12 @@
 
 #include <filesystem>
 #include <glm/glm.hpp>
+#include <optional>
 #include <span>
 #include <utility>
 #include <vector>
+
+class Ray;
 
 class GeoData {
 public:
@@ -22,6 +25,7 @@ public:
 	void loadFromImages(const std::filesystem::path &, float scale);
 
 	[[nodiscard]] glm::vec3 positionAt(glm::vec2) const;
+	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &) const;
 
 	[[nodiscard]] unsigned int at(glm::ivec2) const;
 	[[nodiscard]] unsigned int at(int x, int y) const;

@@ -6,10 +6,19 @@
 #include <stream_support.hpp>
 
 #include <game/geoData.h>
+#include <lib/ray.hpp>
 
 struct TestGeoData : public GeoData {
 	TestGeoData() : GeoData {{{-10, -5}, {30, 40}}, 5.F} { }
 };
+
+namespace std {
+	std::ostream &
+	operator<<(std::ostream & s, const Ray & r)
+	{
+		return (s << r.start << "->" << r.direction);
+	}
+}
 
 BOOST_FIXTURE_TEST_SUITE(tgd, TestGeoData)
 
@@ -132,6 +141,76 @@ BOOST_DATA_TEST_CASE(raytracer,
 	for (const auto & point : points) {
 		BOOST_CHECK_CLOSE_VEC(point, rt.next() * scale);
 	}
+}
+
+using TestRayData = std::tuple<glm::vec3, glm::vec3, glm::vec3>;
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+BOOST_DATA_TEST_CASE(intersect_ray,
+		boost::unit_test::data::make<TestRayData>({
+				{{-1, -1, 1.0}, {1, 1, 0}, {0, 0, 1}},
+				{{-1, -1, 2.5}, {1, 1, 0}, {2.5F, 2.5F, 2.5F}},
+				{{-20, -20, 2.5}, {1, 1, 0}, {2.5F, 2.5F, 2.5F}},
+				// outside the map looking in
+				{{-205, -205, 4}, {1, 1, 0}, {5, 5, 4}},
+				{{-205, 5, 4}, {1, 0, 0}, {5, 5, 4}},
+				{{-205, 215, 4}, {1, -1, 0}, {5, 5, 4}},
+				{{215, -205, 4}, {-1, 1, 0}, {5, 5, 4}},
+				{{215, 5, 4}, {-1, 0, 0}, {5, 5, 4}},
+				{{215, 215, 4}, {-1, -1, 0}, {5, 5, 4}},
+				{{5, 215, 4}, {0, -1, 0}, {5, 5, 4}},
+				{{5, -205, 4}, {0, 1, 0}, {5, 5, 4}},
+		}),
+		start, dir, pos)
+{
+	// at(x,y) is index based
+	nodes[at(0, 0)].height = 1;
+	nodes[at(1, 0)].height = 2;
+	nodes[at(0, 1)].height = 3;
+	nodes[at(1, 1)].height = 4;
+
+	const auto intersect = intersectRay({start, glm::normalize(dir)});
+	BOOST_REQUIRE(intersect);
+	BOOST_CHECK_CLOSE_VEC(*intersect, pos);
+}
+
+auto xs = boost::unit_test::data::xrange(-20.F, 0.F, 0.6F), ys = boost::unit_test::data::xrange(-20.F, 0.F, 0.7F);
+auto targetsx = boost::unit_test::data::xrange(0.2F, 4.9F, 1.3F),
+	 targetsy = boost::unit_test::data::xrange(0.3F, 4.9F, 1.3F);
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+BOOST_DATA_TEST_CASE(intersect_ray_many, xs * ys * targetsx * targetsy, x, y, targetx, targety)
+{
+	// at(x,y) is index based
+	nodes[at(0, 0)].height = 1;
+	nodes[at(1, 0)].height = 2;
+	nodes[at(0, 1)].height = 3;
+	nodes[at(1, 1)].height = 4;
+
+	glm::vec3 start {x, y, 10};
+	const auto target {this->positionAt({targetx, targety})};
+	Ray ray {start, glm::normalize(target - start)};
+	BOOST_TEST_CONTEXT(ray) {
+		const auto intersect = intersectRay(ray);
+		BOOST_REQUIRE(intersect);
+		BOOST_CHECK_CLOSE_VEC(*intersect, target);
+	}
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+BOOST_DATA_TEST_CASE(intersect_ray_miss,
+		boost::unit_test::data::make<Ray>({
+				{{3, 3, 5}, {-1, -1, 0}},
+				{{0, 0, 5}, {0, 0, 1}},
+				{{0, 0, 5}, {0, 0, -1}},
+		}),
+		ray)
+{
+	// at(x,y) is index based
+	nodes[at(0, 0)].height = 1;
+	nodes[at(1, 0)].height = 2;
+	nodes[at(0, 1)].height = 3;
+	nodes[at(1, 1)].height = 4;
+
+	BOOST_REQUIRE(!intersectRay(ray));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
