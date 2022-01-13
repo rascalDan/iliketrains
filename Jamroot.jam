@@ -38,6 +38,11 @@ project : requirements
 	<toolset>tidy:<checkxx>performance-*
 	<toolset>tidy:<comments>no
 	<toolset>tidy:<mapping>iwyu.json
+	<toolset>tidy:<librarydef>gnu
+	<toolset>tidy:<librarydef>posix
+	<toolset>tidy:<librarydef>opengl
+	<toolset>tidy:<librarydef>sdl
+	<toolset>tidy:<librarydef>std
 	<toolset>tidy:<define>TIDY
 	;
 

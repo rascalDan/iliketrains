@@ -14,9 +14,11 @@ project : requirements
 	<library>..//ilt
 	<toolset>tidy:<xcheckxx>hicpp-vararg
 	<toolset>tidy:<suppress>accessMoved
+	<toolset>tidy:<suppress>assertWithSideEffect
 	<toolset>tidy:<xcheckxx>bugprone-use-after-move
 	<toolset>tidy:<xcheckxx>hicpp-invalid-access-moved
 	<toolset>tidy:<xcheckxx>clang-analyzer-cplusplus.Move
+	<toolset>tidy:<librarydef>boost
 	;
 
 run test-collection.cpp ;
