@@ -99,28 +99,33 @@ GeoData::positionAt(const glm::vec2 wcoord) const
 	return wcoord || heightMid;
 }
 
-GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1) : p {glm::floor(p0)}, d {glm::abs(p1)}
+GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1) : RayTracer {p0, p1, glm::abs(p1)} { }
+GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1, glm::vec2 d) :
+	RayTracer {p0, d, byAxis(p0, p1, d, 0), byAxis(p0, p1, d, 1)}
+{
+}
+
+GeoData::RayTracer::RayTracer(
+		glm::vec2 p0, glm::vec2 d_, std::pair<float, float> xdata, std::pair<float, float> ydata) :
+	p {glm::floor(p0)},
+	d {d_}, error {xdata.second - ydata.second}, inc {xdata.first, ydata.first}
+{
+}
+
+std::pair<float, float>
+GeoData::RayTracer::byAxis(glm::vec2 p0, glm::vec2 p1, glm::vec2 d, glm::length_t axis)
 {
 	using Limits = std::numeric_limits<typename glm::vec2::value_type>;
 	static_assert(Limits::has_infinity);
-
-	auto byAxis = [this, p0, p1](auto axis) {
-		if (d[axis] == 0) {
-			inc[axis] = 0;
-			return Limits::infinity();
-		}
-		else if (p1[axis] > 0) {
-			inc[axis] = 1;
-			return (std::floor(p0[axis]) + 1.F - p0[axis]) * d[1 - axis];
-		}
-		else {
-			inc[axis] = -1;
-			return (p0[axis] - std::floor(p0[axis])) * d[1 - axis];
-		}
-	};
-
-	error = byAxis(0);
-	error -= byAxis(1);
+	if (d[axis] == 0) {
+		return {0, Limits::infinity()};
+	}
+	else if (p1[axis] > 0) {
+		return {1, (std::floor(p0[axis]) + 1.F - p0[axis]) * d[1 - axis]};
+	}
+	else {
+		return {-1, (p0[axis] - std::floor(p0[axis])) * d[1 - axis]};
+	}
 }
 
 glm::vec2

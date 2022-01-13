@@ -44,6 +44,10 @@ public:
 		glm::vec2 next();
 
 	private:
+		RayTracer(glm::vec2 p0, glm::vec2 p1, glm::vec2 d);
+		RayTracer(glm::vec2 p0, glm::vec2 d, std::pair<float, float>, std::pair<float, float>);
+		static std::pair<float, float> byAxis(glm::vec2 p0, glm::vec2 p1, glm::vec2 d, glm::length_t);
+
 		glm::vec2 p;
 		const glm::vec2 d;
 		float error;
