@@ -2,7 +2,6 @@
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
 #include "maths.h"
-#include "ray.hpp"
 #include "text.h"
 #include "toolbar.h"
 #include "ui/uiComponent.h"
@@ -17,8 +16,8 @@
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
+#include <optional>
 #include <span>
-#include <stdexcept>
 #include <string>
 #include <typeinfo>
 #include <vector>

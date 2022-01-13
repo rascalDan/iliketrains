@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cstddef>
 #include <glm/gtx/intersect.hpp>
+#include <initializer_list>
+#include <limits>
 #include <maths.h>
 #include <random>
 #include <ray.hpp>
