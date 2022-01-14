@@ -63,7 +63,7 @@ Window::handleInput(const SDL_Event & e)
 				eAdjusted.button.y = size.y - e.button.y;
 				break;
 		}
-		uiComponents.applyOne(&UIComponent::handleInput, eAdjusted, UIComponent::Position {{}, size});
+		uiComponents.rapplyOne(&UIComponent::handleInput, eAdjusted, UIComponent::Position {{}, size});
 		return true;
 	}
 	return false;

@@ -75,6 +75,7 @@ public:
 					else {
 						clicked.clear();
 					}
+					return true;
 				}
 		}
 		return false;
@@ -88,9 +89,9 @@ private:
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h), 0.1F, 10000.0F}
 {
+	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 	uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
 	uiComponents.create<GameMainToolbar>();
-	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 
 	shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
 	shader.setUniform("lightColor", {.6, .6, .6});

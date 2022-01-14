@@ -26,29 +26,32 @@ public:
 		}
 	}
 
-	template<typename T = Object, typename M = void, typename... Params>
+	template<typename T = Object, typename... Params>
 	auto
-	apply(const M & m, Params &&... params) const
+	apply(const auto & m, Params &&... params) const
 	{
-		return std::count_if(objects.begin(), objects.end(), [&m, &params...](auto && op) {
-			if (auto o = dynamic_cast<T *>(op.get())) {
-				std::invoke(m, o, std::forward<Params>(params)...);
-				return true;
-			}
-			return false;
-		});
+		return apply_internal<T>(objects.begin(), objects.end(), m, std::forward<Params>(params)...);
 	}
 
-	template<typename T = Object, typename M = void, typename... Params>
+	template<typename T = Object, typename... Params>
 	auto
-	applyOne(const M & m, Params &&... params) const
+	rapply(const auto & m, Params &&... params) const
 	{
-		return std::find_if(objects.begin(), objects.end(), [&m, &params...](auto && op) {
-			if (auto o = dynamic_cast<T *>(op.get())) {
-				return std::invoke(m, o, std::forward<Params>(params)...);
-			}
-			return false;
-		});
+		return apply_internal<T>(objects.rbegin(), objects.rend(), m, std::forward<Params>(params)...);
+	}
+
+	template<typename T = Object, typename... Params>
+	auto
+	applyOne(const auto & m, Params &&... params) const
+	{
+		return applyOne_internal<T>(objects.begin(), objects.end(), m, std::forward<Params>(params)...);
+	}
+
+	template<typename T = Object, typename... Params>
+	auto
+	rapplyOne(const auto & m, Params &&... params) const
+	{
+		return applyOne_internal<T>(objects.rbegin(), objects.rend(), m, std::forward<Params>(params)...);
 	}
 
 	template<typename T = Object>
@@ -66,5 +69,37 @@ public:
 	end() const
 	{
 		return objects.end();
+	}
+
+	auto
+	rend() const
+	{
+		return objects.rend();
+	}
+
+protected:
+	template<typename T = Object, typename... Params>
+	auto
+	apply_internal(const auto begin, const auto end, const auto & m, Params &&... params) const
+	{
+		return std::count_if(begin, end, [&m, &params...](auto && op) {
+			if (auto o = dynamic_cast<T *>(op.get())) {
+				std::invoke(m, o, std::forward<Params>(params)...);
+				return true;
+			}
+			return false;
+		});
+	}
+
+	template<typename T = Object, typename... Params>
+	auto
+	applyOne_internal(const auto begin, const auto end, const auto & m, Params &&... params) const
+	{
+		return std::find_if(begin, end, [&m, &params...](auto && op) {
+			if (auto o = dynamic_cast<T *>(op.get())) {
+				return std::invoke(m, o, std::forward<Params>(params)...);
+			}
+			return false;
+		});
 	}
 };

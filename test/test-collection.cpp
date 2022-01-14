@@ -35,6 +35,7 @@ public:
 using TestCollection = Collection<Base>;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(Collection<Base>::Objects::const_iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(Collection<Base>::Objects::const_reverse_iterator)
 
 BOOST_FIXTURE_TEST_SUITE(tc, TestCollection)
 
@@ -52,6 +53,15 @@ BOOST_AUTO_TEST_CASE(a_base)
 	BOOST_CHECK_EQUAL(b->total, 1);
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_EQUAL(i, end());
+}
+
+BOOST_AUTO_TEST_CASE(a_rbase)
+{
+	auto b = create<Base>();
+	BOOST_REQUIRE(rapply(&Base::add));
+	BOOST_CHECK_EQUAL(b->total, 1);
+	const auto i = rapplyOne(&Base::add);
+	BOOST_CHECK_EQUAL(i, rend());
 }
 
 BOOST_AUTO_TEST_CASE(a_sub)
