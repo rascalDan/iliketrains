@@ -26,9 +26,9 @@ Train::getBogiePosition(float linkDist, float dist) const
 }
 
 bool
-Train::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * eh) const
+Train::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance) const
 {
-	return applyOne(&RailVehicle::intersectRay, ray, baryPos, eh) != end();
+	return applyOne(&RailVehicle::intersectRay, ray, baryPos, distance) != end();
 }
 
 void

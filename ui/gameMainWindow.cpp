@@ -60,11 +60,11 @@ public:
 					const auto mouse = glm::vec2 {e.button.x, e.button.y} / position.size;
 
 					glm::vec2 baryPos {};
-					float eh;
+					float distance;
 
 					const auto ray = camera->unProject(mouse);
-					if (const auto selected
-							= gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, &baryPos, &eh);
+					if (const auto selected = gameState->world.applyOne<Selectable>(
+								&Selectable::intersectRay, ray, &baryPos, &distance);
 							selected != gameState->world.end()) {
 						const auto & ref = *selected.base()->get();
 						clicked = typeid(ref).name();
