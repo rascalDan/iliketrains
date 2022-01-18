@@ -1,97 +1,56 @@
 #include "gameMainWindow.h"
+#include "editNetwork.h"
+#include "gameMainSelector.h"
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
 #include "maths.h"
-#include "text.h"
 #include "toolbar.h"
-#include "ui/uiComponent.h"
 #include "window.h"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <collection.hpp>
 #include <game/gamestate.h>
-#include <game/geoData.h>
-#include <game/selectable.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <optional>
-#include <span>
-#include <string>
-#include <typeinfo>
-#include <vector>
-
-class UIShader;
+#include <utility>
 
 class GameMainToolbar : public Toolbar {
 public:
-	GameMainToolbar() :
+	explicit GameMainToolbar(GameMainSelector * gms_) :
 		Toolbar {
 				{"ui/icon/network.png",
-						[](const SDL_Event &) {
-							// fprintf(stderr, "network click\n");
+						[this](const SDL_Event &) {
+							toggleSetMode<EditNetwork>();
 						}},
-		}
+		},
+		gms {gms_}
 	{
-	}
-};
-
-#include <stream_support.hpp>
-
-class GameMainSelector : public UIComponent {
-public:
-	GameMainSelector(const Camera * c, glm::vec2 size) : UIComponent {{{}, size}}, camera {c} { }
-
-	void
-	render(const UIShader & shader, const Position & pos) const override
-	{
-		if (!clicked.empty()) {
-			Text {clicked, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, pos);
-		}
-	}
-
-	bool
-	handleInput(const SDL_Event & e, const Position &) override
-	{
-		switch (e.type) {
-			case SDL_MOUSEBUTTONDOWN:
-				if (e.button.button == SDL_BUTTON_LEFT) {
-					const auto mouse = glm::vec2 {e.button.x, e.button.y} / position.size;
-
-					glm::vec2 baryPos {};
-					float distance;
-
-					const auto ray = camera->unProject(mouse);
-					if (const auto selected = gameState->world.applyOne<Selectable>(
-								&Selectable::intersectRay, ray, &baryPos, &distance);
-							selected != gameState->world.end()) {
-						const auto & ref = *selected.base()->get();
-						clicked = typeid(ref).name();
-					}
-					else if (const auto pos = gameState->geoData->intersectRay(ray)) {
-						clicked = streamed_string(*pos);
-					}
-					else {
-						clicked.clear();
-					}
-					return true;
-				}
-		}
-		return false;
 	}
 
 private:
-	const Camera * camera;
-	std::string clicked;
+	template<typename UiMode, typename... Params>
+	void
+	toggleSetMode(Params &&... params)
+	{
+		if (dynamic_cast<UiMode *>(gms->target.get())) {
+			gms->target.reset();
+		}
+		else {
+			gms->target = std::make_unique<UiMode>(std::forward<Params>(params)...);
+		}
+	}
+
+	GameMainSelector * gms;
 };
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h), 0.1F, 10000.0F}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
-	uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
-	uiComponents.create<GameMainToolbar>();
+	auto gms = uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
+	uiComponents.create<GameMainToolbar>(gms.get());
 
 	shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
 	shader.setUniform("lightColor", {.6, .6, .6});
