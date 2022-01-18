@@ -55,14 +55,12 @@ public:
 	}
 
 	template<typename T = Object>
-	void
+	auto
 	removeAll()
 	{
-		objects.erase(std::remove_if(objects.begin(), objects.end(),
-							  [](auto && op) {
-								  return dynamic_cast<T *>(op.get());
-							  }),
-				objects.end());
+		return std::erase_if(objects, [](auto && op) {
+			return dynamic_cast<T *>(op.get());
+		});
 	}
 
 	auto
