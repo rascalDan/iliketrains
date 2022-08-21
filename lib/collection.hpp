@@ -1,8 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <type_traits>
+#include <vector>
 
 template<typename Object, bool shared = true> class Collection {
 public:
