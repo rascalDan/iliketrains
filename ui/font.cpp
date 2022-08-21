@@ -172,11 +172,11 @@ Font::render(const std::string_view chars) const
 		}
 
 		const auto charPos = pos + glm::vec2 {ch.bearing.x, ch.bearing.y - static_cast<int>(ch.size.y)};
-		const auto size = glm::vec2 {ch.size};
+		const auto chSize = glm::vec2 {ch.size};
 
 		out[fontTextures[ch.textureIdx].texture].emplace_back(
-				transform_array(C, [&size, &charPos, &ch, this](const auto & c) {
-					return (charPos + (size * c.first))
+				transform_array(C, [&chSize, &charPos, &ch, this](const auto & c) {
+					return (charPos + (chSize * c.first))
 							|| ((glm::vec2 {ch.position} + (glm::vec2 {ch.size} * c.second)) / glm::vec2 {this->size});
 				}));
 
