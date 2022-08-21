@@ -18,7 +18,6 @@ void
 GLsource::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage)
 {
 	GLint success = 0;
-	std::array<GLchar, 1024> error {};
 
 	if (isProgram) {
 		glGetProgramiv(shader, flag, &success);
@@ -28,6 +27,7 @@ GLsource::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::stri
 	}
 
 	if (success == GL_FALSE) {
+		std::array<GLchar, 1024> error {};
 		if (isProgram) {
 			glGetProgramInfoLog(shader, error.size(), nullptr, error.data());
 		}
