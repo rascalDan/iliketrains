@@ -5,6 +5,7 @@
 
 template<typename IdType, auto get, auto release, auto... fixed> class glRef {
 public:
+	// cppcheck-suppress redundantPointerOp
 	template<typename... Args> explicit glRef(Args &&... args) : id {(*get)(fixed..., std::forward<Args>(args)...)}
 	{
 		if (!id) {
@@ -20,6 +21,7 @@ public:
 	~glRef()
 	{
 		if (id) {
+			// cppcheck-suppress redundantPointerOp
 			(*release)(id);
 		}
 	}
@@ -30,7 +32,8 @@ public:
 	operator=(glRef && other)
 	{
 		if (id) {
-			release(id);
+			// cppcheck-suppress redundantPointerOp
+			(*release)(id);
 		}
 		id = other.id;
 		other.id = {};
