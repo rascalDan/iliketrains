@@ -73,7 +73,7 @@ Font::generateChars(const std::string_view chars) const
 	std::optional<FT> ft;
 	std::optional<Face> face;
 
-	for (auto c = chars.data(); c <= &chars.back(); c = next_char(c)) {
+	for (auto c = &chars.front(); c <= &chars.back(); c = next_char(c)) {
 		const auto codepoint = get_codepoint(c);
 		if (charsData.find(codepoint) == charsData.end()) {
 			if (!ft) {
