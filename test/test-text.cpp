@@ -9,7 +9,20 @@
 #include <glm/glm.hpp>
 #include <span>
 #include <ui/font.h>
+#include <unicode.h>
 #include <vector>
+
+BOOST_AUTO_TEST_CASE(utf8_string_view_iter)
+{
+	static constexpr utf8_string_view text {"Some UTF-8 €£²¹ text."};
+	static constexpr std::array codepoints {
+			83, 111, 109, 101, 32, 85, 84, 70, 45, 56, 32, 8364, 163, 178, 185, 32, 116, 101, 120, 116, 46};
+	BOOST_CHECK_EQUAL(std::count_if(text.begin(), text.end(), isspace), 3);
+	BOOST_CHECK_EQUAL(text.length(), 21);
+	std::vector<uint32_t> codepointsOut;
+	std::copy(text.begin(), text.end(), std::back_inserter(codepointsOut));
+	BOOST_CHECK_EQUAL_COLLECTIONS(codepoints.begin(), codepoints.end(), codepointsOut.begin(), codepointsOut.end());
+}
 
 struct FontTest : public Font {
 	FontTest() : Font {"/usr/share/fonts/corefonts/arial.ttf", 48} { }
