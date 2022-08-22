@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <map>
 #include <string_view>
+#include <unicode.h>
 #include <vector>
 
 class Font {
@@ -21,7 +22,7 @@ public:
 	using Quad = std::array<glm::vec4, 4>;
 	using Quads = std::vector<Quad>;
 	using TextureQuads = std::map<GLuint /*textureId*/, Quads>;
-	TextureQuads render(const std::string_view text) const;
+	TextureQuads render(const utf8_string_view text) const;
 
 	struct CharData {
 		size_t textureIdx;
@@ -38,12 +39,12 @@ public:
 	static glm::uvec3 getTextureSize(unsigned int height);
 
 protected:
-	void generateChars(const std::string_view text) const;
+	void generateChars(const utf8_string_view text) const;
 	const CharData getChar(char) const;
 	std::size_t getTextureWithSpace(unsigned int adv) const;
 
 	std::filesystem::path path;
 	glm::uvec3 size;
-	mutable std::map<uint32_t, CharData> charsData;
+	mutable std::map<decltype(get_codepoint(nullptr)), CharData> charsData;
 	mutable std::vector<FontTexture> fontTextures;
 };

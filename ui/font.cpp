@@ -68,13 +68,12 @@ Font::Font(std::filesystem::path p, unsigned s) : path {std::move(p)}, size {get
 }
 
 void
-Font::generateChars(const std::string_view chars) const
+Font::generateChars(const utf8_string_view chars) const
 {
 	std::optional<FT> ft;
 	std::optional<Face> face;
 
-	for (auto c = &chars.front(); c <= &chars.back(); c = next_char(c)) {
-		const auto codepoint = get_codepoint(c);
+	for (auto codepoint : chars) {
 		if (charsData.find(codepoint) == charsData.end()) {
 			if (!ft) {
 				ft.emplace();
@@ -148,7 +147,7 @@ Font::getTextureSize(unsigned int height)
 }
 
 Font::TextureQuads
-Font::render(const std::string_view chars) const
+Font::render(const utf8_string_view chars) const
 {
 	constexpr static const std::array<std::pair<glm::vec2, glm::vec2>, 4> C {{
 			{{0, 0}, {0, 1}},
@@ -161,12 +160,12 @@ Font::render(const std::string_view chars) const
 
 	glm::vec2 pos {};
 	TextureQuads out;
-	for (auto c = chars.data(); c <= &chars.back(); c = next_char(c)) {
-		if (isspace(*c)) {
+	for (auto codepoint : chars) {
+		if (std::isspace(static_cast<int>(codepoint))) {
 			pos.x += static_cast<float>(size.y) / 4.F;
 			continue;
 		}
-		const auto & ch = charsData.at(get_codepoint(c));
+		const auto & ch = charsData.at(codepoint);
 		if (!ch.advance) {
 			continue;
 		}
