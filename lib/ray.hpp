@@ -8,4 +8,6 @@ public:
 
 	glm::vec3 start;
 	glm::vec3 direction;
+
+	float distanceToLine(const glm::vec3 & a, const glm::vec3 & b) const;
 };
