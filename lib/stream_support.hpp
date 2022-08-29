@@ -5,6 +5,11 @@
 #include <maths.h>
 #include <span>
 #include <sstream>
+#include <type_traits>
+
+template<typename T>
+concept spanable = std::is_constructible_v<std::span<const typename T::value_type>, T> && !std::is_same_v<char,
+		std::decay_t<typename T::value_type>>;
 
 namespace std {
 	template<typename T, std::size_t L>
@@ -34,16 +39,9 @@ namespace std {
 		return (s << std::span {&v[0], L});
 	}
 
-	template<typename T, std::size_t L>
+	template<spanable T>
 	std::ostream &
-	operator<<(std::ostream & s, const array<T, L> & v)
-	{
-		return (s << std::span {v});
-	}
-
-	template<typename T>
-	std::ostream &
-	operator<<(std::ostream & s, const vector<T> & v)
+	operator<<(std::ostream & s, const T & v)
 	{
 		return (s << std::span {v});
 	}
@@ -61,7 +59,7 @@ streamed_string(const T & v)
 {
 	std::stringstream ss;
 	ss << v;
-	return ss.str();
+	return std::move(ss).str();
 }
 
 #define CLOG(x) std::cerr << #x " : " << x << "\n";
