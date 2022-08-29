@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+class Ray;
+
 // Generic network node
 // something that can be travelled to
 // it has location
@@ -47,6 +49,7 @@ public:
 	NO_MOVE(Link);
 
 	[[nodiscard]] virtual Location positionAt(float dist, unsigned char start) const = 0;
+	[[nodiscard]] virtual bool intersectRay(const Ray &) const = 0;
 
 	std::array<End, 2> ends;
 	float length;
@@ -70,6 +73,7 @@ public:
 	NO_MOVE(LinkStraight);
 
 	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
+	[[nodiscard]] bool intersectRay(const Ray &) const override;
 };
 LinkStraight::~LinkStraight() = default;
 
@@ -81,6 +85,7 @@ public:
 	NO_MOVE(LinkCurve);
 
 	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
+	[[nodiscard]] bool intersectRay(const Ray &) const override;
 
 	glm::vec3 centreBase;
 	float radius;

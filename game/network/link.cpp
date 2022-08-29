@@ -1,7 +1,9 @@
 #include "link.h"
 #include <compare>
+#include <glm/gtx/transform.hpp>
 #include <location.hpp>
 #include <maths.h>
+#include <ray.hpp>
 #include <tuple>
 
 Link::Link(End a, End b, float l) : ends {{std::move(a), std::move(b)}}, length {l} { }
@@ -30,6 +32,12 @@ LinkStraight::positionAt(float dist, unsigned char start) const
 	return Location {es.first->pos + vehiclePositionOffset() + dir * dist, {vector_pitch(dir), vector_yaw(dir), 0}};
 }
 
+bool
+LinkStraight::intersectRay(const Ray & ray) const
+{
+	return ray.passesCloseToEdges(std::array {ends.front().node->pos, ends.back().node->pos}, 1.F);
+}
+
 Location
 LinkCurve::positionAt(float dist, unsigned char start) const
 {
@@ -43,4 +51,24 @@ LinkCurve::positionAt(float dist, unsigned char start) const
 			+ glm::vec3 {0, 0, es.first->pos.z - centreBase.z + ((es.second->pos.z - es.first->pos.z) * frac)}};
 	const auto pitch {vector_pitch({0, 0, (es.second->pos.z - es.first->pos.z) / length})};
 	return Location {relPos + relClimb + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
+}
+
+bool
+LinkCurve::intersectRay(const Ray & ray) const
+{
+	const auto & e0p {ends[0].node->pos};
+	const auto & e1p {ends[1].node->pos};
+	const auto slength = round_frac(length / 2.F, 5.F);
+	const auto segs = std::round(15.F * slength / std::pow(radius, 0.7F));
+	const auto step {glm::vec3 {arc_length(arc), e1p.z - e0p.z, slength} / segs};
+	const auto trans {glm::translate(centreBase)};
+
+	auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
+	std::vector<glm::vec3> points;
+	points.reserve(segCount);
+	for (glm::vec3 swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
+		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, 0.F, swing.y})};
+		points.push_back(t * glm::vec4 {0, 0, 0, 1});
+	}
+	return ray.passesCloseToEdges(points, 1.F);
 }
