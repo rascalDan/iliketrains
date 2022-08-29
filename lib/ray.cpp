@@ -1,4 +1,5 @@
 #include "ray.hpp"
+#include <algorithm>
 
 float
 Ray::distanceToLine(const glm::vec3 & p1, const glm::vec3 & e1) const
@@ -15,4 +16,14 @@ Ray::distanceToLine(const glm::vec3 & p1, const glm::vec3 & e1) const
 		return std::numeric_limits<float>::infinity();
 	}
 	return glm::abs(glm::dot(n, p1 - p2));
+}
+
+bool
+Ray::passesCloseToEdges(const std::span<const glm::vec3> positions, float distance) const
+{
+	return std::adjacent_find(positions.begin(), positions.end(),
+				   [this, distance](const glm::vec3 & a, const glm::vec3 & b) {
+					   return distanceToLine(a, b) <= distance;
+				   })
+			!= positions.end();
 }
