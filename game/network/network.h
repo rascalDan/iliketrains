@@ -42,7 +42,8 @@ protected:
 public:
 	template<typename L, typename... Params>
 	std::shared_ptr<L>
-	addLink(glm::vec3 a, glm::vec3 b, Params &&... params) requires std::is_base_of_v<T, L>
+	addLink(glm::vec3 a, glm::vec3 b, Params &&... params)
+		requires std::is_base_of_v<T, L>
 	{
 		const auto node1 = nodeAt(a), node2 = nodeAt(b);
 		auto l {links.template create<L>(node1, node2, std::forward<Params>(params)...)};

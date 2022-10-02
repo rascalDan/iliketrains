@@ -24,7 +24,8 @@ public:
 
 	template<typename T, typename... Params>
 	void
-	addWork(Params &&... params) requires std::is_base_of_v<Work, T>
+	addWork(Params &&... params)
+		requires std::is_base_of_v<Work, T>
 	{
 		addWork(std::make_unique<T>(std::forward<Params>(params)...));
 	}
@@ -49,7 +50,8 @@ class Worker {
 public:
 	template<typename T, typename... Params>
 	void
-	addWork(Params &&... params) requires std::is_base_of_v<Work, T>
+	addWork(Params &&... params)
+		requires std::is_base_of_v<Work, T>
 	{
 		T(std::forward<Params>(params)...).doWork();
 	}

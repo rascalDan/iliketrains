@@ -8,8 +8,8 @@
 #include <type_traits>
 
 template<typename T>
-concept spanable = std::is_constructible_v<std::span<const typename T::value_type>, T> && !std::is_same_v<char,
-		std::decay_t<typename T::value_type>>;
+concept spanable = std::is_constructible_v<std::span<const typename T::value_type>, T> && !
+std::is_same_v<char, std::decay_t<typename T::value_type>>;
 
 namespace std {
 	template<typename T, std::size_t L>

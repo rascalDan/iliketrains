@@ -16,7 +16,8 @@ public:
 
 	template<typename T = Object, typename... Params>
 	auto
-	create(Params &&... params) requires std::is_base_of_v<Object, T>
+	create(Params &&... params)
+		requires std::is_base_of_v<Object, T>
 	{
 		if constexpr (shared) {
 			auto obj = std::make_shared<T>(std::forward<Params>(params)...);
