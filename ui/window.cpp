@@ -1,5 +1,6 @@
 #include "window.h"
 #include "uiComponent.h"
+#include "worldOverlay.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <stdexcept>
@@ -90,6 +91,7 @@ Window::refresh() const
 void
 Window::render() const
 {
+	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, getShader());
 	glDisable(GL_DEPTH_TEST);
 	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
 }
