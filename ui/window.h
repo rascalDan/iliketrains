@@ -10,6 +10,8 @@
 #include <special_members.hpp>
 #include <string>
 
+class Shader;
+
 class Window {
 public:
 	Window(size_t width, size_t height, const std::string & title);
@@ -28,6 +30,7 @@ public:
 protected:
 	[[nodiscard]] SDL_GLContext glContext() const;
 	virtual void render() const;
+	virtual const Shader & getShader() const = 0;
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
 	SDL_WindowPtr m_window;

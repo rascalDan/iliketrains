@@ -71,3 +71,9 @@ GameMainWindow::render() const
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
 	Window::render();
 }
+
+const Shader &
+GameMainWindow::getShader() const
+{
+	return shader;
+}
