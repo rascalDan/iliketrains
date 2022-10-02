@@ -5,7 +5,9 @@
 #include <filesystem>
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
+#include <glm/gtx/intersect.hpp>
 #include <initializer_list>
+#include <ray.hpp>
 #include <stdexcept>
 #include <utility>
 
@@ -31,6 +33,21 @@ Network::findNodeAt(glm::vec3 pos) const
 		return *n;
 	}
 	return {};
+}
+
+Network::IntersectRayResult
+Network::intersectRay(const Ray & ray) const
+{
+	// Click within 2m of a node
+	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
+				[&ray](const NodePtr & node) {
+					glm::vec3 ipos, inorm;
+					return glm::intersectRaySphere(ray.start, ray.direction, node->pos, 2.F, ipos, inorm);
+				});
+			node != nodes.end()) {
+		return *node;
+	}
+	return intersectRayLinks(ray);
 }
 
 void

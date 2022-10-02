@@ -21,3 +21,18 @@ NetworkOf<T>::joinLinks(const LinkPtr & l) const
 		Network::joinLinks(l, ol);
 	}
 }
+
+template<typename T>
+Network::IntersectRayResult
+NetworkOf<T>::intersectRayLinks(const Ray & ray) const
+{
+	// Click link
+	if (const auto link = std::find_if(links.objects.begin(), links.objects.end(),
+				[&ray](const std::shared_ptr<T> & link) {
+					return link->intersectRay(ray);
+				});
+			link != links.objects.end()) {
+		return *link;
+	}
+	return {};
+}
