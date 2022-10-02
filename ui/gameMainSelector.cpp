@@ -48,9 +48,7 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position &)
 				const auto mouse = glm::vec2 {e.motion.x, e.motion.y} / position.size;
 				const auto ray = camera->unProject(mouse);
 
-				if (target) {
-					target->move(ray);
-				}
+				target->move(ray);
 				return true;
 			}
 			break;
