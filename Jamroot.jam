@@ -82,6 +82,8 @@ lib ilt :
 		<link>static
 		<use>glib-2.0
 		<cflags>-fPIC
+		<warnings>off
+		<warnings-as-errors>off
 	]
 	:
 	<variant>debug:<warnings>pedantic
