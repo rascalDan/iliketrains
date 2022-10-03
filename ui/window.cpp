@@ -63,6 +63,10 @@ Window::handleInput(const SDL_Event & e)
 				SDL_GetWindowSize(m_window, &size.x, &size.y);
 				eAdjusted.button.y = size.y - e.button.y;
 				break;
+			case SDL_MOUSEMOTION:
+				SDL_GetWindowSize(m_window, &size.x, &size.y);
+				eAdjusted.motion.y = size.y - e.motion.y;
+				break;
 		}
 		uiComponents.rapplyOne(&UIComponent::handleInput, eAdjusted, UIComponent::Position {{}, size});
 		return true;
