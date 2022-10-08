@@ -1,4 +1,5 @@
 #include "editNetwork.h"
+#include "builders/join.h"
 #include "builders/straight.h"
 #include "text.h"
 #include <game/gamestate.h>
@@ -7,6 +8,7 @@
 EditNetwork::EditNetwork(Network * n) :
 	network {n}, builderToolbar {
 						 {"ui/icon/network.png", mode.toggle<BuilderStraight>()},
+						 {"ui/icon/network.png", mode.toggle<BuilderJoin>()},
 				 }
 {
 }
@@ -16,7 +18,7 @@ EditNetwork::~EditNetwork() = default;
 bool
 EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray & ray)
 {
-	if (builder) {
+	if (builder && (e.button == SDL_BUTTON_LEFT || e.button == SDL_BUTTON_MIDDLE)) {
 		builder->click(network, gameState->geoData.get(), e, ray);
 		return true;
 	}

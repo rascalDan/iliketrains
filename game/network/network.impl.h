@@ -43,3 +43,10 @@ NetworkOf<T>::addStraight(glm::vec3 n1, glm::vec3 n2)
 {
 	return addLink<typename T::StraightLink>(n1, n2);
 }
+
+template<typename T>
+LinkPtr
+NetworkOf<T>::addJoins(glm::vec3 n1, glm::vec3 n2)
+{
+	return addLink<typename T::StraightLink>(n1, n2);
+}
