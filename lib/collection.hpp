@@ -29,6 +29,31 @@ public:
 		}
 	}
 
+	template<typename T = Object>
+	T *
+	find()
+	{
+		if (auto i = std::find_if(objects.begin(), objects.end(),
+					[](auto && o) {
+						return (dynamic_cast<T *>(o.get()));
+					});
+				i != objects.end()) {
+			return static_cast<T *>(i->get());
+		}
+		return nullptr;
+	}
+
+	template<typename T = Object, typename... Params>
+	auto
+	findOrCreate(Params &&... params)
+		requires std::is_base_of_v<Object, T>
+	{
+		if (auto o = find<T>()) {
+			return o;
+		}
+		return create<T>(std::forward<Params>(params)...).get();
+	}
+
 	template<typename T = Object, typename... Params>
 	auto
 	apply(const auto & m, Params &&... params) const
