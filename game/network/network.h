@@ -62,11 +62,7 @@ public:
 		return l;
 	}
 
-	LinkPtr
-	addStraight(glm::vec3 n1, glm::vec3 n2) override
-	{
-		return addLink<typename T::StraightLink>(n1, n2);
-	}
+	LinkPtr addStraight(glm::vec3 n1, glm::vec3 n2) override;
 
 	void render(const Shader &) const override;
 };
