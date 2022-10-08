@@ -18,21 +18,20 @@ class Ray;
 class Network {
 public:
 	using LinkEnd = std::pair<LinkPtr, unsigned char>;
-	using IntersectRayResult = std::variant<std::nullptr_t, NodePtr, LinkEnd, LinkPtr>;
 	explicit Network(const std::string & textureName);
 	virtual ~Network() = default;
 
 	[[nodiscard]] NodePtr findNodeAt(glm::vec3) const;
 	[[nodiscard]] NodePtr nodeAt(glm::vec3);
 	[[nodiscard]] std::pair<NodePtr, bool> newNodeAt(glm::vec3);
-	[[nodiscard]] IntersectRayResult intersectRay(const Ray &) const;
+	[[nodiscard]] virtual LinkPtr intersectRayLinks(const Ray &) const = 0;
+	[[nodiscard]] virtual NodePtr intersectRayNodes(const Ray &) const;
 
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const NodePtr &) const;
 
 protected:
 	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);
-	[[nodiscard]] virtual IntersectRayResult intersectRayLinks(const Ray &) const = 0;
 
 	using Nodes = std::set<NodePtr, PtrSorter<NodePtr>>;
 	Nodes nodes;
@@ -47,7 +46,7 @@ protected:
 	void joinLinks(const LinkPtr &) const;
 
 protected:
-	[[nodiscard]] IntersectRayResult intersectRayLinks(const Ray &) const override;
+	[[nodiscard]] LinkPtr intersectRayLinks(const Ray &) const override;
 
 public:
 	template<typename L, typename... Params>

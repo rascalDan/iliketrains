@@ -35,8 +35,8 @@ Network::findNodeAt(glm::vec3 pos) const
 	return {};
 }
 
-Network::IntersectRayResult
-Network::intersectRay(const Ray & ray) const
+NodePtr
+Network::intersectRayNodes(const Ray & ray) const
 {
 	// Click within 2m of a node
 	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
@@ -47,7 +47,7 @@ Network::intersectRay(const Ray & ray) const
 			node != nodes.end()) {
 		return *node;
 	}
-	return intersectRayLinks(ray);
+	return {};
 }
 
 void

@@ -23,7 +23,7 @@ NetworkOf<T>::joinLinks(const LinkPtr & l) const
 }
 
 template<typename T>
-Network::IntersectRayResult
+LinkPtr
 NetworkOf<T>::intersectRayLinks(const Ray & ray) const
 {
 	// Click link
