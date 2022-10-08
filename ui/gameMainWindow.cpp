@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include <collection.hpp>
 #include <game/gamestate.h>
+#include <game/network/rail.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
@@ -22,7 +23,7 @@ public:
 	explicit GameMainToolbar(GameMainSelector * gms_) :
 		Mode<decltype(GameMainSelector::target)> {gms_->target}, Toolbar {
 																		 {"ui/icon/network.png",
-																				 toggle<EditNetwork>()},
+																				 toggle<EditNetworkOf<RailLinks>>()},
 																 }
 	{
 	}

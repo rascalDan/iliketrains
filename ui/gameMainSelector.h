@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SDL_events.h"
 #include "special_members.hpp"
 #include "uiComponent.h"
 #include <glm/glm.hpp>
@@ -7,20 +8,18 @@
 #include <string>
 class Ray;
 class UIShader;
-union SDL_Event;
 class Camera;
 
 class GameMainSelector : public UIComponent {
 public:
-	class ClickReceiver {
+	class Component {
 	public:
-		ClickReceiver() = default;
-		virtual ~ClickReceiver() = default;
-		DEFAULT_MOVE_COPY(ClickReceiver);
+		virtual ~Component() = default;
 
-		virtual void click(const Ray &) = 0;
-		virtual void move(const Ray &) = 0;
-		virtual bool handleMove() = 0;
+		virtual bool click(const SDL_MouseButtonEvent &, const Ray &);
+		virtual bool move(const SDL_MouseMotionEvent &, const Ray &);
+		virtual bool handleInput(const SDL_Event &, const Position & pos);
+		virtual void render(const UIShader & shader, const Position & pos) const;
 	};
 
 	GameMainSelector(const Camera * c, glm::vec2 size);
@@ -31,7 +30,7 @@ public:
 
 	void defaultClick(const Ray & ray);
 
-	std::unique_ptr<ClickReceiver> target;
+	std::unique_ptr<Component> target;
 
 private:
 	const Camera * camera;

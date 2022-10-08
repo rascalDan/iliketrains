@@ -15,43 +15,47 @@
 #include <vector>
 
 GameMainSelector::GameMainSelector(const Camera * c, glm::vec2 size) : UIComponent {{{}, size}}, camera {c} { }
+constexpr glm::vec2 TargetPos {5, 45};
 
 void
-GameMainSelector::render(const UIShader & shader, const Position & pos) const
+GameMainSelector::render(const UIShader & shader, const Position & parentPos) const
 {
+	if (target) {
+		target->render(shader, parentPos + position + TargetPos);
+	}
 	if (!clicked.empty()) {
-		Text {clicked, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, pos);
+		Text {clicked, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
 	}
 }
 
 bool
-GameMainSelector::handleInput(const SDL_Event & e, const Position &)
+GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 {
-	switch (e.type) {
-		case SDL_MOUSEBUTTONDOWN:
-			if (e.button.button == SDL_BUTTON_LEFT) {
-				const auto mouse = glm::vec2 {e.button.x, e.button.y} / position.size;
-				const auto ray = camera->unProject(mouse);
-
-				if (target) {
-					target->click(ray);
+	const auto getRay = [this](const auto & e) {
+		const auto mouse = glm::vec2 {e.x, e.y} / position.size;
+		return camera->unProject(mouse);
+	};
+	if (target) {
+		switch (e.type) {
+			case SDL_MOUSEBUTTONDOWN:
+				if (target->click(e.button, getRay(e.button))) {
+					return true;
 				}
-				else {
-					defaultClick(ray);
+				break;
+			case SDL_MOUSEMOTION:
+				if (target->move(e.motion, getRay(e.motion))) {
+					return true;
 				}
-				return true;
-			}
-			break;
-
-		case SDL_MOUSEMOTION:
-			if (target && target->handleMove()) {
-				const auto mouse = glm::vec2 {e.motion.x, e.motion.y} / position.size;
-				const auto ray = camera->unProject(mouse);
-
-				target->move(ray);
-				return true;
-			}
-			break;
+				break;
+		}
+		return target->handleInput(e, parentPos + position + TargetPos);
+	}
+	else {
+		switch (e.type) {
+			case SDL_MOUSEBUTTONDOWN:
+				defaultClick(getRay(e.button));
+				break;
+		}
 	}
 	return false;
 }
@@ -74,4 +78,27 @@ GameMainSelector::defaultClick(const Ray & ray)
 	else {
 		clicked.clear();
 	}
+}
+
+bool
+GameMainSelector::Component::click(const SDL_MouseButtonEvent &, const Ray &)
+{
+	return false;
+}
+
+bool
+GameMainSelector::Component::move(const SDL_MouseMotionEvent &, const Ray &)
+{
+	return false;
+}
+
+bool
+GameMainSelector::Component::handleInput(const SDL_Event &, const Position &)
+{
+	return false;
+}
+
+void
+GameMainSelector::Component::render(const UIShader &, const UIComponent::Position &) const
+{
 }
