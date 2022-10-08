@@ -30,6 +30,8 @@ public:
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const NodePtr &) const;
 
+	virtual LinkPtr addStraight(glm::vec3, glm::vec3) = 0;
+
 protected:
 	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);
 
@@ -58,6 +60,12 @@ public:
 		auto l {links.template create<L>(node1, node2, std::forward<Params>(params)...)};
 		joinLinks(l);
 		return l;
+	}
+
+	LinkPtr
+	addStraight(glm::vec3 n1, glm::vec3 n2) override
+	{
+		return addLink<typename T::StraightLink>(n1, n2);
 	}
 
 	void render(const Shader &) const override;

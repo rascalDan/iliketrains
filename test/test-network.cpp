@@ -19,7 +19,9 @@
 #include <vector>
 
 struct TestLink : public LinkStraight {
+	TestLink(NodePtr a, NodePtr b) : TestLink {a, b, glm::distance(a->pos, b->pos)} { }
 	TestLink(NodePtr a, NodePtr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
+	using StraightLink = TestLink;
 };
 
 constexpr glm::vec3 p000 {0, 0, 0}, p100 {1, 0, 0}, p200 {2, 0, 0}, p300 {3, 0, 0};
