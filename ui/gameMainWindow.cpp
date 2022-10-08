@@ -4,6 +4,7 @@
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
 #include "maths.h"
+#include "modeHelper.hpp"
 #include "toolbar.h"
 #include "window.h"
 #include <GL/glew.h>
@@ -16,33 +17,15 @@
 #include <memory>
 #include <utility>
 
-class GameMainToolbar : public Toolbar {
+class GameMainToolbar : Mode<decltype(GameMainSelector::target)>, public Toolbar {
 public:
 	explicit GameMainToolbar(GameMainSelector * gms_) :
-		Toolbar {
-				{"ui/icon/network.png",
-						[this](const SDL_Event &) {
-							toggleSetMode<EditNetwork>();
-						}},
-		},
-		gms {gms_}
+		Mode<decltype(GameMainSelector::target)> {gms_->target}, Toolbar {
+																		 {"ui/icon/network.png",
+																				 toggle<EditNetwork>()},
+																 }
 	{
 	}
-
-private:
-	template<typename UiMode, typename... Params>
-	void
-	toggleSetMode(Params &&... params)
-	{
-		if (dynamic_cast<UiMode *>(gms->target.get())) {
-			gms->target.reset();
-		}
-		else {
-			gms->target = std::make_unique<UiMode>(std::forward<Params>(params)...);
-		}
-	}
-
-	GameMainSelector * gms;
 };
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
