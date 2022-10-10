@@ -61,6 +61,7 @@ protected:
 		return {};
 	}
 };
+using CLinks = std::vector<LinkCPtr>;
 
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);
 bool operator<(const Node & a, const Node & b);

@@ -30,8 +30,8 @@ public:
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const NodePtr &) const;
 
-	virtual LinkPtr addStraight(glm::vec3, glm::vec3) = 0;
-	virtual LinkPtr addJoins(glm::vec3, glm::vec3) = 0;
+	virtual LinkCPtr addStraight(glm::vec3, glm::vec3) = 0;
+	virtual CLinks addJoins(glm::vec3, glm::vec3) = 0;
 
 protected:
 	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);
@@ -63,8 +63,8 @@ public:
 		return l;
 	}
 
-	LinkPtr addStraight(glm::vec3 n1, glm::vec3 n2) override;
-	LinkPtr addJoins(glm::vec3, glm::vec3) override;
+	LinkCPtr addStraight(glm::vec3 n1, glm::vec3 n2) override;
+	CLinks addJoins(glm::vec3, glm::vec3) override;
 
 	void render(const Shader &) const override;
 };
