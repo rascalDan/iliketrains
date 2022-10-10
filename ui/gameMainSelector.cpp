@@ -28,6 +28,14 @@ GameMainSelector::render(const UIShader & shader, const Position & parentPos) co
 	}
 }
 
+void
+GameMainSelector::render(const Shader & shader) const
+{
+	if (target) {
+		target->render(shader);
+	}
+}
+
 bool
 GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 {
@@ -100,5 +108,10 @@ GameMainSelector::Component::handleInput(const SDL_Event &, const Position &)
 
 void
 GameMainSelector::Component::render(const UIShader &, const UIComponent::Position &) const
+{
+}
+
+void
+GameMainSelector::Component::render(const Shader &) const
 {
 }
