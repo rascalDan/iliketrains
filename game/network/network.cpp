@@ -35,6 +35,15 @@ Network::findNodeAt(glm::vec3 pos) const
 	return {};
 }
 
+std::pair<NodePtr, bool>
+Network::candidateNodeAt(glm::vec3 pos) const
+{
+	if (const auto n = nodes.find(std::make_shared<Node>(pos)); n != nodes.end()) {
+		return {*n, true};
+	}
+	return {std::make_shared<Node>(pos), false};
+}
+
 NodePtr
 Network::intersectRayNodes(const Ray & ray) const
 {

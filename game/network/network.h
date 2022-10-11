@@ -24,6 +24,7 @@ public:
 	[[nodiscard]] NodePtr findNodeAt(glm::vec3) const;
 	[[nodiscard]] NodePtr nodeAt(glm::vec3);
 	[[nodiscard]] std::pair<NodePtr, bool> newNodeAt(glm::vec3);
+	[[nodiscard]] std::pair<NodePtr, bool> candidateNodeAt(glm::vec3) const;
 	[[nodiscard]] virtual LinkPtr intersectRayLinks(const Ray &) const = 0;
 	[[nodiscard]] virtual NodePtr intersectRayNodes(const Ray &) const;
 
