@@ -11,3 +11,8 @@ template<typename T> struct StdTypeDefs {
 	using CCollection = std::vector<CPtr>;
 	using WCollection = std::vector<WPtr>;
 };
+
+template<typename T> struct ConstTypeDefs {
+	using Ptr = std::shared_ptr<const T>;
+	using Collection = std::vector<Ptr>;
+};
