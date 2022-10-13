@@ -9,7 +9,7 @@
 #include <numeric>
 #include <vector>
 
-GoTo::GoTo(Orders * o, const Link::End & cp, float d, const NodePtr & dest) :
+GoTo::GoTo(Orders * o, const Link::End & cp, float d, const Node::Ptr & dest) :
 	Objective(o), links(RouteWalker().findRouteTo(cp, dest)), startDist {d}
 {
 }

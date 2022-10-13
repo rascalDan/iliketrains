@@ -37,7 +37,7 @@ BuilderJoin::click(Network * network, const GeoData *, const SDL_MouseButtonEven
 }
 
 void
-BuilderJoin::create(Network * network, const NodePtr & p1, const NodePtr & p2) const
+BuilderJoin::create(Network * network, const Node::Ptr & p1, const Node::Ptr & p2) const
 {
 	network->addJoins(p1->pos, p2->pos);
 }

@@ -6,6 +6,7 @@
 #include <maths.h>
 #include <memory>
 #include <special_members.hpp>
+#include <stdTypeDefs.hpp>
 #include <utility>
 #include <vector>
 
@@ -14,7 +15,7 @@ class Ray;
 // Generic network node
 // something that can be travelled to
 // it has location
-class Node {
+class Node : public StdTypeDefs<Node> {
 public:
 	explicit Node(glm::vec3 p) noexcept : pos(p) {};
 	virtual ~Node() noexcept = default;
@@ -23,7 +24,6 @@ public:
 
 	glm::vec3 pos;
 };
-using NodePtr = std::shared_ptr<Node>;
 
 // Generic network link
 // something that can be travelled along
@@ -38,7 +38,7 @@ public:
 	using Nexts = std::vector<Next>;
 
 	struct End {
-		NodePtr node;
+		Node::Ptr node;
 		float dir;
 		Nexts nexts {};
 	};

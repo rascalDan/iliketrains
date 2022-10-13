@@ -9,10 +9,10 @@ public:
 
 	RouteWalker();
 
-	Solution findRouteTo(const Link::End & currentEnd, const NodePtr & dest);
+	Solution findRouteTo(const Link::End & currentEnd, const Node::Ptr & dest);
 
 private:
-	void findRouteTo(const Link::End & currentEnd, const NodePtr & dest, float length);
+	void findRouteTo(const Link::End & currentEnd, const Node::Ptr & dest, float length);
 
 	std::set<const Link::End *> visited;
 	Solution bestSolution, currentSolution;

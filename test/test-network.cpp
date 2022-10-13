@@ -19,8 +19,8 @@
 #include <vector>
 
 struct TestLink : public LinkStraight {
-	TestLink(NodePtr a, NodePtr b) : TestLink {a, b, glm::distance(a->pos, b->pos)} { }
-	TestLink(NodePtr a, NodePtr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
+	TestLink(Node::Ptr a, Node::Ptr b) : TestLink {a, b, glm::distance(a->pos, b->pos)} { }
+	TestLink(Node::Ptr a, Node::Ptr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
 	using StraightLink = TestLink;
 };
 

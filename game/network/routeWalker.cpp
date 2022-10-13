@@ -9,7 +9,7 @@
 RouteWalker::RouteWalker() : solutionLength {std::numeric_limits<float>::max()} { }
 
 RouteWalker::Solution
-RouteWalker::findRouteTo(const Link::End & currentEnd, const NodePtr & dest)
+RouteWalker::findRouteTo(const Link::End & currentEnd, const Node::Ptr & dest)
 {
 	findRouteTo(currentEnd, dest, 0);
 	return bestSolution;
@@ -17,7 +17,7 @@ RouteWalker::findRouteTo(const Link::End & currentEnd, const NodePtr & dest)
 
 void
 // NOLINTNEXTLINE(misc-no-recursion)
-RouteWalker::findRouteTo(const Link::End & currentEnd, const NodePtr & dest, float length)
+RouteWalker::findRouteTo(const Link::End & currentEnd, const Node::Ptr & dest, float length)
 {
 	if (currentEnd.node == dest && length < solutionLength) {
 		bestSolution = currentSolution;

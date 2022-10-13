@@ -13,13 +13,13 @@
 
 Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(tn)} { }
 
-NodePtr
+Node::Ptr
 Network::nodeAt(glm::vec3 pos)
 {
 	return newNodeAt(pos).first;
 }
 
-std::pair<NodePtr, bool>
+std::pair<Node::Ptr, bool>
 Network::newNodeAt(glm::vec3 pos)
 {
 	const auto [n, i] = candidateNodeAt(pos);
@@ -29,7 +29,7 @@ Network::newNodeAt(glm::vec3 pos)
 	return {n, !i};
 }
 
-NodePtr
+Node::Ptr
 Network::findNodeAt(glm::vec3 pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
@@ -38,7 +38,7 @@ Network::findNodeAt(glm::vec3 pos) const
 	return {};
 }
 
-std::pair<NodePtr, bool>
+std::pair<Node::Ptr, bool>
 Network::candidateNodeAt(glm::vec3 pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
@@ -47,12 +47,12 @@ Network::candidateNodeAt(glm::vec3 pos) const
 	return {std::make_shared<Node>(pos), false};
 }
 
-NodePtr
+Node::Ptr
 Network::intersectRayNodes(const Ray & ray) const
 {
 	// Click within 2m of a node
 	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
-				[&ray](const NodePtr & node) {
+				[&ray](const Node::Ptr & node) {
 					glm::vec3 ipos, inorm;
 					return glm::intersectRaySphere(ray.start, ray.direction, node->pos, 2.F, ipos, inorm);
 				});
@@ -88,7 +88,7 @@ Network::routeFromTo(const Link::End & start, glm::vec3 dest) const
 }
 
 Link::Nexts
-Network::routeFromTo(const Link::End & end, const NodePtr & dest) const
+Network::routeFromTo(const Link::End & end, const Node::Ptr & dest) const
 {
 	return RouteWalker().findRouteTo(end, dest);
 }

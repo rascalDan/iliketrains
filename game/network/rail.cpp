@@ -128,9 +128,9 @@ round_sleepers(const float v)
 	return round_frac(v, sleepers);
 }
 
-RailLinkStraight::RailLinkStraight(const NodePtr & a, const NodePtr & b) : RailLinkStraight(a, b, b->pos - a->pos) { }
+RailLinkStraight::RailLinkStraight(const Node::Ptr & a, const Node::Ptr & b) : RailLinkStraight(a, b, b->pos - a->pos) { }
 
-RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff) :
+RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const glm::vec3 & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
 {
 	if (glGenVertexArrays) {
@@ -149,12 +149,12 @@ RailLinkStraight::RailLinkStraight(NodePtr a, NodePtr b, const glm::vec3 & diff)
 	}
 }
 
-RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec2 c) :
+RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, glm::vec2 c) :
 	RailLinkCurve(a, b, c ^ a->pos.z, {!c, a->pos, b->pos})
 {
 }
 
-RailLinkCurve::RailLinkCurve(const NodePtr & a, const NodePtr & b, glm::vec3 c, const Arc arc) :
+RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, glm::vec3 c, const Arc arc) :
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			(glm::length(a->pos - c)) * arc_length(arc)),
 	LinkCurve {c, glm::length(ends[0].node->pos - c), arc}

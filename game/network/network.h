@@ -21,15 +21,15 @@ public:
 	explicit Network(const std::string & textureName);
 	virtual ~Network() = default;
 
-	[[nodiscard]] NodePtr findNodeAt(glm::vec3) const;
-	[[nodiscard]] NodePtr nodeAt(glm::vec3);
-	[[nodiscard]] std::pair<NodePtr, bool> newNodeAt(glm::vec3);
-	[[nodiscard]] std::pair<NodePtr, bool> candidateNodeAt(glm::vec3) const;
+	[[nodiscard]] Node::Ptr findNodeAt(glm::vec3) const;
+	[[nodiscard]] Node::Ptr nodeAt(glm::vec3);
+	[[nodiscard]] std::pair<Node::Ptr, bool> newNodeAt(glm::vec3);
+	[[nodiscard]] std::pair<Node::Ptr, bool> candidateNodeAt(glm::vec3) const;
 	[[nodiscard]] virtual LinkPtr intersectRayLinks(const Ray &) const = 0;
-	[[nodiscard]] virtual NodePtr intersectRayNodes(const Ray &) const;
+	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray &) const;
 
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
-	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const NodePtr &) const;
+	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &) const;
 
 	virtual LinkCPtr addStraight(glm::vec3, glm::vec3) = 0;
 	virtual CLinks addJoins(glm::vec3, glm::vec3) = 0;
@@ -37,7 +37,7 @@ public:
 protected:
 	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);
 
-	using Nodes = std::set<NodePtr, PtrMemberSorter<NodePtr, &Node::pos>>;
+	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;
 	std::shared_ptr<Texture> texture;
 };

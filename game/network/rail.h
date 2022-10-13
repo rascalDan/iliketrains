@@ -38,18 +38,18 @@ RailLink::~RailLink() = default;
 
 class RailLinkStraight : public RailLink, public LinkStraight {
 public:
-	RailLinkStraight(const NodePtr &, const NodePtr &);
+	RailLinkStraight(const Node::Ptr &, const Node::Ptr &);
 
 private:
-	RailLinkStraight(NodePtr, NodePtr, const glm::vec3 & diff);
+	RailLinkStraight(Node::Ptr, Node::Ptr, const glm::vec3 & diff);
 };
 
 class RailLinkCurve : public RailLink, public LinkCurve {
 public:
-	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec2);
+	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, glm::vec2);
 
 private:
-	RailLinkCurve(const NodePtr &, const NodePtr &, glm::vec3, const Arc);
+	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, glm::vec3, const Arc);
 };
 
 class RailLinks : public NetworkOf<RailLink>, public WorldObject {

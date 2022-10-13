@@ -21,7 +21,7 @@ public:
 	void render(const Shader &) const override;
 	void render(const UIShader & shader, const UIComponent::Position & pos) const override;
 
-	using NetworkClickPos = std::variant<glm::vec3, NodePtr>;
+	using NetworkClickPos = std::variant<glm::vec3, Node::Ptr>;
 
 	class Builder {
 	public:
