@@ -16,20 +16,23 @@ Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(t
 NodePtr
 Network::nodeAt(glm::vec3 pos)
 {
-	return *nodes.insert(std::make_shared<Node>(pos)).first;
+	return newNodeAt(pos).first;
 }
 
 std::pair<NodePtr, bool>
 Network::newNodeAt(glm::vec3 pos)
 {
-	const auto i = nodes.insert(std::make_shared<Node>(pos));
-	return {*i.first, i.second};
+	const auto [n, i] = candidateNodeAt(pos);
+	if (!i) {
+		nodes.insert(n);
+	}
+	return {n, !i};
 }
 
 NodePtr
 Network::findNodeAt(glm::vec3 pos) const
 {
-	if (const auto n = nodes.find(std::make_shared<Node>(pos)); n != nodes.end()) {
+	if (const auto n = nodes.find(pos); n != nodes.end()) {
 		return *n;
 	}
 	return {};
@@ -38,7 +41,7 @@ Network::findNodeAt(glm::vec3 pos) const
 std::pair<NodePtr, bool>
 Network::candidateNodeAt(glm::vec3 pos) const
 {
-	if (const auto n = nodes.find(std::make_shared<Node>(pos)); n != nodes.end()) {
+	if (const auto n = nodes.find(pos); n != nodes.end()) {
 		return {*n, true};
 	}
 	return {std::make_shared<Node>(pos), false};
