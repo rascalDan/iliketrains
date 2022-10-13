@@ -30,9 +30,9 @@ public:
 
 protected:
 	[[nodiscard]] glm::vec3 vehiclePositionOffset() const override;
-	[[nodiscard]] static MeshPtr defaultMesh(const std::span<Vertex> vertices);
+	[[nodiscard]] static Mesh::Ptr defaultMesh(const std::span<Vertex> vertices);
 
-	MeshPtr mesh;
+	Mesh::Ptr mesh;
 };
 RailLink::~RailLink() = default;
 

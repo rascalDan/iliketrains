@@ -92,7 +92,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 	return addLink<RailLinkCurve>(start, end, centre.first);
 }
 
-MeshPtr
+Mesh::Ptr
 RailLink::defaultMesh(const std::span<Vertex> vertices)
 {
 	std::vector<unsigned int> indices;

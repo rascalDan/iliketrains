@@ -4,10 +4,11 @@
 #include <glArrays.h>
 #include <memory>
 #include <span>
+#include <stdTypeDefs.hpp>
 
 class Vertex;
 
-class Mesh {
+class Mesh : public ConstTypeDefs<Mesh> {
 public:
 	Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum = GL_TRIANGLES);
 
@@ -19,4 +20,3 @@ private:
 	GLsizei m_numIndices;
 	GLenum mode;
 };
-using MeshPtr = std::shared_ptr<const Mesh>;

@@ -16,8 +16,8 @@ public:
 
 	void render(const Shader &, const Location &, const std::array<Location, 2> &) const;
 
-	std::array<MeshPtr, 2> bogies;
-	MeshPtr bodyMesh;
+	std::array<Mesh::Ptr, 2> bogies;
+	Mesh::Ptr bodyMesh;
 	std::shared_ptr<Texture> texture;
 	float wheelBase;
 	float length;
