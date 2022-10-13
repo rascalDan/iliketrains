@@ -5,10 +5,12 @@
 #include <glArrays.h>
 
 // IWYU pragma: no_forward_declare Cache
+class Image;
 
 class Texture {
 public:
 	explicit Texture(const std::filesystem::path & fileName);
+	explicit Texture(const Image & image);
 
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
