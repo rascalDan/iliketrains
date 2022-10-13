@@ -11,6 +11,7 @@ class Texture {
 public:
 	explicit Texture(const std::filesystem::path & fileName);
 	explicit Texture(const Image & image);
+	explicit Texture(GLsizei width, GLsizei height, void * data);
 
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
