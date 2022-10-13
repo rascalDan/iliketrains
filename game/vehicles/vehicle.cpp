@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-Vehicle::Vehicle(const LinkPtr & l, float ld) : linkDist {ld}
+Vehicle::Vehicle(const Link::Ptr & l, float ld) : linkDist {ld}
 {
 	linkHist.add(l, 0);
 	currentActivity = std::make_unique<Idle>();

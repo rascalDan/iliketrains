@@ -17,7 +17,7 @@ class Ray;
 
 class Network {
 public:
-	using LinkEnd = std::pair<LinkPtr, unsigned char>;
+	using LinkEnd = std::pair<Link::Ptr, unsigned char>;
 	explicit Network(const std::string & textureName);
 	virtual ~Network() = default;
 
@@ -25,17 +25,17 @@ public:
 	[[nodiscard]] Node::Ptr nodeAt(glm::vec3);
 	[[nodiscard]] std::pair<Node::Ptr, bool> newNodeAt(glm::vec3);
 	[[nodiscard]] std::pair<Node::Ptr, bool> candidateNodeAt(glm::vec3) const;
-	[[nodiscard]] virtual LinkPtr intersectRayLinks(const Ray &) const = 0;
+	[[nodiscard]] virtual Link::Ptr intersectRayLinks(const Ray &) const = 0;
 	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray &) const;
 
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &) const;
 
-	virtual LinkCPtr addStraight(glm::vec3, glm::vec3) = 0;
-	virtual CLinks addJoins(glm::vec3, glm::vec3) = 0;
+	virtual Link::CPtr addStraight(glm::vec3, glm::vec3) = 0;
+	virtual Link::CCollection addJoins(glm::vec3, glm::vec3) = 0;
 
 protected:
-	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);
+	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
 
 	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;
@@ -47,10 +47,10 @@ protected:
 	using Network::Network;
 
 	Collection<T> links;
-	void joinLinks(const LinkPtr &) const;
+	void joinLinks(const Link::Ptr &) const;
 
 protected:
-	[[nodiscard]] LinkPtr intersectRayLinks(const Ray &) const override;
+	[[nodiscard]] Link::Ptr intersectRayLinks(const Ray &) const override;
 
 public:
 	template<typename L, typename... Params>
@@ -64,8 +64,8 @@ public:
 		return l;
 	}
 
-	LinkCPtr addStraight(glm::vec3 n1, glm::vec3 n2) override;
-	CLinks addJoins(glm::vec3, glm::vec3) override;
+	Link::CPtr addStraight(glm::vec3 n1, glm::vec3 n2) override;
+	Link::CCollection addJoins(glm::vec3, glm::vec3) override;
 
 	void render(const Shader &) const override;
 };

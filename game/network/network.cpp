@@ -63,7 +63,7 @@ Network::intersectRayNodes(const Ray & ray) const
 }
 
 void
-Network::joinLinks(const LinkPtr & l, const LinkPtr & ol)
+Network::joinLinks(const Link::Ptr & l, const Link::Ptr & ol)
 {
 	if (l != ol) {
 		for (const auto oe : {0U, 1U}) {

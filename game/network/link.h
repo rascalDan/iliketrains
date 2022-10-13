@@ -28,13 +28,9 @@ public:
 // Generic network link
 // something that can be travelled along
 // it joins 2 nodes
-class Link;
-using LinkPtr = std::shared_ptr<Link>;
-using LinkCPtr = std::shared_ptr<const Link>;
-using LinkWPtr = std::weak_ptr<const Link>;
-class Link {
+class Link : public StdTypeDefs<Link> {
 public:
-	using Next = std::pair<LinkWPtr, unsigned char /*end*/>;
+	using Next = std::pair<WPtr, unsigned char /*end*/>;
 	using Nexts = std::vector<Next>;
 
 	struct End {
@@ -61,7 +57,6 @@ protected:
 		return {};
 	}
 };
-using CLinks = std::vector<LinkCPtr>;
 
 bool operator<(const glm::vec3 & a, const glm::vec3 & b);
 bool operator<(const Node & a, const Node & b);

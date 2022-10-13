@@ -15,7 +15,7 @@ NetworkOf<T>::render(const Shader & shader) const
 
 template<typename T>
 void
-NetworkOf<T>::joinLinks(const LinkPtr & l) const
+NetworkOf<T>::joinLinks(const Link::Ptr & l) const
 {
 	for (const auto & ol : links.objects) {
 		Network::joinLinks(l, ol);
@@ -23,7 +23,7 @@ NetworkOf<T>::joinLinks(const LinkPtr & l) const
 }
 
 template<typename T>
-LinkPtr
+Link::Ptr
 NetworkOf<T>::intersectRayLinks(const Ray & ray) const
 {
 	// Click link
@@ -38,14 +38,14 @@ NetworkOf<T>::intersectRayLinks(const Ray & ray) const
 }
 
 template<typename T>
-LinkCPtr
+Link::CPtr
 NetworkOf<T>::addStraight(glm::vec3 n1, glm::vec3 n2)
 {
 	return addLink<typename T::StraightLink>(n1, n2);
 }
 
 template<typename T>
-CLinks
+Link::CCollection
 NetworkOf<T>::addJoins(glm::vec3 n1, glm::vec3 n2)
 {
 	return {addLink<typename T::StraightLink>(n1, n2)};

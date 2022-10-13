@@ -3,7 +3,7 @@
 #include <memory>
 
 LinkHistory::Entry
-LinkHistory::add(const LinkWPtr & l, unsigned char d)
+LinkHistory::add(const Link::WPtr & l, unsigned char d)
 {
 	links.insert(links.begin(), {l, d});
 	const auto lp = l.lock();

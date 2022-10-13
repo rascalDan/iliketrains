@@ -6,9 +6,9 @@
 
 class LinkHistory {
 public:
-	using WEntry = std::pair<LinkWPtr, unsigned char /*dir*/>;
-	using Entry = std::pair<LinkCPtr, unsigned char /*dir*/>;
-	Entry add(const LinkWPtr &, unsigned char);
+	using WEntry = std::pair<Link::WPtr, unsigned char /*dir*/>;
+	using Entry = std::pair<Link::CPtr, unsigned char /*dir*/>;
+	Entry add(const Link::WPtr &, unsigned char);
 	[[nodiscard]] Entry getCurrent() const;
 	[[nodiscard]] Entry getAt(float, float *) const;
 

@@ -18,7 +18,7 @@ class Ray;
 
 class Train : public Vehicle, public Collection<RailVehicle, false>, public Can<Go>, public Can<Idle> {
 public:
-	explicit Train(const LinkPtr & link, float linkDist = 0) : Vehicle {link, linkDist} { }
+	explicit Train(const Link::Ptr & link, float linkDist = 0) : Vehicle {link, linkDist} { }
 
 	[[nodiscard]] const Location &
 	getLocation() const override

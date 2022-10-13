@@ -14,7 +14,7 @@ class Location;
 
 class Vehicle : public WorldObject, public Renderable, public Selectable {
 public:
-	explicit Vehicle(const LinkPtr & link, float linkDist = 0);
+	explicit Vehicle(const Link::Ptr & link, float linkDist = 0);
 	float linkDist; // distance along current link
 	float speed {}; // speed in m/s (~75 km/h)
 
