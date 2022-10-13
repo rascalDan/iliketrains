@@ -37,7 +37,7 @@ public:
 protected:
 	static void joinLinks(const LinkPtr & l, const LinkPtr & ol);
 
-	using Nodes = std::set<NodePtr, PtrSorter<NodePtr>>;
+	using Nodes = std::set<NodePtr, PtrMemberSorter<NodePtr, &Node::pos>>;
 	Nodes nodes;
 	std::shared_ptr<Texture> texture;
 };
