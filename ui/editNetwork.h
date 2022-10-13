@@ -29,14 +29,14 @@ public:
 		virtual void render(const Shader & shader) const = 0;
 		virtual std::string hint() const = 0;
 		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray &) = 0;
+
+		using Ptr = std::unique_ptr<Builder>;
 	};
 
 private:
-	using BuilderPtr = std::unique_ptr<Builder>;
-
 	Network * network;
-	BuilderPtr builder;
-	Mode<BuilderPtr, ModeSecondClick::NoAction> mode {builder};
+	Builder::Ptr builder;
+	Mode<Builder::Ptr, ModeSecondClick::NoAction> mode {builder};
 	Toolbar builderToolbar;
 };
 
