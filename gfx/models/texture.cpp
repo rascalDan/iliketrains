@@ -18,7 +18,7 @@ Texture::Texture(const Image & tex) :
 {
 }
 
-Texture::Texture(GLsizei width, GLsizei height, void * data)
+Texture::Texture(GLsizei width, GLsizei height, const void * data)
 {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 
