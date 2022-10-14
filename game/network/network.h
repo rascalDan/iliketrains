@@ -31,7 +31,9 @@ public:
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, glm::vec3) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &) const;
 
-	virtual Link::CPtr addStraight(glm::vec3, glm::vec3) = 0;
+	virtual Link::CCollection candidateStraight(glm::vec3, glm::vec3) = 0;
+	virtual Link::CCollection candidateJoins(glm::vec3, glm::vec3) = 0;
+	virtual Link::CCollection addStraight(glm::vec3, glm::vec3) = 0;
 	virtual Link::CCollection addJoins(glm::vec3, glm::vec3) = 0;
 
 protected:
@@ -55,8 +57,15 @@ protected:
 public:
 	template<typename L, typename... Params>
 	std::shared_ptr<L>
-	addLink(glm::vec3 a, glm::vec3 b, Params &&... params)
-		requires std::is_base_of_v<T, L>
+	candidateLink(glm::vec3 a, glm::vec3 b, Params &&... params) requires std::is_base_of_v<T, L>
+	{
+		const auto node1 = candidateNodeAt(a).first, node2 = candidateNodeAt(b).first;
+		return std::make_shared<L>(node1, node2, std::forward<Params>(params)...);
+	}
+
+	template<typename L, typename... Params>
+	std::shared_ptr<L>
+	addLink(glm::vec3 a, glm::vec3 b, Params &&... params) requires std::is_base_of_v<T, L>
 	{
 		const auto node1 = nodeAt(a), node2 = nodeAt(b);
 		auto l {links.template create<L>(node1, node2, std::forward<Params>(params)...)};
@@ -64,7 +73,9 @@ public:
 		return l;
 	}
 
-	Link::CPtr addStraight(glm::vec3 n1, glm::vec3 n2) override;
+	Link::CCollection candidateStraight(glm::vec3 n1, glm::vec3 n2) override;
+	Link::CCollection candidateJoins(glm::vec3, glm::vec3) override;
+	Link::CCollection addStraight(glm::vec3 n1, glm::vec3 n2) override;
 	Link::CCollection addJoins(glm::vec3, glm::vec3) override;
 
 	void render(const Shader &) const override;

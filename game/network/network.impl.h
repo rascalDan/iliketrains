@@ -38,10 +38,24 @@ NetworkOf<T>::intersectRayLinks(const Ray & ray) const
 }
 
 template<typename T>
-Link::CPtr
+Link::CCollection
+NetworkOf<T>::candidateStraight(glm::vec3 n1, glm::vec3 n2)
+{
+	return {candidateLink<typename T::StraightLink>(n1, n2)};
+}
+
+template<typename T>
+Link::CCollection
+NetworkOf<T>::candidateJoins(glm::vec3 n1, glm::vec3 n2)
+{
+	return {candidateLink<typename T::StraightLink>(n1, n2)};
+}
+
+template<typename T>
+Link::CCollection
 NetworkOf<T>::addStraight(glm::vec3 n1, glm::vec3 n2)
 {
-	return addLink<typename T::StraightLink>(n1, n2);
+	return {addLink<typename T::StraightLink>(n1, n2)};
 }
 
 template<typename T>
