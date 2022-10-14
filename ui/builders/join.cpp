@@ -1,11 +1,6 @@
 #include "join.h"
 #include <game/geoData.h>
 
-void
-BuilderJoin::render(const Shader &) const
-{
-}
-
 std::string
 BuilderJoin::hint() const
 {
@@ -13,6 +8,19 @@ BuilderJoin::hint() const
 		return "Pick second node";
 	}
 	return "Pick first node";
+}
+
+void
+BuilderJoin::move(Network * network, const GeoData *, const SDL_MouseMotionEvent &, const Ray & ray)
+{
+	if (p1) {
+		if (const auto p = network->intersectRayNodes(ray)) {
+			candidateLinks.objects = network->candidateJoins(p1->pos, p->pos);
+		}
+		else {
+			candidateLinks.removeAll();
+		}
+	}
 }
 
 void
@@ -24,6 +32,7 @@ BuilderJoin::click(Network * network, const GeoData *, const SDL_MouseButtonEven
 				if (p1) {
 					create(network, p1, p);
 					p1.reset();
+					candidateLinks.removeAll();
 				}
 				else {
 					p1 = p;

@@ -4,12 +4,18 @@
 #include "text.h"
 #include <game/gamestate.h>
 #include <game/geoData.h>
+#include <gfx/gl/shader.h>
+#include <gfx/models/texture.h>
+
+constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
 
 EditNetwork::EditNetwork(Network * n) :
-	network {n}, builderToolbar {
-						 {"ui/icon/network.png", mode.toggle<BuilderStraight>()},
-						 {"ui/icon/network.png", mode.toggle<BuilderJoin>()},
-				 }
+	network {n},
+	builderToolbar {
+			{"ui/icon/network.png", mode.toggle<BuilderStraight>()},
+			{"ui/icon/network.png", mode.toggle<BuilderJoin>()},
+	},
+	blue {1, 1, &TRANSPARENT_BLUE}
 {
 }
 
@@ -26,8 +32,11 @@ EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray & ray)
 }
 
 bool
-EditNetwork::move(const SDL_MouseMotionEvent &, const Ray &)
+EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray & ray)
 {
+	if (builder) {
+		builder->move(network, gameState->geoData.get(), e, ray);
+	}
 	return false;
 }
 
@@ -41,8 +50,16 @@ void
 EditNetwork::render(const Shader & shader) const
 {
 	if (builder) {
+		blue.Bind();
+		shader.setModel(Location {}, Shader::Program::StaticPos);
 		builder->render(shader);
 	}
+}
+
+void
+EditNetwork::Builder::render(const Shader & shader) const
+{
+	candidateLinks.apply<const Renderable>(&Renderable::render, shader);
 }
 
 void

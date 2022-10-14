@@ -6,6 +6,7 @@
 #include "worldOverlay.h"
 #include <game/gamestate.h>
 #include <game/network/network.h>
+#include <gfx/models/texture.h>
 #include <optional>
 
 class Ray;
@@ -26,11 +27,15 @@ public:
 	class Builder {
 	public:
 		virtual ~Builder() = default;
-		virtual void render(const Shader & shader) const = 0;
+		virtual void render(const Shader & shader) const;
 		virtual std::string hint() const = 0;
 		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray &) = 0;
+		virtual void move(Network *, const GeoData *, const SDL_MouseMotionEvent &, const Ray &) = 0;
 
 		using Ptr = std::unique_ptr<Builder>;
+
+	protected:
+		Collection<const Link> candidateLinks;
 	};
 
 private:
@@ -38,6 +43,7 @@ private:
 	Builder::Ptr builder;
 	Mode<Builder::Ptr, ModeSecondClick::NoAction> mode {builder};
 	Toolbar builderToolbar;
+	Texture blue;
 };
 
 template<typename T> class EditNetworkOf : public EditNetwork {

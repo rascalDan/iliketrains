@@ -1,11 +1,6 @@
 #include "straight.h"
 #include <game/geoData.h>
 
-void
-BuilderStraight::render(const Shader &) const
-{
-}
-
 std::string
 BuilderStraight::hint() const
 {
@@ -16,6 +11,19 @@ BuilderStraight::hint() const
 }
 
 void
+BuilderStraight::move(Network * network, const GeoData * geoData, const SDL_MouseMotionEvent &, const Ray & ray)
+{
+	if (p1) {
+		if (const auto p = geoData->intersectRay(ray)) {
+			candidateLinks.objects = network->candidateStraight(*p1, *p);
+		}
+		else {
+			candidateLinks.removeAll();
+		}
+	}
+}
+
+void
 BuilderStraight::click(Network * network, const GeoData * geoData, const SDL_MouseButtonEvent & e, const Ray & ray)
 {
 	switch (e.button) {
@@ -23,12 +31,14 @@ BuilderStraight::click(Network * network, const GeoData * geoData, const SDL_Mou
 			if (const auto p = geoData->intersectRay(ray)) {
 				if (p1) {
 					create(network, *p1, *p);
+					candidateLinks.removeAll();
 				}
 				p1 = *p;
 			}
 			return;
 		case SDL_BUTTON_MIDDLE:
 			p1.reset();
+			candidateLinks.removeAll();
 			return;
 	}
 }
