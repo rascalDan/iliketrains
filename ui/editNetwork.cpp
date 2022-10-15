@@ -1,4 +1,5 @@
 #include "editNetwork.h"
+#include "builders/freeExtend.h"
 #include "builders/join.h"
 #include "builders/straight.h"
 #include "text.h"
@@ -14,6 +15,7 @@ EditNetwork::EditNetwork(Network * n) :
 	builderToolbar {
 			{"ui/icon/network.png", mode.toggle<BuilderStraight>()},
 			{"ui/icon/network.png", mode.toggle<BuilderJoin>()},
+			{"ui/icon/network.png", mode.toggle<BuilderFreeExtend>()},
 	},
 	blue {1, 1, &TRANSPARENT_BLUE}
 {
