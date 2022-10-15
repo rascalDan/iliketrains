@@ -32,8 +32,11 @@ BuilderStraight::click(Network * network, const GeoData * geoData, const SDL_Mou
 				if (p1) {
 					create(network, *p1, *p);
 					candidateLinks.removeAll();
+					p1.reset();
 				}
-				p1 = *p;
+				else {
+					p1 = p;
+				}
 			}
 			return;
 		case SDL_BUTTON_MIDDLE:
