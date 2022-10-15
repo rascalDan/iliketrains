@@ -14,7 +14,6 @@ class Ray;
 class EditNetwork : public GameMainSelector::Component, public WorldOverlay {
 public:
 	explicit EditNetwork(Network *);
-	virtual ~EditNetwork();
 
 	bool click(const SDL_MouseButtonEvent & e, const Ray &) override;
 	bool move(const SDL_MouseMotionEvent & e, const Ray &) override;

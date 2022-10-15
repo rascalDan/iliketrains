@@ -19,8 +19,6 @@ EditNetwork::EditNetwork(Network * n) :
 {
 }
 
-EditNetwork::~EditNetwork() = default;
-
 bool
 EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray & ray)
 {
