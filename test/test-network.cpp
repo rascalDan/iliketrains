@@ -81,7 +81,7 @@ BOOST_DATA_TEST_CASE(nodeAt, VALID_NODES + INVALID_NODES, p)
 BOOST_DATA_TEST_CASE(newNodeAt_existing, VALID_NODES, p)
 {
 	auto n = newNodeAt(p);
-	BOOST_CHECK(!n.second);
+	BOOST_CHECK_EQUAL(n.second, Network::NodeIs::InNetwork);
 	BOOST_REQUIRE(n.first);
 	BOOST_CHECK_EQUAL(n.first->pos, p);
 }
@@ -89,7 +89,7 @@ BOOST_DATA_TEST_CASE(newNodeAt_existing, VALID_NODES, p)
 BOOST_DATA_TEST_CASE(newNodeAt_new, INVALID_NODES, p)
 {
 	auto n = newNodeAt(p);
-	BOOST_CHECK(n.second);
+	BOOST_CHECK_EQUAL(n.second, Network::NodeIs::NotInNetwork);
 	BOOST_REQUIRE(n.first);
 	BOOST_CHECK_EQUAL(n.first->pos, p);
 }

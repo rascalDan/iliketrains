@@ -19,14 +19,15 @@ Network::nodeAt(glm::vec3 pos)
 	return newNodeAt(pos).first;
 }
 
-std::pair<Node::Ptr, bool>
+Network::NodeInsertion
 Network::newNodeAt(glm::vec3 pos)
 {
-	const auto [n, i] = candidateNodeAt(pos);
-	if (!i) {
-		nodes.insert(n);
+	if (const auto [n, i] = candidateNodeAt(pos); i == NodeIs::NotInNetwork) {
+		return {*nodes.insert(std::move(n)).first, i};
 	}
-	return {n, !i};
+	else {
+		return {n, NodeIs::InNetwork};
+	}
 }
 
 Node::Ptr
@@ -38,13 +39,13 @@ Network::findNodeAt(glm::vec3 pos) const
 	return {};
 }
 
-std::pair<Node::Ptr, bool>
+Network::NodeInsertion
 Network::candidateNodeAt(glm::vec3 pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
-		return {*n, true};
+		return {*n, NodeIs::InNetwork};
 	}
-	return {std::make_shared<Node>(pos), false};
+	return {std::make_shared<Node>(pos), NodeIs::NotInNetwork};
 }
 
 Node::Ptr

@@ -23,8 +23,10 @@ public:
 
 	[[nodiscard]] Node::Ptr findNodeAt(glm::vec3) const;
 	[[nodiscard]] Node::Ptr nodeAt(glm::vec3);
-	[[nodiscard]] std::pair<Node::Ptr, bool> newNodeAt(glm::vec3);
-	[[nodiscard]] std::pair<Node::Ptr, bool> candidateNodeAt(glm::vec3) const;
+	enum class NodeIs { InNetwork, NotInNetwork };
+	using NodeInsertion = std::pair<Node::Ptr, NodeIs>;
+	[[nodiscard]] NodeInsertion newNodeAt(glm::vec3);
+	[[nodiscard]] NodeInsertion candidateNodeAt(glm::vec3) const;
 	[[nodiscard]] virtual Link::Ptr intersectRayLinks(const Ray &) const = 0;
 	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray &) const;
 
@@ -85,4 +87,7 @@ public:
 	Link::CCollection addExtend(glm::vec3, glm::vec3) override;
 
 	void render(const Shader &) const override;
+
+protected:
+	Link::CCollection addJoins();
 };

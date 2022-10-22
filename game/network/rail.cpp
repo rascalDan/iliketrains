@@ -30,11 +30,11 @@ std::shared_ptr<RailLink>
 RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 {
 	auto node1ins = newNodeAt(start), node2ins = newNodeAt(end);
-	if (node1ins.second && node2ins.second) {
+	if (node1ins.second == NodeIs::NotInNetwork && node2ins.second == NodeIs::NotInNetwork) {
 		// Both nodes are new, direct link, easy
 		return addLink<RailLinkStraight>(start, end);
 	}
-	if (node1ins.second && !node2ins.second) {
+	if (node1ins.second == NodeIs::NotInNetwork && node2ins.second == NodeIs::InNetwork) {
 		// node1 is new, node2 exists, but we build from existing outwards
 		std::swap(node1ins, node2ins);
 		std::swap(start, end);
@@ -56,7 +56,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		return addLink<RailLinkStraight>(start, end);
 	}
 	const glm::vec2 flatStart {!start}, flatEnd {!end};
-	if (!node2ins.second) {
+	if (node2ins.second == NodeIs::InNetwork) {
 		auto midheight = [&](auto mid) {
 			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
 			return start.z + ((end.z - start.z) * (sm / (sm + em)));
@@ -128,7 +128,9 @@ round_sleepers(const float v)
 	return round_frac(v, sleepers);
 }
 
-RailLinkStraight::RailLinkStraight(const Node::Ptr & a, const Node::Ptr & b) : RailLinkStraight(a, b, b->pos - a->pos) { }
+RailLinkStraight::RailLinkStraight(const Node::Ptr & a, const Node::Ptr & b) : RailLinkStraight(a, b, b->pos - a->pos)
+{
+}
 
 RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const glm::vec3 & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
