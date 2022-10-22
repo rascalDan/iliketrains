@@ -35,16 +35,16 @@ RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance
 	constexpr const auto X = 1.35F;
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3.9F;
-	const auto move = glm::translate(location.pos) * rotate_ypr(location.rot);
+	const auto moveBy = glm::translate(location.pos) * rotate_ypr(location.rot);
 	const std::array<glm::vec3, 8> cornerVertices {{
-			move * glm::vec4 {-X, Y, 0, 1}, //  LFB
-			move * glm::vec4 {X, Y, 0, 1}, //   RFB
-			move * glm::vec4 {-X, Y, Z, 1}, //  LFT
-			move * glm::vec4 {X, Y, Z, 1}, //   RFT
-			move * glm::vec4 {-X, -Y, 0, 1}, // LBB
-			move * glm::vec4 {X, -Y, 0, 1}, //  RBB
-			move * glm::vec4 {-X, -Y, Z, 1}, // LBT
-			move * glm::vec4 {X, -Y, Z, 1}, //  RBT
+			moveBy * glm::vec4 {-X, Y, 0, 1}, //  LFB
+			moveBy * glm::vec4 {X, Y, 0, 1}, //   RFB
+			moveBy * glm::vec4 {-X, Y, Z, 1}, //  LFT
+			moveBy * glm::vec4 {X, Y, Z, 1}, //   RFT
+			moveBy * glm::vec4 {-X, -Y, 0, 1}, // LBB
+			moveBy * glm::vec4 {X, -Y, 0, 1}, //  RBB
+			moveBy * glm::vec4 {-X, -Y, Z, 1}, // LBT
+			moveBy * glm::vec4 {X, -Y, Z, 1}, //  RBT
 	}};
 	static constexpr const std::array<glm::uvec3, 10> triangles {{
 			// Front
