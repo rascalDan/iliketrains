@@ -1,5 +1,6 @@
 #pragma once
 
+#include "enumDetails.hpp"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <maths.h>
@@ -50,6 +51,16 @@ namespace std {
 	operator<<(std::ostream & s, const Arc & arc)
 	{
 		return s << arc.first << " ↺ " << arc.second;
+	}
+
+	template<typename E>
+	concept IsEnum = std::is_enum_v<E>;
+
+	template<IsEnum E>
+	inline std::ostream &
+	operator<<(std::ostream & s, const E & e)
+	{
+		return s << EnumTypeDetails<E>::typeName << "::" << EnumDetails<E>::to_string(e).value();
 	}
 }
 

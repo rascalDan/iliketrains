@@ -29,3 +29,5 @@ run test-geo.cpp ;
 run test-network.cpp ;
 run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json fixtures/json/bad/*.json ] ] ;
 run test-text.cpp ;
+run test-enumDetails.cpp ;
+compile test-static-enumDetails.cpp ;
