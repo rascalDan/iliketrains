@@ -6,9 +6,22 @@
 #include <optional>
 #include <string_view>
 
+/// EnumDetailsBase
+// Shared helpers
+struct EnumDetailsBase {
+	template<size_t len>
+	constexpr static auto
+	strArr(auto input, auto start, auto end)
+	{
+		std::array<char, len> out;
+		input.copy(out.begin(), end - start, start);
+		return out;
+	}
+};
+
 /// EnumTypeDetails
 // Extracts the fully qualified name of the enumeration
-template<typename E> struct EnumTypeDetails {
+template<typename E> struct EnumTypeDetails : EnumDetailsBase {
 #ifndef ENUM_PROBE
 protected:
 #endif
@@ -21,11 +34,7 @@ protected:
 	constexpr static auto typeNameStart {typeraw().find(SEARCH_TYPE) + SEARCH_TYPE.length()};
 	constexpr static auto typeNameEnd {typeraw().find_first_of("];", typeNameStart)};
 	constexpr static auto typeNameLen {typeNameEnd - typeNameStart};
-	constexpr static auto typeNameArr {[]() {
-		std::array<char, typeNameLen> out;
-		typeraw().copy(out.begin(), typeNameEnd - typeNameStart, typeNameStart);
-		return out;
-	}()};
+	constexpr static auto typeNameArr {strArr<typeNameLen>(typeraw(), typeNameStart, typeNameEnd)};
 
 public:
 	constexpr static std::string_view typeName {typeNameArr.data(), typeNameArr.size()};
@@ -46,11 +55,7 @@ private:
 	constexpr static auto nameStart {raw().find_last_of(": ") + 1};
 	constexpr static auto nameEnd {raw().find_first_of("];", nameStart)};
 	constexpr static auto nameLen {nameEnd - nameStart};
-	constexpr static auto nameArr {[]() {
-		std::array<char, nameLen> out;
-		raw().copy(out.begin(), nameLen, nameStart);
-		return out;
-	}()};
+	constexpr static auto nameArr {EnumValueDetails::template strArr<nameLen>(raw(), nameStart, nameEnd)};
 
 public:
 	constexpr static std::string_view valueName {nameArr.data(), nameArr.size()};
@@ -58,14 +63,15 @@ public:
 	constexpr static auto raw_value {value};
 };
 
+/// EnumValueCollection
+// Customisation point for specifying the range of underlying values your enum can have
 template<typename E> struct EnumValueCollection {
 	using Vs = std::make_integer_sequence<int, 256>;
 };
 
+/// EnumDetails
+// Interface for lookups/checks/etc at runtime
 template<typename E> struct EnumDetails {
-public:
-	using EVC = EnumValueCollection<E>;
-
 #ifndef ENUM_PROBE
 private:
 #endif
@@ -88,21 +94,28 @@ private:
 		return std::array {EnumValueDetails<values[n]>::valueName...};
 	}
 
+	using EVC = EnumValueCollection<E>;
 	constexpr static auto valid_flags {get_valids(typename EVC::Vs {})};
 	constexpr static auto valid_count {std::count_if(valid_flags.begin(), valid_flags.end(), std::identity {})};
+
+	constexpr static auto
+	lookup(const auto key, const auto & search, const auto & out)
+			-> std::optional<typename std::decay_t<decltype(out)>::value_type>
+	{
+		if (const auto itr = std::find(search.begin(), search.end(), key); itr != search.end()) {
+			return out[std::distance(search.begin(), itr)];
+		}
+		return std::nullopt;
+	}
 
 public:
 	constexpr static auto values {[]() {
 		constexpr auto values {get_values(typename EVC::Vs {})};
 		static_assert(std::is_sorted(values.begin(), values.end()), "Candidate values must be sorted");
 		std::array<E, valid_count> out;
-		auto write = out.begin();
-		for (auto v = values.begin(); const bool & valid : valid_flags) {
-			if (valid) {
-				*write++ = static_cast<E>(*v);
-			}
-			++v;
-		}
+		std::copy_if(values.begin(), values.end(), out.begin(), [valid = valid_flags.begin()](auto) mutable {
+			return *valid++;
+		});
 		return out;
 	}()};
 	constexpr static auto names {get_valueNames(std::make_integer_sequence<int, valid_count> {})};
@@ -116,18 +129,12 @@ public:
 	constexpr static std::optional<E>
 	parse(std::string_view name) noexcept
 	{
-		if (const auto itr = std::find(names.begin(), names.end(), name); itr != names.end()) {
-			return values[std::distance(names.begin(), itr)];
-		}
-		return std::nullopt;
+		return lookup(name, names, values);
 	}
 
 	constexpr static std::optional<std::string_view>
 	to_string(E value) noexcept
 	{
-		if (const auto itr = std::find(values.begin(), values.end(), value); itr != values.end()) {
-			return names[std::distance(values.begin(), itr)];
-		}
-		return std::nullopt;
+		return lookup(value, values, names);
 	}
 };
