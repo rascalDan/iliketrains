@@ -38,6 +38,21 @@ NetworkOf<T>::intersectRayLinks(const Ray & ray) const
 }
 
 template<typename T>
+float
+NetworkOf<T>::findNodeDirection(Node::AnyCPtr n) const
+{
+	for (const auto & l : links.objects) {
+		for (const auto & e : l->ends) {
+			// cppcheck-suppress useStlAlgorithm
+			if (e.node.get() == n.get()) {
+				return e.dir;
+			}
+		}
+	}
+	throw std::runtime_error("Node exists but couldn't find it");
+}
+
+template<typename T>
 Link::CCollection
 NetworkOf<T>::candidateStraight(glm::vec3 n1, glm::vec3 n2)
 {

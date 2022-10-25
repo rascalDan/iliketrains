@@ -40,18 +40,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 		std::swap(start, end);
 	}
 	// Find start link/end - opposite entry dir to existing link; so pi +...
-	const auto findDir = [this](const auto & n) {
-		for (const auto & l : links.objects) {
-			for (const auto & e : l->ends) {
-				// cppcheck-suppress useStlAlgorithm
-				if (e.node == n) {
-					return e.dir;
-				}
-			}
-		}
-		throw std::runtime_error("Node exists but couldn't find it");
-	};
-	float dir = pi + findDir(node1ins.first);
+	float dir = pi + findNodeDirection(node1ins.first);
 	if (dir == vector_yaw(end - start)) {
 		return addLink<RailLinkStraight>(start, end);
 	}
@@ -61,7 +50,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
 			return start.z + ((end.z - start.z) * (sm / (sm + em)));
 		};
-		float dir2 = pi + findDir(node2ins.first);
+		float dir2 = pi + findNodeDirection(node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
 			const auto radius {radii.first};
 			const auto c1 = flatStart + sincosf(dir + half_pi) * radius;

@@ -40,6 +40,8 @@ public:
 	virtual Link::CCollection addJoins(glm::vec3, glm::vec3) = 0;
 	virtual Link::CCollection addExtend(glm::vec3, glm::vec3) = 0;
 
+	virtual float findNodeDirection(Node::AnyCPtr) const = 0;
+
 protected:
 	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
 
@@ -85,6 +87,8 @@ public:
 	Link::CCollection addStraight(glm::vec3 n1, glm::vec3 n2) override;
 	Link::CCollection addJoins(glm::vec3, glm::vec3) override;
 	Link::CCollection addExtend(glm::vec3, glm::vec3) override;
+
+	float findNodeDirection(Node::AnyCPtr) const override;
 
 	void render(const Shader &) const override;
 
