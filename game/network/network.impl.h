@@ -68,9 +68,10 @@ NetworkOf<T>::candidateJoins(glm::vec3 n1, glm::vec3 n2)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::candidateExtend(glm::vec3 n1, glm::vec3 n2)
+NetworkOf<T>::candidateExtend(glm::vec3 start, glm::vec3 end)
 {
-	return {candidateLink<typename T::StraightLink>(n1, n2)};
+	const auto [cstart, cend, centre] = genCurveDef(start, end, findNodeDirection(candidateNodeAt(start).first));
+	return {candidateLink<typename T::CurveLink>(cstart, cend, centre)};
 }
 
 template<typename T>
@@ -89,7 +90,8 @@ NetworkOf<T>::addJoins(glm::vec3 n1, glm::vec3 n2)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::addExtend(glm::vec3 n1, glm::vec3 n2)
+NetworkOf<T>::addExtend(glm::vec3 start, glm::vec3 end)
 {
-	return {addLink<typename T::StraightLink>(n1, n2)};
+	const auto [cstart, cend, centre] = genCurveDef(start, end, findNodeDirection(nodeAt(start)));
+	return {addLink<typename T::CurveLink>(cstart, cend, centre)};
 }

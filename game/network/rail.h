@@ -17,12 +17,14 @@ struct Arc;
 
 // A piece of rail track
 class RailLinkStraight;
+class RailLinkCurve;
 class RailLink : public virtual Link, public Renderable {
 public:
 	RailLink() = default;
 	inline ~RailLink() override = 0;
 
 	using StraightLink = RailLinkStraight;
+	using CurveLink = RailLinkCurve;
 
 	void render(const Shader &) const override;
 	NO_COPY(RailLink);

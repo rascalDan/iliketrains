@@ -93,3 +93,19 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest) const
 {
 	return RouteWalker().findRouteTo(end, dest);
 }
+
+GenCurveDef
+Network::genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float startDir)
+{
+	const auto diff {end - start};
+	const auto vy {vector_yaw(diff)};
+	const auto dir = pi + startDir;
+	const auto flatStart {!start}, flatEnd {!end};
+	const auto n2ed {(vy * 2) - dir - pi};
+	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};
+
+	if (centre.second) { // right hand arc
+		return {end, start, centre.first};
+	}
+	return {start, end, centre.first};
+}

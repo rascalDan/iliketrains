@@ -15,6 +15,9 @@ class Texture;
 class Shader;
 class Ray;
 
+template<size_t... n> using GenDef = std::tuple<glm::vec<n, float>...>;
+using GenCurveDef = GenDef<3, 3, 2>;
+
 class Network {
 public:
 	using LinkEnd = std::pair<Link::Ptr, unsigned char>;
@@ -44,6 +47,7 @@ public:
 
 protected:
 	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
+	static GenCurveDef genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float startDir);
 
 	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;
