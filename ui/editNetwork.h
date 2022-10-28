@@ -48,7 +48,7 @@ private:
 template<typename T> class EditNetworkOf : public EditNetwork {
 public:
 	template<typename... P>
-	EditNetworkOf(P &&... p) : EditNetwork(gameState->world.findOrCreate<T>(), std::forward<P>(p)...)
+	explicit EditNetworkOf(P &&... p) : EditNetwork(gameState->world.findOrCreate<T>(), std::forward<P>(p)...)
 	{
 	}
 };
