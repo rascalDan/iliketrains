@@ -61,9 +61,16 @@ NetworkOf<T>::candidateStraight(glm::vec3 n1, glm::vec3 n2)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::candidateJoins(glm::vec3 n1, glm::vec3 n2)
+NetworkOf<T>::candidateJoins(glm::vec3 start, glm::vec3 end)
 {
-	return {candidateLink<typename T::StraightLink>(n1, n2)};
+	if (glm::distance(start, end) < 2.F) {
+		return {};
+	}
+	const auto defs = genCurveDef(
+			start, end, findNodeDirection(candidateNodeAt(start).first), findNodeDirection(candidateNodeAt(end).first));
+	const auto & [c1s, c1e, c1c] = defs.first;
+	const auto & [c2s, c2e, c2c] = defs.second;
+	return {candidateLink<typename T::CurveLink>(c1s, c1e, c1c), candidateLink<typename T::CurveLink>(c2s, c2e, c2c)};
 }
 
 template<typename T>
@@ -83,9 +90,15 @@ NetworkOf<T>::addStraight(glm::vec3 n1, glm::vec3 n2)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::addJoins(glm::vec3 n1, glm::vec3 n2)
+NetworkOf<T>::addJoins(glm::vec3 start, glm::vec3 end)
 {
-	return {addLink<typename T::StraightLink>(n1, n2)};
+	if (glm::distance(start, end) < 2.F) {
+		return {};
+	}
+	const auto defs = genCurveDef(start, end, findNodeDirection(nodeAt(start)), findNodeDirection(nodeAt(end)));
+	const auto & [c1s, c1e, c1c] = defs.first;
+	const auto & [c2s, c2e, c2c] = defs.second;
+	return {addLink<typename T::CurveLink>(c1s, c1e, c1c), addLink<typename T::CurveLink>(c2s, c2e, c2c)};
 }
 
 template<typename T>

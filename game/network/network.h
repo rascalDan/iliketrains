@@ -48,6 +48,8 @@ public:
 protected:
 	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
 	static GenCurveDef genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float startDir);
+	static std::pair<GenCurveDef, GenCurveDef> genCurveDef(
+			const glm::vec3 & start, const glm::vec3 & end, float startDir, float endDir);
 
 	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;

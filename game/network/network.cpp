@@ -109,3 +109,31 @@ Network::genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float start
 	}
 	return {start, end, centre.first};
 }
+
+std::pair<GenCurveDef, GenCurveDef>
+Network::genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float startDir, float endDir)
+{
+	startDir += pi;
+	endDir += pi;
+	const glm::vec2 flatStart {!start}, flatEnd {!end};
+	auto midheight = [&](auto mid) {
+		const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
+		return start.z + ((end.z - start.z) * (sm / (sm + em)));
+	};
+	if (const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir); radii.first < radii.second) {
+		const auto radius {radii.first};
+		const auto c1 = flatStart + sincosf(startDir + half_pi) * radius;
+		const auto c2 = flatEnd + sincosf(endDir + half_pi) * radius;
+		const auto mid = (c1 + c2) / 2.F;
+		const auto midh = mid ^ midheight(mid);
+		return {{start, midh, c1}, {end, midh, c2}};
+	}
+	else {
+		const auto radius {radii.second};
+		const auto c1 = flatStart + sincosf(startDir - half_pi) * radius;
+		const auto c2 = flatEnd + sincosf(endDir - half_pi) * radius;
+		const auto mid = (c1 + c2) / 2.F;
+		const auto midh = mid ^ midheight(mid);
+		return {{midh, start, c1}, {midh, end, c2}};
+	}
+}
