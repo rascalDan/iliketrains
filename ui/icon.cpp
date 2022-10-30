@@ -25,5 +25,6 @@ Icon::Icon(const Image & tex) : size {tex.width, tex.height}
 void
 Icon::Bind() const
 {
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }

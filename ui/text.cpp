@@ -44,6 +44,7 @@ void
 Text::render(const UIShader & shader, const Position &) const
 {
 	shader.useText(colour);
+	glActiveTexture(GL_TEXTURE0);
 	for (const auto & m : models) {
 		glBindTexture(GL_TEXTURE_2D, m.texture);
 		glBindVertexArray(m.vao);
