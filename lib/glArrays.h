@@ -74,3 +74,7 @@ template<size_t N> using glBuffers = glArrays<N, &glGenBuffers, &glDeleteBuffers
 using glBuffer = glBuffers<1>;
 template<size_t N> using glTextures = glArrays<N, &glGenTextures, &glDeleteTextures>;
 using glTexture = glTextures<1>;
+template<size_t N> using glFrameBuffers = glArrays<N, &glGenFramebuffers, &glDeleteFramebuffers>;
+using glFrameBuffer = glFrameBuffers<1>;
+template<size_t N> using glRenderBuffers = glArrays<N, &glGenRenderbuffers, &glDeleteRenderbuffers>;
+using glRenderBuffer = glRenderBuffers<1>;
