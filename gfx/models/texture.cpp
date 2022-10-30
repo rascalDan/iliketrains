@@ -31,7 +31,8 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data)
 }
 
 void
-Texture::Bind() const
+Texture::bind(GLenum unit) const
 {
+	glActiveTexture(unit);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }

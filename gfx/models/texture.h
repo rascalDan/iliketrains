@@ -15,7 +15,7 @@ public:
 
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
-	void Bind() const;
+	void bind(GLenum unit = GL_TEXTURE0) const;
 
 private:
 	glTexture m_texture;

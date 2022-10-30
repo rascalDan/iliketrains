@@ -86,11 +86,11 @@ void
 Terrain::render(const Shader & shader) const
 {
 	shader.setModel(Location {}, Shader::Program::LandMass);
-	grass->Bind();
+	grass->bind();
 	meshes.apply(&Mesh::Draw);
 
 	shader.setModel(Location {}, Shader::Program::Water);
 	shader.setUniform("waves", {waveCycle, 0, 0});
-	water->Bind();
+	water->bind();
 	meshes.apply(&Mesh::Draw);
 }

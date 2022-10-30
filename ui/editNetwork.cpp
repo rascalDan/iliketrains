@@ -50,7 +50,7 @@ void
 EditNetwork::render(const Shader & shader) const
 {
 	if (builder) {
-		blue.Bind();
+		blue.bind();
 		shader.setModel(Location {}, Shader::Program::StaticPos);
 		builder->render(shader);
 	}

@@ -41,7 +41,7 @@ RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr
 void
 RailVehicleClass::render(const Shader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
-	texture->Bind();
+	texture->bind();
 	for (auto b = 0U; b < bogies.size(); ++b) {
 		shader.setModel(bl[b]);
 		bogies[b]->Draw();

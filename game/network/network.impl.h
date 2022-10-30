@@ -8,7 +8,7 @@ NetworkOf<T>::render(const Shader & shader) const
 {
 	if constexpr (std::is_base_of_v<Renderable, T>) {
 		shader.setModel(Location {}, Shader::Program::StaticPos);
-		texture->Bind();
+		texture->bind();
 		links.apply(&Renderable::render, shader);
 	}
 }
