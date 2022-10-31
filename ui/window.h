@@ -33,6 +33,7 @@ protected:
 	virtual const Shader & getShader() const = 0;
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
+	const glm::ivec2 size;
 	SDL_WindowPtr m_window;
 	Collection<UIComponent> uiComponents;
 	UIShader uiShader;

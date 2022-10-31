@@ -26,8 +26,10 @@ using GL_Context = std::remove_pointer_t<SDL_GLContext>;
 using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContextAndGlewInit, SDL_GL_DeleteContext>;
 
 Window::Window(size_t width, size_t height, const std::string & title) :
-	m_window {title.c_str(), static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED),
-			static_cast<int>(width), static_cast<int>(height), static_cast<Uint32>(SDL_WINDOW_OPENGL)},
+	size {static_cast<int>(width), static_cast<int>(height)}, m_window {title.c_str(),
+																	  static_cast<int>(SDL_WINDOWPOS_CENTERED),
+																	  static_cast<int>(SDL_WINDOWPOS_CENTERED), size.x,
+																	  size.y, static_cast<Uint32>(SDL_WINDOW_OPENGL)},
 	uiShader {[this](auto w) {
 				  // must call glContent before creating the shader
 				  std::ignore = glContext();
@@ -55,16 +57,13 @@ Window::handleInput(const SDL_Event & e)
 {
 	if (SDL_GetWindowID(m_window) == e.window.windowID) {
 		SDL_Event eAdjusted {e};
-		glm::ivec2 size {};
 		switch (e.type) {
 			// SDL and OpenGL have coordinates that are vertically opposed.
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
-				SDL_GetWindowSize(m_window, &size.x, &size.y);
 				eAdjusted.button.y = size.y - e.button.y;
 				break;
 			case SDL_MOUSEMOTION:
-				SDL_GetWindowSize(m_window, &size.x, &size.y);
 				eAdjusted.motion.y = size.y - e.motion.y;
 				break;
 		}
