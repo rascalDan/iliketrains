@@ -3,6 +3,7 @@
 #include <cache.h>
 #include <filesystem>
 #include <glArrays.h>
+#include <glm/fwd.hpp>
 
 // IWYU pragma: no_forward_declare Cache
 class Image;
@@ -16,6 +17,8 @@ public:
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
 	void bind(GLenum unit = GL_TEXTURE0) const;
+
+	static void save(const glTexture &, const glm::ivec2 & size, const char * path);
 
 private:
 	glTexture m_texture;
