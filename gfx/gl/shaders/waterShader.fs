@@ -1,13 +1,22 @@
 #version 330 core
+#extension GL_ARB_shading_language_420pack : enable
 
-in vec2 texCoord0;
-in float depth;
+in vec3 FragPos;
+in vec2 TexCoords;
+in vec3 Normal;
 
-uniform sampler2D sampler;
+out vec4 gPosition;
+out vec4 gNormal;
+out vec4 gAlbedoSpec;
+
+uniform sampler2D texture0;
 uniform vec3 waves;
 
-void main()
+void
+main()
 {
-	gl_FragColor = texture(sampler, texCoord0);
-	gl_FragColor.a *= clamp(-depth * .7, .1, 1.0);
+	gPosition = vec4(FragPos, 1);
+	gNormal = vec4(Normal, 1);
+	gAlbedoSpec = texture(texture0, TexCoords);
+	gAlbedoSpec.a *= clamp(-FragPos.z * .7, .1, 1.0);
 }

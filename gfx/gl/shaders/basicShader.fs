@@ -1,15 +1,20 @@
 #version 330 core
 
-in vec2 texCoord0;
-in vec3 normal0;
+in vec3 FragPos;
+in vec2 TexCoords;
+in vec3 Normal;
 
-uniform sampler2D sampler;
-uniform vec3 lightDirection;
-uniform vec3 lightColor;
-uniform vec3 ambientColor;
+out vec4 gPosition;
+out vec4 gNormal;
+out vec4 gAlbedoSpec;
 
-void main()
+uniform sampler2D texture0;
+
+void
+main()
 {
-	gl_FragColor = texture(sampler, texCoord0);
-	gl_FragColor.rgb *= clamp(ambientColor + (dot(-lightDirection, normal0) * lightColor), 0.0, 1.0);
+	float clear = round(texture(texture0, TexCoords).a);
+	gPosition = vec4(FragPos, clear);
+	gNormal = vec4(Normal, clear);
+	gAlbedoSpec = texture(texture0, TexCoords);
 }

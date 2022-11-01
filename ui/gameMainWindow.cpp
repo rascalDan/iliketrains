@@ -30,7 +30,8 @@ public:
 };
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
-	Window {w, h, "I Like Trains"}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h), 0.1F, 10000.0F}
+	Window {w, h, "I Like Trains"}, SceneRenderer {size}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h),
+																  0.1F, 10000.0F}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
@@ -51,8 +52,10 @@ GameMainWindow::tick(TickDuration)
 void
 GameMainWindow::render() const
 {
-	glEnable(GL_DEPTH_TEST);
-	gameState->world.apply<Renderable>(&Renderable::render, shader);
+	SceneRenderer::render([this] {
+		gameState->world.apply<Renderable>(&Renderable::render, shader);
+		uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
+	});
 	Window::render();
 }
 

@@ -94,7 +94,7 @@ Window::refresh() const
 void
 Window::render() const
 {
-	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, getShader());
+	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
 }

@@ -3,10 +3,11 @@
 #include "chronology.hpp"
 #include "gfx/gl/camera.h"
 #include "gfx/gl/shader.h"
+#include "sceneRenderer.h"
 #include "window.h"
 #include <cstddef>
 
-class GameMainWindow : public Window {
+class GameMainWindow : public Window, SceneRenderer {
 public:
 	GameMainWindow(size_t w, size_t h);
 

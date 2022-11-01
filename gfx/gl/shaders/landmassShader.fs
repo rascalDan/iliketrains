@@ -1,13 +1,14 @@
 #version 330 core
 
-in vec2 texCoord0;
-in vec3 normal0;
-in float height;
+in vec3 FragPos;
+in vec2 TexCoords;
+in vec3 Normal;
 
-uniform sampler2D sampler;
-uniform vec3 lightDirection;
-uniform vec3 lightColor;
-uniform vec3 ambientColor;
+layout(location = 0) out vec4 gPosition;
+layout(location = 1) out vec4 gNormal;
+layout(location = 2) out vec4 gAlbedoSpec;
+
+uniform sampler2D texture0;
 
 const vec3 grass = vec3(.1, .4, .05);
 const vec3 slope = vec3(.6, .6, .4);
@@ -32,36 +33,39 @@ mixBetween(vec3 colA, vec3 colB, float blend, float low, float high)
 void
 main()
 {
-	vec4 tex = texture(sampler, texCoord0);
-	gl_FragColor = tex;
-	gl_FragColor.rgb *= clamp(ambientColor + (dot(-lightDirection, normal0) * lightColor), 0.0, 1.0);
+	vec3 color = texture(texture0, TexCoords).rgb;
 
+	float height = FragPos.z;
 	if (height < beachline) { // Sandy beach
-		gl_FragColor.rgb *= sand;
+		color *= sand;
 	}
-	else if (normal0.z < slope_max) { // Dark rocky face
-		gl_FragColor.rgb *= rock;
+	else if (Normal.z < slope_max) { // Dark rocky face
+		color *= rock;
 	}
 	else { // Colour by lesser slope
-		if (normal0.z < slope_mid) {
-			gl_FragColor.rgb *= mixBetween(rock, slope, normal0.z, slope_max, slope_mid);
+		if (Normal.z < slope_mid) {
+			color *= mixBetween(rock, slope, Normal.z, slope_max, slope_mid);
 		}
-		else if (normal0.z < slope_min) {
-			gl_FragColor.rgb *= mixBetween(slope, grass, normal0.z, slope_mid, slope_min);
+		else if (Normal.z < slope_min) {
+			color *= mixBetween(slope, grass, Normal.z, slope_mid, slope_min);
 		}
 		else {
-			gl_FragColor.rgb *= grass;
+			color *= grass;
 		}
 
 		// Add a snow covering
 		if (height > snowline_low) {
-			vec3 tsnow = tex.rgb * snow;
+			vec3 tsnow = color * snow;
 			if (height > snowline_high) {
-				gl_FragColor.rgb = tsnow;
+				color = tsnow;
 			}
 			else {
-				gl_FragColor.rgb = mixBetween(gl_FragColor.rgb, tsnow, height, snowline_low, snowline_high);
+				color = mixBetween(color, tsnow, height, snowline_low, snowline_high);
 			}
 		}
 	}
+
+	gPosition = vec4(FragPos, 1);
+	gNormal = vec4(Normal, 1);
+	gAlbedoSpec = vec4(color, 1);
 }
