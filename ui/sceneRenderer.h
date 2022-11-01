@@ -15,4 +15,6 @@ private:
 	glTexture gPosition, gNormal, gAlbedoSpec;
 	glRenderBuffer depth;
 	ProgramHandleBase lighting;
+	glVertexArray displayVAO;
+	glBuffer displayVBO;
 };

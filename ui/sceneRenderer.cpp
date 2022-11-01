@@ -1,9 +1,24 @@
 #include "sceneRenderer.h"
 #include <gfx/gl/shaders/fs-lightingShader.h>
 #include <gfx/gl/shaders/vs-lightingShader.h>
+#include <glm/gtc/type_ptr.hpp>
 
+static constexpr std::array<glm::vec4, 4> displayVAOdata {{
+		// positions(x,y) texture coords(z,w)
+		{-1.0f, 1.0f, 0.0f, 1.0f},
+		{-1.0f, -1.0f, 0.0f, 0.0f},
+		{1.0f, 1.0f, 1.0f, 1.0f},
+		{1.0f, -1.0f, 1.0f, 0.0f},
+}};
 SceneRenderer::SceneRenderer(glm::ivec2 size) : lighting {lightingShader_vs.compile(), lightingShader_fs.compile()}
 {
+	glBindVertexArray(displayVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, displayVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(displayVAOdata), nullptr, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(displayVAOdata), glm::value_ptr(displayVAOdata.front()));
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), nullptr);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	const auto configuregdata
 			= [size](const GLuint data, const GLint format, const GLenum type, const GLenum attachment) {
@@ -31,57 +46,12 @@ SceneRenderer::SceneRenderer(glm::ivec2 size) : lighting {lightingShader_vs.comp
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void
-renderQuad()
-{
-	if (quadVAO == 0) {
-		float quadVertices[] = {
-				// positions        // texture Coords
-				-1.0f,
-				1.0f,
-				0.0f,
-				0.0f,
-				1.0f,
-				-1.0f,
-				-1.0f,
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f,
-				1.0f,
-				0.0f,
-				1.0f,
-				1.0f,
-				1.0f,
-				-1.0f,
-				0.0f,
-				1.0f,
-				0.0f,
-		};
-		// setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
-	}
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-}
-
 void
 SceneRenderer::render(std::function<void()> content) const
 {
+	// Geometry pass
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	// Geometry pass
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	content();
@@ -98,5 +68,7 @@ SceneRenderer::render(std::function<void()> content) const
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 	// TODO Configure lights
-	renderQuad();
+	glBindVertexArray(displayVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }
