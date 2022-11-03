@@ -36,10 +36,6 @@ GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
 	uiComponents.create<GameMainToolbar>(gms.get());
-
-	shader.setUniform("lightDirection", glm::normalize(glm::vec3 {1, 0, -1}));
-	shader.setUniform("lightColor", {.6, .6, .6});
-	shader.setUniform("ambientColor", {0.5, 0.5, 0.5});
 }
 
 void
@@ -57,10 +53,4 @@ GameMainWindow::render() const
 		uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
 	});
 	Window::render();
-}
-
-const SceneShader &
-GameMainWindow::getShader() const
-{
-	return shader;
 }

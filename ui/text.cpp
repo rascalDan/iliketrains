@@ -43,7 +43,7 @@ Text::Text(std::string_view s, Position pos, glm::vec3 c) : UIComponent {pos}, c
 void
 Text::render(const UIShader & shader, const Position &) const
 {
-	shader.useText(colour);
+	shader.text.use(colour);
 	glActiveTexture(GL_TEXTURE0);
 	for (const auto & m : models) {
 		glBindTexture(GL_TEXTURE_2D, m.texture);

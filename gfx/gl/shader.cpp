@@ -1,21 +1,22 @@
-#include "glSource.h"
+#include "shader.h"
 #include <array>
 #include <stdexcept>
 #include <string>
 
-GLsource::ShaderRef
-GLsource::compile() const
+Shader::operator GLuint() const
 {
-	ShaderRef id {type};
-	glShaderSource(id, 1, &text, &len);
-	glCompileShader(id);
+	if (!shader) {
+		shader.emplace(type);
+		glShaderSource(*shader, 1, &text, &len);
+		glCompileShader(*shader);
 
-	CheckShaderError(id, GL_COMPILE_STATUS, false, "Error compiling shader!");
-	return id;
+		CheckShaderError(*shader, GL_COMPILE_STATUS, false, "Error compiling shader!");
+	}
+	return *shader;
 }
 
 void
-GLsource::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage)
+Shader::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage)
 {
 	GLint success = 0;
 

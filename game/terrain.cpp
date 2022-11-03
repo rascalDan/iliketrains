@@ -85,12 +85,11 @@ Terrain::tick(TickDuration dur)
 void
 Terrain::render(const SceneShader & shader) const
 {
-	shader.setModel(Location {}, SceneShader::Program::LandMass);
+	shader.landmass.use();
 	grass->bind();
 	meshes.apply(&Mesh::Draw);
 
-	shader.setModel(Location {}, SceneShader::Program::Water);
-	shader.setUniform("waves", {waveCycle, 0, 0});
+	shader.water.use(waveCycle);
 	water->bind();
 	meshes.apply(&Mesh::Draw);
 }

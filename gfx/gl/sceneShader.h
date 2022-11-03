@@ -1,27 +1,54 @@
 #pragma once
 
-#include "programHandle.h"
-#include <GL/glew.h>
-#include <array>
-#include <glm/glm.hpp>
+#include "program.h"
 
 class Location;
 
-class SceneShader {
-public:
-	enum class Program { Basic = 0, Water = 1, LandMass = 2, StaticPos = 3 };
+struct SceneShader {
+	class SceneProgram : public Program {
+	public:
+		template<typename... S>
+		inline SceneProgram(const S &... srcs) : Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}
+		{
+		}
+
+		void setView(const glm::mat4 &) const;
+
+	private:
+		RequiredUniformLocation viewProjectionLoc;
+	};
+
+	class BasicProgram : public SceneProgram {
+	public:
+		BasicProgram();
+		void setModel(const Location &) const;
+		void use(const Location &) const;
+
+	private:
+		RequiredUniformLocation modelLoc;
+	};
+
+	class AbsolutePosProgram : public SceneProgram {
+	public:
+		using Program::use;
+		using SceneProgram::SceneProgram;
+	};
+
+	class WaterProgram : public SceneProgram {
+	public:
+	public:
+		WaterProgram();
+		void use(float waveCycle) const;
+
+	private:
+		RequiredUniformLocation waveLoc;
+	};
 
 	SceneShader();
 
-	void setView(glm::mat4 view) const;
-	void setModel(const Location &, Program = Program::Basic) const;
-	void setUniform(const GLchar *, glm::vec3 dir) const;
+	BasicProgram basic;
+	WaterProgram water;
+	AbsolutePosProgram landmass, absolute;
 
-private:
-	class ProgramHandle : public ProgramHandleBase {
-	public:
-		ProgramHandle(GLuint, GLuint);
-	};
-
-	std::array<ProgramHandle, 4> programs;
+	void setView(glm::mat4 proj) const;
 };

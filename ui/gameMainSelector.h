@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
+
+class SceneShader;
 class Ray;
 class UIShader;
 class Camera;

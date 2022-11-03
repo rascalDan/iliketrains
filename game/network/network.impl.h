@@ -7,7 +7,7 @@ void
 NetworkOf<T>::render(const SceneShader & shader) const
 {
 	if constexpr (std::is_base_of_v<Renderable, T>) {
-		shader.setModel(Location {}, SceneShader::Program::StaticPos);
+		shader.absolute.use();
 		texture->bind();
 		links.apply(&Renderable::render, shader);
 	}

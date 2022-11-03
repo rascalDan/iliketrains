@@ -10,7 +10,7 @@ static constexpr std::array<glm::vec4, 4> displayVAOdata {{
 		{1.0f, 1.0f, 1.0f, 1.0f},
 		{1.0f, -1.0f, 1.0f, 0.0f},
 }};
-SceneRenderer::SceneRenderer(glm::ivec2 size) : lighting {lightingShader_vs.compile(), lightingShader_fs.compile()}
+SceneRenderer::SceneRenderer(glm::ivec2 size) : lighting {lightingShader_vs, lightingShader_fs}
 {
 	glBindVertexArray(displayVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, displayVBO);
@@ -60,7 +60,6 @@ SceneRenderer::render(std::function<void()> content) const
 	// Lighting pass
 	glDisable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(lighting.m_program);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
 	glActiveTexture(GL_TEXTURE1);
@@ -68,6 +67,7 @@ SceneRenderer::render(std::function<void()> content) const
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 	// TODO Configure lights
+	lighting.use();
 	glBindVertexArray(displayVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);

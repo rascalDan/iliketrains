@@ -18,7 +18,7 @@ Toolbar::Toolbar(const std::initializer_list<InitInfo> & initInfo) : UIComponent
 void
 Toolbar::render(const UIShader & uiShader, const Position & parentPos) const
 {
-	uiShader.useDefault();
+	uiShader.icon.use();
 	const auto absPos = this->position + parentPos;
 	icons.apply(&UIComponent::render, uiShader, absPos);
 }

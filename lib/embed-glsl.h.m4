@@ -1,6 +1,6 @@
 #pragma once
 
 // NAME
-#include <gfx/gl/glSource.h>
+#include <gfx/gl/shader.h>
 
-extern const GLsource NAME`_'substr(TYPE,1);
+extern const Shader NAME`_'substr(TYPE,1);

@@ -1,19 +1,44 @@
 #pragma once
 
-#include "programHandle.h"
+#include "program.h"
 #include <GL/glew.h>
 #include <cstddef>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class UIShader {
 public:
 	UIShader(std::size_t width, std::size_t height);
-	void useDefault() const;
-	void useText(glm::vec3) const;
 
 private:
-	class UIProgramHandle : public ProgramHandleBase {
-		using ProgramHandleBase::ProgramHandleBase;
+	explicit UIShader(const glm::mat4 & viewProjection);
+
+	class UIProgram : public Program {
+	public:
+		template<typename... S> UIProgram(const glm::mat4 & vp, S &&... srcs) : Program {std::forward<S>(srcs)...}
+		{
+			RequiredUniformLocation uiProjectionLoc {*this, "uiProjection"};
+			glUseProgram(*this);
+			glUniformMatrix4fv(uiProjectionLoc, 1, GL_FALSE, glm::value_ptr(vp));
+		}
 	};
-	UIProgramHandle progDefault, progText;
+
+	class IconProgram : public UIProgram {
+	public:
+		explicit IconProgram(const glm::mat4 & vp);
+		using Program::use;
+	};
+
+	class TextProgram : public UIProgram {
+	public:
+		explicit TextProgram(const glm::mat4 & vp);
+		void use(const glm::vec3 & colour) const;
+
+	private:
+		RequiredUniformLocation colorLoc;
+	};
+
+public:
+	IconProgram icon;
+	TextProgram text;
 };

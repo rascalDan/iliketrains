@@ -42,13 +42,13 @@ void
 RailVehicleClass::render(
 		const SceneShader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
+	shader.basic.use(location);
 	texture->bind();
+	bodyMesh->Draw();
 	for (auto b = 0U; b < bogies.size(); ++b) {
-		shader.setModel(bl[b]);
+		shader.basic.setModel(bl[b]);
 		bogies[b]->Draw();
 	}
-	shader.setModel(location);
-	bodyMesh->Draw();
 }
 
 float

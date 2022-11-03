@@ -1,12 +1,13 @@
 #pragma once
 
-#include "gfx/gl/sceneShader.h"
+#include "gfx/gl/program.h"
 #include "lib/glArrays.h"
 #include <functional>
+#include <glm/fwd.hpp>
 
 class SceneRenderer {
 public:
-	SceneRenderer(glm::ivec2 size);
+	explicit SceneRenderer(glm::ivec2 size);
 
 	void render(std::function<void()> content) const;
 
@@ -14,7 +15,12 @@ private:
 	glFrameBuffer gBuffer;
 	glTexture gPosition, gNormal, gAlbedoSpec;
 	glRenderBuffer depth;
-	ProgramHandleBase lighting;
+	class DeferredLightProgram : public Program {
+	public:
+		using Program::Program;
+		using Program::use;
+	};
+	DeferredLightProgram lighting;
 	glVertexArray displayVAO;
 	glBuffer displayVBO;
 };

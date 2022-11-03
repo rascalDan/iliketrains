@@ -51,7 +51,7 @@ EditNetwork::render(const SceneShader & shader) const
 {
 	if (builder) {
 		blue.bind();
-		shader.setModel(Location {}, SceneShader::Program::StaticPos);
+		shader.absolute.use();
 		builder->render(shader);
 	}
 }

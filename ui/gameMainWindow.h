@@ -16,7 +16,6 @@ public:
 	void render() const override;
 
 private:
-	const SceneShader & getShader() const override;
 	SceneShader shader;
 	Camera camera;
 };
