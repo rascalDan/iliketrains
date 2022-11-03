@@ -7,7 +7,7 @@
 #include <gfx/renderable.h>
 #include <memory>
 
-class Shader;
+class SceneShader;
 class Texture;
 class GeoData;
 
@@ -15,7 +15,7 @@ class Terrain : public WorldObject, public Renderable {
 public:
 	explicit Terrain(std::shared_ptr<GeoData>);
 
-	void render(const Shader & shader) const override;
+	void render(const SceneShader & shader) const override;
 
 	void tick(TickDuration) override;
 	float waveCycle {0.F};

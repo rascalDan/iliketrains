@@ -5,7 +5,7 @@
 #include "text.h"
 #include <game/gamestate.h>
 #include <game/geoData.h>
-#include <gfx/gl/shader.h>
+#include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
 constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
@@ -47,17 +47,17 @@ EditNetwork::handleInput(const SDL_Event & e, const UIComponent::Position & pare
 }
 
 void
-EditNetwork::render(const Shader & shader) const
+EditNetwork::render(const SceneShader & shader) const
 {
 	if (builder) {
 		blue.bind();
-		shader.setModel(Location {}, Shader::Program::StaticPos);
+		shader.setModel(Location {}, SceneShader::Program::StaticPos);
 		builder->render(shader);
 	}
 }
 
 void
-EditNetwork::Builder::render(const Shader & shader) const
+EditNetwork::Builder::render(const SceneShader & shader) const
 {
 	candidateLinks.apply<const Renderable>(&Renderable::render, shader);
 }

@@ -29,7 +29,7 @@ GameMainSelector::render(const UIShader & shader, const Position & parentPos) co
 }
 
 void
-GameMainSelector::render(const Shader & shader) const
+GameMainSelector::render(const SceneShader & shader) const
 {
 	if (target) {
 		target->render(shader);
@@ -112,6 +112,6 @@ GameMainSelector::Component::render(const UIShader &, const UIComponent::Positio
 }
 
 void
-GameMainSelector::Component::render(const Shader &) const
+GameMainSelector::Component::render(const SceneShader &) const
 {
 }

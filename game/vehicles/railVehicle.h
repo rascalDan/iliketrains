@@ -9,7 +9,7 @@
 #include <memory>
 #include <utility>
 
-class Shader;
+class SceneShader;
 class Ray;
 
 class Train;
@@ -19,7 +19,7 @@ public:
 
 	void move(const Train *, float & trailBy);
 
-	void render(const Shader & shader) const override;
+	void render(const SceneShader & shader) const override;
 	[[nodiscard]] bool intersectRay(const Ray &, glm::vec2 *, float *) const override;
 
 	Location location;

@@ -10,7 +10,7 @@
 #include <special_members.hpp>
 #include <string>
 
-class Shader;
+class SceneShader;
 
 class Window {
 public:
@@ -30,7 +30,7 @@ public:
 protected:
 	[[nodiscard]] SDL_GLContext glContext() const;
 	virtual void render() const;
-	virtual const Shader & getShader() const = 0;
+	virtual const SceneShader & getShader() const = 0;
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
 	const glm::ivec2 size;

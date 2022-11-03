@@ -6,7 +6,7 @@
 #include <cache.h>
 #include <cstddef>
 #include <filesystem>
-#include <gfx/gl/shader.h>
+#include <gfx/gl/sceneShader.h>
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
@@ -83,13 +83,13 @@ Terrain::tick(TickDuration dur)
 }
 
 void
-Terrain::render(const Shader & shader) const
+Terrain::render(const SceneShader & shader) const
 {
-	shader.setModel(Location {}, Shader::Program::LandMass);
+	shader.setModel(Location {}, SceneShader::Program::LandMass);
 	grass->bind();
 	meshes.apply(&Mesh::Draw);
 
-	shader.setModel(Location {}, Shader::Program::Water);
+	shader.setModel(Location {}, SceneShader::Program::Water);
 	shader.setUniform("waves", {waveCycle, 0, 0});
 	water->bind();
 	meshes.apply(&Mesh::Draw);

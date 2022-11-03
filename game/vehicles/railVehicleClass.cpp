@@ -1,5 +1,5 @@
 #include "railVehicleClass.h"
-#include "gfx/gl/shader.h"
+#include "gfx/gl/sceneShader.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/obj.h"
 #include "gfx/models/texture.h"
@@ -39,7 +39,8 @@ RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr
 }
 
 void
-RailVehicleClass::render(const Shader & shader, const Location & location, const std::array<Location, 2> & bl) const
+RailVehicleClass::render(
+		const SceneShader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
 	texture->bind();
 	for (auto b = 0U; b < bogies.size(); ++b) {

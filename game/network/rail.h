@@ -11,7 +11,7 @@
 #include <span>
 #include <special_members.hpp>
 
-class Shader;
+class SceneShader;
 class Vertex;
 struct Arc;
 
@@ -26,7 +26,7 @@ public:
 	using StraightLink = RailLinkStraight;
 	using CurveLink = RailLinkCurve;
 
-	void render(const Shader &) const override;
+	void render(const SceneShader &) const override;
 	NO_COPY(RailLink);
 	NO_MOVE(RailLink);
 

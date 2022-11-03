@@ -2,7 +2,7 @@
 
 #include <special_members.hpp>
 
-class Shader;
+class SceneShader;
 
 class Renderable {
 public:
@@ -10,5 +10,5 @@ public:
 	virtual ~Renderable() = default;
 	DEFAULT_MOVE_COPY(Renderable);
 
-	virtual void render(const Shader & shader) const = 0;
+	virtual void render(const SceneShader & shader) const = 0;
 };

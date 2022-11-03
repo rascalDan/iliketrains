@@ -7,11 +7,11 @@
 
 class Location;
 
-class Shader {
+class SceneShader {
 public:
 	enum class Program { Basic = 0, Water = 1, LandMass = 2, StaticPos = 3 };
 
-	Shader();
+	SceneShader();
 
 	void setView(glm::mat4 view) const;
 	void setModel(const Location &, Program = Program::Basic) const;

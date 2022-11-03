@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-class Shader;
+class SceneShader;
 class Texture;
 class ObjParser;
 class Location;
@@ -14,7 +14,7 @@ class RailVehicleClass {
 public:
 	explicit RailVehicleClass(const std::string & name);
 
-	void render(const Shader &, const Location &, const std::array<Location, 2> &) const;
+	void render(const SceneShader &, const Location &, const std::array<Location, 2> &) const;
 
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;

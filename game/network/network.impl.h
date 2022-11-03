@@ -1,13 +1,13 @@
 #include "network.h"
-#include <gfx/gl/shader.h>
+#include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
 template<typename T>
 void
-NetworkOf<T>::render(const Shader & shader) const
+NetworkOf<T>::render(const SceneShader & shader) const
 {
 	if constexpr (std::is_base_of_v<Renderable, T>) {
-		shader.setModel(Location {}, Shader::Program::StaticPos);
+		shader.setModel(Location {}, SceneShader::Program::StaticPos);
 		texture->bind();
 		links.apply(&Renderable::render, shader);
 	}

@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "sceneShader.h"
 #include "gfx/gl/glSource.h"
 #include <array>
 #include <cstddef>
@@ -15,7 +15,7 @@
 #include <location.hpp>
 #include <maths.h>
 
-Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : ProgramHandleBase {vs, fs}
+SceneShader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : ProgramHandleBase {vs, fs}
 {
 	glBindAttribLocation(m_program, 0, "position");
 	glBindAttribLocation(m_program, 1, "texCoord");
@@ -25,7 +25,7 @@ Shader::ProgramHandle::ProgramHandle(GLuint vs, GLuint fs) : ProgramHandleBase {
 	model_uniform = glGetUniformLocation(m_program, "model");
 }
 
-Shader::Shader() :
+SceneShader::SceneShader() :
 	programs {{{
 					   basicShader_vs.compile(),
 					   basicShader_fs.compile(),
@@ -46,7 +46,7 @@ Shader::Shader() :
 }
 
 void
-Shader::setView(glm::mat4 proj) const
+SceneShader::setView(glm::mat4 proj) const
 {
 	for (const auto & prog : programs) {
 		glUseProgram(prog.m_program);
@@ -55,7 +55,7 @@ Shader::setView(glm::mat4 proj) const
 }
 
 void
-Shader::setUniform(const GLchar * uniform, glm::vec3 v) const
+SceneShader::setUniform(const GLchar * uniform, glm::vec3 v) const
 {
 	for (const auto & prog : programs) {
 		if (auto loc = glGetUniformLocation(prog.m_program, uniform); loc >= 0) {
@@ -66,7 +66,7 @@ Shader::setUniform(const GLchar * uniform, glm::vec3 v) const
 }
 
 void
-Shader::setModel(const Location & loc, Program pid) const
+SceneShader::setModel(const Location & loc, Program pid) const
 {
 	auto & prog = programs[static_cast<std::size_t>(pid)];
 	glUseProgram(prog.m_program);

@@ -2,7 +2,7 @@
 
 #include "chronology.hpp"
 #include "gfx/gl/camera.h"
-#include "gfx/gl/shader.h"
+#include "gfx/gl/sceneShader.h"
 #include "sceneRenderer.h"
 #include "window.h"
 #include <cstddef>
@@ -16,7 +16,7 @@ public:
 	void render() const override;
 
 private:
-	const Shader & getShader() const override;
-	Shader shader;
+	const SceneShader & getShader() const override;
+	SceneShader shader;
 	Camera camera;
 };

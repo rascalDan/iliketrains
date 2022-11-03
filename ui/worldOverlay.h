@@ -1,9 +1,9 @@
 #pragma once
 
-class Shader;
+class SceneShader;
 
 class WorldOverlay {
 public:
 	virtual ~WorldOverlay() = default;
-	virtual void render(const Shader &) const = 0;
+	virtual void render(const SceneShader &) const = 0;
 };

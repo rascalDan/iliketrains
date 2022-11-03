@@ -12,7 +12,7 @@
 #include <ray.hpp>
 
 void
-RailVehicle::render(const Shader & shader) const
+RailVehicle::render(const SceneShader & shader) const
 {
 	rvClass->render(shader, location, bogies);
 }

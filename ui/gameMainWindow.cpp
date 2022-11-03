@@ -59,7 +59,7 @@ GameMainWindow::render() const
 	Window::render();
 }
 
-const Shader &
+const SceneShader &
 GameMainWindow::getShader() const
 {
 	return shader;

@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-class Shader;
+class SceneShader;
 class Ray;
 
 class Train : public Vehicle, public Collection<RailVehicle, false>, public Can<Go>, public Can<Idle> {
@@ -26,7 +26,7 @@ public:
 		return objects.front()->location;
 	}
 
-	void render(const Shader & shader) const override;
+	void render(const SceneShader & shader) const override;
 
 	[[nodiscard]] bool intersectRay(const Ray &, glm::vec2 *, float *) const override;
 

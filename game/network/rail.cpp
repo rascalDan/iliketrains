@@ -94,7 +94,7 @@ RailLink::defaultMesh(const std::span<Vertex> vertices)
 }
 
 void
-RailLink::render(const Shader &) const
+RailLink::render(const SceneShader &) const
 {
 	mesh->Draw();
 }

@@ -18,7 +18,7 @@ public:
 	bool click(const SDL_MouseButtonEvent & e, const Ray &) override;
 	bool move(const SDL_MouseMotionEvent & e, const Ray &) override;
 	bool handleInput(const SDL_Event & e, const UIComponent::Position &) override;
-	void render(const Shader &) const override;
+	void render(const SceneShader &) const override;
 	void render(const UIShader & shader, const UIComponent::Position & pos) const override;
 
 	using NetworkClickPos = std::variant<glm::vec3, Node::Ptr>;
@@ -26,7 +26,7 @@ public:
 	class Builder {
 	public:
 		virtual ~Builder() = default;
-		virtual void render(const Shader & shader) const;
+		virtual void render(const SceneShader & shader) const;
 		virtual std::string hint() const = 0;
 		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray &) = 0;
 		virtual void move(Network *, const GeoData *, const SDL_MouseMotionEvent &, const Ray &) = 0;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gfx/gl/shader.h"
+#include "gfx/gl/sceneShader.h"
 #include "lib/glArrays.h"
 #include <functional>
 

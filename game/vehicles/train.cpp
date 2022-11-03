@@ -12,7 +12,7 @@
 class Ray;
 
 void
-Train::render(const Shader & shader) const
+Train::render(const SceneShader & shader) const
 {
 	apply(&Renderable::render, shader);
 }

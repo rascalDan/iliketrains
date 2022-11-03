@@ -12,7 +12,7 @@
 #include <variant>
 
 class Texture;
-class Shader;
+class SceneShader;
 class Ray;
 
 template<size_t... n> using GenDef = std::tuple<glm::vec<n, float>...>;
@@ -96,7 +96,7 @@ public:
 
 	float findNodeDirection(Node::AnyCPtr) const override;
 
-	void render(const Shader &) const override;
+	void render(const SceneShader &) const override;
 
 protected:
 	Link::CCollection addJoins();
