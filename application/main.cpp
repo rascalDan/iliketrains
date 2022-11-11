@@ -1,4 +1,3 @@
-#include <SDL2/SDL.h>
 #include <array>
 #include <chrono>
 #include <collection.hpp>
@@ -21,6 +20,7 @@
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <memory>
 #include <special_members.hpp>
+#include <ui/applicationBase.h>
 #include <ui/gameMainWindow.h>
 #include <ui/window.h>
 #include <vector>
@@ -28,33 +28,8 @@
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
 
-class SDL_Application : public GameState {
+class MainApplication : public GameState, public ApplicationBase {
 public:
-	SDL_Application()
-	{
-		SDL_Init(SDL_INIT_EVERYTHING);
-
-		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-	}
-
-	~SDL_Application()
-	{
-		SDL_Quit();
-	}
-
-	NO_COPY(SDL_Application);
-	NO_MOVE(SDL_Application);
-
 	using Windows = Collection<Window>;
 	int
 	run()
@@ -135,5 +110,5 @@ private:
 int
 main(int, char **)
 {
-	return std::make_shared<SDL_Application>()->run();
+	return std::make_shared<MainApplication>()->run();
 }
