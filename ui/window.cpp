@@ -7,35 +7,24 @@
 #include <tuple>
 #include <type_traits>
 
-static SDL_GLContext
-SDL_GL_CreateContextAndGlewInit(SDL_Window * w)
+Window::GlewInitHelper::GlewInitHelper()
 {
-	auto ctx = SDL_GL_CreateContext(w);
-	if (glewInit() != GLEW_OK) {
-		throw std::runtime_error {"Glew failed to initialize!"};
-	}
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	return ctx;
+	[[maybe_unused]] static auto init = []() {
+		if (const auto r = glewInit(); r != GLEW_OK) {
+			throw std::runtime_error {reinterpret_cast<const char *>(glewGetErrorString(r))};
+		}
+		else {
+			return r;
+		}
+	}();
 }
-
-using GL_Context = std::remove_pointer_t<SDL_GLContext>;
-using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContextAndGlewInit, SDL_GL_DeleteContext>;
 
 Window::Window(size_t width, size_t height, const std::string & title) :
 	size {static_cast<int>(width), static_cast<int>(height)}, m_window {title.c_str(),
 																	  static_cast<int>(SDL_WINDOWPOS_CENTERED),
 																	  static_cast<int>(SDL_WINDOWPOS_CENTERED), size.x,
 																	  size.y, static_cast<Uint32>(SDL_WINDOW_OPENGL)},
-	uiShader {[this](auto w) {
-				  // must call glContent before creating the shader
-				  std::ignore = glContext();
-				  return w;
-			  }(width),
-			height}
+	glContext {m_window}, uiShader {width, height}
 {
 }
 
@@ -73,17 +62,10 @@ Window::handleInput(const SDL_Event & e)
 	return false;
 }
 
-SDL_GLContext
-Window::glContext() const
-{
-	static SDL_GLContextPtr m_glContext {m_window};
-	return m_glContext;
-}
-
 void
 Window::refresh() const
 {
-	SDL_GL_MakeCurrent(m_window, glContext());
+	SDL_GL_MakeCurrent(m_window, glContext);
 	clear(0.0F, 0.0F, 0.0F, 1.0F);
 
 	render();

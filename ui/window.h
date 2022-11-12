@@ -26,12 +26,18 @@ public:
 	void swapBuffers() const;
 
 protected:
-	[[nodiscard]] SDL_GLContext glContext() const;
 	virtual void render() const;
+	struct GlewInitHelper {
+		GlewInitHelper();
+	};
 
 	using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
+	using GL_Context = std::remove_pointer_t<SDL_GLContext>;
+	using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContext, SDL_GL_DeleteContext>;
 	const glm::ivec2 size;
 	SDL_WindowPtr m_window;
+	SDL_GLContextPtr glContext;
+	GlewInitHelper glewinithelper;
 	Collection<UIComponent> uiComponents;
 	UIShader uiShader;
 };
