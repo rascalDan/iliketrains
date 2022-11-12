@@ -4,7 +4,7 @@
 
 class Location;
 
-struct SceneShader {
+class SceneShader {
 	class SceneProgram : public Program {
 	public:
 		template<typename... S>
@@ -44,6 +44,7 @@ struct SceneShader {
 		RequiredUniformLocation waveLoc;
 	};
 
+public:
 	SceneShader();
 
 	BasicProgram basic;
