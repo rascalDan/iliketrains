@@ -19,7 +19,6 @@ public:
 
 	using Limits = std::pair<glm::ivec2, glm::ivec2>;
 
-	GeoData() = default;
 	explicit GeoData(Limits limit, float scale = 10.F);
 
 	void generateRandom();
