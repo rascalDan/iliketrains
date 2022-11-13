@@ -12,7 +12,7 @@
 
 class Window {
 public:
-	Window(size_t width, size_t height, const std::string & title);
+	Window(size_t width, size_t height, const std::string & title, Uint32 flags);
 	virtual ~Window() = default;
 
 	NO_COPY(Window);
