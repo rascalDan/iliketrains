@@ -1,6 +1,8 @@
 #pragma once
 
+#include "gfx/gl/camera.h"
 #include "gfx/gl/program.h"
+#include "gfx/gl/sceneShader.h"
 #include "lib/glArrays.h"
 #include <functional>
 #include <glm/fwd.hpp>
@@ -9,7 +11,9 @@ class SceneRenderer {
 public:
 	explicit SceneRenderer(glm::ivec2 size, GLuint output);
 
-	void render(std::function<void()> content) const;
+	void render(std::function<void(const SceneShader &)> content) const;
+
+	Camera camera;
 
 private:
 	GLuint output;
@@ -24,4 +28,5 @@ private:
 	DeferredLightProgram lighting;
 	glVertexArray displayVAO;
 	glBuffer displayVBO;
+	SceneShader shader;
 };

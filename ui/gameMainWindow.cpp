@@ -3,7 +3,6 @@
 #include "gameMainSelector.h"
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
-#include "maths.h"
 #include "modeHelper.hpp"
 #include "toolbar.h"
 #include "window.h"
@@ -30,8 +29,7 @@ public:
 };
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
-	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {size, 0}, camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(w, h),
-																  0.1F, 10000.0F}
+	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {size, 0}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {-1150, -1150});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
@@ -42,13 +40,12 @@ void
 GameMainWindow::tick(TickDuration)
 {
 	uiComponents.apply<CameraController>(&CameraController::updateCamera, &camera);
-	shader.setView(camera.GetViewProjection());
 }
 
 void
 GameMainWindow::render() const
 {
-	SceneRenderer::render([this] {
+	SceneRenderer::render([this](const auto & shader) {
 		gameState->world.apply<Renderable>(&Renderable::render, shader);
 		uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
 	});

@@ -1,4 +1,5 @@
 #include "sceneRenderer.h"
+#include "maths.h"
 #include <gfx/gl/shaders/fs-lightingShader.h>
 #include <gfx/gl/shaders/vs-lightingShader.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,7 +11,9 @@ static constexpr std::array<glm::vec4, 4> displayVAOdata {{
 		{1.0f, 1.0f, 1.0f, 1.0f},
 		{1.0f, -1.0f, 1.0f, 0.0f},
 }};
-SceneRenderer::SceneRenderer(glm::ivec2 size, GLuint o) : output {o}, lighting {lightingShader_vs, lightingShader_fs}
+SceneRenderer::SceneRenderer(glm::ivec2 size, GLuint o) :
+	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, rdiv(size.x, size.y), 0.1F, 10000.0F}, output {o},
+	lighting {lightingShader_vs, lightingShader_fs}
 {
 	glBindVertexArray(displayVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, displayVBO);
@@ -47,8 +50,9 @@ SceneRenderer::SceneRenderer(glm::ivec2 size, GLuint o) : output {o}, lighting {
 }
 
 void
-SceneRenderer::render(std::function<void()> content) const
+SceneRenderer::render(std::function<void(const SceneShader &)> content) const
 {
+	shader.setView(camera.GetViewProjection());
 	// Geometry pass
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
@@ -57,7 +61,7 @@ SceneRenderer::render(std::function<void()> content) const
 	glEnable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	content();
+	content(shader);
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 
 	// Lighting pass
