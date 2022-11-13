@@ -10,7 +10,7 @@ static constexpr std::array<glm::vec4, 4> displayVAOdata {{
 		{1.0f, 1.0f, 1.0f, 1.0f},
 		{1.0f, -1.0f, 1.0f, 0.0f},
 }};
-SceneRenderer::SceneRenderer(glm::ivec2 size) : lighting {lightingShader_vs, lightingShader_fs}
+SceneRenderer::SceneRenderer(glm::ivec2 size, GLuint o) : output {o}, lighting {lightingShader_vs, lightingShader_fs}
 {
 	glBindVertexArray(displayVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, displayVBO);
@@ -43,7 +43,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 size) : lighting {lightingShader_vs, lig
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		throw std::runtime_error("Framebuffer not complete!");
 	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, output);
 }
 
 void
@@ -58,7 +58,7 @@ SceneRenderer::render(std::function<void()> content) const
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	content();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, output);
 
 	// Lighting pass
 	glDisable(GL_BLEND);

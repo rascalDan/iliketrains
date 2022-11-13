@@ -7,11 +7,12 @@
 
 class SceneRenderer {
 public:
-	explicit SceneRenderer(glm::ivec2 size);
+	explicit SceneRenderer(glm::ivec2 size, GLuint output);
 
 	void render(std::function<void()> content) const;
 
 private:
+	GLuint output;
 	glFrameBuffer gBuffer;
 	glTexture gPosition, gNormal, gAlbedoSpec;
 	glRenderBuffer depth;
