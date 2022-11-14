@@ -7,6 +7,7 @@
 
 class Location;
 
+using ProgramRef = glRef<GLuint, &glCreateProgram, &glDeleteProgram>;
 class Program {
 public:
 	template<typename... S> Program(const S &... srcs)
@@ -40,7 +41,6 @@ public:
 
 protected:
 	void use() const;
-	using ProgramRef = glRef<GLuint, &__glewCreateProgram, &__glewDeleteProgram>;
 	void linkAndValidate() const;
 	ProgramRef m_program;
 };
