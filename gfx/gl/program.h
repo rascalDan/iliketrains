@@ -12,7 +12,7 @@ class Program {
 public:
 	template<typename... S> Program(const S &... srcs)
 	{
-		(glAttachShader(m_program, srcs), ...);
+		(glAttachShader(m_program, srcs.compile()), ...);
 		linkAndValidate();
 	}
 	virtual ~Program() = default;

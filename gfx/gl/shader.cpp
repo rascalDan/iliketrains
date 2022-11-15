@@ -3,16 +3,15 @@
 #include <stdexcept>
 #include <string>
 
-Shader::operator GLuint() const
+Shader::ShaderRef
+Shader::compile() const
 {
-	if (!shader) {
-		shader.emplace(type);
-		glShaderSource(*shader, 1, &text, &len);
-		glCompileShader(*shader);
+	ShaderRef shader {type};
+	glShaderSource(shader, 1, &text, &len);
+	glCompileShader(shader);
 
-		CheckShaderError(*shader, GL_COMPILE_STATUS, false, "Error compiling shader!");
-	}
-	return *shader;
+	CheckShaderError(shader, GL_COMPILE_STATUS, false, "Error compiling shader!");
+	return shader;
 }
 
 void
