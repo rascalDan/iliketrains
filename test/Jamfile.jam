@@ -31,4 +31,5 @@ run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*
 run test-text.cpp ;
 run test-enumDetails.cpp ;
 run test-render.cpp ;
+run test-glContextBhvr.cpp ;
 compile test-static-enumDetails.cpp ;
