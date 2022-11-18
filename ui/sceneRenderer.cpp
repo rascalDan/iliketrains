@@ -11,8 +11,8 @@ static constexpr std::array<glm::vec4, 4> displayVAOdata {{
 		{1.0f, 1.0f, 1.0f, 1.0f},
 		{1.0f, -1.0f, 1.0f, 0.0f},
 }};
-SceneRenderer::SceneRenderer(glm::ivec2 size, GLuint o) :
-	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(size), 0.1F, 10000.0F}, output {o},
+SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
+	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
 	lighting {lightingShader_vs, lightingShader_fs}
 {
 	glBindVertexArray(displayVAO);
@@ -24,7 +24,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 size, GLuint o) :
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	const auto configuregdata
-			= [size](const GLuint data, const GLint format, const GLenum type, const GLenum attachment) {
+			= [this](const GLuint data, const GLint format, const GLenum type, const GLenum attachment) {
 				  glBindTexture(GL_TEXTURE_2D, data);
 				  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGBA, type, NULL);
 				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -53,6 +53,8 @@ void
 SceneRenderer::render(std::function<void(const SceneShader &)> content) const
 {
 	shader.setView(camera.GetViewProjection());
+	glViewport(0, 0, size.x, size.y);
+
 	// Geometry pass
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
@@ -62,9 +64,9 @@ SceneRenderer::render(std::function<void(const SceneShader &)> content) const
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	content(shader);
-	glBindFramebuffer(GL_FRAMEBUFFER, output);
 
 	// Lighting pass
+	glBindFramebuffer(GL_FRAMEBUFFER, output);
 	glDisable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);

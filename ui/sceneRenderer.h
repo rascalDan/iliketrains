@@ -16,6 +16,7 @@ public:
 	Camera camera;
 
 private:
+	glm::ivec2 size;
 	GLuint output;
 	glFrameBuffer gBuffer;
 	glTexture gPosition, gNormal, gAlbedoSpec;
