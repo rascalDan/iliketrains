@@ -67,9 +67,16 @@ sq(T v)
 
 template<typename R = float, typename Ta, typename Tb>
 inline constexpr auto
-rdiv(Ta a, Tb b)
+ratio(Ta a, Tb b)
 {
 	return (static_cast<R>(a) / static_cast<R>(b));
+}
+
+template<typename R = float, typename T, glm::qualifier Q>
+inline constexpr auto
+ratio(glm::vec<2, T, Q> v)
+{
+	return ratio<R>(v.x, v.y);
 }
 
 constexpr inline glm::vec2

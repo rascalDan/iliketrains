@@ -43,7 +43,7 @@ GeoData::generateRandom()
 					for (auto x = lim1.x; x < lim2.x; x += 1) {
 						const auto dist {hpos - glm::ivec2 {x, y}};
 						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
-						const auto out {rdiv(sq(x - hpos.x), sq(hsize.x)) + rdiv(sq(y - hpos.y), sq(hsize.y))};
+						const auto out {ratio(sq(x - hpos.x), sq(hsize.x)) + ratio(sq(y - hpos.y), sq(hsize.y))};
 						if (out <= 1.0F) {
 							auto & node {nodes[at({x, y})]};
 							const auto m {1.F / (7.F * out - 8.F) + 1.F};
