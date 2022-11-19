@@ -1,5 +1,6 @@
 #include "sceneRenderer.h"
 #include "maths.h"
+#include <gfx/gl/shaders/fs-directionalLight.h>
 #include <gfx/gl/shaders/fs-lightingShader.h>
 #include <gfx/gl/shaders/vs-lightingShader.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -34,9 +35,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	configuregdata(gPosition, GL_RGBA16F, GL_FLOAT, GL_COLOR_ATTACHMENT0);
 	configuregdata(gNormal, GL_RGBA16F, GL_FLOAT, GL_COLOR_ATTACHMENT1);
 	configuregdata(gAlbedoSpec, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2);
-	static constexpr std::array<unsigned int, 3> attachments {
-			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-	glDrawBuffers(attachments.size(), attachments.data());
+	configuregdata(gIllumination, GL_RGBA16F, GL_FLOAT, GL_COLOR_ATTACHMENT3);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
@@ -50,20 +49,35 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 }
 
 void
-SceneRenderer::render(std::function<void(const SceneShader &)> content) const
+SceneRenderer::render(const SceneProvider & scene) const
 {
 	shader.setView(camera.GetViewProjection());
 	glViewport(0, 0, size.x, size.y);
 
 	// Geometry pass
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	static constexpr std::array<unsigned int, 3> attachments {
+			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	glDrawBuffers(attachments.size(), attachments.data());
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	content(shader);
+	scene.content(shader);
+
+	// Illumination pass
+	glDrawBuffer(GL_COLOR_ATTACHMENT3);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	scene.environment(shader, *this);
 
 	// Lighting pass
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
@@ -75,9 +89,48 @@ SceneRenderer::render(std::function<void(const SceneShader &)> content) const
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-	// TODO Configure lights
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, gIllumination);
 	lighting.use();
 	glBindVertexArray(displayVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+void
+SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
+{
+	glClearColor(colour.r, colour.g, colour.b, 1.0F);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void
+SceneRenderer::setDirectionalLight(const glm::vec3 & colour, const glm::vec3 & direction) const
+{
+	dirLight.use();
+	dirLight.setDirectionalLight(colour, direction);
+	glBindVertexArray(displayVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
+SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
+	Program {lightingShader_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"}, colourLoc {*this,
+																									  "lightColour"}
+{
+}
+
+void
+SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c, const glm::vec3 & d) const
+{
+	glUniform3fv(colourLoc, 1, glm::value_ptr(c));
+	const auto nd = glm::normalize(d);
+	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
+}
+
+void
+SceneRenderer::SceneProvider::environment(const SceneShader &, const SceneRenderer & renderer) const
+{
+	renderer.setAmbientLight({0.5F, 0.5F, 0.5F});
+	renderer.setDirectionalLight({0.6F, 0.6F, 0.6F}, {1, 0, -1});
 }

@@ -45,9 +45,18 @@ GameMainWindow::tick(TickDuration)
 void
 GameMainWindow::render() const
 {
-	SceneRenderer::render([this](const auto & shader) {
-		gameState->world.apply<Renderable>(&Renderable::render, shader);
-		uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
-	});
+	SceneRenderer::render(*this);
 	Window::render();
+}
+void
+GameMainWindow::content(const SceneShader & shader) const
+{
+	gameState->world.apply<Renderable>(&Renderable::render, shader);
+	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
+}
+void
+GameMainWindow::environment(const SceneShader & s, const SceneRenderer & r) const
+{
+	// default for now
+	SceneRenderer::SceneProvider::environment(s, r);
 }

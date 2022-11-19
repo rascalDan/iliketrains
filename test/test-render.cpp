@@ -54,6 +54,19 @@ public:
 	}
 };
 
+class TestScene : public SceneRenderer::SceneProvider {
+	Terrain terrain {[]() {
+		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
+		gd->generateRandom();
+		return gd;
+	}()};
+	void
+	content(const SceneShader & shader) const
+	{
+		terrain.render(shader);
+	}
+};
+
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
@@ -61,29 +74,21 @@ BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-	auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
-	gd->generateRandom();
-	Terrain terrain {gd};
 	SceneRenderer ss {size, output};
 	ss.camera.pos = {-10, -10, 60};
 	ss.camera.forward = glm::normalize(glm::vec3 {1, 1, -0.5F});
-	ss.render([&terrain](const auto & shader) {
-		terrain.render(shader);
-	});
+	TestScene scene;
+	ss.render(scene);
 	Texture::save(outImage, size, "/tmp/basic.tga");
 }
 
 BOOST_AUTO_TEST_CASE(pointlight)
 {
-	auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
-	gd->generateRandom();
-	Terrain terrain {gd};
 	SceneRenderer ss {size, output};
 	ss.camera.pos = {-10, -10, 60};
 	ss.camera.forward = glm::normalize(glm::vec3 {1, 1, -0.5F});
-	ss.render([&terrain](const auto & shader) {
-		terrain.render(shader);
-	});
+	TestScene scene;
+	ss.render(scene);
 	Texture::save(outImage, size, "/tmp/pointlight.tga");
 }
 
