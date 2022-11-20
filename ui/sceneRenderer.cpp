@@ -107,11 +107,13 @@ SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
 void
 SceneRenderer::setDirectionalLight(const glm::vec3 & colour, const glm::vec3 & direction) const
 {
-	dirLight.use();
-	dirLight.setDirectionalLight(colour, direction);
-	glBindVertexArray(displayVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
+	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
+		dirLight.use();
+		dirLight.setDirectionalLight(colour, direction);
+		glBindVertexArray(displayVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	}
 }
 
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
