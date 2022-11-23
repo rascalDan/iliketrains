@@ -25,10 +25,27 @@ SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 }
 
 void
+SceneShader::setViewPort(const glm::ivec4 & viewPort) const
+{
+	for (const auto & prog : std::array<const SceneProgram *, 4> {&basic, &water, &landmass, &absolute}) {
+		prog->setViewPort(viewPort);
+	}
+}
+
+void
 SceneShader::SceneProgram::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
+}
+
+void
+SceneShader::SceneProgram::setViewPort(const glm::ivec4 & viewPort) const
+{
+	if (viewPortLoc >= 0) {
+		glUseProgram(*this);
+		glUniform4iv(viewPortLoc, 1, glm::value_ptr(viewPort));
+	}
 }
 
 SceneShader::BasicProgram::BasicProgram() : SceneProgram {basicShader_vs, basicShader_fs}, modelLoc {*this, "model"} { }

@@ -16,6 +16,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
 	lighting {lightingShader_vs, lightingShader_fs}
 {
+	shader.setViewPort({0, 0, size.x, size.y});
 	glBindVertexArray(displayVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, displayVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(displayVAOdata), nullptr, GL_STATIC_DRAW);

@@ -8,14 +8,17 @@ class SceneShader {
 	class SceneProgram : public Program {
 	public:
 		template<typename... S>
-		inline SceneProgram(const S &... srcs) : Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}
+		inline SceneProgram(const S &... srcs) :
+			Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}, viewPortLoc {*this, "viewPort"}
 		{
 		}
 
 		void setViewProjection(const glm::mat4 &) const;
+		void setViewPort(const glm::ivec4 &) const;
 
 	private:
 		RequiredUniformLocation viewProjectionLoc;
+		UniformLocation viewPortLoc;
 	};
 
 	class BasicProgram : public SceneProgram {
@@ -52,4 +55,5 @@ public:
 	AbsolutePosProgram landmass, absolute;
 
 	void setViewProjection(const glm::mat4 & viewProjection) const;
+	void setViewPort(const glm::ivec4 & viewPort) const;
 };
