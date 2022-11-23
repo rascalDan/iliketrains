@@ -48,9 +48,11 @@ project : requirements
 	;
 
 type.register GL_VERTEX_SHADER : vs ;
+type.register GL_GEOMETRY_SHADER : gs ;
 type.register GL_FRAGMENT_SHADER : fs ;
 
 generators.register-standard embed.glsl : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) ;
+generators.register-standard embed.glsl : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) ;
 generators.register-standard embed.glsl : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) ;
 
 actions embed.glsl
@@ -75,7 +77,7 @@ explicit main ;
 run iliketrains : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.* ] ] : : main ;
 
 lib ilt :
-	[ glob-tree *.cpp *.vs *.fs : application bin test ]
+	[ glob-tree *.cpp *.?s : application bin test ]
 	[ lib generated : [ glob-tree *.ll *.c ] :
 		<include>.
 		<include>lib
