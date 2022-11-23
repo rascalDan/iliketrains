@@ -2,9 +2,12 @@
 #include <array>
 #include <gfx/gl/shaders/fs-basicShader.h>
 #include <gfx/gl/shaders/fs-landmassShader.h>
+#include <gfx/gl/shaders/fs-pointLight.h>
 #include <gfx/gl/shaders/fs-waterShader.h>
+#include <gfx/gl/shaders/gs-pointLight.h>
 #include <gfx/gl/shaders/vs-basicShader.h>
 #include <gfx/gl/shaders/vs-landmassShader.h>
+#include <gfx/gl/shaders/vs-pointLight.h>
 #include <gfx/gl/shaders/vs-waterShader.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
@@ -19,7 +22,7 @@ SceneShader::SceneShader() :
 void
 SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 {
-	for (const auto & prog : std::array<const SceneProgram *, 4> {&basic, &water, &landmass, &absolute}) {
+	for (const auto & prog : std::array<const SceneProgram *, 5> {&basic, &water, &landmass, &absolute, &pointLight}) {
 		prog->setViewProjection(viewProjection);
 	}
 }
@@ -27,7 +30,7 @@ SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 void
 SceneShader::setViewPort(const glm::ivec4 & viewPort) const
 {
-	for (const auto & prog : std::array<const SceneProgram *, 4> {&basic, &water, &landmass, &absolute}) {
+	for (const auto & prog : std::array<const SceneProgram *, 5> {&basic, &water, &landmass, &absolute, &pointLight}) {
 		prog->setViewPort(viewPort);
 	}
 }
@@ -72,4 +75,28 @@ SceneShader::WaterProgram::use(float waveCycle) const
 	Program::use();
 	glm::vec3 waves {waveCycle, 0.F, 0.F};
 	glUniform3fv(waveLoc, 1, glm::value_ptr(waves));
+}
+
+SceneShader::PointLightShader::PointLightShader() :
+	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"}
+{
+	glBindVertexArray(va);
+	glBindBuffer(GL_ARRAY_BUFFER, b);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void
+SceneShader::PointLightShader::add(const glm::vec3 & position, const glm::vec3 & colour, const float kq) const
+{
+	Program::use();
+	glBindVertexArray(va);
+	glBindBuffer(GL_ARRAY_BUFFER, b);
+	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
+	glUniform1f(kqLoc, kq);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(position));
+	glDrawArrays(GL_POINTS, 0, 1);
 }

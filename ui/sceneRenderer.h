@@ -14,6 +14,7 @@ public:
 		virtual ~SceneProvider() = default;
 		virtual void content(const SceneShader &) const = 0;
 		virtual void environment(const SceneShader &, const SceneRenderer &) const;
+		virtual void lights(const SceneShader &) const = 0;
 	};
 
 	explicit SceneRenderer(glm::ivec2 size, GLuint output);

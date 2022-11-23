@@ -79,6 +79,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	scene.environment(shader, *this);
+	scene.lights(shader);
 
 	// Lighting pass
 	glBindFramebuffer(GL_FRAMEBUFFER, output);

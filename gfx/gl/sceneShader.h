@@ -1,6 +1,7 @@
 #pragma once
 
 #include "program.h"
+#include <glArrays.h>
 
 class Location;
 
@@ -47,12 +48,26 @@ class SceneShader {
 		RequiredUniformLocation waveLoc;
 	};
 
+	class PointLightShader : public SceneProgram {
+	public:
+		PointLightShader();
+
+		void add(const glm::vec3 & position, const glm::vec3 & colour, const float kq) const;
+
+	private:
+		UniformLocation colourLoc;
+		UniformLocation kqLoc;
+		glVertexArray va;
+		glBuffer b;
+	};
+
 public:
 	SceneShader();
 
 	BasicProgram basic;
 	WaterProgram water;
 	AbsolutePosProgram landmass, absolute;
+	PointLightShader pointLight;
 
 	void setViewProjection(const glm::mat4 & viewProjection) const;
 	void setViewPort(const glm::ivec4 & viewPort) const;

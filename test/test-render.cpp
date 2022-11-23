@@ -8,6 +8,7 @@
 #include <game/terrain.h>
 #include <gfx/models/texture.h>
 #include <lib/glArrays.h>
+#include <maths.h>
 #include <ui/applicationBase.h>
 #include <ui/sceneRenderer.h>
 #include <ui/window.h>
@@ -65,6 +66,10 @@ class TestScene : public SceneRenderer::SceneProvider {
 	{
 		terrain.render(shader);
 	}
+	void
+	lights(const SceneShader &) const
+	{
+	}
 };
 
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
@@ -87,7 +92,25 @@ BOOST_AUTO_TEST_CASE(pointlight)
 	SceneRenderer ss {size, output};
 	ss.camera.pos = {-10, -10, 60};
 	ss.camera.forward = glm::normalize(glm::vec3 {1, 1, -0.5F});
-	TestScene scene;
+	class PointLightScene : public TestScene {
+	public:
+		void
+		environment(const SceneShader &, const SceneRenderer & r) const override
+		{
+			r.setAmbientLight({0.2F, 0.2F, 0.2F});
+			r.setDirectionalLight({}, down);
+		}
+		void
+		lights(const SceneShader & shader) const override
+		{
+			for (int x = 50; x < 100; x += 20) {
+				for (int y = 50; y < 2000; y += 20) {
+					shader.pointLight.add({x, y, 4}, {1.0, 1.0, 1.0}, 0.1);
+				}
+			}
+		}
+	};
+	PointLightScene scene;
 	ss.render(scene);
 	Texture::save(outImage, size, "/tmp/pointlight.tga");
 }
