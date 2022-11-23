@@ -61,6 +61,7 @@ GameMainWindow::environment(const SceneShader & s, const SceneRenderer & r) cons
 	SceneRenderer::SceneProvider::environment(s, r);
 }
 void
-GameMainWindow::lights(const SceneShader &) const
+GameMainWindow::lights(const SceneShader & shader) const
 {
+	gameState->world.apply<Renderable>(&Renderable::lights, shader);
 }
