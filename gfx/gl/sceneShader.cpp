@@ -17,15 +17,15 @@ SceneShader::SceneShader() :
 }
 
 void
-SceneShader::setView(glm::mat4 proj) const
+SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	for (const auto & prog : std::array<const SceneProgram *, 4> {&basic, &water, &landmass, &absolute}) {
-		prog->setView(proj);
+		prog->setViewProjection(viewProjection);
 	}
 }
 
 void
-SceneShader::SceneProgram::setView(const glm::mat4 & viewProjection) const
+SceneShader::SceneProgram::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));

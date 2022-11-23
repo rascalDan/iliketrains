@@ -12,7 +12,7 @@ class SceneShader {
 		{
 		}
 
-		void setView(const glm::mat4 &) const;
+		void setViewProjection(const glm::mat4 &) const;
 
 	private:
 		RequiredUniformLocation viewProjectionLoc;
@@ -51,5 +51,5 @@ public:
 	WaterProgram water;
 	AbsolutePosProgram landmass, absolute;
 
-	void setView(glm::mat4 proj) const;
+	void setViewProjection(const glm::mat4 & viewProjection) const;
 };
