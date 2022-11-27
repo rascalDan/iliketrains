@@ -131,10 +131,3 @@ SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c,
 	const auto nd = glm::normalize(d);
 	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
 }
-
-void
-SceneRenderer::SceneProvider::environment(const SceneShader &, const SceneRenderer & renderer) const
-{
-	renderer.setAmbientLight({0.5F, 0.5F, 0.5F});
-	renderer.setDirectionalLight({0.6F, 0.6F, 0.6F}, {1, 0, -1});
-}

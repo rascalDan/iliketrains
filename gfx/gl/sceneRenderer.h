@@ -1,22 +1,15 @@
 #pragma once
 
-#include "gfx/gl/camera.h"
-#include "gfx/gl/program.h"
-#include "gfx/gl/sceneShader.h"
-#include "lib/glArrays.h"
+#include "camera.h"
+#include "glArrays.h"
+#include "program.h"
+#include "sceneProvider.h"
+#include "sceneShader.h"
 #include <functional>
 #include <glm/fwd.hpp>
 
 class SceneRenderer {
 public:
-	class SceneProvider {
-	public:
-		virtual ~SceneProvider() = default;
-		virtual void content(const SceneShader &) const = 0;
-		virtual void environment(const SceneShader &, const SceneRenderer &) const;
-		virtual void lights(const SceneShader &) const = 0;
-	};
-
 	explicit SceneRenderer(glm::ivec2 size, GLuint output);
 
 	void render(const SceneProvider &) const;

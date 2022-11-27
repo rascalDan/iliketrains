@@ -58,7 +58,7 @@ void
 GameMainWindow::environment(const SceneShader & s, const SceneRenderer & r) const
 {
 	// default for now
-	SceneRenderer::SceneProvider::environment(s, r);
+	SceneProvider::environment(s, r);
 }
 void
 GameMainWindow::lights(const SceneShader & shader) const

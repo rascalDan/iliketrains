@@ -5,7 +5,7 @@
 #include "window.h"
 #include <cstddef>
 
-class GameMainWindow : public Window, SceneRenderer, public SceneRenderer::SceneProvider {
+class GameMainWindow : public Window, SceneRenderer, public SceneProvider {
 public:
 	GameMainWindow(size_t w, size_t h);
 

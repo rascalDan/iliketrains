@@ -55,7 +55,7 @@ public:
 	}
 };
 
-class TestScene : public SceneRenderer::SceneProvider {
+class TestScene : public SceneProvider {
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
 		gd->generateRandom();
