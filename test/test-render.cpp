@@ -6,11 +6,11 @@
 
 #include <game/geoData.h>
 #include <game/terrain.h>
+#include <gfx/gl/sceneRenderer.h>
 #include <gfx/models/texture.h>
 #include <lib/glArrays.h>
 #include <maths.h>
 #include <ui/applicationBase.h>
-#include <ui/sceneRenderer.h>
 #include <ui/window.h>
 
 class TestRenderOutput {

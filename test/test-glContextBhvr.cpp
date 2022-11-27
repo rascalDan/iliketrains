@@ -3,9 +3,9 @@
 #include "test-helpers.hpp"
 #include <boost/test/unit_test.hpp>
 
+#include <gfx/gl/sceneRenderer.h>
 #include <lib/glArrays.h>
 #include <ui/applicationBase.h>
-#include <ui/sceneRenderer.h>
 #include <ui/window.h>
 
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
