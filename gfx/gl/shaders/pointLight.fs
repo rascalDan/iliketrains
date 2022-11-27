@@ -8,16 +8,19 @@ layout(binding = 1) uniform sampler2D gNormal;
 uniform ivec4 viewPort;
 uniform vec3 colour;
 uniform float kq;
-in vec3 geo_centre;
+in vec4 geo_centre;
 
 void
 main()
 {
 	const vec2 texCoord = gl_FragCoord.xy / viewPort.zw;
 	const vec3 position = texture(gPosition, texCoord).xyz;
-	const vec3 normal = texture(gNormal, texCoord).xyz;
-	const vec3 lightv = position - geo_centre;
+	const vec3 lightv = position - geo_centre.xyz;
 	const float lightDist = length(lightv);
+	if (lightDist > geo_centre.w) {
+		discard;
+	}
+	const vec3 normal = texture(gNormal, texCoord).xyz;
 	const vec3 lightDirection = normalize(lightv);
 	const float normalDot = dot(-lightDirection, normal);
 	if (normalDot < 0) {
