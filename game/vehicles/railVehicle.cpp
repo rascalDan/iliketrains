@@ -18,6 +18,12 @@ RailVehicle::render(const SceneShader & shader) const
 }
 
 void
+RailVehicle::shadows(const ShadowMapper & shadowMapper) const
+{
+	rvClass->shadows(shadowMapper, location);
+}
+
+void
 RailVehicle::move(const Train * t, float & trailBy)
 {
 	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};

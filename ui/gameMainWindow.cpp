@@ -65,3 +65,8 @@ GameMainWindow::lights(const SceneShader & shader) const
 {
 	gameState->world.apply<Renderable>(&Renderable::lights, shader);
 }
+void
+GameMainWindow::shadows(const ShadowMapper & shadowMapper) const
+{
+	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper);
+}

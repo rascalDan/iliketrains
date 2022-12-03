@@ -16,6 +16,11 @@ Train::render(const SceneShader & shader) const
 {
 	apply(&Renderable::render, shader);
 }
+void
+Train::shadows(const ShadowMapper & shadowMapper) const
+{
+	apply(&Renderable::shadows, shadowMapper);
+}
 
 Location
 Train::getBogiePosition(float linkDist, float dist) const

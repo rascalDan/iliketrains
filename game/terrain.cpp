@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <gfx/gl/sceneShader.h>
+#include <gfx/gl/shadowMapper.h>
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.hpp>
@@ -91,5 +92,12 @@ Terrain::render(const SceneShader & shader) const
 
 	shader.water.use(waveCycle);
 	water->bind();
+	meshes.apply(&Mesh::Draw);
+}
+
+void
+Terrain::shadows(const ShadowMapper & shadowMapper) const
+{
+	shadowMapper.fixedPoint.use();
 	meshes.apply(&Mesh::Draw);
 }

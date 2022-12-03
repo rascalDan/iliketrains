@@ -1,5 +1,6 @@
 #include "railVehicleClass.h"
 #include "gfx/gl/sceneShader.h"
+#include "gfx/gl/shadowMapper.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/obj.h"
 #include "gfx/models/texture.h"
@@ -49,6 +50,12 @@ RailVehicleClass::render(
 		shader.basic.setModel(bl[b]);
 		bogies[b]->Draw();
 	}
+}
+void
+RailVehicleClass::shadows(const ShadowMapper & shadowMapper, const Location & location) const
+{
+	shadowMapper.dynamicPoint.use(location);
+	bodyMesh->Draw();
 }
 
 float

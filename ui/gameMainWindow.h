@@ -17,4 +17,5 @@ private:
 	void content(const SceneShader &) const override;
 	void environment(const SceneShader &, const SceneRenderer &) const override;
 	void lights(const SceneShader &) const override;
+	void shadows(const ShadowMapper &) const override;
 };

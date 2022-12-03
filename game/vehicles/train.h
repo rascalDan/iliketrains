@@ -14,6 +14,7 @@
 #include <vector>
 
 class SceneShader;
+class ShadowMapper;
 class Ray;
 
 class Train : public Vehicle, public Collection<RailVehicle, false>, public Can<Go>, public Can<Idle> {
@@ -27,6 +28,7 @@ public:
 	}
 
 	void render(const SceneShader & shader) const override;
+	void shadows(const ShadowMapper & shadowMapper) const override;
 
 	[[nodiscard]] bool intersectRay(const Ray &, glm::vec2 *, float *) const override;
 
