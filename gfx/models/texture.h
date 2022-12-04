@@ -19,7 +19,11 @@ public:
 	void bind(GLenum unit = GL_TEXTURE0) const;
 
 	static void save(const glTexture &, const glm::ivec2 & size, const char * path);
+	static void saveDepth(const glTexture &, const glm::ivec2 & size, const char * path);
 
 private:
+	static void save(const glTexture &, GLenum, const glm::ivec2 & size, unsigned short channels, const char * path,
+			short tgaFormat);
+
 	glTexture m_texture;
 };

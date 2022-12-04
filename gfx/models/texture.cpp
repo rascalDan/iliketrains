@@ -41,15 +41,30 @@ Texture::bind(GLenum unit) const
 }
 
 void
-Texture::save(const glTexture & texture, const glm::ivec2 & size, const char * path)
+Texture::save(const glTexture & texture, GLenum format, const glm::ivec2 & size, unsigned short channels,
+		const char * path, short tgaFormat)
 {
-	std::vector<unsigned char> buffer(static_cast<size_t>(size.x * size.y * 3));
-	glGetTextureImage(texture, 0, GL_BGR, GL_UNSIGNED_BYTE, static_cast<GLsizei>(buffer.size()), buffer.data());
+	using PixelData = std::vector<unsigned char>;
+	PixelData buffer(static_cast<size_t>(size.x * size.y * channels));
+	glGetTextureImage(texture, 0, format, GL_UNSIGNED_BYTE, static_cast<GLsizei>(buffer.size()), buffer.data());
 
 	auto out = open(path, O_WRONLY | O_CREAT, 0660);
-	short TGAhead[] = {0, 2, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y), 24};
+	const short TGAhead[] = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
+			static_cast<short>(8 * channels)};
 	std::ignore = write(out, &TGAhead, sizeof(TGAhead));
 	std::ignore = write(out, buffer.data(), buffer.size());
 	std::ignore = ftruncate(out, static_cast<off_t>(buffer.size() + sizeof(TGAhead)));
 	close(out);
+}
+
+void
+Texture::save(const glTexture & texture, const glm::ivec2 & size, const char * path)
+{
+	save(texture, GL_BGR, size, 3, path, 2);
+}
+
+void
+Texture::saveDepth(const glTexture & texture, const glm::ivec2 & size, const char * path)
+{
+	save(texture, GL_DEPTH_COMPONENT, size, 1, path, 3);
 }

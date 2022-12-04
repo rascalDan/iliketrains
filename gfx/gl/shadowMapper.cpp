@@ -51,7 +51,6 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir) const
 	scene.shadows(*this);
 	glCullFace(GL_BACK);
 
-	// Texture::saveDepth(depthMap, size, "/tmp/depth.tga");
 	return lightViewProjection;
 }
 
