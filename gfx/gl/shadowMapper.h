@@ -8,7 +8,7 @@ class SceneProvider;
 
 class ShadowMapper {
 public:
-	ShadowMapper(const glm::ivec2 & size = {1024, 1024});
+	ShadowMapper(const glm::ivec2 & size);
 
 	glm::mat4x4 update(const SceneProvider &, const glm::vec3 & direction) const;
 
