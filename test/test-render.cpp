@@ -104,6 +104,7 @@ BOOST_AUTO_TEST_CASE(basic)
 	ss.camera.forward = glm::normalize(glm::vec3 {1, 1, -0.5F});
 	TestScene scene;
 	ss.render(scene);
+	glDisable(GL_DEBUG_OUTPUT);
 	Texture::save(outImage, size, "/tmp/basic.tga");
 }
 
@@ -132,6 +133,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 	};
 	PointLightScene scene;
 	ss.render(scene);
+	glDisable(GL_DEBUG_OUTPUT);
 	Texture::save(outImage, size, "/tmp/pointlight.tga");
 }
 
