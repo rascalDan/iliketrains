@@ -1,5 +1,4 @@
 #include "shadowMapper.h"
-#include "gfx/gl/shaders/fs-shadowCast.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowFixedPoint.h"
 #include "gfx/models/texture.h"
@@ -56,10 +55,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir) const
 	return lightViewProjection;
 }
 
-ShadowMapper::FixedPoint::FixedPoint() :
-	Program {shadowFixedPoint_vs, shadowCast_fs}, viewProjectionLoc {*this, "viewProjection"}
-{
-}
+ShadowMapper::FixedPoint::FixedPoint() : Program {shadowFixedPoint_vs}, viewProjectionLoc {*this, "viewProjection"} { }
 void
 ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection) const
 {
@@ -73,8 +69,7 @@ ShadowMapper::FixedPoint::use() const
 }
 
 ShadowMapper::DynamicPoint::DynamicPoint() :
-	Program {shadowDynamicPoint_vs, shadowCast_fs}, viewProjectionLoc {*this, "viewProjection"}, modelLoc {
-																										 *this, "model"}
+	Program {shadowDynamicPoint_vs}, viewProjectionLoc {*this, "viewProjection"}, modelLoc {*this, "model"}
 {
 }
 void
