@@ -19,14 +19,17 @@ ObjParser::ObjParser(std::unique_ptr<std::istream> in) : yyFlexLexer(in.get())
 	assert(in);
 	ObjParser::yylex();
 	assert(in->good());
-	std::for_each(vertices.begin(), vertices.end(), [](auto & v) {
-		constexpr const glm::mat4 obj2ilt {
-				-1, 0, 0, 0, // x
-				0, 0, 1, 0, // y
-				0, 1, 0, 0, // z
-				0, 0, 0, 0, // w
-		};
+	constexpr const glm::mat4 obj2ilt {
+			-1, 0, 0, 0, // x
+			0, 0, 1, 0, // y
+			0, 1, 0, 0, // z
+			0, 0, 0, 0, // w
+	};
+	std::for_each(vertices.begin(), vertices.end(), [&obj2ilt](auto & v) {
 		v = v * obj2ilt;
+	});
+	std::for_each(normals.begin(), normals.end(), [&obj2ilt](auto & v) {
+		v = glm::vec4 {v, 0} * obj2ilt;
 	});
 }
 
