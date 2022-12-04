@@ -5,6 +5,7 @@
 #include "program.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
+#include "shadowMapper.h"
 #include <functional>
 #include <glm/fwd.hpp>
 
@@ -14,7 +15,7 @@ public:
 
 	void render(const SceneProvider &) const;
 	void setAmbientLight(const glm::vec3 & colour) const;
-	void setDirectionalLight(const glm::vec3 & colour, const glm::vec3 & direction) const;
+	void setDirectionalLight(const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider &) const;
 
 	Camera camera;
 
@@ -34,10 +35,10 @@ private:
 		DirectionalLightProgram();
 		using Program::use;
 
-		void setDirectionalLight(const glm::vec3 &, const glm::vec3 &) const;
+		void setDirectionalLight(const glm::vec3 &, const glm::vec3 &, const glm::mat4x4 &) const;
 
 	private:
-		RequiredUniformLocation directionLoc, colourLoc;
+		RequiredUniformLocation directionLoc, colourLoc, lightViewProjectionLoc;
 	};
 
 	DeferredLightProgram lighting;
@@ -45,4 +46,5 @@ private:
 	glVertexArray displayVAO;
 	glBuffer displayVBO;
 	SceneShader shader;
+	ShadowMapper shadowMapper;
 };

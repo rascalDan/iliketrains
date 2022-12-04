@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 		environment(const SceneShader &, const SceneRenderer & r) const override
 		{
 			r.setAmbientLight({0.2F, 0.2F, 0.2F});
-			r.setDirectionalLight({}, down);
+			r.setDirectionalLight({}, down, *this);
 		}
 		void
 		lights(const SceneShader & shader) const override

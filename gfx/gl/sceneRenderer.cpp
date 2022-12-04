@@ -78,11 +78,15 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glBindTexture(GL_TEXTURE_2D, gPosition);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, shadowMapper);
 	scene.environment(shader, *this);
 	scene.lights(shader);
 
 	// Lighting pass
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
+	glViewport(0, 0, size.x, size.y);
+	glCullFace(GL_BACK);
 	glDisable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
@@ -102,32 +106,40 @@ SceneRenderer::render(const SceneProvider & scene) const
 void
 SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClearColor(colour.r, colour.g, colour.b, 1.0F);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void
-SceneRenderer::setDirectionalLight(const glm::vec3 & colour, const glm::vec3 & direction) const
+SceneRenderer::setDirectionalLight(
+		const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
+		const auto lvp = shadowMapper.update(scene, direction);
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
-		dirLight.setDirectionalLight(colour, direction);
+		dirLight.setDirectionalLight(colour, direction, lvp);
 		glBindVertexArray(displayVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
+		glEnable(GL_DEPTH_TEST);
 	}
 }
 
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
-	Program {lightingShader_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"}, colourLoc {*this,
-																									  "lightColour"}
+	Program {lightingShader_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
+	colourLoc {*this, "lightColour"}, lightViewProjectionLoc {*this, "lightViewProjection"}
 {
 }
 
 void
-SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c, const glm::vec3 & d) const
+SceneRenderer::DirectionalLightProgram::setDirectionalLight(
+		const glm::vec3 & c, const glm::vec3 & d, const glm::mat4x4 & lvp) const
 {
 	glUniform3fv(colourLoc, 1, glm::value_ptr(c));
 	const auto nd = glm::normalize(d);
 	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
+	glUniformMatrix4fv(lightViewProjectionLoc, 1, GL_FALSE, glm::value_ptr(lvp));
 }
