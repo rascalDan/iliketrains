@@ -35,7 +35,7 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 glm::mat4x4
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir) const
 {
-	const glm::vec3 centre {1200.F, 1200.F, 0.F};
+	const glm::vec3 centre {0.F, 0.F, 0.F};
 	const glm::vec3 range = glm::normalize(dir) * 1800.F;
 	const auto lightProjection = glm::ortho(-1200.F, 1200.F, -1200.F, 1200.F, 0.F, 3600.F);
 	const auto lightView = glm::lookAt(centre - range, centre, north);
