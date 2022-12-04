@@ -23,5 +23,5 @@ main()
 		discard;
 	}
 	const vec3 Normal = texture(gNormal, TexCoords).rgb;
-	FragColor = dot(-lightDirection, Normal) * lightColour;
+	FragColor = max(dot(-lightDirection, Normal) * lightColour, 0);
 }
