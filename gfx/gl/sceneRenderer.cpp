@@ -33,10 +33,10 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 				  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
 			  };
-	configuregdata(gPosition, GL_RGBA16F, GL_FLOAT, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, GL_RGBA16F, GL_FLOAT, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2);
-	configuregdata(gIllumination, GL_RGBA16F, GL_FLOAT, GL_COLOR_ATTACHMENT3);
+	configuregdata(gPosition, GL_RGB32F, GL_FLOAT, GL_COLOR_ATTACHMENT0);
+	configuregdata(gNormal, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT1);
+	configuregdata(gAlbedoSpec, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2);
+	configuregdata(gIllumination, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
