@@ -17,7 +17,7 @@ void
 main()
 {
 	const vec3 Position = texture(gPosition, TexCoords).xyz;
-	const vec4 PositionInLightSpace = (lightViewProjection * vec4(Position, 1)) * 0.5 + 0.5;
+	const vec3 PositionInLightSpace = ((lightViewProjection * vec4(Position, 1.0f)) * 0.5 + 0.5).xyz;
 	const float lightSpaceDepth = texture(shadowMap, PositionInLightSpace.xy).r;
 	if (lightSpaceDepth < PositionInLightSpace.z) {
 		discard;

@@ -19,7 +19,6 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	static constexpr glm::vec3 border {std::numeric_limits<float>::infinity()};
-	// static constexpr glm::vec3 border {1};
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(border));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
