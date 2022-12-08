@@ -26,26 +26,29 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	const auto configuregdata
-			= [this](const GLuint data, const GLint format, const GLenum type, const GLenum attachment) {
+			= [this](const GLuint data, const std::initializer_list<GLint> formats, const GLenum attachment) {
 				  glBindTexture(GL_TEXTURE_2D, data);
-				  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGBA, type, NULL);
 				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+				  for (const auto format : formats) {
+					  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGB, GL_BYTE, NULL);
+
+					  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+					  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+						  return format;
+					  }
+				  }
+				  throw std::runtime_error("Framebuffer could not be completed!");
 			  };
-	configuregdata(gPosition, GL_RGB32F, GL_FLOAT, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2);
-	configuregdata(gIllumination, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3);
+	configuregdata(gPosition, {GL_RGB32F}, GL_COLOR_ATTACHMENT0);
+	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_COLOR_ATTACHMENT1);
+	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_COLOR_ATTACHMENT2);
+	configuregdata(gIllumination, {GL_RGB8}, GL_COLOR_ATTACHMENT3);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
 
-	// finally check if framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer not complete!");
-	}
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 }
 
