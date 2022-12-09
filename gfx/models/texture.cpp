@@ -7,6 +7,7 @@
 #include <glm/geometric.hpp>
 #include <resource.h>
 #include <stb/stb_image.h>
+#include <sys/mman.h>
 
 Cache<Texture, std::filesystem::path> Texture::cachedTexture;
 
@@ -44,17 +45,23 @@ void
 Texture::save(const glTexture & texture, GLenum format, const glm::ivec2 & size, unsigned short channels,
 		const char * path, short tgaFormat)
 {
-	using PixelData = std::vector<unsigned char>;
-	PixelData buffer(static_cast<size_t>(size.x * size.y * channels));
-	glGetTextureImage(texture, 0, format, GL_UNSIGNED_BYTE, static_cast<GLsizei>(buffer.size()), buffer.data());
+	using TGAHead = std::array<short, 9>;
 
-	auto out = open(path, O_WRONLY | O_CREAT, 0660);
-	const short TGAhead[] = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
-			static_cast<short>(8 * channels)};
-	std::ignore = write(out, &TGAhead, sizeof(TGAhead));
-	std::ignore = write(out, buffer.data(), buffer.size());
-	std::ignore = ftruncate(out, static_cast<off_t>(buffer.size() + sizeof(TGAhead)));
+	size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
+	size_t fileSize = dataSize + sizeof(TGAHead);
+
+	auto out = open(path, O_RDWR | O_CREAT, 0660);
+	std::ignore = ftruncate(out, static_cast<off_t>(fileSize));
+	TGAHead * tga = static_cast<TGAHead *>(mmap(nullptr, fileSize, PROT_WRITE, MAP_SHARED, out, 0));
 	close(out);
+	if (tga == MAP_FAILED) {
+		return;
+	}
+	*tga = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
+			static_cast<short>(8 * channels)};
+	glGetTextureImage(texture, 0, format, GL_UNSIGNED_BYTE, static_cast<GLsizei>(dataSize), tga + 1);
+	msync(tga, fileSize, MS_ASYNC);
+	munmap(tga, fileSize);
 }
 
 void
