@@ -71,3 +71,9 @@ Texture::saveDepth(const glTexture & texture, const glm::ivec2 & size, const cha
 {
 	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, size, 1, path, 3);
 }
+
+void
+Texture::saveNormal(const glTexture & texture, const glm::ivec2 & size, const char * path)
+{
+	save(texture, GL_BGR, GL_BYTE, size, 3, path, 2);
+}
