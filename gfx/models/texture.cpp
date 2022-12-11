@@ -43,7 +43,7 @@ Texture::bind(GLenum unit) const
 }
 
 void
-Texture::save(const glTexture & texture, GLenum format, const glm::ivec2 & size, unsigned short channels,
+Texture::save(const glTexture & texture, GLenum format, GLenum type, const glm::ivec2 & size, unsigned short channels,
 		const char * path, short tgaFormat)
 {
 	using TGAHead = std::array<short, 9>;
@@ -56,18 +56,18 @@ Texture::save(const glTexture & texture, GLenum format, const glm::ivec2 & size,
 	auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
 	*tga.get<TGAHead>() = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
 			static_cast<short>(8 * channels)};
-	glGetTextureImage(texture, 0, format, GL_UNSIGNED_BYTE, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
+	glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
 	tga.msync(MS_ASYNC);
 }
 
 void
 Texture::save(const glTexture & texture, const glm::ivec2 & size, const char * path)
 {
-	save(texture, GL_BGR, size, 3, path, 2);
+	save(texture, GL_BGR, GL_UNSIGNED_BYTE, size, 3, path, 2);
 }
 
 void
 Texture::saveDepth(const glTexture & texture, const glm::ivec2 & size, const char * path)
 {
-	save(texture, GL_DEPTH_COMPONENT, size, 1, path, 3);
+	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, size, 1, path, 3);
 }

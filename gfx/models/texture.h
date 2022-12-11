@@ -22,8 +22,8 @@ public:
 	static void saveDepth(const glTexture &, const glm::ivec2 & size, const char * path);
 
 private:
-	static void save(const glTexture &, GLenum, const glm::ivec2 & size, unsigned short channels, const char * path,
-			short tgaFormat);
+	static void save(const glTexture &, GLenum, GLenum, const glm::ivec2 & size, unsigned short channels,
+			const char * path, short tgaFormat);
 
 	glTexture m_texture;
 };
