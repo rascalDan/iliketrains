@@ -78,7 +78,6 @@ ManualCameraController::render(const UIShader &, const Position &) const
 void
 ManualCameraController::updateCamera(Camera * camera) const
 {
-	camera->forward = glm::normalize(sincosf(direction) ^ -sin(pitch));
-	camera->pos = !focus + up * 3.F - (camera->forward * std::pow(dist, 1.3F));
-	camera->up = up;
+	camera->setView(!focus + up * 3.F - (camera->getForward() * std::pow(dist, 1.3F)),
+			glm::normalize(sincosf(direction) ^ -sin(pitch)));
 }

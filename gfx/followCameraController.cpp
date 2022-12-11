@@ -20,20 +20,16 @@ FollowCameraController::updateCamera(Camera * camera) const
 
 	switch (mode) {
 		case Mode::Pan:
-			camera->forward = glm::normalize(pos - camera->pos);
-			camera->up = up;
+			camera->lookAt(pos);
 			break;
 
 		case Mode::Ride:
-			camera->pos = pos + (up * 4.8F);
-			camera->forward = !-sincosf(rot.y);
-			camera->up = up;
+			camera->setView(pos + (up * 4.8F), !-sincosf(rot.y));
 			break;
 
 		case Mode::ISO:
-			camera->pos = pos + ((up + north + east) * 40.F);
-			camera->forward = glm::normalize(down + south + west);
-			camera->up = glm::normalize(up - north - east);
+			camera->setView(pos + ((up + north + east) * 40.F), glm::normalize(down + south + west),
+					glm::normalize(up - north - east));
 			break;
 	}
 }

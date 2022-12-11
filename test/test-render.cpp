@@ -100,8 +100,7 @@ BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);
 BOOST_AUTO_TEST_CASE(basic)
 {
 	SceneRenderer ss {size, output};
-	ss.camera.pos = {-10, -10, 60};
-	ss.camera.forward = glm::normalize(glm::vec3 {1, 1, -0.5F});
+	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	TestScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
@@ -111,8 +110,7 @@ BOOST_AUTO_TEST_CASE(basic)
 BOOST_AUTO_TEST_CASE(pointlight)
 {
 	SceneRenderer ss {size, output};
-	ss.camera.pos = {-10, -10, 60};
-	ss.camera.forward = glm::normalize(glm::vec3 {1, 1, -0.5F});
+	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	class PointLightScene : public TestScene {
 	public:
 		void
