@@ -7,12 +7,7 @@ Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) 
 	position {pos}, forward {::north}, up {::up}, fov {fov}, aspect {aspect}, near {zNear}, far {zFar},
 	projection {glm::perspective(fov, aspect, zNear, zFar)}
 {
-}
-
-glm::mat4
-Camera::getViewProjection() const
-{
-	return projection * glm::lookAt(position, position + forward, up);
+	updateView();
 }
 
 Ray
@@ -21,4 +16,11 @@ Camera::unProject(const glm::vec2 & mouse) const
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
 	return {position,
 			glm::normalize(glm::unProject(mouse ^ 1, glm::lookAt(::origin, forward, up), projection, screen))};
+}
+
+void
+Camera::updateView()
+{
+	view = glm::lookAt(position, position + forward, up);
+	viewProjection = projection * view;
 }

@@ -8,18 +8,24 @@ class Camera {
 public:
 	Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar);
 
-	[[nodiscard]] glm::mat4 getViewProjection() const;
+	[[nodiscard]] glm::mat4
+	getViewProjection() const
+	{
+		return viewProjection;
+	}
 	[[nodiscard]] Ray unProject(const glm::vec2 &) const;
 
 	void
 	setPosition(const glm::vec3 & p)
 	{
 		position = p;
+		updateView();
 	}
 	void
 	setForward(const glm::vec3 & f)
 	{
 		forward = f;
+		updateView();
 	}
 	void
 	setView(const glm::vec3 & p, const glm::vec3 & f, const glm::vec3 & u = ::up)
@@ -27,6 +33,7 @@ public:
 		position = p;
 		forward = f;
 		up = u;
+		updateView();
 	}
 	void
 	lookAt(const glm::vec3 & target)
@@ -45,10 +52,14 @@ public:
 	}
 
 private:
+	void updateView();
+
 	glm::vec3 position;
 	glm::vec3 forward;
 	glm::vec3 up;
 
 	float fov, aspect, near, far;
 	glm::mat4 projection;
+	glm::mat4 view;
+	glm::mat4 viewProjection;
 };
