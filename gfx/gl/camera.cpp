@@ -14,13 +14,13 @@ Ray
 Camera::unProject(const glm::vec2 & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
-	return {position,
-			glm::normalize(glm::unProject(mouse ^ 1, glm::lookAt(::origin, forward, up), projection, screen))};
+	return {position, glm::normalize(glm::unProject(mouse ^ 1, unView, projection, screen))};
 }
 
 void
 Camera::updateView()
 {
 	view = glm::lookAt(position, position + forward, up);
+	unView = glm::lookAt(::origin, forward, up);
 	viewProjection = projection * view;
 }

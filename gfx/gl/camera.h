@@ -60,6 +60,6 @@ private:
 
 	float fov, aspect, near, far;
 	glm::mat4 projection;
-	glm::mat4 view;
+	glm::mat4 view, unView;
 	glm::mat4 viewProjection;
 };
