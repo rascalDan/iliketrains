@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <cache.h>
 #include <fcntl.h>
+#include <filesystem.h>
 #include <gfx/image.h>
 #include <glm/geometric.hpp>
 #include <resource.h>
@@ -50,18 +51,13 @@ Texture::save(const glTexture & texture, GLenum format, const glm::ivec2 & size,
 	size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
 	size_t fileSize = dataSize + sizeof(TGAHead);
 
-	auto out = open(path, O_RDWR | O_CREAT, 0660);
-	std::ignore = ftruncate(out, static_cast<off_t>(fileSize));
-	TGAHead * tga = static_cast<TGAHead *>(mmap(nullptr, fileSize, PROT_WRITE, MAP_SHARED, out, 0));
-	close(out);
-	if (tga == MAP_FAILED) {
-		return;
-	}
-	*tga = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
+	filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
+	out.truncate(fileSize);
+	auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
+	*tga.get<TGAHead>() = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
 			static_cast<short>(8 * channels)};
-	glGetTextureImage(texture, 0, format, GL_UNSIGNED_BYTE, static_cast<GLsizei>(dataSize), tga + 1);
-	msync(tga, fileSize, MS_ASYNC);
-	munmap(tga, fileSize);
+	glGetTextureImage(texture, 0, format, GL_UNSIGNED_BYTE, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
+	tga.msync(MS_ASYNC);
 }
 
 void
