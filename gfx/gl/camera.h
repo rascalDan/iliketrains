@@ -49,5 +49,6 @@ private:
 	glm::vec3 forward;
 	glm::vec3 up;
 
+	float fov, aspect, near, far;
 	glm::mat4 projection;
 };
