@@ -9,7 +9,7 @@ Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) 
 }
 
 glm::mat4
-Camera::GetViewProjection() const
+Camera::getViewProjection() const
 {
 	return projection * glm::lookAt(pos, pos + forward, up);
 }

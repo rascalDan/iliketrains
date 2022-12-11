@@ -55,7 +55,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 void
 SceneRenderer::render(const SceneProvider & scene) const
 {
-	shader.setViewProjection(camera.GetViewProjection());
+	shader.setViewProjection(camera.getViewProjection());
 	glViewport(0, 0, size.x, size.y);
 
 	// Geometry pass

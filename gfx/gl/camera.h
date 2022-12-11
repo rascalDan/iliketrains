@@ -7,7 +7,7 @@ class Camera {
 public:
 	Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar);
 
-	[[nodiscard]] glm::mat4 GetViewProjection() const;
+	[[nodiscard]] glm::mat4 getViewProjection() const;
 	[[nodiscard]] Ray unProject(const glm::vec2 &) const;
 
 	glm::vec3 pos;
