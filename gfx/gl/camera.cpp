@@ -23,4 +23,5 @@ Camera::updateView()
 	view = glm::lookAt(position, position + forward, up);
 	unView = glm::lookAt(::origin, forward, up);
 	viewProjection = projection * view;
+	inverseViewProjection = glm::inverse(viewProjection);
 }
