@@ -25,3 +25,10 @@ Camera::updateView()
 	viewProjection = projection * view;
 	inverseViewProjection = glm::inverse(viewProjection);
 }
+
+glm::vec3
+Camera::upFromForward(const glm::vec3 & forward)
+{
+	const auto right = glm::cross(forward, ::down);
+	return glm::cross(forward, right);
+}

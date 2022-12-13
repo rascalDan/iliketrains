@@ -24,16 +24,26 @@ public:
 	void
 	setForward(const glm::vec3 & f)
 	{
-		forward = f;
-		updateView();
+		setForward(f, upFromForward(f));
 	}
 	void
-	setView(const glm::vec3 & p, const glm::vec3 & f, const glm::vec3 & u = ::up)
+	setForward(const glm::vec3 & f, const glm::vec3 & u)
 	{
-		position = p;
 		forward = f;
 		up = u;
 		updateView();
+	}
+	void
+	setView(const glm::vec3 & p, const glm::vec3 & f)
+	{
+		position = p;
+		setForward(f);
+	}
+	void
+	setView(const glm::vec3 & p, const glm::vec3 & f, const glm::vec3 & u)
+	{
+		position = p;
+		setView(f, u);
 	}
 	void
 	lookAt(const glm::vec3 & target)
@@ -50,6 +60,8 @@ public:
 	{
 		return position;
 	}
+
+	static glm::vec3 upFromForward(const glm::vec3 & forward);
 
 private:
 	void updateView();
