@@ -10,6 +10,7 @@
 #include <gfx/models/texture.h>
 #include <lib/glArrays.h>
 #include <maths.h>
+#include <stream_support.hpp>
 #include <ui/applicationBase.h>
 #include <ui/window.h>
 
@@ -94,6 +95,22 @@ class TestScene : public SceneProvider {
 
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
+
+BOOST_DATA_TEST_CASE(cam,
+		boost::unit_test::data::xrange(0.5F, 30.F, 1.3F) * boost::unit_test::data::xrange(0.5F, 10.F, 0.3F)
+				* boost::unit_test::data::xrange(50.F, 500.F, 70.F),
+		dist, near, far)
+{
+	static constexpr glm::vec3 pos {-10, -10, 60};
+	Camera cam {pos, half_pi, 1.f, near, far};
+
+	const auto e = cam.extentsAtDist(dist);
+
+	BOOST_CHECK_CLOSE_VEC(e[0], pos + glm::vec3(-dist, dist, -dist));
+	BOOST_CHECK_CLOSE_VEC(e[1], pos + glm::vec3(-dist, dist, dist));
+	BOOST_CHECK_CLOSE_VEC(e[2], pos + glm::vec3(dist, dist, -dist));
+	BOOST_CHECK_CLOSE_VEC(e[3], pos + glm::vec3(dist, dist, dist));
+}
 
 BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);
 

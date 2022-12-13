@@ -32,3 +32,21 @@ Camera::upFromForward(const glm::vec3 & forward)
 	const auto right = glm::cross(forward, ::down);
 	return glm::cross(forward, right);
 }
+
+std::array<glm::vec3, 4>
+Camera::extentsAtDist(const float dist) const
+{
+	const auto depth = -(2.f * (dist - near) * far) / (dist * (near - far)) - 1.f;
+	static constexpr const std::array extents {-1.F, 1.F};
+	std::array<glm::vec3, 4> out {};
+	auto outitr = out.begin();
+	for (auto x : extents) {
+		for (auto y : extents) {
+			const glm::vec4 in {x, y, depth, 1.f};
+
+			const auto out = inverseViewProjection * in;
+			*outitr++ = out / out.w;
+		}
+	}
+	return out;
+}
