@@ -3,6 +3,7 @@
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <numeric>
 #include <utility>
 
 struct Arc : public std::pair<float, float> {
@@ -129,6 +130,13 @@ std::pair<glm::vec2, bool> find_arc_centre(glm::vec2 start, float entrys, glm::v
 std::pair<glm::vec2, bool> find_arc_centre(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd);
 std::pair<float, float> find_arcs_radius(glm::vec2 start, float entrys, glm::vec2 end, float entrye);
 float find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd);
+
+template<typename T>
+auto
+midpoint(const std::pair<T, T> & v)
+{
+	return std::midpoint(v.first, v.second);
+}
 
 // Conversions
 template<typename T>
