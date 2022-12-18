@@ -115,7 +115,7 @@ SceneRenderer::setDirectionalLight(
 		const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
-		const auto lvp = shadowMapper.update(scene, direction);
+		const auto lvp = shadowMapper.update(scene, direction, camera);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();

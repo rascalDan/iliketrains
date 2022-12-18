@@ -1,11 +1,13 @@
 #include "shadowMapper.h"
+#include "camera.h"
+#include "collections.hpp"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowFixedPoint.h"
-#include "gfx/models/texture.h"
 #include "location.hpp"
 #include "maths.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
+#include "sorting.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
@@ -18,7 +20,7 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	static constexpr glm::vec3 border {std::numeric_limits<float>::infinity()};
+	static constexpr glm::vec4 border {std::numeric_limits<float>::infinity()};
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(border));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -32,12 +34,32 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 }
 
 glm::mat4x4
-ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir) const
+ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
-	const glm::vec3 centre {0.F, 0.F, 0.F};
-	const glm::vec3 range = glm::normalize(dir) * 1800.F;
-	const auto lightProjection = glm::ortho(-1200.F, 1200.F, -1200.F, 1200.F, 0.F, 3600.F);
-	const auto lightView = glm::lookAt(centre - range, centre, north);
+	constexpr auto BACK_OFF = 3600.f;
+	const glm::vec3 range = glm::normalize(dir) * BACK_OFF;
+	auto viewExtents = camera.extentsAtDist(1) + camera.extentsAtDist(1000);
+	for (auto & e : viewExtents) {
+		e = glm::round(e);
+	}
+	const auto extents_minmax = [&viewExtents](auto && comp) {
+		const auto mm = std::minmax_element(viewExtents.begin(), viewExtents.end(), comp);
+		return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
+	};
+	// Find camera view centre
+	const auto centre = [](const auto & x, const auto & y, const auto & z) {
+		return glm::vec3 {midpoint(x), midpoint(y), midpoint(z)};
+	}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
+
+	const auto lightView = glm::lookAt(centre, centre + range, up);
+	for (auto & e : viewExtents) {
+		e = lightView * glm::vec4(e, 1);
+	}
+
+	const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
+		return glm::ortho(x.first, x.second, y.first, y.second, z.first, z.second);
+	}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
+
 	const auto lightViewProjection = lightProjection * lightView;
 	fixedPoint.setViewProjection(lightViewProjection);
 	dynamicPoint.setViewProjection(lightViewProjection);

@@ -5,12 +5,13 @@
 #include <glm/vec2.hpp>
 
 class SceneProvider;
+class Camera;
 
 class ShadowMapper {
 public:
 	ShadowMapper(const glm::ivec2 & size);
 
-	glm::mat4x4 update(const SceneProvider &, const glm::vec3 & direction) const;
+	glm::mat4x4 update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
 
 	class FixedPoint : public Program {
 	public:
