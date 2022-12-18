@@ -54,7 +54,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	}
 
 	const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
-		return glm::ortho(x.first, x.second, y.first, y.second, z.first, z.second);
+		return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
 	}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
 	const auto lightViewProjection = lightProjection * lightView;
