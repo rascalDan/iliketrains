@@ -47,6 +47,13 @@ namespace std {
 		return (s << std::span {v});
 	}
 
+	template<typename First, typename Second>
+	std::ostream &
+	operator<<(std::ostream & s, const std::pair<First, Second> & v)
+	{
+		return (s << '(' << v.first << ", " << v.second << ')');
+	}
+
 	inline std::ostream &
 	operator<<(std::ostream & s, const Arc & arc)
 	{
