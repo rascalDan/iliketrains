@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/fwd.hpp>
 #include <type_traits>
 
 template<typename T> struct PtrSorter {
@@ -26,5 +27,23 @@ template<typename T, auto M> struct PtrMemberSorter : public PtrSorter<T> {
 	operator()(const T & a, const MT & b) const
 	{
 		return (*a).*M < b;
+	}
+};
+
+struct CompareBy {
+	glm::length_t index;
+
+	template<typename T>
+	auto
+	operator()(const T & a, const T & b) const
+	{
+		return get(a) < get(b);
+	}
+
+	template<typename T>
+	auto
+	get(const T & a) const
+	{
+		return a[index];
 	}
 };
