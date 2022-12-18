@@ -39,9 +39,6 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	constexpr auto BACK_OFF = 3600.f;
 	const glm::vec3 range = glm::normalize(dir) * BACK_OFF;
 	auto viewExtents = camera.extentsAtDist(1) + camera.extentsAtDist(1000);
-	for (auto & e : viewExtents) {
-		e = glm::round(e);
-	}
 	const auto extents_minmax = [&viewExtents](auto && comp) {
 		const auto mm = std::minmax_element(viewExtents.begin(), viewExtents.end(), comp);
 		return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
