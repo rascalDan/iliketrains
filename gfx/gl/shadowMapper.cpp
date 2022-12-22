@@ -36,8 +36,6 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 glm::mat4x4
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
-	constexpr auto BACK_OFF = 3600.f;
-	const glm::vec3 range = glm::normalize(dir) * BACK_OFF;
 	auto viewExtents = camera.extentsAtDist(1) + camera.extentsAtDist(1000);
 	const auto extents_minmax = [&viewExtents](auto && comp) {
 		const auto mm = std::minmax_element(viewExtents.begin(), viewExtents.end(), comp);
@@ -48,7 +46,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 		return glm::vec3 {midpoint(x), midpoint(y), midpoint(z)};
 	}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
-	const auto lightView = glm::lookAt(centre, centre + range, up);
+	const auto lightView = glm::lookAt(centre, centre + dir, up);
 	for (auto & e : viewExtents) {
 		e = lightView * glm::vec4(e, 1);
 	}
