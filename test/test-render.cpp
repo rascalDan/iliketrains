@@ -6,9 +6,11 @@
 
 #include <game/geoData.h>
 #include <game/terrain.h>
+#include <game/vehicles/railVehicleClass.h>
 #include <gfx/gl/sceneRenderer.h>
 #include <gfx/models/texture.h>
 #include <lib/glArrays.h>
+#include <location.hpp>
 #include <maths.h>
 #include <stream_support.hpp>
 #include <ui/applicationBase.h>
@@ -77,6 +79,7 @@ public:
 };
 
 class TestScene : public SceneProvider {
+	RailVehicleClass train {"brush47"};
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
 		gd->generateRandom();
@@ -86,10 +89,19 @@ class TestScene : public SceneProvider {
 	content(const SceneShader & shader) const
 	{
 		terrain.render(shader);
+		train.render(shader, Location {{52, 50, 2}}, {Location {}, Location {}});
+		train.render(shader, Location {{52, 30, 2}}, {Location {}, Location {}});
 	}
 	void
 	lights(const SceneShader &) const
 	{
+	}
+	void
+	shadows(const ShadowMapper & shadowMapper) const
+	{
+		terrain.shadows(shadowMapper);
+		train.shadows(shadowMapper, Location {{52, 50, 2}});
+		train.shadows(shadowMapper, Location {{52, 30, 2}});
 	}
 };
 
