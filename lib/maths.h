@@ -80,6 +80,13 @@ ratio(glm::vec<2, T, Q> v)
 	return ratio<R>(v.x, v.y);
 }
 
+template<glm::length_t L = 3, typename T, glm::qualifier Q>
+inline constexpr glm::vec<L, T, Q>
+perspective_divide(glm::vec<4, T, Q> v)
+{
+	return v / v.w;
+}
+
 constexpr inline glm::vec2
 operator!(const glm::vec3 & v)
 {
