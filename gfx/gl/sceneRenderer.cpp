@@ -14,7 +14,7 @@ static constexpr std::array<glm::vec4, 4> displayVAOdata {{
 }};
 SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
-	lighting {lightingShader_vs, lightingShader_fs}, shadowMapper {{4096, 4096}}
+	lighting {lightingShader_vs, lightingShader_fs}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
 	glBindVertexArray(displayVAO);
