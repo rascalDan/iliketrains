@@ -33,7 +33,17 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-std::array<glm::mat4x4, 1>
+constexpr std::array<glm::ivec4, 1> viewports {{
+		{31, 31, 0, 0},
+}};
+constexpr std::array<glm::vec4, 1> shadowMapRegions {
+		{{0.5F, 0.5F, 0.5F, 0.5F}},
+};
+constexpr std::array shadowBands {1.F, 1000.F};
+static_assert(viewports.size() == shadowMapRegions.size());
+static_assert(shadowBands.size() == shadowMapRegions.size() + 1);
+
+ShadowMapper::Definitions<1>
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -42,29 +52,39 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 
-	auto viewExtents = camera.extentsAtDist(1) + camera.extentsAtDist(1000);
-	const auto extents_minmax = [&viewExtents](auto && comp) {
-		const auto mm = std::minmax_element(viewExtents.begin(), viewExtents.end(), comp);
-		return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
+	auto bandViewExtents = shadowBands * [&camera](auto distance) {
+		return camera.extentsAtDist(distance);
 	};
+	const std::span<glm::vec3> viewExtents {bandViewExtents.front().begin(), bandViewExtents.back().end()};
 
 	const auto lightView = glm::lookAt(camera.getPosition(), camera.getPosition() + dir, up);
 	for (auto & e : viewExtents) {
 		e = lightView * glm::vec4(e, 1);
 	}
+	Definitions<1> out;
+	for (std::size_t band = 0; band < viewports.size(); ++band) {
+		const auto extents_minmax = [extents = viewExtents.subspan(band * 4, 8)](auto && comp) {
+			const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
+			return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
+		};
 
-	const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
-		return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
-	}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
+		const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
+			return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
+		}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
-	const auto lightViewProjection = lightProjection * lightView;
-	fixedPoint.setViewProjection(lightViewProjection);
-	dynamicPoint.setViewProjection(lightViewProjection);
+		out.projections[band] = lightProjection * lightView;
+		fixedPoint.setViewProjection(out.projections[band]);
+		dynamicPoint.setViewProjection(out.projections[band]);
+		out.regions[band] = shadowMapRegions[band];
 
-	scene.shadows(*this);
+		const auto & viewport = viewports[band];
+		glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
+		scene.shadows(*this);
+	};
+
 	glCullFace(GL_BACK);
 
-	return {lightViewProjection};
+	return out;
 }
 
 ShadowMapper::FixedPoint::FixedPoint() : Program {shadowFixedPoint_vs}, viewProjectionLoc {*this, "viewProjection"} { }

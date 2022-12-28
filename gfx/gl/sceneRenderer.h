@@ -35,7 +35,8 @@ private:
 		DirectionalLightProgram();
 		using Program::use;
 
-		void setDirectionalLight(const glm::vec3 &, const glm::vec3 &, const std::span<const glm::mat4x4>) const;
+		void setDirectionalLight(const glm::vec3 &, const glm::vec3 &, const std::span<const glm::mat4x4>,
+				const std::span<const glm::vec4>) const;
 
 	private:
 		RequiredUniformLocation directionLoc, colourLoc, lightViewProjectionLoc, lightViewProjectionCountLoc,
