@@ -36,6 +36,12 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 std::array<glm::mat4x4, 1>
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glViewport(0, 0, size.x, size.y);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_FRONT);
+
 	auto viewExtents = camera.extentsAtDist(1) + camera.extentsAtDist(1000);
 	const auto extents_minmax = [&viewExtents](auto && comp) {
 		const auto mm = std::minmax_element(viewExtents.begin(), viewExtents.end(), comp);
@@ -59,11 +65,6 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	fixedPoint.setViewProjection(lightViewProjection);
 	dynamicPoint.setViewProjection(lightViewProjection);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glViewport(0, 0, size.x, size.y);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glCullFace(GL_FRONT);
 	scene.shadows(*this);
 	glCullFace(GL_BACK);
 
