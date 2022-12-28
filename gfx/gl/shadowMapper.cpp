@@ -47,12 +47,8 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 		const auto mm = std::minmax_element(viewExtents.begin(), viewExtents.end(), comp);
 		return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
 	};
-	// Find camera view centre
-	const auto centre = [](const auto & x, const auto & y, const auto & z) {
-		return glm::vec3 {midpoint(x), midpoint(y), midpoint(z)};
-	}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
-	const auto lightView = glm::lookAt(centre, centre + dir, up);
+	const auto lightView = glm::lookAt(camera.getPosition(), camera.getPosition() + dir, up);
 	for (auto & e : viewExtents) {
 		e = lightView * glm::vec4(e, 1);
 	}
