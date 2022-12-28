@@ -33,17 +33,29 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-constexpr std::array<glm::ivec4, 1> viewports {{
-		{31, 31, 0, 0},
+constexpr std::array<glm::ivec4, ShadowMapper::SHADOW_BANDS> viewports {{
+		{31, 31, 1, 1},
+		{1, 31, 1, 1},
+		{31, 1, 1, 1},
+		{1, 1, 1, 1},
 }};
-constexpr std::array<glm::vec4, 1> shadowMapRegions {
-		{{0.5F, 0.5F, 0.5F, 0.5F}},
+constexpr std::array<glm::vec4, ShadowMapper::SHADOW_BANDS> shadowMapRegions {{
+		{0.25F, 0.25F, 0.25F, 0.25F},
+		{0.25F, 0.25F, 0.75F, 0.25F},
+		{0.25F, 0.25F, 0.25F, 0.75F},
+		{0.25F, 0.25F, 0.75F, 0.75F},
+}};
+constexpr std::array<float, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
+		1.F,
+		250.F,
+		750.F,
+		2500.F,
+		10000.F,
 };
-constexpr std::array shadowBands {1.F, 1000.F};
 static_assert(viewports.size() == shadowMapRegions.size());
 static_assert(shadowBands.size() == shadowMapRegions.size() + 1);
 
-ShadowMapper::Definitions<1>
+ShadowMapper::Definitions<ShadowMapper::SHADOW_BANDS>
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -61,8 +73,8 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	for (auto & e : viewExtents) {
 		e = lightView * glm::vec4(e, 1);
 	}
-	Definitions<1> out;
-	for (std::size_t band = 0; band < viewports.size(); ++band) {
+	Definitions<SHADOW_BANDS> out;
+	for (std::size_t band = 0; band < SHADOW_BANDS; ++band) {
 		const auto extents_minmax = [extents = viewExtents.subspan(band * 4, 8)](auto && comp) {
 			const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
 			return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));

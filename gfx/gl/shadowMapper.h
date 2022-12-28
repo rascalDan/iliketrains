@@ -11,11 +11,12 @@ class ShadowMapper {
 public:
 	ShadowMapper(const glm::ivec2 & size);
 
+	static constexpr std::size_t SHADOW_BANDS {4};
 	template<std::size_t S> struct Definitions {
 		std::array<glm::mat4x4, S> projections;
 		std::array<glm::vec4, S> regions;
 	};
-	Definitions<1> update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
+	Definitions<SHADOW_BANDS> update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
 
 	class FixedPoint : public Program {
 	public:

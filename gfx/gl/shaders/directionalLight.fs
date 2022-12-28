@@ -1,7 +1,7 @@
 #version 330 core
 #extension GL_ARB_shading_language_420pack : enable
 
-const int MAX_MAPS = 3;
+const int MAX_MAPS = 4;
 
 out vec3 FragColor;
 
