@@ -11,7 +11,7 @@ class ShadowMapper {
 public:
 	ShadowMapper(const glm::ivec2 & size);
 
-	glm::mat4x4 update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
+	std::array<glm::mat4x4, 1> update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
 
 	class FixedPoint : public Program {
 	public:

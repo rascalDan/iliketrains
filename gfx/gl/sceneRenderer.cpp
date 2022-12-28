@@ -129,16 +129,21 @@ SceneRenderer::setDirectionalLight(
 
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 	Program {lightingShader_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
-	colourLoc {*this, "lightColour"}, lightViewProjectionLoc {*this, "lightViewProjection"}
+	colourLoc {*this, "lightColour"}, lightViewProjectionLoc {*this, "lightViewProjection"},
+	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"}, lightViewShadowMapRegionLoc {
+																			 *this, "shadowMapRegion"}
 {
 }
 
 void
 SceneRenderer::DirectionalLightProgram::setDirectionalLight(
-		const glm::vec3 & c, const glm::vec3 & d, const glm::mat4x4 & lvp) const
+		const glm::vec3 & c, const glm::vec3 & d, const std::span<const glm::mat4x4> lvp) const
 {
+	constexpr glm::vec4 shadowMapRegions {0.5F, 0.5F, 0.5F, 0.5F};
 	glUniform3fv(colourLoc, 1, glm::value_ptr(c));
 	const auto nd = glm::normalize(d);
 	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
-	glUniformMatrix4fv(lightViewProjectionLoc, 1, GL_FALSE, glm::value_ptr(lvp));
+	glUniform1ui(lightViewProjectionCountLoc, static_cast<GLuint>(lvp.size()));
+	glUniformMatrix4fv(lightViewProjectionLoc, static_cast<GLsizei>(lvp.size()), GL_FALSE, glm::value_ptr(lvp.front()));
+	glUniform4fv(lightViewShadowMapRegionLoc, 1, glm::value_ptr(shadowMapRegions));
 }

@@ -33,7 +33,7 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-glm::mat4x4
+std::array<glm::mat4x4, 1>
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
 	auto viewExtents = camera.extentsAtDist(1) + camera.extentsAtDist(1000);
@@ -67,7 +67,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	scene.shadows(*this);
 	glCullFace(GL_BACK);
 
-	return lightViewProjection;
+	return {lightViewProjection};
 }
 
 ShadowMapper::FixedPoint::FixedPoint() : Program {shadowFixedPoint_vs}, viewProjectionLoc {*this, "viewProjection"} { }
