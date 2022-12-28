@@ -33,3 +33,4 @@ run test-enumDetails.cpp ;
 run test-render.cpp ;
 run test-glContextBhvr.cpp ;
 compile test-static-enumDetails.cpp ;
+compile test-static-stream_support.cpp ;

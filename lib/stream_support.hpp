@@ -8,14 +8,16 @@
 #include <sstream>
 #include <type_traits>
 
+template<typename S>
+concept stringlike = requires(const S & s) { s.substr(0); };
 template<typename T>
 concept spanable = std::is_constructible_v<std::span<const typename T::value_type>, T> && !
-std::is_same_v<char, std::decay_t<typename T::value_type>>;
+stringlike<T> && !std::is_same_v<std::span<typename T::value_type>, T>;
 
 namespace std {
 	template<typename T, std::size_t L>
 	std::ostream &
-	operator<<(std::ostream & s, const span<const T, L> v)
+	operator<<(std::ostream & s, const span<T, L> v)
 	{
 		s << '(';
 		for (const auto & i : v) {
