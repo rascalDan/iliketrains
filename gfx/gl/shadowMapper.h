@@ -9,7 +9,7 @@ class Camera;
 
 class ShadowMapper {
 public:
-	ShadowMapper(const glm::ivec2 & size);
+	explicit ShadowMapper(const glm::ivec2 & size);
 
 	static constexpr std::size_t SHADOW_BANDS {4};
 	template<std::size_t S> struct Definitions {

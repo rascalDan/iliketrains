@@ -9,7 +9,7 @@ class SceneShader {
 	class SceneProgram : public Program {
 	public:
 		template<typename... S>
-		inline SceneProgram(const S &... srcs) :
+		inline explicit SceneProgram(const S &... srcs) :
 			Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}, viewPortLoc {*this, "viewPort"}
 		{
 		}

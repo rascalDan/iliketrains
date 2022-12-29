@@ -10,7 +10,7 @@ class Location;
 using ProgramRef = glRef<GLuint, &glCreateProgram, &glDeleteProgram>;
 class Program {
 public:
-	template<typename... S> Program(const S &... srcs)
+	template<typename... S> explicit Program(const S &... srcs)
 	{
 		(glAttachShader(m_program, srcs.compile()), ...);
 		linkAndValidate();
