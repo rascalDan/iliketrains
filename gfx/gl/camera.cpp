@@ -1,4 +1,5 @@
 #include "camera.h"
+#include <collections.hpp>
 #include <glm/gtx/intersect.hpp> // IWYU pragma: keep
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <maths.h>
@@ -36,29 +37,22 @@ Camera::upFromForward(const glm::vec3 & forward)
 std::array<glm::vec3, 4>
 Camera::extentsAtDist(const float dist) const
 {
-	const auto adjustToSeafloor = [this](glm::vec3 & target) {
-		const auto vec = glm::normalize(target - position);
-		constexpr glm::vec3 seafloor {0, 0, -1.5};
-		float outdist;
-		if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
-			target = vec * outdist + position;
+	const auto clampToSeaFloor = [this](const glm::vec3 & target) {
+		if (target.z < -1.5f) {
+			const auto vec = glm::normalize(target - position);
+			constexpr glm::vec3 seafloor {0, 0, -1.5};
+			float outdist;
+			if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
+				return vec * outdist + position;
+			}
 		}
+		return target;
 	};
 	const auto depth = -(2.f * (dist - near) * far) / (dist * (near - far)) - 1.f;
 	static constexpr const std::array extents {-1.F, 1.F};
-	std::array<glm::vec3, 4> out {};
-	auto outitr = out.begin();
-	for (auto x : extents) {
-		for (auto y : extents) {
-			const glm::vec4 in {x, y, depth, 1.f};
-
-			const auto out = inverseViewProjection * in;
-			*outitr = out / out.w;
-			if (outitr->z < -1.5f) {
-				adjustToSeafloor(*outitr);
-			}
-			outitr++;
-		}
-	}
-	return out;
+	static constexpr const auto cartesianExtents = extents * extents;
+	return cartesianExtents * [&depth, this, &clampToSeaFloor](const auto & extent) {
+		const glm::vec4 in {extent.first, extent.second, depth, 1.f};
+		return clampToSeaFloor(perspective_divide(inverseViewProjection * in));
+	};
 }
