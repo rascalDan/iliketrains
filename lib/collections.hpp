@@ -13,6 +13,20 @@ operator+(const std::array<T, first> & a, const std::array<T, second> & b)
 	return r;
 }
 
+template<typename T, typename V, std::size_t first, std::size_t second>
+constexpr std::array<std::pair<T, V>, first * second>
+operator*(const std::array<T, first> & a, const std::array<V, second> & b)
+{
+	std::array<std::pair<T, V>, first * second> r;
+	auto out = r.begin();
+	for (const auto & ae : a) {
+		for (const auto & be : b) {
+			*out++ = {ae, be};
+		}
+	}
+	return r;
+}
+
 template<typename T, std::size_t N>
 constexpr auto
 operator*(const std::array<T, N> & in, auto && f)
