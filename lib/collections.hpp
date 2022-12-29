@@ -3,7 +3,7 @@
 #include <array>
 
 template<typename T, std::size_t first, std::size_t second>
-std::array<T, first + second>
+constexpr std::array<T, first + second>
 operator+(const std::array<T, first> & a, const std::array<T, second> & b)
 {
 	std::array<T, first + second> r;
@@ -14,7 +14,7 @@ operator+(const std::array<T, first> & a, const std::array<T, second> & b)
 }
 
 template<typename T, std::size_t N>
-auto
+constexpr auto
 operator*(const std::array<T, N> & in, auto && f)
 {
 	std::array<decltype(f(in[0])), N> out;
@@ -26,7 +26,7 @@ operator*(const std::array<T, N> & in, auto && f)
 }
 
 template<typename T, std::size_t N>
-auto &
+constexpr auto &
 operator*=(std::array<T, N> & in, auto && f)
 {
 	for (const auto & v : in) {
