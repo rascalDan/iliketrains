@@ -61,7 +61,6 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glViewport(0, 0, size.x, size.y);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 
 	auto bandViewExtents = shadowBands * [&camera](auto distance) {

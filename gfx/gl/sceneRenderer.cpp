@@ -74,8 +74,6 @@ SceneRenderer::render(const SceneProvider & scene) const
 
 	// Illumination pass
 	glDrawBuffer(GL_COLOR_ATTACHMENT3);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -84,6 +82,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, shadowMapper);
 	scene.environment(shader, *this);
+	glDisable(GL_DEPTH_TEST);
 	scene.lights(shader);
 
 	// Lighting pass
@@ -123,7 +122,6 @@ SceneRenderer::setDirectionalLight(
 		glBindVertexArray(displayVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-		glEnable(GL_DEPTH_TEST);
 	}
 }
 
