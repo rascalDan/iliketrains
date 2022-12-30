@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <span>
 
 template<typename T, std::size_t first, std::size_t second>
 constexpr std::array<T, first + second>
@@ -39,11 +40,12 @@ operator*(const std::array<T, N> & in, auto && f)
 	return out;
 }
 
-template<typename T, std::size_t N>
+template<typename T>
 constexpr auto &
-operator*=(std::array<T, N> & in, auto && f)
+operator*=(std::span<T> & in, auto && f)
 {
-	for (const auto & v : in) {
+	for (auto & v : in) {
 		f(v);
 	}
+	return in;
 }
