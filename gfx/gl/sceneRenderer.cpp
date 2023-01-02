@@ -1,28 +1,24 @@
 #include "sceneRenderer.h"
 #include "maths.h"
+#include "vertexArrayObject.hpp"
 #include <gfx/gl/shaders/fs-directionalLight.h>
 #include <gfx/gl/shaders/fs-lightingShader.h>
 #include <gfx/gl/shaders/vs-lightingShader.h>
 #include <glm/gtc/type_ptr.hpp>
 
-static constexpr std::array<glm::vec4, 4> displayVAOdata {{
+static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
 		// positions(x,y) texture coords(z,w)
-		{-1.0f, 1.0f, 0.0f, 1.0f},
-		{-1.0f, -1.0f, 0.0f, 0.0f},
-		{1.0f, 1.0f, 1.0f, 1.0f},
-		{1.0f, -1.0f, 1.0f, 0.0f},
+		{-1, 1, 0, 1},
+		{-1, -1, 0, 0},
+		{1, 1, 1, 1},
+		{1, -1, 1, 0},
 }};
 SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
 	lighting {lightingShader_vs, lightingShader_fs}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
-	glBindVertexArray(displayVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, displayVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(displayVAOdata), nullptr, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(displayVAOdata), glm::value_ptr(displayVAOdata.front()));
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), nullptr);
+	VertexArrayObject<glm::i8vec4>::configure(displayVAO, displayVBO, displayVAOdata);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	const auto configuregdata
