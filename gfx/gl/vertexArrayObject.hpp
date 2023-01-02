@@ -50,7 +50,7 @@ private:
 	static void
 	data(const Data & data, const GLuint arrayBuffer, GLenum target)
 	{
-		using Value = typename Data::element_type;
+		using Value = typename Data::value_type;
 		glBindBuffer(target, arrayBuffer);
 		glBufferData(target, static_cast<GLsizeiptr>(sizeof(Value) * data.size()), data.data(), GL_STATIC_DRAW);
 	}
