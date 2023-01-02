@@ -9,6 +9,7 @@
 #include <gfx/gl/shaders/vs-landmassShader.h>
 #include <gfx/gl/shaders/vs-pointLight.h>
 #include <gfx/gl/shaders/vs-waterShader.h>
+#include <gfx/gl/vertexArrayObject.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <location.hpp>
@@ -80,13 +81,7 @@ SceneShader::WaterProgram::use(float waveCycle) const
 SceneShader::PointLightShader::PointLightShader() :
 	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"}
 {
-	glBindVertexArray(va);
-	glBindBuffer(GL_ARRAY_BUFFER, b);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexArrayObject<glm::vec3>::configure(va, b);
 }
 
 void
