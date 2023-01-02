@@ -20,6 +20,8 @@ public:
 	Camera camera;
 
 private:
+	void renderQuad() const;
+
 	glm::ivec2 size;
 	GLuint output;
 	glFrameBuffer gBuffer;

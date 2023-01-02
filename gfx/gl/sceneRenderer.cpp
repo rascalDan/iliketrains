@@ -96,9 +96,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, gIllumination);
 	lighting.use();
-	glBindVertexArray(displayVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
+	renderQuad();
 }
 
 void
@@ -119,10 +117,16 @@ SceneRenderer::setDirectionalLight(
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
 		dirLight.setDirectionalLight(colour, direction, lvp.projections, lvp.regions);
-		glBindVertexArray(displayVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		renderQuad();
 	}
+}
+
+void
+SceneRenderer::renderQuad() const
+{
+	glBindVertexArray(displayVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }
 
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
