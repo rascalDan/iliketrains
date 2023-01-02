@@ -55,14 +55,21 @@ private:
 		glBufferData(target, static_cast<GLsizeiptr>(sizeof(Value) * data.size()), data.data(), GL_STATIC_DRAW);
 	}
 
-	template<auto Vertex::*attrib>
+	template<typename T>
 	static void
-	set_pointer(GLuint & vertexArrayId)
+	set_pointer(const GLuint vertexArrayId, const void * ptr)
 	{
 		glEnableVertexAttribArray(vertexArrayId);
-		using traits = gl_traits<std::decay_t<decltype(std::declval<Vertex>().*attrib)>>;
-		glVertexAttribPointer(vertexArrayId++, traits::size, traits::type, GL_FALSE, sizeof(Vertex),
-				&(static_cast<const Vertex *>(nullptr)->*attrib));
+		using traits = gl_traits<T>;
+		glVertexAttribPointer(vertexArrayId, traits::size, traits::type, GL_FALSE, sizeof(Vertex), ptr);
+	}
+
+	template<auto Vertex::*attrib>
+	static void
+	set_pointer(const GLuint vertexArrayId)
+	{
+		set_pointer<std::decay_t<decltype(std::declval<Vertex>().*attrib)>>(
+				vertexArrayId, &(static_cast<const Vertex *>(nullptr)->*attrib));
 	}
 
 	template<auto Vertex::*... attribs>
@@ -70,7 +77,12 @@ private:
 	configure_attribs(const GLuint arrayBuffer)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
-		GLuint vertexArrayId {};
-		(set_pointer<attribs>(vertexArrayId), ...);
+		if constexpr (sizeof...(attribs) == 0) {
+			set_pointer<Vertex>(0, nullptr);
+		}
+		else {
+			GLuint vertexArrayId {};
+			(set_pointer<attribs>(vertexArrayId++), ...);
+		}
 	}
 };
