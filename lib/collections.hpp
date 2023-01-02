@@ -3,6 +3,16 @@
 #include <array>
 #include <span>
 
+template<typename T, typename E>
+concept SequentialCollection = requires(T c) {
+								   {
+									   c.size()
+									   } -> std::integral;
+								   {
+									   c.data()
+									   } -> std::same_as<const E *>;
+							   };
+
 template<typename T, std::size_t first, std::size_t second>
 constexpr std::array<T, first + second>
 operator+(const std::array<T, first> & a, const std::array<T, second> & b)
