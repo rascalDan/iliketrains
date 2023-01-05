@@ -104,4 +104,31 @@ BOOST_AUTO_TEST_CASE(pointlight)
 	Texture::save(outImage, size, "/tmp/pointlight.tga");
 }
 
+BOOST_AUTO_TEST_CASE(spotlight)
+{
+	SceneRenderer ss {size, output};
+	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+	class PointLightScene : public TestScene {
+	public:
+		void
+		environment(const SceneShader &, const SceneRenderer & r) const override
+		{
+			r.setAmbientLight({0.2F, 0.2F, 0.2F});
+			r.setDirectionalLight({0.2F, 0.2F, 0.2F}, west + down, *this);
+		}
+		void
+		lights(const SceneShader & shader) const override
+		{
+			shader.spotLight.add({50, 50, 15}, down, {1.0, 1.0, 1.0}, 0.01, 1);
+			shader.spotLight.add({51, 59.5, 1}, north, {1.0, 1.0, 1.0}, 0.001, .5);
+			shader.spotLight.add({53, 59.5, 1}, north, {1.0, 1.0, 1.0}, 0.001, .5);
+			shader.spotLight.add({60, 50, 3}, north + east, {1.0, 1.0, 1.0}, 0.0001, .7);
+		}
+	};
+	PointLightScene scene;
+	ss.render(scene);
+	glDisable(GL_DEBUG_OUTPUT);
+	Texture::save(outImage, size, "/tmp/spotlight.tga");
+}
+
 BOOST_AUTO_TEST_SUITE_END();

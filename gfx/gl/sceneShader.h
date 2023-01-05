@@ -61,6 +61,21 @@ class SceneShader {
 		glBuffer b;
 	};
 
+	class SpotLightShader : public SceneProgram {
+	public:
+		SpotLightShader();
+
+		void add(const glm::vec3 & position, const glm::vec3 & direction, const glm::vec3 & colour, const float kq,
+				const float arc) const;
+
+	private:
+		UniformLocation colourLoc;
+		UniformLocation kqLoc;
+		UniformLocation arcLoc;
+		glVertexArray va;
+		glBuffer b;
+	};
+
 public:
 	SceneShader();
 
@@ -68,6 +83,7 @@ public:
 	WaterProgram water;
 	AbsolutePosProgram landmass, absolute;
 	PointLightShader pointLight;
+	SpotLightShader spotLight;
 
 	void setViewProjection(const glm::mat4 & viewProjection) const;
 	void setViewPort(const glm::ivec4 & viewPort) const;

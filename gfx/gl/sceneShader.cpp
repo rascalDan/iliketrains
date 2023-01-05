@@ -3,11 +3,14 @@
 #include <gfx/gl/shaders/fs-basicShader.h>
 #include <gfx/gl/shaders/fs-landmassShader.h>
 #include <gfx/gl/shaders/fs-pointLight.h>
+#include <gfx/gl/shaders/fs-spotLight.h>
 #include <gfx/gl/shaders/fs-waterShader.h>
 #include <gfx/gl/shaders/gs-pointLight.h>
+#include <gfx/gl/shaders/gs-spotLight.h>
 #include <gfx/gl/shaders/vs-basicShader.h>
 #include <gfx/gl/shaders/vs-landmassShader.h>
 #include <gfx/gl/shaders/vs-pointLight.h>
+#include <gfx/gl/shaders/vs-spotLight.h>
 #include <gfx/gl/shaders/vs-waterShader.h>
 #include <gfx/gl/vertexArrayObject.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -23,7 +26,8 @@ SceneShader::SceneShader() :
 void
 SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 {
-	for (const auto & prog : std::array<const SceneProgram *, 5> {&basic, &water, &landmass, &absolute, &pointLight}) {
+	for (const auto & prog :
+			std::array<const SceneProgram *, 6> {&basic, &water, &landmass, &absolute, &pointLight, &spotLight}) {
 		prog->setViewProjection(viewProjection);
 	}
 }
@@ -31,7 +35,8 @@ SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 void
 SceneShader::setViewPort(const glm::ivec4 & viewPort) const
 {
-	for (const auto & prog : std::array<const SceneProgram *, 5> {&basic, &water, &landmass, &absolute, &pointLight}) {
+	for (const auto & prog :
+			std::array<const SceneProgram *, 6> {&basic, &water, &landmass, &absolute, &pointLight, &spotLight}) {
 		prog->setViewPort(viewPort);
 	}
 }
@@ -93,5 +98,28 @@ SceneShader::PointLightShader::add(const glm::vec3 & position, const glm::vec3 &
 	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
 	glUniform1f(kqLoc, kq);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(position));
+	glDrawArrays(GL_POINTS, 0, 1);
+}
+
+SceneShader::SpotLightShader::SpotLightShader() :
+	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"},
+	arcLoc {*this, "arc"}
+{
+	using v3pair = std::pair<glm::vec3, glm::vec3>;
+	VertexArrayObject<v3pair>::configure<&v3pair::first, &v3pair::second>(va, b);
+}
+
+void
+SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & direction, const glm::vec3 & colour,
+		const float kq, const float arc) const
+{
+	Program::use();
+	glBindVertexArray(va);
+	glBindBuffer(GL_ARRAY_BUFFER, b);
+	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
+	glUniform1f(kqLoc, kq);
+	glUniform1f(arcLoc, arc);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(position));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(direction));
 	glDrawArrays(GL_POINTS, 0, 1);
 }
