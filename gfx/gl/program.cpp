@@ -30,6 +30,6 @@ Program::RequiredUniformLocation::RequiredUniformLocation(GLuint program, const 
 	UniformLocation {program, name}
 {
 	if (location < 0) {
-		throw std::logic_error("Required uniform does not exist");
+		throw std::logic_error(std::string {"Required uniform does not exist: "} + name);
 	}
 }
