@@ -34,19 +34,19 @@ Camera::upFromForward(const glm::vec3 & forward)
 	return glm::cross(forward, right);
 }
 
-std::array<glm::vec3, 4>
+std::array<glm::vec4, 4>
 Camera::extentsAtDist(const float dist) const
 {
-	const auto clampToSeaFloor = [this](const glm::vec3 & target) {
+	const auto clampToSeaFloor = [this, dist](const glm::vec3 & target) {
 		if (target.z < -1.5f) {
 			const auto vec = glm::normalize(target - position);
 			constexpr glm::vec3 seafloor {0, 0, -1.5};
 			float outdist;
 			if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
-				return vec * outdist + position;
+				return (vec * outdist + position) ^ outdist;
 			}
 		}
-		return target;
+		return target ^ dist;
 	};
 	const auto depth = -(2.f * (dist - near) * far) / (dist * (near - far)) - 1.f;
 	static constexpr const std::array extents {-1.F, 1.F};

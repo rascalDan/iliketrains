@@ -112,7 +112,7 @@ SceneRenderer::setDirectionalLight(
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
-		dirLight.setDirectionalLight(colour, direction, lvp.projections, lvp.regions);
+		dirLight.setDirectionalLight(colour, direction, lvp.projections, lvp.regions, lvp.maps);
 		renderQuad();
 	}
 }
@@ -135,13 +135,13 @@ SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 
 void
 SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c, const glm::vec3 & d,
-		const std::span<const glm::mat4x4> lvp, const std::span<const glm::vec4> shadowMapRegions) const
+		const std::span<const glm::mat4x4> lvp, const std::span<const glm::vec4> shadowMapRegions,
+		std::size_t maps) const
 {
 	glUniform3fv(colourLoc, 1, glm::value_ptr(c));
 	const auto nd = glm::normalize(d);
 	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
-	glUniform1ui(lightViewProjectionCountLoc, static_cast<GLuint>(lvp.size()));
-	glUniformMatrix4fv(lightViewProjectionLoc, static_cast<GLsizei>(lvp.size()), GL_FALSE, glm::value_ptr(lvp.front()));
-	glUniform4fv(lightViewShadowMapRegionLoc, static_cast<GLsizei>(shadowMapRegions.size()),
-			glm::value_ptr(shadowMapRegions.front()));
+	glUniform1ui(lightViewProjectionCountLoc, static_cast<GLuint>(maps));
+	glUniformMatrix4fv(lightViewProjectionLoc, static_cast<GLsizei>(maps), GL_FALSE, glm::value_ptr(lvp.front()));
+	glUniform4fv(lightViewShadowMapRegionLoc, static_cast<GLsizei>(maps), glm::value_ptr(shadowMapRegions.front()));
 }

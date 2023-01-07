@@ -53,15 +53,15 @@ BOOST_DATA_TEST_CASE(cam,
 				* boost::unit_test::data::xrange(50.F, 500.F, 70.F),
 		dist, near, far)
 {
-	static constexpr glm::vec3 pos {-10, -10, 60};
+	static constexpr glm::vec4 pos {-10, -10, 60, 0};
 	Camera cam {pos, half_pi, 1.f, near, far};
 
 	const auto e = cam.extentsAtDist(dist);
 
-	BOOST_CHECK_CLOSE_VEC(e[0], pos + glm::vec3(-dist, dist, -dist));
-	BOOST_CHECK_CLOSE_VEC(e[1], pos + glm::vec3(-dist, dist, dist));
-	BOOST_CHECK_CLOSE_VEC(e[2], pos + glm::vec3(dist, dist, -dist));
-	BOOST_CHECK_CLOSE_VEC(e[3], pos + glm::vec3(dist, dist, dist));
+	BOOST_CHECK_CLOSE_VEC(e[0], pos + glm::vec4(-dist, dist, -dist, dist));
+	BOOST_CHECK_CLOSE_VEC(e[1], pos + glm::vec4(-dist, dist, dist, dist));
+	BOOST_CHECK_CLOSE_VEC(e[2], pos + glm::vec4(dist, dist, -dist, dist));
+	BOOST_CHECK_CLOSE_VEC(e[3], pos + glm::vec4(dist, dist, dist, dist));
 }
 
 BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);

@@ -11,6 +11,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
+#include <tuple>
+#include <vector>
 
 ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 {
@@ -55,7 +57,21 @@ constexpr std::array<float, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
 static_assert(viewports.size() == shadowMapRegions.size());
 static_assert(shadowBands.size() == shadowMapRegions.size() + 1);
 
-ShadowMapper::Definitions<ShadowMapper::SHADOW_BANDS>
+struct DefinitionsInserter {
+	auto
+	operator++()
+	{
+		return out.maps++;
+	};
+	auto
+	operator*()
+	{
+		return std::tie(out.projections[out.maps], out.regions[out.maps]);
+	}
+	ShadowMapper::Definitions & out;
+};
+
+ShadowMapper::Definitions
 ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -63,35 +79,49 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	auto bandViewExtents = shadowBands * [&camera](auto distance) {
-		return camera.extentsAtDist(distance);
-	};
-	const std::span<glm::vec3> viewExtents {bandViewExtents.front().begin(), bandViewExtents.back().end()};
+	std::vector<std::array<glm::vec3, 4>> bandViewExtents;
+	for (const auto dist : shadowBands) {
+		const auto extents = camera.extentsAtDist(dist);
+		bandViewExtents.emplace_back(extents * [](const auto & e) -> glm::vec3 {
+			return e;
+		});
+		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist * 0.99F](const glm::vec4 & e) {
+				return e.w > targetDist;
+			})) {
+			break;
+		}
+	}
 
 	const auto lightView = glm::lookAt(camera.getPosition(), camera.getPosition() + dir, up);
-	for (auto & e : viewExtents) {
-		e = lightView * glm::vec4(e, 1);
+	for (auto & band : bandViewExtents) {
+		for (auto & e : band) {
+			e = lightView * glm::vec4(e, 1);
+		}
 	}
-	Definitions<SHADOW_BANDS> out;
-	for (std::size_t band = 0; band < SHADOW_BANDS; ++band) {
-		const auto extents_minmax = [extents = viewExtents.subspan(band * 4, 8)](auto && comp) {
-			const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
-			return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
-		};
 
-		const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
-			return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
-		}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
+	Definitions out;
+	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
+			DefinitionsInserter {out},
+			[&scene, this, &lightView, band = 0U](const auto & near, const auto & far) mutable {
+				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
+					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
+					return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
+				};
 
-		out.projections[band] = lightProjection * lightView;
-		fixedPoint.setViewProjection(out.projections[band]);
-		dynamicPoint.setViewProjection(out.projections[band]);
-		out.regions[band] = shadowMapRegions[band];
+				const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
+					return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
+				}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
-		const auto & viewport = viewports[band];
-		glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
-		scene.shadows(*this);
-	};
+				const auto lightViewProjection = lightProjection * lightView;
+				fixedPoint.setViewProjection(lightViewProjection);
+				dynamicPoint.setViewProjection(lightViewProjection);
+
+				const auto & viewport = viewports[band];
+				glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
+				scene.shadows(*this);
+
+				return std::make_pair(lightViewProjection, shadowMapRegions[band++]);
+			});
 
 	glCullFace(GL_BACK);
 
