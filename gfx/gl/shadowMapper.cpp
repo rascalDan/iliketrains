@@ -100,19 +100,14 @@ struct DefinitionsInserter {
 	ShadowMapper::Definitions & out;
 };
 
-ShadowMapper::Definitions
-ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
+std::vector<std::array<glm::vec3, 4>>
+ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightView)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glViewport(0, 0, size.x, size.y);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
-
 	std::vector<std::array<glm::vec3, 4>> bandViewExtents;
 	for (const auto dist : shadowBands) {
 		const auto extents = camera.extentsAtDist(dist);
-		bandViewExtents.emplace_back(extents * [](const auto & e) -> glm::vec3 {
-			return e;
+		bandViewExtents.emplace_back(extents * [&lightView](const auto & e) -> glm::vec3 {
+			return lightView * glm::vec4(glm::vec3 {e}, 1);
 		});
 		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist * 0.99F](const glm::vec4 & e) {
 				return e.w > targetDist;
@@ -120,13 +115,18 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 			break;
 		}
 	}
+	return bandViewExtents;
+}
+
+ShadowMapper::Definitions
+ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
 
 	const auto lightView = glm::lookAt(camera.getPosition(), camera.getPosition() + dir, up);
-	for (auto & band : bandViewExtents) {
-		for (auto & e : band) {
-			e = lightView * glm::vec4(e, 1);
-		}
-	}
+	const auto bandViewExtents = getBandViewExtents(camera, lightView);
 
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),

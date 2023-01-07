@@ -48,6 +48,8 @@ public:
 	}
 
 private:
+	[[nodiscard]] static std::vector<std::array<glm::vec3, 4>> getBandViewExtents(
+			const Camera &, const glm::mat4 & lightView);
 	glFrameBuffer depthMapFBO;
 	glTexture depthMap;
 	glm::ivec2 size;
