@@ -35,17 +35,46 @@ ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-constexpr std::array<glm::ivec4, ShadowMapper::SHADOW_BANDS> viewports {{
-		{31, 31, 1, 1},
-		{1, 31, 1, 1},
-		{31, 1, 1, 1},
-		{1, 1, 1, 1},
+constexpr std::array<std::array<glm::ivec4, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS> viewports {{
+		{{
+				{31, 31, 0, 0}, // full
+		}},
+		{{
+				{31, 31, 0, 1}, // lower half
+				{31, 1, 0, 1}, // upper half
+		}},
+		{{
+				{31, 31, 0, 1}, // lower half
+				{31, 1, 1, 1}, // upper left
+				{1, 1, 1, 1}, // upper right
+		}},
+		{{
+				{31, 31, 1, 1}, // lower left
+				{1, 31, 1, 1}, // lower right
+				{31, 1, 1, 1}, // upper left
+				{1, 1, 1, 1}, // upper right
+		}},
 }};
-constexpr std::array<glm::vec4, ShadowMapper::SHADOW_BANDS> shadowMapRegions {{
-		{0.25F, 0.25F, 0.25F, 0.25F},
-		{0.25F, 0.25F, 0.75F, 0.25F},
-		{0.25F, 0.25F, 0.25F, 0.75F},
-		{0.25F, 0.25F, 0.75F, 0.75F},
+constexpr std::array<std::array<glm::vec4, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS> shadowMapRegions {{
+		{{
+				{0.5F, 0.5F, 0.5F, 0.5F}, // full
+		}},
+		{{
+				{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
+				{0.5F, 0.25F, 0.5F, 0.75F}, // upper half
+		}},
+		{{
+				{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
+				{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
+				{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
+		}},
+
+		{{
+				{0.25F, 0.25F, 0.25F, 0.25F}, // lower left
+				{0.25F, 0.25F, 0.75F, 0.25F}, // lower right
+				{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
+				{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
+		}},
 }};
 constexpr std::array<float, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
 		1.F,
@@ -102,7 +131,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			DefinitionsInserter {out},
-			[&scene, this, &lightView, band = 0U](const auto & near, const auto & far) mutable {
+			[&scene, this, &lightView, bands = bandViewExtents.size() - 2, &out](const auto & near, const auto & far) {
 				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
 					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
 					return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
@@ -116,11 +145,11 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 				fixedPoint.setViewProjection(lightViewProjection);
 				dynamicPoint.setViewProjection(lightViewProjection);
 
-				const auto & viewport = viewports[band];
+				const auto & viewport = viewports[bands][out.maps];
 				glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
 				scene.shadows(*this);
 
-				return std::make_pair(lightViewProjection, shadowMapRegions[band++]);
+				return std::make_pair(lightViewProjection, shadowMapRegions[bands][out.maps]);
 			});
 
 	glCullFace(GL_BACK);
