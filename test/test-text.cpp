@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE test_text
 
-#include "test-helpers.hpp"
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <stream_support.hpp>
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(initialize_chardata)
 	BOOST_CHECK_EQUAL(fontTextures.size(), 2);
 }
 
-using CharDataTest = std::tuple<char, Font::CharData>;
+using CharDataTest = std::tuple<decltype(get_codepoint(nullptr)), Font::CharData>;
 BOOST_DATA_TEST_CASE(initialize_chardata_A,
 		boost::unit_test::data::make<CharDataTest>({
 				{'A', {0, {34, 35}, {627, 0}, {-1, 35}, 32}},
@@ -82,7 +82,7 @@ static_assert(glm::vec2 {866, 35} / glm::vec2 {2048, 64} == glm::vec2 {0.4228515
 BOOST_AUTO_TEST_CASE(render_text)
 {
 	constexpr std::string_view text {"I Like Trains"};
-	const auto spaces = std::count_if(text.begin(), text.end(), isspace);
+	const auto spaces = static_cast<std::size_t>(std::count_if(text.begin(), text.end(), isspace));
 	const auto tqs = render(text);
 	BOOST_REQUIRE_EQUAL(tqs.size(), 1);
 	const auto & t1 = tqs.begin();

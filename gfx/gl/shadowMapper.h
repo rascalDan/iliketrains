@@ -14,11 +14,11 @@ public:
 
 	static constexpr std::size_t SHADOW_BANDS {4};
 	struct Definitions {
-		std::array<glm::mat4x4, SHADOW_BANDS> projections;
-		std::array<glm::vec4, SHADOW_BANDS> regions;
+		std::array<glm::mat4x4, SHADOW_BANDS> projections {};
+		std::array<glm::vec4, SHADOW_BANDS> regions {};
 		size_t maps {};
 	};
-	Definitions update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
+	[[nodiscard]] Definitions update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
 
 	class FixedPoint : public Program {
 	public:
@@ -42,6 +42,7 @@ public:
 	FixedPoint fixedPoint;
 	DynamicPoint dynamicPoint;
 
+	// NOLINTNEXTLINE(hicpp-explicit-conversions)
 	operator GLuint() const
 	{
 		return depthMap;

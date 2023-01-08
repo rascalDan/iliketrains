@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <glRef.hpp>
 #include <glm/mat4x4.hpp>
+#include <special_members.hpp>
 
 class Location;
 
@@ -16,10 +17,12 @@ public:
 		linkAndValidate();
 	}
 	virtual ~Program() = default;
+	DEFAULT_MOVE_NO_COPY(Program);
 
 	class UniformLocation {
 	public:
 		UniformLocation(GLuint prog, const char * name);
+		// NOLINTNEXTLINE(hicpp-explicit-conversions)
 		operator auto() const
 		{
 			return location;
@@ -34,6 +37,7 @@ public:
 		RequiredUniformLocation(GLuint prog, const char * name);
 	};
 
+	// NOLINTNEXTLINE(hicpp-explicit-conversions)
 	operator GLuint() const
 	{
 		return m_program;

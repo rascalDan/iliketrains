@@ -131,7 +131,7 @@ GeoData::RayTracer::byAxis(glm::vec2 p0, glm::vec2 p1, glm::vec2 d, glm::length_
 glm::vec2
 GeoData::RayTracer::next()
 {
-	glm::vec2 cur {p};
+	const glm::vec2 cur {p};
 
 	static constexpr const glm::vec2 m {1, -1};
 	const int axis = (error > 0) ? 1 : 0;

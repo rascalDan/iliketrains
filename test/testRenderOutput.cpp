@@ -7,7 +7,7 @@ TestRenderOutput::TestRenderOutput() : size {640, 480}
 	const auto configuregdata
 			= [this](const GLuint data, const GLint format, const GLenum type, const GLenum attachment) {
 				  glBindTexture(GL_TEXTURE_2D, data);
-				  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGBA, type, NULL);
+				  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGBA, type, nullptr);
 				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 				  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);

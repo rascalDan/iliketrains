@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE network
 
-#include "test-helpers.hpp"
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -19,7 +19,7 @@
 #include <vector>
 
 struct TestLink : public LinkStraight {
-	TestLink(Node::Ptr a, Node::Ptr b) : TestLink {a, b, (a->pos - b->pos)} { }
+	TestLink(const Node::Ptr & a, const Node::Ptr & b) : TestLink {a, b, (a->pos - b->pos)} { }
 	TestLink(Node::Ptr a, Node::Ptr b, glm::vec2 l) : Link {{std::move(a), 0}, {std::move(b), pi}, glm::length(l)} { }
 	TestLink(Node::Ptr a, Node::Ptr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
 	using StraightLink = TestLink;

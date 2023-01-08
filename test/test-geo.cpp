@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE test_geo
 
-#include "test-helpers.hpp"
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <stream_support.hpp>
@@ -169,8 +169,9 @@ BOOST_DATA_TEST_CASE(intersect_ray,
 	nodes[at(1, 1)].height = 4;
 
 	const auto intersect = intersectRay({start, glm::normalize(dir)});
-	BOOST_REQUIRE(intersect);
-	BOOST_CHECK_CLOSE_VEC(*intersect, pos);
+	BOOST_CHECK_IF(has_intersect, intersect) {
+		BOOST_CHECK_CLOSE_VEC(*intersect, pos);
+	}
 }
 
 auto xs = boost::unit_test::data::xrange(-20.F, 0.F, 0.6F), ys = boost::unit_test::data::xrange(-20.F, 0.F, 0.7F);
@@ -185,13 +186,14 @@ BOOST_DATA_TEST_CASE(intersect_ray_many, xs * ys * targetsx * targetsy, x, y, ta
 	nodes[at(0, 1)].height = 3;
 	nodes[at(1, 1)].height = 4;
 
-	glm::vec3 start {x, y, 10};
+	const glm::vec3 start {x, y, 10};
 	const auto target {this->positionAt({targetx, targety})};
-	Ray ray {start, glm::normalize(target - start)};
+	const Ray ray {start, glm::normalize(target - start)};
 	BOOST_TEST_CONTEXT(ray) {
 		const auto intersect = intersectRay(ray);
-		BOOST_REQUIRE(intersect);
-		BOOST_CHECK_CLOSE_VEC(*intersect, target);
+		BOOST_CHECK_IF(has_intersect, intersect) {
+			BOOST_CHECK_CLOSE_VEC(*intersect, target);
+		}
 	}
 }
 

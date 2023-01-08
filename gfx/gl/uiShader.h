@@ -15,9 +15,10 @@ private:
 
 	class UIProgram : public Program {
 	public:
-		template<typename... S> UIProgram(const glm::mat4 & vp, S &&... srcs) : Program {std::forward<S>(srcs)...}
+		template<typename... S>
+		explicit UIProgram(const glm::mat4 & vp, S &&... srcs) : Program {std::forward<S>(srcs)...}
 		{
-			RequiredUniformLocation uiProjectionLoc {*this, "uiProjection"};
+			const RequiredUniformLocation uiProjectionLoc {*this, "uiProjection"};
 			glUseProgram(*this);
 			glUniformMatrix4fv(uiProjectionLoc, 1, GL_FALSE, glm::value_ptr(vp));
 		}

@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE test_maths
 
-#include "test-helpers.hpp"
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <glm/gtx/transform.hpp>
@@ -187,7 +187,7 @@ BOOST_DATA_TEST_CASE(straight1,
 		}),
 		v, angFor, angBack)
 {
-	TestLinkStraight l(v);
+	const TestLinkStraight l(v);
 	{
 		const auto p = l.positionAt(0, 0);
 		BOOST_CHECK_EQUAL(p.pos, origin);
@@ -220,7 +220,7 @@ BOOST_DATA_TEST_CASE(curve1,
 		e1, ctr, angFor, angBack)
 {
 	{ // One-way...
-		TestLinkCurve l(origin, e1, ctr);
+		const TestLinkCurve l(origin, e1, ctr);
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
@@ -235,7 +235,7 @@ BOOST_DATA_TEST_CASE(curve1,
 	}
 
 	{ // The other way...
-		TestLinkCurve l(e1, origin, ctr);
+		const TestLinkCurve l(e1, origin, ctr);
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
@@ -307,6 +307,15 @@ BOOST_DATA_TEST_CASE(rayLineDistance,
 				n_test_points_between(), // cz
 		i1, n1x, i2, n1y, i3, n1z, i4, n2x, i5, n2y, i6, n2z, i7, cx, i8, cy, i9, cz)
 {
+	(void)i1;
+	(void)i2;
+	(void)i3;
+	(void)i4;
+	(void)i5;
+	(void)i6;
+	(void)i7;
+	(void)i8;
+	(void)i9;
 	const glm::vec3 n1 {n1x, n1y, n1z}, n2 {n2x, n2y, n2z}, c {cx, cy, cz};
 
 	const auto nstep = n2 - n1;

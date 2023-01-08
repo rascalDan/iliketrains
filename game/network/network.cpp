@@ -22,11 +22,11 @@ Network::nodeAt(glm::vec3 pos)
 Network::NodeInsertion
 Network::newNodeAt(glm::vec3 pos)
 {
-	if (const auto [n, i] = candidateNodeAt(pos); i == NodeIs::NotInNetwork) {
+	if (auto [n, i] = candidateNodeAt(pos); i == NodeIs::NotInNetwork) {
 		return {*nodes.insert(std::move(n)).first, i};
 	}
 	else {
-		return {n, NodeIs::InNetwork};
+		return {std::move(n), NodeIs::InNetwork};
 	}
 }
 

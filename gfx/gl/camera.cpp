@@ -7,9 +7,10 @@
 
 Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
 	position {pos}, forward {::north}, up {::up}, fov {fov}, aspect {aspect}, near {zNear}, far {zFar},
-	projection {glm::perspective(fov, aspect, zNear, zFar)}
+	projection {glm::perspective(fov, aspect, zNear, zFar)},
+	viewProjection {projection * glm::lookAt(position, position + forward, up)}, inverseViewProjection {
+																						 glm::inverse(viewProjection)}
 {
-	updateView();
 }
 
 Ray
@@ -38,9 +39,9 @@ std::array<glm::vec4, 4>
 Camera::extentsAtDist(const float dist) const
 {
 	const auto clampToSeaFloor = [this, dist](const glm::vec3 & target) {
-		if (target.z < -1.5f) {
+		if (target.z < -1.5F) {
 			const auto vec = glm::normalize(target - position);
-			constexpr glm::vec3 seafloor {0, 0, -1.5};
+			constexpr glm::vec3 seafloor {0, 0, -1.5F};
 			float outdist;
 			if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
 				return (vec * outdist + position) ^ outdist;
@@ -48,11 +49,11 @@ Camera::extentsAtDist(const float dist) const
 		}
 		return target ^ dist;
 	};
-	const auto depth = -(2.f * (dist - near) * far) / (dist * (near - far)) - 1.f;
+	const auto depth = -(2.F * (dist - near) * far) / (dist * (near - far)) - 1.F;
 	static constexpr const std::array extents {-1.F, 1.F};
 	static constexpr const auto cartesianExtents = extents * extents;
 	return cartesianExtents * [&depth, this, &clampToSeaFloor](const auto & extent) {
-		const glm::vec4 in {extent.first, extent.second, depth, 1.f};
+		const glm::vec4 in {extent.first, extent.second, depth, 1.F};
 		return clampToSeaFloor(perspective_divide(inverseViewProjection * in));
 	};
 }

@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_CASE(wrapped_ptr_file_cons)
 {
 	using FilePtr = wrapped_ptr<FILE, &fclose>;
-	FilePtr fp {fopen, "/dev/null", "r"};
+	const FilePtr fp {fopen, "/dev/null", "r"};
 	BOOST_REQUIRE(fp);
 	BOOST_CHECK_NO_THROW(fflush(fp));
 
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(wrapped_ptr_file_move)
 BOOST_AUTO_TEST_CASE(wrapped_ptr_file_typed)
 {
 	using FilePtr = wrapped_ptrt<FILE, &fopen, &fclose>;
-	FilePtr fp {"/dev/null", "r"};
+	const FilePtr fp {"/dev/null", "r"};
 	BOOST_REQUIRE(fp);
 	BOOST_CHECK_NO_THROW(fflush(fp));
 }

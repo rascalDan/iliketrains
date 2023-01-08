@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE test_lib
 
-#include "test-helpers.hpp"
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -33,7 +33,7 @@ using TestArray = glArrays<5, &generator, &deleter>;
 BOOST_AUTO_TEST_CASE(generate_and_delete)
 {
 	{
-		TestArray a;
+		const TestArray a;
 	}
 	BOOST_CHECK(active.empty());
 }
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(generate_move_and_delete)
 	{
 		TestArray a;
 		BOOST_CHECK_EQUAL(TestArray::size, active.size());
-		TestArray b {std::move(a)};
+		const TestArray b {std::move(a)};
 		BOOST_CHECK_EQUAL(TestArray::size, active.size());
 	}
 	BOOST_CHECK(active.empty());

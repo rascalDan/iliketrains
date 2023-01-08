@@ -68,7 +68,7 @@ LinkCurve::intersectRay(const Ray & ray) const
 	points.reserve(segCount);
 	for (glm::vec3 swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
 		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, 0.F, swing.y})};
-		points.push_back(t * glm::vec4 {0, 0, 0, 1});
+		points.emplace_back(t * glm::vec4 {0, 0, 0, 1});
 	}
 	return ray.passesCloseToEdges(points, 1.F);
 }

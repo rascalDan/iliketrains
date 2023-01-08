@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE test_enumDetails
 
 #include "enumDetailsData.hpp"
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <enumDetails.hpp>
@@ -32,14 +33,16 @@ constexpr std::array INVALID_VALUES {-1, 3, 20};
 	BOOST_DATA_TEST_CASE(valid_parse_##TYPE, VALID_NAMES ^ VALID_VALUES<TYPE>, in, out) \
 	{ \
 		const auto v = EnumDetails<TYPE>::parse(in); \
-		BOOST_REQUIRE(v.has_value()); \
-		BOOST_CHECK_EQUAL(v.value(), out); \
+		BOOST_CHECK_IF(vo, v.has_value()) { \
+			BOOST_CHECK_EQUAL(v.value(), out); \
+		} \
 	} \
 	BOOST_DATA_TEST_CASE(valid_to_string_##TYPE, VALID_VALUES<TYPE> ^ VALID_NAMES, in, out) \
 	{ \
 		const auto v = EnumDetails<TYPE>::to_string(in); \
-		BOOST_CHECK(v.has_value()); \
-		BOOST_CHECK_EQUAL(v.value(), out); \
+		BOOST_CHECK_IF(vo, v.has_value()) { \
+			BOOST_CHECK_EQUAL(v.value(), out); \
+		} \
 	}
 
 TESTS_FOR_TYPE(GlobalScoped)

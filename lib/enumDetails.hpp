@@ -79,7 +79,10 @@ private:
 	constexpr static auto
 	get_valids(std::integer_sequence<int, n...>)
 	{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
 		return std::array {EnumValueDetails<static_cast<E>(n)>::valid...};
+#pragma GCC diagnostic pop
 	}
 	template<auto... n>
 	constexpr static auto
@@ -103,7 +106,7 @@ private:
 			-> std::optional<typename std::decay_t<decltype(out)>::value_type>
 	{
 		if (const auto itr = std::find(search.begin(), search.end(), key); itr != search.end()) {
-			return out[std::distance(search.begin(), itr)];
+			return out[static_cast<std::size_t>(std::distance(search.begin(), itr))];
 		}
 		return std::nullopt;
 	}

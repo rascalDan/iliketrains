@@ -7,6 +7,7 @@
 #include <memory>
 #include <set>
 #include <sorting.hpp>
+#include <special_members.hpp>
 #include <string>
 #include <utility>
 #include <variant>
@@ -23,6 +24,7 @@ public:
 	using LinkEnd = std::pair<Link::Ptr, unsigned char>;
 	explicit Network(const std::string & textureName);
 	virtual ~Network() = default;
+	DEFAULT_MOVE_NO_COPY(Network);
 
 	[[nodiscard]] Node::Ptr findNodeAt(glm::vec3) const;
 	[[nodiscard]] Node::Ptr nodeAt(glm::vec3);
@@ -43,7 +45,7 @@ public:
 	virtual Link::CCollection addJoins(glm::vec3, glm::vec3) = 0;
 	virtual Link::CCollection addExtend(glm::vec3, glm::vec3) = 0;
 
-	virtual float findNodeDirection(Node::AnyCPtr) const = 0;
+	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
 protected:
 	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
@@ -94,7 +96,7 @@ public:
 	Link::CCollection addJoins(glm::vec3, glm::vec3) override;
 	Link::CCollection addExtend(glm::vec3, glm::vec3) override;
 
-	float findNodeDirection(Node::AnyCPtr) const override;
+	[[nodiscard]] float findNodeDirection(Node::AnyCPtr) const override;
 
 	void render(const SceneShader &) const override;
 

@@ -65,7 +65,7 @@ public:
 			rl->addLinksBetween(l, s);
 			rl->addLinksBetween(t, u);
 			rl->addLinksBetween(u, m);
-			std::shared_ptr<Train> train = world.create<Train>(l3);
+			const std::shared_ptr<Train> train = world.create<Train>(l3);
 			auto b47 = std::make_shared<RailVehicleClass>("brush47");
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);

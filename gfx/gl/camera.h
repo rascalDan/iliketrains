@@ -61,9 +61,9 @@ public:
 		return position;
 	}
 
-	std::array<glm::vec4, 4> extentsAtDist(float) const;
+	[[nodiscard]] std::array<glm::vec4, 4> extentsAtDist(float) const;
 
-	static glm::vec3 upFromForward(const glm::vec3 & forward);
+	[[nodiscard]] static glm::vec3 upFromForward(const glm::vec3 & forward);
 
 private:
 	void updateView();

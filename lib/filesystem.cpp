@@ -36,6 +36,7 @@ namespace filesystem {
 		}
 	}
 
+	// NOLINTNEXTLINE(hicpp-vararg)
 	fh::fh(const char * path, int flags, int mode) : h {open(path, flags, mode)}
 	{
 		if (h == -1) {

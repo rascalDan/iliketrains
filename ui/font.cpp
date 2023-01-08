@@ -82,7 +82,7 @@ Font::generateChars(const utf8_string_view chars) const
 				face.emplace(*ft, path.c_str());
 				FT_Set_Pixel_Sizes(*face, 0, size.z);
 			}
-			FT_UInt glyph_index = FT_Get_Char_Index(*face, codepoint);
+			const FT_UInt glyph_index = FT_Get_Char_Index(*face, codepoint);
 			if (FT_Load_Glyph(*face, glyph_index, FT_LOAD_RENDER)) {
 				charsData.emplace(codepoint, CharData {});
 				continue;

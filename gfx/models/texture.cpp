@@ -48,8 +48,8 @@ Texture::save(const glTexture & texture, GLenum format, GLenum type, const glm::
 {
 	using TGAHead = std::array<short, 9>;
 
-	size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
-	size_t fileSize = dataSize + sizeof(TGAHead);
+	const size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
+	const size_t fileSize = dataSize + sizeof(TGAHead);
 
 	filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
 	out.truncate(fileSize);
