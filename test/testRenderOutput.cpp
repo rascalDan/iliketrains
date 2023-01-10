@@ -1,7 +1,7 @@
 #include "testRenderOutput.h"
 #include <stdexcept>
 
-TestRenderOutput::TestRenderOutput() : size {640, 480}
+TestRenderOutput::TestRenderOutput(glm::ivec2 s) : size {s}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 	const auto configuregdata
