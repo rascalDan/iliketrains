@@ -21,8 +21,9 @@ namespace std {
 	{
 		s << '(';
 		for (const auto & i : v) {
-			if (&i != &v.front())
+			if (&i != &v.front()) {
 				s << ", ";
+			}
 			s << i;
 		}
 		return s << ')';
