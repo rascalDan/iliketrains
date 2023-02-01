@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <span>
+#include <utility>
+#include <vector>
 
 template<typename T, typename E>
 concept SequentialCollection = requires(T c) {
@@ -58,4 +61,44 @@ operator*=(std::span<T> & in, auto && f)
 		f(v);
 	}
 	return in;
+}
+
+template<template<typename...> typename C, typename... T>
+constexpr auto
+operator*(const C<T...> & in, auto && f)
+{
+	C<decltype(f(in[0]))> out;
+
+	std::transform(in.begin(), in.end(), std::inserter(out, out.end()), f);
+	return out;
+}
+
+template<typename... T>
+constexpr auto &
+operator+=(std::vector<T...> & in, std::vector<T...> && src)
+{
+	in.reserve(in.size() + src.size());
+	std::move(src.begin(), src.end(), std::back_inserter(in));
+	return in;
+}
+
+template<typename... T>
+constexpr auto
+operator+(std::vector<T...> && in, std::vector<T...> && src)
+{
+	in.reserve(in.size() + src.size());
+	std::move(src.begin(), src.end(), std::back_inserter(in));
+	return in;
+}
+
+template<template<typename> typename Direction = std::plus>
+static auto
+vectorOfN(std::integral auto N, unsigned int start = {}, unsigned int step = 1)
+{
+	std::vector<unsigned int> v;
+	v.resize(N);
+	std::generate_n(v.begin(), N, [&start, step, adj = Direction {}]() {
+		return std::exchange(start, adj(start, step));
+	});
+	return v;
 }
