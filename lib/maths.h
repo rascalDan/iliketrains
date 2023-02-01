@@ -125,6 +125,13 @@ operator||(const glm::vec<L, T, Q> v1, const T v2)
 	return {v1, v2};
 }
 
+inline glm::vec3
+operator%(const glm::vec3 & p, const glm::mat4 & mutation)
+{
+	const auto p2 = mutation * (p ^ 1);
+	return p2 / p2.w;
+}
+
 constexpr inline float
 arc_length(const Arc & arc)
 {
