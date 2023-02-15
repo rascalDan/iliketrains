@@ -13,6 +13,7 @@ pkg-config.import glew ;
 pkg-config.import freetype2 ;
 pkg-config.import glib-2.0 ;
 lib pthread ;
+lib OpenMeshCore ;
 
 variant coverage : debug ;
 project : requirements
@@ -112,6 +113,7 @@ lib ilt :
 	<library>freetype2
 	<library>glib-2.0
 	<library>pthread
+	<library>OpenMeshCore
 	: :
 	<include>.
 	<include>lib
