@@ -36,6 +36,9 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation)
 								mesh.add_vertex({xyz1t.x, xyz1t.y, xyz1t.z}),
 						}));
 			});
+	for (const auto & [name, face] : surface) {
+		mesh.property(mesh.smoothFaceProperty, face) = true;
+	}
 	surface.emplace("bottom", mesh.add_face(bottom));
 	surface.emplace("top", mesh.add_face(top));
 

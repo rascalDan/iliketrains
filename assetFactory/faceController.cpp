@@ -23,6 +23,9 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 			const auto vertexCount = points.size();
 			const auto centre
 					= std::accumulate(points.begin(), points.end(), glm::vec3 {}) / static_cast<float>(vertexCount);
+			if (smooth) {
+				mesh.property(mesh.smoothFaceProperty, cf.second) = true;
+			}
 			if (type == "extrude") {
 				Shape::CreatedFaces newFaces;
 				// mutate points
@@ -43,6 +46,11 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 							mesh.add_face({baseVertices[idx], baseVertices[next], vertices[next], vertices[idx]}));
 				}
 				newFaces.emplace(name, mesh.add_face(vertices));
+				if (smooth) {
+					for (const auto & [name, face] : newFaces) {
+						mesh.property(mesh.smoothFaceProperty, face) = true;
+					}
+				}
 				for (const auto & [name, faceController] : faceControllers) {
 					faceController.apply(mesh, name, newFaces);
 				}

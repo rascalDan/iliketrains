@@ -17,10 +17,14 @@ FactoryMesh::createMesh() const
 
 	mesh.triangulate();
 	mesh.update_face_normals();
+	mesh.update_vertex_normals();
 	std::vector<Vertex> vertices;
 	for (const auto & face : mesh.faces()) {
+		const auto smooth = mesh.property(mesh.smoothFaceProperty, face);
 		for (const auto & vertex : mesh.fv_range(face)) {
-			vertices.emplace_back(mesh.point(vertex), NullUV, mesh.property(mesh.face_normals_pph(), face));
+			vertices.emplace_back(mesh.point(vertex), NullUV,
+					smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
+						   : mesh.property(mesh.face_normals_pph(), face));
 		}
 	}
 	return std::make_shared<Mesh>(vertices, vectorOfN(vertices.size()));
