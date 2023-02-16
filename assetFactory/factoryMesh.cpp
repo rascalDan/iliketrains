@@ -1,7 +1,7 @@
 #include "factoryMesh.h"
-#include "assetFactoryConfig.h"
 #include "collections.hpp"
 #include "gfx/models/vertex.hpp"
+#include "modelFactoryMesh.h"
 #include <glm/ext/matrix_transform.hpp>
 
 Mesh::Ptr

@@ -1,7 +1,7 @@
 #include "modelFactory.h"
-#include "assetFactoryConfig.h"
 #include "cuboid.h"
 #include "cylinder.h"
+#include "modelFactoryMesh_fwd.h"
 #include "plane.h"
 
 ModelFactory::ModelFactory() :

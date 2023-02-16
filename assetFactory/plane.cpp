@@ -1,5 +1,5 @@
 #include "plane.h"
-#include "assetFactoryConfig.h"
+#include "modelFactoryMesh.h"
 
 Plane::CreatedFaces
 Plane::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const

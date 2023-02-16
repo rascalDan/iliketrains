@@ -1,6 +1,6 @@
 #pragma once
 
-#include "assetFactoryConfig_fwd.h"
+#include "modelFactoryMesh_fwd.h"
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/Mesh/Traits.hh>
 #include <glm/geometric.hpp>
@@ -25,4 +25,10 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
 	using Point = OpenMesh::glmvec<float, 3>;
 	using Normal = OpenMesh::glmvec<float, 3>;
+};
+
+struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTraits> {
+	ModelFactoryMesh();
+
+	OpenMesh::FPropHandleT<bool> smoothFaceProperty;
 };

@@ -1,7 +1,7 @@
 #include "shape.h"
-#include "assetFactoryConfig.h"
 #include "gfx/models/vertex.hpp"
 #include "maths.h"
+#include "modelFactoryMesh.h"
 #include "shape.h"
 
 std::vector<OpenMesh::VertexHandle>

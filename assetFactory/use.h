@@ -1,7 +1,7 @@
 #pragma once
 
-#include "assetFactoryConfig_fwd.h"
 #include "faceController.h"
+#include "modelFactoryMesh_fwd.h"
 #include "shape.h"
 #include "stdTypeDefs.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "assetFactoryConfig_fwd.h"
+#include "modelFactoryMesh_fwd.h"
 #include "mutation.h"
 #include "stdTypeDefs.hpp"
 #include <OpenMesh/Core/Mesh/Handles.hh>

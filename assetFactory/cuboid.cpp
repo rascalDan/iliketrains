@@ -1,5 +1,5 @@
 #include "cuboid.h"
-#include "assetFactoryConfig.h"
+#include "modelFactoryMesh.h"
 
 Cuboid::CreatedFaces
 Cuboid::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const

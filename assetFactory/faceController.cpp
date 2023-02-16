@@ -1,6 +1,6 @@
 #include "faceController.h"
-#include "assetFactoryConfig.h"
 #include "maths.h"
+#include "modelFactoryMesh.h"
 
 void
 FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::CreatedFaces & faces) const

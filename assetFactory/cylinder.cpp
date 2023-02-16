@@ -1,6 +1,6 @@
 #include "cylinder.h"
-#include "assetFactoryConfig.h"
 #include "maths.h"
+#include "modelFactoryMesh.h"
 
 Cylinder::CreatedFaces
 Cylinder::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const
