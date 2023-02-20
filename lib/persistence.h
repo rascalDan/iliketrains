@@ -113,14 +113,14 @@ namespace Persistence {
 		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 
 		enum class NameAction { Push, HandleAndContinue, Ignore };
-		template<typename T>
+		template<typename Helper, typename T>
 		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
 		{
-			SelectionT<T> s {value};
-			const auto act {setName(key, s)};
+			auto s = std::make_unique<Helper>(value);
+			const auto act {setName(key, *s)};
 			if (act != NameAction::Ignore) {
-				sel = std::make_unique<decltype(s)>(std::move(s));
+				sel = std::move(s);
 				if (act == NameAction::HandleAndContinue) {
 					selHandler();
 				}
@@ -462,4 +462,7 @@ namespace Persistence {
 }
 
 #define STORE_TYPE store.persistType(this, typeid(*this))
-#define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
+#define STORE_MEMBER(mbr) STORE_NAME_MEMBER(#mbr, mbr)
+#define STORE_NAME_MEMBER(name, mbr) store.persistValue<Persistence::SelectionT<decltype(mbr)>>(name, mbr)
+#define STORE_HELPER(mbr, Helper) STORE_NAME_HELPER(#mbr, mbr, Helper)
+#define STORE_NAME_HELPER(name, mbr, Helper) store.persistValue<Helper>(name, mbr)
