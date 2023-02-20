@@ -348,6 +348,7 @@ namespace Persistence {
 				}
 				if constexpr (shared) {
 					if (mbr == "p.id"sv) {
+						make_default_as_needed(this->v);
 						return this->template make_s<RememberObjectById>(this->v);
 					}
 				}
