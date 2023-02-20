@@ -1,8 +1,8 @@
 {
-	"@typeid": "SharedTestObject",
+	"p.typeid": "SharedTestObject",
 		"sptr": {
-			"@typeid": "SubObject2",
-			"@id": "someid"
+			"p.typeid": "SubObject2",
+			"p.id": "someid"
 		},
 		"ssptr": "someid"
 }

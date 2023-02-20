@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(write_test_dfl)
 	std::stringstream ss;
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]})");
+			R"({"p.typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]})");
 }
 
 BOOST_FIXTURE_TEST_CASE(write_test_loaded, JPP)
@@ -329,7 +329,7 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded, JPP)
 	std::stringstream ss;
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":true,"pos":[3.14,6.28,1.57],"flts":[3.14,6.28,1.57,0,-1,-3.14],"poss":[[3.14,6.28,1.57],[0,-1,-3.14]],"nest":[[["a","b"],["c","d","e"]],[["f"]],[]],"ptr":{"@typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]},"vptr":[]})");
+			R"({"p.typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":true,"pos":[3.14,6.28,1.57],"flts":[3.14,6.28,1.57,0,-1,-3.14],"poss":[[3.14,6.28,1.57],[0,-1,-3.14]],"nest":[[["a","b"],["c","d","e"]],[["f"]],[]],"ptr":{"p.typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]},"vptr":[]})");
 }
 
 BOOST_FIXTURE_TEST_CASE(write_test_loaded_abs, JPP)
@@ -338,7 +338,7 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded_abs, JPP)
 	std::stringstream ss;
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"aptr":{"@typeid":"SubObject","base":"set base","sub":"set sub"},"vptr":[]})");
+			R"({"p.typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"aptr":{"p.typeid":"SubObject","base":"set base","sub":"set sub"},"vptr":[]})");
 }
 
 BOOST_FIXTURE_TEST_CASE(write_test_loaded_shared, JPP)
@@ -349,7 +349,7 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded_shared, JPP)
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(Persistence::seenSharedObjects.size(), 1);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"SharedTestObject","sptr":{"@typeid":"SubObject","@id":"someid","base":"","sub":""},"ssptr":"someid"})");
+			R"({"p.typeid":"SharedTestObject","sptr":{"p.typeid":"SubObject","p.id":"someid","base":"","sub":""},"ssptr":"someid"})");
 }
 
 BOOST_DATA_TEST_CASE(write_special_strings, TEST_STRINGS, exp, in)

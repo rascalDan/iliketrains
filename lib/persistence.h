@@ -340,14 +340,14 @@ namespace Persistence {
 			select(const std::string & mbr) override
 			{
 				using namespace std::literals;
-				if (mbr == "@typeid"sv) {
+				if (mbr == "p.typeid"sv) {
 					if (this->v) {
 						throw std::runtime_error("cannot set object type after creation");
 					}
 					return this->template make_s<MakeObjectByTypeName>(this->v);
 				}
 				if constexpr (shared) {
-					if (mbr == "@id"sv) {
+					if (mbr == "p.id"sv) {
 						return this->template make_s<RememberObjectById>(this->v);
 					}
 				}

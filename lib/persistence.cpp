@@ -81,12 +81,12 @@ namespace Persistence {
 	void
 	PersistenceWrite::setType(const std::string_view tn, const Persistable * p)
 	{
-		out.pushKey("@typeid");
+		out.pushKey("p.typeid");
 		out.pushValue(tn);
 		first = false;
 		if (shared) {
 			out.nextValue();
-			out.pushKey("@id");
+			out.pushKey("p.id");
 			out.pushValue(p->getId());
 		}
 	}
