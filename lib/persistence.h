@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <special_members.hpp>
+#include <sstream>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -187,6 +188,17 @@ namespace Persistence {
 		};
 
 		using SelectionV<V>::SelectionV;
+		using SelectionV<V>::setValue;
+
+		void
+		setValue(std::string && s) override
+		{
+			std::stringstream ss {std::move(s)};
+			for (glm::length_t n = 0; n < L; n += 1) {
+				ss >> this->v[n];
+				ss.get();
+			}
+		}
 
 		void
 		beginArray(Stack & stk) override
