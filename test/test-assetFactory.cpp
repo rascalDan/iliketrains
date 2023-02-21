@@ -1,12 +1,12 @@
-#define BOOST_TEST_MODULE test_model_factory
+#define BOOST_TEST_MODULE test_asset_factory
 
 #include "testHelpers.h"
 #include "testRenderOutput.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "assetFactory/assetFactory.h"
 #include "assetFactory/factoryMesh.h"
-#include "assetFactory/modelFactory.h"
 #include "assetFactory/object.h"
 #include "gfx/gl/sceneRenderer.h"
 #include "lib/collection.hpp"
@@ -66,37 +66,37 @@ private:
 BOOST_FIXTURE_TEST_SUITE(m, FactoryFixture);
 BOOST_AUTO_TEST_CASE(brush47)
 {
-	ModelFactory modelFactory;
+	AssetFactory assetFactory;
 	{
 		auto wheel = std::make_shared<Object>("wheel");
 		{
 			auto wheelCylinder = wheel->uses.emplace_back(std::make_shared<Use>());
-			wheelCylinder->type = modelFactory.shapes.at("cylinder");
+			wheelCylinder->type = assetFactory.shapes.at("cylinder");
 			wheelCylinder->position = {0, 0, 0.571};
 			wheelCylinder->scale = {1.142, 1.142, 0.07};
 			wheelCylinder->rotation = {0, 0, half_pi};
 			wheelCylinder->colour = "#2C3539";
 		}
-		modelFactory.shapes.emplace(wheel->id, wheel);
+		assetFactory.shapes.emplace(wheel->id, wheel);
 	}
 	{
 		auto axel = std::make_shared<Object>("axel");
 		for (float x : {-1.f, 1.f}) {
 			auto wheel = axel->uses.emplace_back(std::make_shared<Use>());
-			wheel->type = modelFactory.shapes.at("wheel");
+			wheel->type = assetFactory.shapes.at("wheel");
 			wheel->position = {x * 0.717f, 0, 0};
 			wheel->rotation = {0, x == 1.f ? pi : 0.f, 0};
 		}
-		modelFactory.shapes.emplace(axel->id, axel);
+		assetFactory.shapes.emplace(axel->id, axel);
 	}
 	{
 		auto bogey = std::make_shared<Object>("bogey");
 		for (float y : {-2.f, 0.f, 2.f}) {
 			auto axel = bogey->uses.emplace_back(std::make_shared<Use>());
-			axel->type = modelFactory.shapes.at("axel");
+			axel->type = assetFactory.shapes.at("axel");
 			axel->position = {0, y, 0};
 		}
-		modelFactory.shapes.emplace(bogey->id, bogey);
+		assetFactory.shapes.emplace(bogey->id, bogey);
 	}
 	FactoryMesh::Collection factoryMeshes;
 	{
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(brush47)
 			auto bogey = factoryMeshes.emplace_back(std::make_shared<FactoryMesh>());
 			bogey->id = "bogey" + std::to_string(b);
 			auto bogeyUse = bogey->uses.emplace_back(std::make_shared<Use>());
-			bogeyUse->type = modelFactory.shapes.at("bogey");
+			bogeyUse->type = assetFactory.shapes.at("bogey");
 			bogeyUse->position = {0, y, 0};
 			bogeyUse->rotation = {0, b * pi, 0};
 			b++;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(brush47)
 		body->size = {2.69f, 19.38f, 3.9f};
 		{
 			auto bodyLower = body->uses.emplace_back(std::make_shared<Use>());
-			bodyLower->type = modelFactory.shapes.at("cuboid");
+			bodyLower->type = assetFactory.shapes.at("cuboid");
 			bodyLower->position = {0, 0, 1.2};
 			bodyLower->scale = {2.69, 19.38, 1.5};
 			bodyLower->colour = "#1111DD";
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(brush47)
 		}
 		{
 			auto batteryBox = body->uses.emplace_back(std::make_shared<Use>());
-			batteryBox->type = modelFactory.shapes.at("cuboid");
+			batteryBox->type = assetFactory.shapes.at("cuboid");
 			batteryBox->position = {0, 0, .2};
 			batteryBox->scale = {2.6, 4.5, 1};
 			batteryBox->colour = "#2C3539";
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(brush47)
 }
 BOOST_AUTO_TEST_CASE(brush47xml)
 {
-	auto mf = ModelFactory::loadXML(RESDIR "/brush47.xml");
+	auto mf = AssetFactory::loadXML(RESDIR "/brush47.xml");
 	BOOST_REQUIRE(mf);
 	BOOST_REQUIRE_EQUAL(6, mf->shapes.size());
 	BOOST_CHECK(mf->shapes.at("plane"));

@@ -1,4 +1,4 @@
-#include "modelFactory.h"
+#include "assetFactory.h"
 #include "cuboid.h"
 #include "cylinder.h"
 #include "modelFactoryMesh_fwd.h"
@@ -7,7 +7,7 @@
 #include "saxParse-persistence.h"
 #include <filesystem.h>
 
-ModelFactory::ModelFactory() :
+AssetFactory::AssetFactory() :
 	shapes {
 			{"plane", std::make_shared<Plane>()},
 			{"cuboid", std::make_shared<Cuboid>()},
@@ -16,15 +16,15 @@ ModelFactory::ModelFactory() :
 {
 }
 
-std::shared_ptr<ModelFactory>
-ModelFactory::loadXML(const std::filesystem::path & filename)
+std::shared_ptr<AssetFactory>
+AssetFactory::loadXML(const std::filesystem::path & filename)
 {
 	filesystem::FileStar file {filename.c_str(), "r"};
-	return Persistence::SAXParsePersistence {}.loadState<std::shared_ptr<ModelFactory>>(file);
+	return Persistence::SAXParsePersistence {}.loadState<std::shared_ptr<AssetFactory>>(file);
 }
 
 bool
-ModelFactory::persist(Persistence::PersistenceStore & store)
+AssetFactory::persist(Persistence::PersistenceStore & store)
 {
 	using MapObjects = Persistence::MapByMember<Shapes, Object>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects);

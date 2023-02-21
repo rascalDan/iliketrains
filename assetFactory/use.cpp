@@ -1,5 +1,5 @@
 #include "use.h"
-#include "modelFactory.h"
+#include "assetFactory.h"
 
 Shape::CreatedFaces
 Use::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const
@@ -17,7 +17,7 @@ struct Lookup : public Persistence::SelectionV<Shape::CPtr> {
 	void
 	setValue(std::string && str) override
 	{
-		if (auto mf = std::dynamic_pointer_cast<const ModelFactory>(Persistence::sharedObjects.at("modelFactory"))) {
+		if (auto mf = std::dynamic_pointer_cast<const AssetFactory>(Persistence::sharedObjects.at("assetFactory"))) {
 			v = mf->shapes.at(str);
 		}
 	}

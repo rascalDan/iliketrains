@@ -4,16 +4,16 @@
 #include "shape.h"
 #include <filesystem>
 
-class ModelFactory : public Persistence::Persistable {
+class AssetFactory : public Persistence::Persistable {
 public:
 	using Shapes = std::map<std::string, Shape::CPtr, std::less<>>;
 
-	ModelFactory();
-	[[nodiscard]] static std::shared_ptr<ModelFactory> loadXML(const std::filesystem::path &);
+	AssetFactory();
+	[[nodiscard]] static std::shared_ptr<AssetFactory> loadXML(const std::filesystem::path &);
 
 	Shapes shapes;
 
 private:
-	friend Persistence::SelectionPtrBase<std::shared_ptr<ModelFactory>, true>;
+	friend Persistence::SelectionPtrBase<std::shared_ptr<AssetFactory>, true>;
 	bool persist(Persistence::PersistenceStore & store) override;
 };
