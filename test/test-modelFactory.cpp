@@ -147,4 +147,27 @@ BOOST_AUTO_TEST_CASE(brush47)
 
 	render(20);
 }
+BOOST_AUTO_TEST_CASE(brush47xml)
+{
+	auto mf = ModelFactory::loadXML(RESDIR "/brush47.xml");
+	BOOST_REQUIRE(mf);
+	BOOST_REQUIRE_EQUAL(6, mf->shapes.size());
+	BOOST_CHECK(mf->shapes.at("plane"));
+	BOOST_CHECK(mf->shapes.at("cylinder"));
+	BOOST_CHECK(mf->shapes.at("cuboid"));
+	BOOST_CHECK(mf->shapes.at("wheel"));
+	BOOST_CHECK(mf->shapes.at("axel"));
+	auto bogey = mf->shapes.at("bogey");
+	BOOST_REQUIRE(bogey);
+	auto bogeyObj = std::dynamic_pointer_cast<const Object>(bogey);
+	BOOST_CHECK_EQUAL(3, bogeyObj->uses.size());
+
+	FactoryMesh::Collection factoryMeshes;
+	std::transform(factoryMeshes.begin(), factoryMeshes.end(), std::back_inserter(meshes.objects),
+			[](const FactoryMesh::CPtr & factoryMesh) -> Mesh::Ptr {
+				return factoryMesh->createMesh();
+			});
+
+	render(20);
+}
 BOOST_AUTO_TEST_SUITE_END();

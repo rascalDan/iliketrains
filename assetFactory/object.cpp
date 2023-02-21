@@ -15,3 +15,25 @@ Object::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) c
 	}
 	return faces;
 }
+
+template<typename Container, typename Type> struct Appender : public Persistence::SelectionT<std::shared_ptr<Type>> {
+	Appender(Container & c) : Persistence::SelectionT<std::shared_ptr<Type>> {s}, container {c} { }
+	using Persistence::SelectionT<std::shared_ptr<Type>>::SelectionT;
+	void
+	endObject(Persistence::Stack & stk) override
+	{
+		container.emplace_back(s);
+		stk.pop();
+	}
+
+private:
+	std::shared_ptr<Type> s;
+	Container & container;
+};
+
+bool
+Object::persist(Persistence::PersistenceStore & store)
+{
+	using UseAppend = Appender<Use::Collection, Use>;
+	return STORE_TYPE && STORE_MEMBER(id) && STORE_NAME_HELPER("use", uses, UseAppend);
+}

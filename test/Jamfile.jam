@@ -52,6 +52,6 @@ run test-text.cpp ;
 run test-enumDetails.cpp ;
 run test-render.cpp : : : <library>test ;
 run test-glContextBhvr.cpp ;
-run test-modelFactory.cpp : : : <library>test ;
+run test-modelFactory.cpp : -- : ../res/brush47.xml : <library>test ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;

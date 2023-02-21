@@ -2,10 +2,11 @@
 
 #include "faceController.h"
 #include "modelFactoryMesh_fwd.h"
+#include "persistence.h"
 #include "shape.h"
 #include "stdTypeDefs.hpp"
 
-class Use : public StdTypeDefs<Use>, public Mutation {
+class Use : public StdTypeDefs<Use>, public Mutation, public Persistence::Persistable {
 public:
 	using FaceControllers = std::map<std::string, FaceController>;
 
@@ -14,4 +15,13 @@ public:
 	Shape::CPtr type;
 	std::string colour;
 	FaceControllers faceControllers;
+
+private:
+	friend Persistence::SelectionPtrBase<std::shared_ptr<Use>, true>;
+	bool persist(Persistence::PersistenceStore & store) override;
+	std::string
+	getId() const override
+	{
+		return {};
+	};
 };

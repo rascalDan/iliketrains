@@ -1,4 +1,5 @@
 #include "use.h"
+#include "modelFactory.h"
 
 Shape::CreatedFaces
 Use::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const
@@ -8,4 +9,23 @@ Use::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) cons
 		faceController.apply(mesh, name, faces);
 	}
 	return faces;
+}
+
+struct Lookup : public Persistence::SelectionV<Shape::CPtr> {
+	using Persistence::SelectionV<Shape::CPtr>::SelectionV;
+	using Persistence::SelectionV<Shape::CPtr>::setValue;
+	void
+	setValue(std::string && str) override
+	{
+		if (auto mf = std::dynamic_pointer_cast<const ModelFactory>(Persistence::sharedObjects.at("modelFactory"))) {
+			v = mf->shapes.at(str);
+		}
+	}
+};
+
+bool
+Use::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_TYPE && STORE_HELPER(type, Lookup) && STORE_MEMBER(position) && STORE_MEMBER(scale)
+			&& STORE_MEMBER(rotation);
 }
