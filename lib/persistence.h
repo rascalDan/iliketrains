@@ -273,6 +273,22 @@ namespace Persistence {
 		Map & map;
 	};
 
+	template<typename Container, typename Type = typename Container::value_type>
+	struct Appender : public Persistence::SelectionT<Type> {
+		Appender(Container & c) : Persistence::SelectionT<Type> {s}, container {c} { }
+		using Persistence::SelectionT<Type>::SelectionT;
+		void
+		endObject(Persistence::Stack & stk) override
+		{
+			container.emplace_back(std::move(s));
+			stk.pop();
+		}
+
+	private:
+		Type s;
+		Container & container;
+	};
+
 	struct Persistable {
 		Persistable() = default;
 		virtual ~Persistable() = default;
