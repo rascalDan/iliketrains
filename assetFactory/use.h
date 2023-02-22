@@ -8,7 +8,7 @@
 
 class Use : public StdTypeDefs<Use>, public Mutation, public Persistence::Persistable {
 public:
-	using FaceControllers = std::map<std::string, FaceController>;
+	using FaceControllers = std::map<std::string, std::unique_ptr<FaceController>>;
 
 	Shape::CreatedFaces createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const;
 

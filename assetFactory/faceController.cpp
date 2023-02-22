@@ -52,10 +52,18 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 					}
 				}
 				for (const auto & [name, faceController] : faceControllers) {
-					faceController.apply(mesh, name, newFaces);
+					faceController->apply(mesh, name, newFaces);
 				}
 				faces.merge(std::move(newFaces));
 			}
 		}
 	}
+}
+
+bool
+FaceController::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_TYPE && STORE_MEMBER(id) && STORE_MEMBER(colour) && STORE_MEMBER(type) && STORE_MEMBER(smooth)
+			&& STORE_MEMBER(scale) && STORE_MEMBER(position) && STORE_MEMBER(rotation)
+			&& STORE_NAME_HELPER("face", faceControllers, Persistence::MapByMember<FaceControllers>);
 }

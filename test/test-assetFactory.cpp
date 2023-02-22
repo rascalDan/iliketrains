@@ -90,24 +90,24 @@ BOOST_AUTO_TEST_CASE(brush47)
 		assetFactory.shapes.emplace(axel->id, axel);
 	}
 	{
-		auto bogey = std::make_shared<Object>("bogey");
+		auto bogie = std::make_shared<Object>("bogie");
 		for (float y : {-2.f, 0.f, 2.f}) {
-			auto axel = bogey->uses.emplace_back(std::make_shared<Use>());
+			auto axel = bogie->uses.emplace_back(std::make_shared<Use>());
 			axel->type = assetFactory.shapes.at("axel");
 			axel->position = {0, y, 0};
 		}
-		assetFactory.shapes.emplace(bogey->id, bogey);
+		assetFactory.shapes.emplace(bogie->id, bogie);
 	}
 	FactoryMesh::Collection factoryMeshes;
 	{
 		unsigned short b {0};
 		for (float y : {-6.f, 6.f}) {
-			auto bogey = factoryMeshes.emplace_back(std::make_shared<FactoryMesh>());
-			bogey->id = "bogey" + std::to_string(b);
-			auto bogeyUse = bogey->uses.emplace_back(std::make_shared<Use>());
-			bogeyUse->type = assetFactory.shapes.at("bogey");
-			bogeyUse->position = {0, y, 0};
-			bogeyUse->rotation = {0, b * pi, 0};
+			auto bogie = factoryMeshes.emplace_back(std::make_shared<FactoryMesh>());
+			bogie->id = "bogie" + std::to_string(b);
+			auto bogieUse = bogie->uses.emplace_back(std::make_shared<Use>());
+			bogieUse->type = assetFactory.shapes.at("bogie");
+			bogieUse->position = {0, y, 0};
+			bogieUse->rotation = {0, b * pi, 0};
 			b++;
 		}
 	}
@@ -115,23 +115,25 @@ BOOST_AUTO_TEST_CASE(brush47)
 		auto body = factoryMeshes.emplace_back(std::make_shared<FactoryMesh>());
 		body->id = "body";
 		body->size = {2.69f, 19.38f, 3.9f};
-		{
-			auto bodyLower = body->uses.emplace_back(std::make_shared<Use>());
-			bodyLower->type = assetFactory.shapes.at("cuboid");
-			bodyLower->position = {0, 0, 1.2};
-			bodyLower->scale = {2.69, 19.38, 1.5};
-			bodyLower->colour = "#1111DD";
-			bodyLower->faceControllers["bottom"].colour = "#2C3539";
-			auto & bodyUpper = bodyLower->faceControllers["top"];
-			bodyUpper.type = "extrude";
-			bodyUpper.scale = {1, .95f, 1};
-			bodyUpper.position = {0, 0, 1.0};
-			auto & roof = bodyUpper.faceControllers["top"];
-			roof.type = "extrude";
-			roof.scale = {.6f, .9f, 0};
-			roof.position = {0, 0, 0.2};
-			roof.smooth = true;
-		}
+		auto bodyLower = body->uses.emplace_back(std::make_shared<Use>());
+		bodyLower->type = assetFactory.shapes.at("cuboid");
+		bodyLower->position = {0, 0, 1.2};
+		bodyLower->scale = {2.69, 19.38, 1.5};
+		bodyLower->colour = "#1111DD";
+		auto & bottom = bodyLower->faceControllers["bottom"];
+		bottom = std::make_unique<FaceController>();
+		bottom->colour = "#2C3539";
+		auto & bodyUpper = bodyLower->faceControllers["top"];
+		bodyUpper = std::make_unique<FaceController>();
+		bodyUpper->type = "extrude";
+		bodyUpper->scale = {1, .95f, 1};
+		bodyUpper->position = {0, 0, 1.0};
+		auto & roof = bodyUpper->faceControllers["top"];
+		roof = std::make_unique<FaceController>();
+		roof->type = "extrude";
+		roof->scale = {.6f, .9f, 0};
+		roof->position = {0, 0, 0.2};
+		roof->smooth = true;
 		{
 			auto batteryBox = body->uses.emplace_back(std::make_shared<Use>());
 			batteryBox->type = assetFactory.shapes.at("cuboid");
@@ -157,13 +159,20 @@ BOOST_AUTO_TEST_CASE(brush47xml)
 	BOOST_CHECK(mf->shapes.at("cuboid"));
 	BOOST_CHECK(mf->shapes.at("wheel"));
 	BOOST_CHECK(mf->shapes.at("axel"));
-	auto bogey = mf->shapes.at("bogey");
-	BOOST_REQUIRE(bogey);
-	auto bogeyObj = std::dynamic_pointer_cast<const Object>(bogey);
-	BOOST_CHECK_EQUAL(3, bogeyObj->uses.size());
+	auto bogie = mf->shapes.at("bogie");
+	BOOST_REQUIRE(bogie);
+	auto bogieObj = std::dynamic_pointer_cast<const Object>(bogie);
+	BOOST_CHECK_EQUAL(3, bogieObj->uses.size());
+	BOOST_CHECK_EQUAL(1, mf->assets.size());
+	auto brush47 = mf->assets.at("brush-47");
+	BOOST_REQUIRE(brush47);
+	BOOST_CHECK_EQUAL(3, brush47->meshes.size());
+	auto body = brush47->meshes.at(0);
+	BOOST_REQUIRE(body);
+	BOOST_CHECK_EQUAL("body", body->id);
+	BOOST_CHECK_EQUAL(2, body->uses.size());
 
-	FactoryMesh::Collection factoryMeshes;
-	std::transform(factoryMeshes.begin(), factoryMeshes.end(), std::back_inserter(meshes.objects),
+	std::transform(brush47->meshes.begin(), brush47->meshes.end(), std::back_inserter(meshes.objects),
 			[](const FactoryMesh::CPtr & factoryMesh) -> Mesh::Ptr {
 				return factoryMesh->createMesh();
 			});

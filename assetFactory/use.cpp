@@ -6,7 +6,7 @@ Use::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) cons
 {
 	auto faces = type->createMesh(mesh, mutation * getMatrix());
 	for (const auto & [name, faceController] : faceControllers) {
-		faceController.apply(mesh, name, faces);
+		faceController->apply(mesh, name, faces);
 	}
 	return faces;
 }
@@ -27,5 +27,6 @@ bool
 Use::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_TYPE && STORE_HELPER(type, Lookup) && STORE_MEMBER(position) && STORE_MEMBER(scale)
-			&& STORE_MEMBER(rotation);
+			&& STORE_MEMBER(rotation) && STORE_MEMBER(colour)
+			&& STORE_NAME_HELPER("face", faceControllers, Persistence::MapByMember<FaceControllers>);
 }

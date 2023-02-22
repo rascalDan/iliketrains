@@ -29,3 +29,10 @@ FactoryMesh::createMesh() const
 	}
 	return std::make_shared<Mesh>(vertices, vectorOfN(vertices.size()));
 }
+
+bool
+FactoryMesh::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_TYPE && STORE_MEMBER(id) && STORE_MEMBER(size)
+			&& STORE_NAME_HELPER("use", uses, Persistence::Appender<Use::Collection>);
+}
