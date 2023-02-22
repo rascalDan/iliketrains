@@ -26,6 +26,6 @@ AssetFactory::loadXML(const std::filesystem::path & filename)
 bool
 AssetFactory::persist(Persistence::PersistenceStore & store)
 {
-	using MapObjects = Persistence::MapByMember<Shapes, Object>;
+	using MapObjects = Persistence::MapByMember<Shapes, std::shared_ptr<Object>>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects);
 }

@@ -256,20 +256,20 @@ namespace Persistence {
 		}
 	};
 
-	template<typename Map, typename Type = typename Map::mapped_type, auto Key = &Type::id>
-	struct MapByMember : public Persistence::SelectionT<std::shared_ptr<Type>> {
-		MapByMember(Map & m) : Persistence::SelectionT<std::shared_ptr<Type>> {s}, map {m} { }
+	template<typename Map, typename Type = typename Map::mapped_type, auto Key = &Type::element_type::id>
+	struct MapByMember : public Persistence::SelectionT<Type> {
+		MapByMember(Map & m) : Persistence::SelectionT<Type> {s}, map {m} { }
 
-		using Persistence::SelectionT<std::shared_ptr<Type>>::SelectionT;
+		using Persistence::SelectionT<Type>::SelectionT;
 		void
 		endObject(Persistence::Stack & stk) override
 		{
-			map.emplace(std::invoke(Key, s), s);
+			map.emplace(std::invoke(Key, s), std::move(s));
 			stk.pop();
 		}
 
 	private:
-		std::shared_ptr<Type> s;
+		Type s;
 		Map & map;
 	};
 
