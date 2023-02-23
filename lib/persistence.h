@@ -1,5 +1,6 @@
 #pragma once
 
+#include <charconv>
 #include <functional>
 #include <glm/glm.hpp>
 #include <iosfwd>
@@ -87,13 +88,53 @@ namespace Persistence {
 		T & v;
 	};
 
-	template<typename T> struct SelectionT : public SelectionV<T> {
+	template<typename T>
+	concept Scalar = std::is_scalar_v<T>;
+	template<typename T>
+	concept NotScalar = (!Scalar<T>);
+
+	template<Scalar T> struct SelectionT<T> : public SelectionV<T> {
 		using SelectionV<T>::SelectionV;
 		using Selection::setValue;
-		using P = std::conditional_t<std::is_scalar_v<T>, T, T &&>;
 
 		void
-		setValue(P evalue) override
+		setValue(T evalue) override
+		{
+			std::swap(this->v, evalue);
+		}
+
+		void
+		setValue(std::string && evalue) override
+		{
+			if constexpr (std::same_as<T, bool>) {
+				using namespace std::literals;
+				if (!(this->v = evalue == "true"sv)) {
+					if (evalue != "false"sv) {
+						throw std::runtime_error("Value conversion failure");
+					}
+				}
+			}
+			else {
+				if (auto res = std::from_chars(evalue.c_str(), evalue.c_str() + evalue.length(), this->v).ec;
+						res != std::errc {}) {
+					throw std::runtime_error("Value conversion failure");
+				}
+			}
+		}
+
+		void
+		write(const Writer & out) const override
+		{
+			out.pushValue(this->v);
+		}
+	};
+
+	template<NotScalar T> struct SelectionT<T> : public SelectionV<T> {
+		using SelectionV<T>::SelectionV;
+		using Selection::setValue;
+
+		void
+		setValue(T && evalue) override
 		{
 			std::swap(this->v, evalue);
 		}

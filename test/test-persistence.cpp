@@ -208,6 +208,14 @@ BOOST_FIXTURE_TEST_CASE(load_vector_ptr, JPP)
 	BOOST_CHECK(to->vptr.at(3)->str.empty());
 }
 
+BOOST_FIXTURE_TEST_CASE(test_conversion, JPP)
+{
+	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/conv.json");
+	BOOST_REQUIRE(to);
+	BOOST_CHECK_EQUAL(to->bl, true);
+	BOOST_CHECK_EQUAL(to->flt, 3.14F);
+}
+
 struct SharedTestObject : public Persistence::Persistable {
 	SharedTestObject() = default;
 
