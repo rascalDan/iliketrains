@@ -4,8 +4,8 @@
     <use type="cylinder" position="0,0,0.571" scale="1.142,1.142,0.07" rotation="0,0,1.5708"/>
   </object>
   <object id="axel">
-    <use type="wheel" position="0.717,0,0"/>
-    <use type="wheel" position="-0.717,0,0" rotation="0,3.14159,0"/>
+    <use type="wheel" position="-0.717,0,0"/>
+    <use type="wheel" position="0.717,0,0" rotation="0,3.14159,0"/>
   </object>
   <object id="bogie">
     <use type="axel" position="0,0,0"/>
