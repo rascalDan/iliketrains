@@ -17,8 +17,7 @@
       <use type="cuboid" position="0,0,1.2" scale="2.69,19.38,1.5" colour="#1111dd">
         <face id="bottom" colour="#2C3539"/>
         <face id="top" type="extrude" scale="1,0.95,1" position="0,0,1.0">
-          <face id="top" type="extrude" scale="0.6,0.9,0" position="0,0,0.2"/>
-          <!--smooth="true"-->
+          <face id="top" type="extrude" scale="0.6,0.9,0" position="0,0,0.2" smooth="true"/>
         </face>
       </use>
       <use type="cuboid" position="0,0,0.2" scale="2.6,4.5,1" colour="#2C3539"/>
