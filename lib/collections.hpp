@@ -82,13 +82,13 @@ operator+=(std::vector<T...> & in, std::vector<T...> && src)
 	return in;
 }
 
-template<typename... T>
+template<typename... T, typename Vn>
 constexpr auto
-operator+(std::vector<T...> && in, std::vector<T...> && src)
+operator+(const std::vector<T...> & in, Vn && vn)
 {
-	in.reserve(in.size() + src.size());
-	std::move(src.begin(), src.end(), std::back_inserter(in));
-	return in;
+	auto out(in);
+	out.emplace_back(std::forward<Vn>(vn));
+	return out;
 }
 
 template<template<typename> typename Direction = std::plus>
