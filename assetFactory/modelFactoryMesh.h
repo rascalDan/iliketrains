@@ -20,11 +20,12 @@ namespace OpenMesh {
 }
 
 struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
-	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status | OpenMesh::Attributes::Color);
 	EdgeAttributes(OpenMesh::Attributes::Status);
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
 	using Point = OpenMesh::glmvec<float, 3>;
 	using Normal = OpenMesh::glmvec<float, 3>;
+	using Color = OpenMesh::glmvec<float, 4>;
 };
 
 struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTraits> {

@@ -5,15 +5,15 @@
 #include "persistence.h"
 #include "shape.h"
 #include "stdTypeDefs.hpp"
+#include "style.h"
 
-class Use : public StdTypeDefs<Use>, public Mutation, public Persistence::Persistable {
+class Use : public StdTypeDefs<Use>, public Mutation, public Style, public Persistence::Persistable {
 public:
 	using FaceControllers = std::map<std::string, std::unique_ptr<FaceController>>;
 
 	Shape::CreatedFaces createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const;
 
 	Shape::CPtr type;
-	std::string colour;
 	FaceControllers faceControllers;
 
 private:

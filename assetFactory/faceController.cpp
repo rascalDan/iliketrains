@@ -1,14 +1,19 @@
 #include "faceController.h"
+#include "collections.hpp"
 #include "maths.h"
 #include "modelFactoryMesh.h"
 
 void
-FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::CreatedFaces & faces) const
+FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & name,
+		Shape::CreatedFaces & faces) const
 {
+	const auto controlledFacesRange = faces.equal_range(name);
+	const std::vector controlledFaces(controlledFacesRange.first, controlledFacesRange.second);
+	if (controlledFaces.empty()) {
+		throw std::runtime_error("Named face(s) do not exist: " + name);
+	}
 	if (!type.empty()) {
 		const auto mutation = getMatrix();
-		const auto controlledFacesRange = faces.equal_range(name);
-		const std::vector controlledFaces(controlledFacesRange.first, controlledFacesRange.second);
 		faces.erase(name);
 		for (const auto & cf : controlledFaces) {
 			// get face vertices
@@ -23,9 +28,6 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 			const auto vertexCount = points.size();
 			const auto centre
 					= std::accumulate(points.begin(), points.end(), glm::vec3 {}) / static_cast<float>(vertexCount);
-			if (smooth) {
-				mesh.property(mesh.smoothFaceProperty, cf.second) = true;
-			}
 			if (type == "extrude") {
 				Shape::CreatedFaces newFaces;
 				// mutate points
@@ -38,7 +40,6 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 					return mesh.add_vertex({p.x, p.y, p.z});
 				});
 				// create new faces
-
 				mesh.delete_face(cf.second);
 				for (size_t idx {}; idx < vertexCount; ++idx) {
 					const auto next = (idx + 1) % vertexCount;
@@ -51,11 +52,21 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 						mesh.property(mesh.smoothFaceProperty, face) = true;
 					}
 				}
+				applyStyle(mesh, parents + this, newFaces);
 				for (const auto & [name, faceController] : faceControllers) {
-					faceController->apply(mesh, name, newFaces);
+					faceController->apply(mesh, parents + this, name, newFaces);
 				}
 				faces.merge(std::move(newFaces));
 			}
+			else {
+				mesh.property(mesh.smoothFaceProperty, cf.second) = smooth;
+				applyStyle(mesh, parents + this, cf.second);
+			}
+		}
+	}
+	else {
+		for (const auto & cf : controlledFaces) {
+			applyStyle(mesh, parents + this, cf.second);
 		}
 	}
 }
@@ -63,7 +74,7 @@ FaceController::apply(ModelFactoryMesh & mesh, const std::string & name, Shape::
 bool
 FaceController::persist(Persistence::PersistenceStore & store)
 {
-	return STORE_TYPE && STORE_MEMBER(id) && STORE_MEMBER(colour) && STORE_MEMBER(type) && STORE_MEMBER(smooth)
+	return STORE_TYPE && STORE_MEMBER(id) && Style::persist(store) && STORE_MEMBER(type) && STORE_MEMBER(smooth)
 			&& STORE_MEMBER(scale) && STORE_MEMBER(position) && STORE_MEMBER(rotation)
 			&& STORE_NAME_HELPER("face", faceControllers, Persistence::MapByMember<FaceControllers>);
 }
