@@ -15,6 +15,8 @@ concept SequentialCollection = requires(T c) {
 									   c.data()
 									   } -> std::same_as<const E *>;
 							   };
+template<typename T>
+concept IterableCollection = std::is_same_v<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>;
 
 template<typename T, std::size_t first, std::size_t second>
 constexpr std::array<T, first + second>
@@ -101,4 +103,18 @@ vectorOfN(std::integral auto N, unsigned int start = {}, unsigned int step = 1)
 		return std::exchange(start, adj(start, step));
 	});
 	return v;
+}
+
+template<template<typename...> typename Rtn = std::vector, IterableCollection In>
+auto
+materializeRange(In && in)
+{
+	return Rtn(in.begin(), in.end());
+}
+
+template<template<typename...> typename Rtn = std::vector, typename In>
+auto
+materializeRange(const std::pair<In, In> & in)
+{
+	return Rtn(in.first, in.second);
 }
