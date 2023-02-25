@@ -11,5 +11,5 @@ Plane::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) co
 			{n, y, z},
 	}};
 
-	return {{"plane", mesh.add_face(addMutatedToMesh(mesh, VERTICES, mutation))}};
+	return {mesh.add_namedFace("plane", addMutatedToMesh(mesh, VERTICES, mutation))};
 }

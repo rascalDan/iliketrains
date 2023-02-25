@@ -28,19 +28,19 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation)
 				const auto xyz2b = (xy2 ^ 0) % mutation;
 				const auto xyz1t = (xy1 ^ 1) % mutation;
 				const auto xyz2t = (xy2 ^ 1) % mutation;
-				return std::make_pair(std::string {"edge"},
-						mesh.add_face({
+				return mesh.add_namedFace("edge",
+						{
 								mesh.add_vertex({xyz1b.x, xyz1b.y, xyz1b.z}),
 								mesh.add_vertex({xyz2b.x, xyz2b.y, xyz2b.z}),
 								mesh.add_vertex({xyz2t.x, xyz2t.y, xyz2t.z}),
 								mesh.add_vertex({xyz1t.x, xyz1t.y, xyz1t.z}),
-						}));
+						});
 			});
 	for (const auto & [name, face] : surface) {
 		mesh.property(mesh.smoothFaceProperty, face) = true;
 	}
-	surface.emplace("bottom", mesh.add_face(bottom));
-	surface.emplace("top", mesh.add_face(top));
+	surface.insert(mesh.add_namedFace("bottom", bottom));
+	surface.insert(mesh.add_namedFace("top", top));
 
 	return surface;
 }
