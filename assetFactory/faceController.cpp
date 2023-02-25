@@ -7,23 +7,30 @@ void
 FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & name,
 		Shape::CreatedFaces & faces) const
 {
-	const auto controlledFacesRange = faces.equal_range(name);
-	const std::vector controlledFaces(controlledFacesRange.first, controlledFacesRange.second);
+	const auto getAdjacentFaceName = [&mesh](const auto & ofrange, OpenMesh::FaceHandle nf) -> std::string {
+		const auto nfrange = mesh.ff_range(nf);
+		if (const auto target = std::find_first_of(ofrange.begin(), ofrange.end(), nfrange.begin(), nfrange.end());
+				target != ofrange.end()) {
+			return mesh.property(mesh.nameFaceProperty, *target);
+		};
+		return {};
+	};
+
+	const auto controlledFaces {materializeRange(faces.equal_range(name))};
 	if (controlledFaces.empty()) {
 		throw std::runtime_error("Named face(s) do not exist: " + name);
 	}
+
 	if (!type.empty()) {
 		const auto mutation = getMatrix();
 		faces.erase(name);
 		for (const auto & cf : controlledFaces) {
-			// get face vertices
-			const auto faceVertexRange = mesh.fv_range(cf.second);
 			// get points
-			const std::vector baseVertices(faceVertexRange.begin(), faceVertexRange.end());
-			std::vector<glm::vec3> points;
-			std::transform(
-					faceVertexRange.begin(), faceVertexRange.end(), std::back_inserter(points), [&mesh](auto && v) {
-						return mesh.point(v);
+			const auto baseVertices {materializeRange(mesh.fv_range(cf.second))};
+			auto points = std::accumulate(baseVertices.begin(), baseVertices.end(), std::vector<glm::vec3> {},
+					[&mesh](auto && out, auto && v) {
+						out.push_back(mesh.point(v));
+						return std::move(out);
 					});
 			const auto vertexCount = points.size();
 			const auto centre
@@ -40,11 +47,15 @@ FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const
 					return mesh.add_vertex({p.x, p.y, p.z});
 				});
 				// create new faces
+				const auto ofrange = materializeRange(mesh.ff_range(cf.second));
 				mesh.delete_face(cf.second);
 				for (size_t idx {}; idx < vertexCount; ++idx) {
 					const auto next = (idx + 1) % vertexCount;
-					newFaces.emplace("extrusion",
-							mesh.add_face({baseVertices[idx], baseVertices[next], vertices[next], vertices[idx]}));
+					const auto newFace
+							= mesh.add_face({baseVertices[idx], baseVertices[next], vertices[next], vertices[idx]});
+					auto & name = mesh.property(mesh.nameFaceProperty, newFace);
+					name = getAdjacentFaceName(ofrange, newFace);
+					newFaces.emplace(name, newFace);
 				}
 				newFaces.emplace(name, mesh.add_face(vertices));
 				if (smooth) {
