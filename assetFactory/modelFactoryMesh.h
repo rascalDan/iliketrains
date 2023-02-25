@@ -32,4 +32,7 @@ struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTra
 	ModelFactoryMesh();
 
 	OpenMesh::FPropHandleT<bool> smoothFaceProperty;
+	OpenMesh::FPropHandleT<std::string> nameFaceProperty;
+
+	std::pair<std::string, OpenMesh::FaceHandle> add_namedFace(std::string name, std::vector<OpenMesh::VertexHandle> p);
 };
