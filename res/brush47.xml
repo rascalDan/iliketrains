@@ -19,6 +19,8 @@
         <face id="front" colour="#fbc32f"/>
         <face id="back" colour="#fbc32f"/>
         <face id="top" type="extrude" scale="1,0.95,1" position="0,0,0.8">
+          <face id="front" colour="#e1eff3"/>
+          <face id="back" colour="#e1eff3"/>
           <face id="top" type="extrude" scale="0.5,0.8,0" position="0,0,0.4" smooth="true" colour="#aeb0b0"/>
         </face>
       </use>
