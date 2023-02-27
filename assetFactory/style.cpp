@@ -1,12 +1,16 @@
 #include "style.h"
+#include "assetFactory.h"
 
 ModelFactoryMesh::Color
 Style::parseColour(const std::string_view & in)
 {
 	if (in.empty()) {
-		return {};
+		throw std::runtime_error("Empty colour specification");
 	}
 	if (in[0] == '#') {
+		if (in.length() > 9 || in.length() % 2 == 0) {
+			throw std::runtime_error("Invalid hex colour specification");
+		}
 		ModelFactoryMesh::Color out {0, 0, 0, 1};
 		std::generate_n(out.begin(), (in.length() - 1) / 2, [in = in.data() + 1]() mutable {
 			uint8_t channel;
@@ -16,7 +20,13 @@ Style::parseColour(const std::string_view & in)
 		});
 		return out;
 	}
-	return {};
+	if (auto mf = std::dynamic_pointer_cast<const AssetFactory>(Persistence::sharedObjects.at("assetFactory"))) {
+		if (const auto colour = mf->colours.find(in); colour != mf->colours.end()) {
+			const auto out = glm::vec3 {colour->second} / 256.F;
+			return {out.r, out.g, out.b, 1.f};
+		}
+	}
+	throw std::runtime_error("No such asset factory colour");
 }
 
 void

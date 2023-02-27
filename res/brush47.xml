@@ -16,15 +16,15 @@
     <mesh id="body" size="2.69,19.38,3.9">
       <use type="cuboid" position="0,0,1.2" scale="2.69,19.38,1.5" colour="#2c4f5a">
         <face id="bottom" colour="#2c3539"/>
-        <face id="front" colour="#fbc32f"/>
-        <face id="back" colour="#fbc32f"/>
+        <face id="front" colour="goldenrod"/>
+        <face id="back" colour="goldenrod"/>
         <face id="top" type="extrude" scale="1,0.95,1" position="0,0,0.8">
           <face id="front" colour="#e1eff3"/>
           <face id="back" colour="#e1eff3"/>
           <face id="top" type="extrude" scale="0.5,0.8,0" position="0,0,0.4" smooth="true" colour="#aeb0b0"/>
         </face>
       </use>
-      <use type="cuboid" position="0,0,0.2" scale="2.6,4.5,1" colour="#413b3a"/>
+      <use type="cuboid" position="0,0,0.2" scale="2.6,4.5,1" colour="grey30"/>
     </mesh>
     <mesh id="bogie1">
       <use type="bogie" position="0,6,0" colour="#413b3a"/>
