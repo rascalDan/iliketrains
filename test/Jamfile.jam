@@ -2,6 +2,7 @@ import testing ;
 import sequence ;
 
 lib boost_unit_test_framework ;
+lib benchmark ;
 
 path-constant res : ../res ;
 path-constant fixtures : fixtures ;
@@ -39,7 +40,7 @@ project : requirements
 	<toolset>tidy:<xcheckxx>hicpp-vararg
 	<toolset>tidy:<librarydef>boost
 	;
-lib test : [ glob *.cpp : test-*.cpp ] ;
+lib test : [ glob *.cpp : test-*.cpp perf-*.cpp ] ;
 
 run test-collection.cpp ;
 run test-obj.cpp ;
@@ -53,5 +54,7 @@ run test-enumDetails.cpp ;
 run test-render.cpp : : : <library>test ;
 run test-glContextBhvr.cpp ;
 run test-assetFactory.cpp : -- : ../res/brush47.xml : <library>test ;
+run perf-assetFactory.cpp : : : <library>benchmark <library>test ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
+explicit perf-assetFactory ;
