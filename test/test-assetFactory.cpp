@@ -11,6 +11,7 @@
 #include "gfx/gl/sceneRenderer.h"
 #include "lib/collection.hpp"
 #include "lib/location.hpp"
+#include "lib/stream_support.hpp"
 #include "testMainWindow.h"
 #include "ui/applicationBase.h"
 
@@ -180,3 +181,32 @@ BOOST_AUTO_TEST_CASE(brush47xml)
 	render(20);
 }
 BOOST_AUTO_TEST_SUITE_END();
+
+template<typename T> using InOut = std::tuple<T, T>;
+BOOST_DATA_TEST_CASE(normalizeColourName,
+		boost::unit_test::data::make<InOut<std::string>>({
+				{"", ""},
+				{"black", "black"},
+				{" black ", "black"},
+				{" b l a c k ", "black"},
+				{" B L A c k ", "black"},
+				{"BLAck ", "black"},
+				{"BLACK ", "black"},
+				{"BlAck ", "black"},
+				{"Bl Ack ", "black"},
+		}),
+		in_, exp)
+{
+	auto in {in_};
+	BOOST_CHECK_NO_THROW(AssetFactory::normalizeColourName(in));
+	BOOST_CHECK_EQUAL(in, exp);
+}
+
+BOOST_AUTO_TEST_CASE(parseX11RGB)
+{
+	const auto parsedColours = AssetFactory::parseX11RGB(FIXTURESDIR "rgb.txt");
+	BOOST_REQUIRE_EQUAL(parsedColours.size(), 20);
+	BOOST_CHECK_EQUAL(parsedColours.at("cyan"), AssetFactory::Colour(0, 255, 255));
+	BOOST_CHECK_EQUAL(parsedColours.at("slategrey"), AssetFactory::Colour(112, 128, 144));
+	BOOST_CHECK_EQUAL(parsedColours.at("lightsteelblue1"), AssetFactory::Colour(202, 225, 255));
+}
