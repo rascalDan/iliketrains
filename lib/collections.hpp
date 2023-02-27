@@ -55,9 +55,8 @@ operator*(const std::array<T, N> & in, auto && f)
 	return out;
 }
 
-template<typename T>
 constexpr auto &
-operator*=(std::span<T> & in, auto && f)
+operator*=(IterableCollection auto & in, auto && f)
 {
 	for (auto & v : in) {
 		f(v);
