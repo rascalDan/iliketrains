@@ -13,6 +13,6 @@ public:
 	Use::Collection uses;
 
 private:
-	friend Persistence::SelectionPtrBase<std::shared_ptr<FactoryMesh>, true>;
+	friend Persistence::SelectionPtrBase<std::shared_ptr<FactoryMesh>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 };

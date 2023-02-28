@@ -21,7 +21,7 @@ public:
 	FaceControllers faceControllers;
 
 private:
-	friend Persistence::SelectionPtrBase<std::unique_ptr<FaceController>, false>;
+	friend Persistence::SelectionPtrBase<std::unique_ptr<FaceController>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	std::string
 	getId() const override

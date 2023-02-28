@@ -17,7 +17,7 @@ public:
 	FaceControllers faceControllers;
 
 private:
-	friend Persistence::SelectionPtrBase<std::shared_ptr<Use>, true>;
+	friend Persistence::SelectionPtrBase<std::shared_ptr<Use>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	std::string
 	getId() const override

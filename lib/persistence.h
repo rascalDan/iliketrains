@@ -381,7 +381,8 @@ namespace Persistence {
 	using SeenSharedObjects = std::map<void *, std::string>;
 	inline SeenSharedObjects seenSharedObjects;
 
-	template<typename Ptr, bool shared> struct SelectionPtrBase : public SelectionV<Ptr> {
+	template<typename Ptr> struct SelectionPtrBase : public SelectionV<Ptr> {
+		static constexpr auto shared = std::is_copy_assignable_v<Ptr>;
 		using T = typename Ptr::element_type;
 		struct SelectionObj : public SelectionV<Ptr> {
 			struct MakeObjectByTypeName : public SelectionV<Ptr> {
@@ -526,13 +527,13 @@ namespace Persistence {
 		}
 	};
 
-	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionPtrBase<std::unique_ptr<T>, false> {
-		using SelectionPtrBase<std::unique_ptr<T>, false>::SelectionPtrBase;
+	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionPtrBase<std::unique_ptr<T>> {
+		using SelectionPtrBase<std::unique_ptr<T>>::SelectionPtrBase;
 	};
 
-	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionPtrBase<std::shared_ptr<T>, true> {
-		using SelectionPtrBase<std::shared_ptr<T>, true>::SelectionPtrBase;
-		using SelectionPtrBase<std::shared_ptr<T>, true>::setValue;
+	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionPtrBase<std::shared_ptr<T>> {
+		using SelectionPtrBase<std::shared_ptr<T>>::SelectionPtrBase;
+		using SelectionPtrBase<std::shared_ptr<T>>::setValue;
 
 		void
 		setValue(std::string && id) override

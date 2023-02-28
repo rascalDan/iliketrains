@@ -14,7 +14,7 @@ public:
 	FactoryMesh::Collection meshes;
 
 private:
-	friend Persistence::SelectionPtrBase<std::shared_ptr<Asset>, true>;
+	friend Persistence::SelectionPtrBase<std::shared_ptr<Asset>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 };
 
@@ -36,6 +36,6 @@ public:
 	static void normalizeColourName(std::string &);
 
 private:
-	friend Persistence::SelectionPtrBase<std::shared_ptr<AssetFactory>, true>;
+	friend Persistence::SelectionPtrBase<std::shared_ptr<AssetFactory>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 };
