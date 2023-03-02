@@ -6,7 +6,7 @@
 #include <mxml.h>
 
 namespace Persistence {
-	class SAXParsePersistence : public SAXParse {
+	class SAXParsePersistence : public SAXParse, ParseBase {
 	private:
 		template<typename T> struct Root : public Persistable {
 			T t {};
@@ -36,8 +36,5 @@ namespace Persistence {
 		void data(mxml_node_t *) override;
 		void directive(mxml_node_t *) override;
 		void cdata(mxml_node_t *) override;
-
-	private:
-		Stack stk;
 	};
 }

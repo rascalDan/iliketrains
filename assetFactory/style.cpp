@@ -36,8 +36,7 @@ Style::persist(Persistence::PersistenceStore & store)
 		void
 		setValue(std::string && str) override
 		{
-			if (auto mf
-					= std::dynamic_pointer_cast<const AssetFactory>(Persistence::sharedObjects.at("assetFactory"))) {
+			if (auto mf = Persistence::ParseBase::getShared<const AssetFactory>("assetFactory")) {
 				v = mf->parseColour(str);
 			}
 		}

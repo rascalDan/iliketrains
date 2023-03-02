@@ -68,7 +68,7 @@ AssetFactory::parseColour(std::string_view in) const
 		});
 		return out;
 	}
-	if (auto mf = std::dynamic_pointer_cast<const AssetFactory>(Persistence::sharedObjects.at("assetFactory"))) {
+	if (auto mf = Persistence::ParseBase::getShared<const AssetFactory>("assetFactory")) {
 		if (const auto colour = mf->colours.find(in); colour != mf->colours.end()) {
 			return {colour->second, 1};
 		}

@@ -157,4 +157,9 @@ namespace Persistence {
 		throw std::logic_error("Default write op shouldn't ever get called");
 	}
 	/// LCOV_EXCL_STOP
+
+	ParseBase::ParseBase() : sharedObjectsInstance {std::make_shared<SharedObjects>()}
+	{
+		sharedObjects = sharedObjectsInstance;
+	}
 }

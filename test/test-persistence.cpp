@@ -83,16 +83,14 @@ struct TestObject : public Persistence::Persistable {
 	}
 };
 
-struct JPP : public Persistence::JsonParsePersistence {
+struct JPP {
 	template<typename T>
 	T
 	load_json(const std::filesystem::path & path)
 	{
 		BOOST_TEST_CONTEXT(path) {
 			std::ifstream ss {path};
-			auto to = loadState<T>(ss);
-			Persistence::sharedObjects.clear();
-			BOOST_CHECK(stk.empty());
+			auto to = Persistence::JsonParsePersistence {}.loadState<T>(ss);
 			BOOST_REQUIRE(to);
 			return to;
 		}
@@ -289,10 +287,10 @@ auto const TEST_STRINGS_DECODE_ONLY = boost::unit_test::data::make<svs>({
 		{R"J("\u056b ARMENIAN SMALL LETTER INI")J", "ի ARMENIAN SMALL LETTER INI"},
 		{R"J("\u0833 SAMARITAN PUNCTUATION BAU")J", "࠳ SAMARITAN PUNCTUATION BAU"},
 });
-BOOST_DATA_TEST_CASE_F(JPP, load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, exp)
+BOOST_DATA_TEST_CASE(load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, exp)
 {
 	std::stringstream str {in};
-	BOOST_CHECK_EQUAL(loadState<std::string>(str), exp);
+	BOOST_CHECK_EQUAL(Persistence::JsonParsePersistence {}.loadState<std::string>(str), exp);
 }
 
 using cpstr = std::tuple<unsigned long, std::string_view>;

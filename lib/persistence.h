@@ -375,9 +375,36 @@ namespace Persistence {
 		return true;
 	}
 
+	class ParseBase {
+	public:
+		using SharedObjects = std::map<std::string, std::shared_ptr<Persistable>>;
+		using SharedObjectsWPtr = std::weak_ptr<SharedObjects>;
+		using SharedObjectsPtr = std::shared_ptr<SharedObjects>;
+
+		ParseBase();
+		DEFAULT_MOVE_NO_COPY(ParseBase);
+
+		template<typename T>
+		static auto
+		getShared(auto && k)
+		{
+			return std::dynamic_pointer_cast<T>(Persistence::ParseBase::sharedObjects.lock()->at(k));
+		}
+		template<typename... T>
+		static auto
+		emplaceShared(T &&... v)
+		{
+			return sharedObjects.lock()->emplace(std::forward<T>(v)...);
+		}
+
+	protected:
+		Stack stk;
+
+	private:
+		inline static thread_local SharedObjectsWPtr sharedObjects;
+		SharedObjectsPtr sharedObjectsInstance;
+	};
 	// TODO Move these
-	using SharedObjects = std::map<std::string, std::shared_ptr<Persistable>>;
-	inline SharedObjects sharedObjects;
 	using SeenSharedObjects = std::map<void *, std::string>;
 	inline SeenSharedObjects seenSharedObjects;
 
@@ -417,7 +444,7 @@ namespace Persistence {
 				void
 				setValue(std::string && id) override
 				{
-					sharedObjects.emplace(id, this->v);
+					ParseBase::emplaceShared(id, this->v);
 				}
 			};
 
@@ -538,7 +565,7 @@ namespace Persistence {
 		void
 		setValue(std::string && id) override
 		{
-			if (auto teo = std::dynamic_pointer_cast<T>(sharedObjects.at(id))) {
+			if (auto teo = ParseBase::getShared<T>(id)) {
 				this->v = std::move(teo);
 			}
 			else {

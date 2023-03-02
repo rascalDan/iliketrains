@@ -9,7 +9,7 @@
 #include <string_view>
 
 namespace Persistence {
-	class JsonParsePersistence : public json::jsonParser {
+	class JsonParsePersistence : public json::jsonParser, ParseBase {
 	public:
 		template<typename T>
 		inline T
@@ -33,8 +33,6 @@ namespace Persistence {
 		void pushKey(std::string && k) override;
 		void endArray() override;
 		void endObject() override;
-
-		Stack stk;
 
 		template<typename T> inline void pushValue(T && value);
 		inline SelectionPtr & current();
