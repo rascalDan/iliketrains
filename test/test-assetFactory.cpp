@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(brush47)
 			wheelCylinder->position = {0, 0, 0.571};
 			wheelCylinder->scale = {1.142, 1.142, 0.07};
 			wheelCylinder->rotation = {0, 0, half_pi};
-			wheelCylinder->colour = "#2C3539";
+			wheelCylinder->colour = assetFactory.parseColour("#2C3539");
 		}
 		assetFactory.shapes.emplace(wheel->id, wheel);
 	}
@@ -120,10 +120,10 @@ BOOST_AUTO_TEST_CASE(brush47)
 		bodyLower->type = assetFactory.shapes.at("cuboid");
 		bodyLower->position = {0, 0, 1.2};
 		bodyLower->scale = {2.69, 19.38, 1.5};
-		bodyLower->colour = "#1111DD";
+		bodyLower->colour = assetFactory.parseColour("#1111DD");
 		auto & bottom = bodyLower->faceControllers["bottom"];
 		bottom = std::make_unique<FaceController>();
-		bottom->colour = "#2C3539";
+		bottom->colour = assetFactory.parseColour("#2C3539");
 		auto & bodyUpper = bodyLower->faceControllers["top"];
 		bodyUpper = std::make_unique<FaceController>();
 		bodyUpper->type = "extrude";
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(brush47)
 			batteryBox->type = assetFactory.shapes.at("cuboid");
 			batteryBox->position = {0, 0, .2};
 			batteryBox->scale = {2.6, 4.5, 1};
-			batteryBox->colour = "#2C3539";
+			batteryBox->colour = assetFactory.parseColour("#2C3539");
 		}
 	}
 	std::transform(factoryMeshes.begin(), factoryMeshes.end(), std::back_inserter(meshes.objects),
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(parseX11RGB)
 {
 	const auto parsedColours = AssetFactory::parseX11RGB(FIXTURESDIR "rgb.txt");
 	BOOST_REQUIRE_EQUAL(parsedColours.size(), 20);
-	BOOST_CHECK_EQUAL(parsedColours.at("cyan"), AssetFactory::Colour(0, 255, 255));
-	BOOST_CHECK_EQUAL(parsedColours.at("slategrey"), AssetFactory::Colour(112, 128, 144));
-	BOOST_CHECK_EQUAL(parsedColours.at("lightsteelblue1"), AssetFactory::Colour(202, 225, 255));
+	BOOST_CHECK_CLOSE_VEC(parsedColours.at("cyan"), AssetFactory::Colour(0, 1, 1));
+	BOOST_CHECK_CLOSE_VEC(parsedColours.at("slategrey"), AssetFactory::Colour(0.44F, 0.5, 0.56F));
+	BOOST_CHECK_CLOSE_VEC(parsedColours.at("lightsteelblue1"), AssetFactory::Colour(0.79, 0.88, 1));
 }

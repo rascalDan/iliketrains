@@ -5,6 +5,7 @@
 #include <OpenMesh/Core/Mesh/Traits.hh>
 #include <glm/geometric.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 namespace OpenMesh {
 	template<typename Scalar, int DIM> struct glmvec : public VectorT<Scalar, DIM> {
@@ -25,7 +26,7 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
 	using Point = OpenMesh::glmvec<float, 3>;
 	using Normal = OpenMesh::glmvec<float, 3>;
-	using Color = OpenMesh::glmvec<float, 4>;
+	using Color = glm::vec4;
 };
 
 struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTraits> {
