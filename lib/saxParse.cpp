@@ -11,7 +11,7 @@ namespace Persistence {
 	void
 	SAXParse::parseFile(FILE * file)
 	{
-		mxmlSAXLoadFile(
+		mxmlRelease(mxmlSAXLoadFile(
 				nullptr, file, MXML_TEXT_CALLBACK,
 				[](mxml_node_t * n, mxml_sax_event_t e, void * data) {
 					SAXParse * self = static_cast<SAXParse *>(data);
@@ -36,6 +36,6 @@ namespace Persistence {
 							break;
 					}
 				},
-				this);
+				this));
 	}
 }
