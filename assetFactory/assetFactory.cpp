@@ -83,10 +83,3 @@ AssetFactory::persist(Persistence::PersistenceStore & store)
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects)
 			&& STORE_NAME_HELPER("asset", assets, MapAssets);
 }
-
-bool
-Asset::persist(Persistence::PersistenceStore & store)
-{
-	return STORE_TYPE && STORE_MEMBER(id) && STORE_MEMBER(name)
-			&& STORE_NAME_HELPER("mesh", meshes, Persistence::Appender<FactoryMesh::Collection>);
-}

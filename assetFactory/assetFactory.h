@@ -1,22 +1,9 @@
 #pragma once
 
-#include "factoryMesh.h"
+#include "asset.h"
 #include "persistence.h"
 #include "shape.h"
 #include <filesystem>
-#include <stdTypeDefs.hpp>
-
-class Asset : public Persistence::Persistable, public StdTypeDefs<Asset> {
-public:
-	std::string id;
-	std::string name;
-
-	FactoryMesh::Collection meshes;
-
-private:
-	friend Persistence::SelectionPtrBase<std::shared_ptr<Asset>>;
-	bool persist(Persistence::PersistenceStore & store) override;
-};
 
 class AssetFactory : public Persistence::Persistable {
 public:
