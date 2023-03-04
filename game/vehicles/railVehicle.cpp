@@ -11,6 +11,12 @@
 #include <memory>
 #include <ray.hpp>
 
+RailVehicle::RailVehicle(RailVehicleClassPtr rvc) : rvClass {std::move(rvc)}
+{
+	bogies.front().pos.y = rvClass->wheelBase / 2.F;
+	bogies.back().pos.y = -bogies.front().pos.y;
+}
+
 void
 RailVehicle::render(const SceneShader & shader) const
 {

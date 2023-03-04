@@ -16,7 +16,7 @@ class Ray;
 class Train;
 class RailVehicle : public Renderable, Selectable {
 public:
-	explicit RailVehicle(RailVehicleClassPtr rvc) : rvClass {std::move(rvc)} { }
+	explicit RailVehicle(RailVehicleClassPtr rvc);
 
 	void move(const Train *, float & trailBy);
 
