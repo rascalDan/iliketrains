@@ -8,6 +8,7 @@
 #include "assetFactory/assetFactory.h"
 #include "assetFactory/factoryMesh.h"
 #include "assetFactory/object.h"
+#include "game/vehicles/railVehicleClass.h"
 #include "gfx/gl/sceneRenderer.h"
 #include "lib/collection.hpp"
 #include "lib/location.hpp"
@@ -167,16 +168,15 @@ BOOST_AUTO_TEST_CASE(brush47xml)
 	BOOST_CHECK_EQUAL(1, mf->assets.size());
 	auto brush47 = mf->assets.at("brush-47");
 	BOOST_REQUIRE(brush47);
-	BOOST_CHECK_EQUAL(3, brush47->meshes.size());
-	auto body = brush47->meshes.at(0);
-	BOOST_REQUIRE(body);
-	BOOST_CHECK_EQUAL("body", body->id);
-	BOOST_CHECK_EQUAL(2, body->uses.size());
+	auto brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(brush47);
+	BOOST_REQUIRE(brush47rvc);
+	BOOST_REQUIRE(brush47rvc->bodyMesh);
+	BOOST_REQUIRE(brush47rvc->bogies.front());
+	BOOST_REQUIRE(brush47rvc->bogies.back());
 
-	std::transform(brush47->meshes.begin(), brush47->meshes.end(), std::back_inserter(meshes.objects),
-			[](const FactoryMesh::CPtr & factoryMesh) -> Mesh::Ptr {
-				return factoryMesh->createMesh();
-			});
+	meshes.objects.push_back(brush47rvc->bodyMesh);
+	meshes.objects.push_back(brush47rvc->bogies.front());
+	meshes.objects.push_back(brush47rvc->bogies.back());
 
 	render(20);
 }

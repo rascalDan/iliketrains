@@ -9,8 +9,6 @@ public:
 	std::string id;
 	std::string name;
 
-	FactoryMesh::Collection meshes;
-
 protected:
 	struct MeshConstruct : public Persistence::SelectionPtrBase<FactoryMesh::Ptr> {
 		using Persistence::SelectionPtrBase<FactoryMesh::Ptr>::setValue;

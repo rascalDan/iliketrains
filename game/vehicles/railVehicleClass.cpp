@@ -39,6 +39,15 @@ RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr
 	bogies[1] = m.at("Bogie2");
 }
 
+RailVehicleClass::RailVehicleClass() { }
+
+bool
+RailVehicleClass::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_TYPE && STORE_MEMBER(maxSpeed) && STORE_NAME_HELPER("bogie", bogies, Asset::MeshArrayConstruct)
+			&& STORE_HELPER(bodyMesh, Asset::MeshConstruct) && Asset::persist(store);
+}
+
 void
 RailVehicleClass::render(
 		const SceneShader & shader, const Location & location, const std::array<Location, 2> & bl) const

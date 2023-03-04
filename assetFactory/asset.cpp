@@ -3,8 +3,7 @@
 bool
 Asset::persist(Persistence::PersistenceStore & store)
 {
-	return STORE_MEMBER(id) && STORE_MEMBER(name)
-			&& STORE_NAME_HELPER("mesh", meshes, Persistence::Appender<FactoryMesh::Collection>);
+	return STORE_MEMBER(id) && STORE_MEMBER(name);
 }
 
 Asset::MeshConstruct::MeshConstruct(Mesh::Ptr & m) :

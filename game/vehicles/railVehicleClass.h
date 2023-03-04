@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assetFactory/asset.h"
 #include "gfx/models/mesh.h"
 #include <array>
 #include <memory>
@@ -11,9 +12,10 @@ class Texture;
 class ObjParser;
 class Location;
 
-class RailVehicleClass {
+class RailVehicleClass : public Asset {
 public:
 	explicit RailVehicleClass(const std::string & name);
+	RailVehicleClass();
 
 	void render(const SceneShader &, const Location &, const std::array<Location, 2> &) const;
 	void shadows(const ShadowMapper &, const Location &) const;
@@ -24,6 +26,10 @@ public:
 	float wheelBase;
 	float length;
 	float maxSpeed;
+
+protected:
+	friend Persistence::SelectionPtrBase<std::shared_ptr<RailVehicleClass>>;
+	bool persist(Persistence::PersistenceStore & store) override;
 
 private:
 	RailVehicleClass(std::unique_ptr<ObjParser> obj, std::shared_ptr<Texture>);
