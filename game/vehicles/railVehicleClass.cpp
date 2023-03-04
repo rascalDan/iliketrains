@@ -64,10 +64,15 @@ RailVehicleClass::render(
 	}
 }
 void
-RailVehicleClass::shadows(const ShadowMapper & shadowMapper, const Location & location) const
+RailVehicleClass::shadows(
+		const ShadowMapper & shadowMapper, const Location & location, const std::array<Location, 2> & bl) const
 {
 	shadowMapper.dynamicPoint.use(location);
 	bodyMesh->Draw();
+	for (auto b = 0U; b < bogies.size(); ++b) {
+		shadowMapper.dynamicPoint.setModel(bl[b]);
+		bogies[b]->Draw();
+	}
 }
 
 float

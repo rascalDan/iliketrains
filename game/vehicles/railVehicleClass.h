@@ -18,7 +18,7 @@ public:
 	RailVehicleClass();
 
 	void render(const SceneShader &, const Location &, const std::array<Location, 2> &) const;
-	void shadows(const ShadowMapper &, const Location &) const;
+	void shadows(const ShadowMapper &, const Location &, const std::array<Location, 2> &) const;
 
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;

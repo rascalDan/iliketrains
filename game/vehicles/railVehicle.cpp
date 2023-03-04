@@ -20,7 +20,7 @@ RailVehicle::render(const SceneShader & shader) const
 void
 RailVehicle::shadows(const ShadowMapper & shadowMapper) const
 {
-	rvClass->shadows(shadowMapper, location);
+	rvClass->shadows(shadowMapper, location, bogies);
 }
 
 void
