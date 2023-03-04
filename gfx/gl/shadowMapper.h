@@ -34,6 +34,7 @@ public:
 		DynamicPoint();
 		void setViewProjection(const glm::mat4 &) const;
 		void use(const Location &) const;
+		void setModel(const Location &) const;
 
 	private:
 		RequiredUniformLocation viewProjectionLoc;
