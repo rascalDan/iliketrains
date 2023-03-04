@@ -12,7 +12,7 @@
     <use type="axel" position="0,2,0"/>
     <use type="axel" position="0,-2,0"/>
   </object>
-  <asset p.typeid="RailVehicleClass" id="brush-47" name="Brush 47">
+  <asset p.typeid="RailVehicleClass" id="brush-47" name="Brush 47" length="19.38" wheelBase="15.70" maxSpeed="42.4688">
     <bodyMesh id="body" size="2.69,19.38,3.9">
       <use type="cuboid" position="0,0,1.2" scale="2.69,19.38,1.5" colour="#2c4f5a">
         <face id="bottom" colour="#2c3539"/>
@@ -27,10 +27,10 @@
       <use type="cuboid" position="0,0,0.2" scale="2.6,4.5,1" colour="grey30"/>
     </bodyMesh>
     <bogie id="bogie1">
-      <use type="bogie" position="0,6,0" colour="#413b3a"/>
+      <use type="bogie" position="0,-1.85,0" colour="#413b3a"/>
     </bogie>
     <bogie id="bogie2">
-      <use type="bogie" position="0,-6,0" rotation="0,3.14159,0" colour="#413b3a"/>
+      <use type="bogie" position="0,1.85,0" rotation="0,3.14159,0" colour="#413b3a"/>
     </bogie>
   </asset>
 </ilt>
