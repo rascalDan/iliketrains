@@ -53,7 +53,9 @@ RailVehicleClass::render(
 		const SceneShader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
 	shader.basic.use(location);
-	texture->bind();
+	if (texture) {
+		texture->bind();
+	}
 	bodyMesh->Draw();
 	for (auto b = 0U; b < bogies.size(); ++b) {
 		shader.basic.setModel(bl[b]);
