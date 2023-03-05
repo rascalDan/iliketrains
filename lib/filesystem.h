@@ -1,7 +1,9 @@
 #pragma once
 
+#include "ptr.hpp"
 #include "special_members.hpp"
 #include <cstddef>
+#include <cstdio>
 #include <sys/types.h>
 
 namespace filesystem {
@@ -39,4 +41,7 @@ namespace filesystem {
 	private:
 		int h;
 	};
+
+	FILE * checked_fopen(const char * pathname, const char * mode);
+	using FileStar = wrapped_ptrt<FILE, &checked_fopen, &fclose>;
 }

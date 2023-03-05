@@ -1,7 +1,7 @@
 {
 	"vptr": [
 		{
-			"@typeid": "TestObject",
+			"p.typeid": "TestObject",
 			"str": "type"
 		},
 		{

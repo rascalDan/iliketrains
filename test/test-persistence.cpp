@@ -83,16 +83,14 @@ struct TestObject : public Persistence::Persistable {
 	}
 };
 
-struct JPP : public Persistence::JsonParsePersistence {
+struct JPP {
 	template<typename T>
 	T
 	load_json(const std::filesystem::path & path)
 	{
 		BOOST_TEST_CONTEXT(path) {
 			std::ifstream ss {path};
-			auto to = loadState<T>(ss);
-			Persistence::sharedObjects.clear();
-			BOOST_CHECK(stk.empty());
+			auto to = Persistence::JsonParsePersistence {}.loadState<T>(ss);
 			BOOST_REQUIRE(to);
 			return to;
 		}
@@ -208,6 +206,14 @@ BOOST_FIXTURE_TEST_CASE(load_vector_ptr, JPP)
 	BOOST_CHECK(to->vptr.at(3)->str.empty());
 }
 
+BOOST_FIXTURE_TEST_CASE(test_conversion, JPP)
+{
+	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/conv.json");
+	BOOST_REQUIRE(to);
+	BOOST_CHECK_EQUAL(to->bl, true);
+	BOOST_CHECK_EQUAL(to->flt, 3.14F);
+}
+
 struct SharedTestObject : public Persistence::Persistable {
 	SharedTestObject() = default;
 
@@ -281,10 +287,10 @@ auto const TEST_STRINGS_DECODE_ONLY = boost::unit_test::data::make<svs>({
 		{R"J("\u056b ARMENIAN SMALL LETTER INI")J", "ի ARMENIAN SMALL LETTER INI"},
 		{R"J("\u0833 SAMARITAN PUNCTUATION BAU")J", "࠳ SAMARITAN PUNCTUATION BAU"},
 });
-BOOST_DATA_TEST_CASE_F(JPP, load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, exp)
+BOOST_DATA_TEST_CASE(load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, exp)
 {
 	std::stringstream str {in};
-	BOOST_CHECK_EQUAL(loadState<std::string>(str), exp);
+	BOOST_CHECK_EQUAL(Persistence::JsonParsePersistence {}.loadState<std::string>(str), exp);
 }
 
 using cpstr = std::tuple<unsigned long, std::string_view>;
@@ -320,7 +326,7 @@ BOOST_AUTO_TEST_CASE(write_test_dfl)
 	std::stringstream ss;
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]})");
+			R"({"p.typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]})");
 }
 
 BOOST_FIXTURE_TEST_CASE(write_test_loaded, JPP)
@@ -329,7 +335,7 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded, JPP)
 	std::stringstream ss;
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":true,"pos":[3.14,6.28,1.57],"flts":[3.14,6.28,1.57,0,-1,-3.14],"poss":[[3.14,6.28,1.57],[0,-1,-3.14]],"nest":[[["a","b"],["c","d","e"]],[["f"]],[]],"ptr":{"@typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]},"vptr":[]})");
+			R"({"p.typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":true,"pos":[3.14,6.28,1.57],"flts":[3.14,6.28,1.57,0,-1,-3.14],"poss":[[3.14,6.28,1.57],[0,-1,-3.14]],"nest":[[["a","b"],["c","d","e"]],[["f"]],[]],"ptr":{"p.typeid":"TestObject","flt":3.14,"str":"Lovely string","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"vptr":[]},"vptr":[]})");
 }
 
 BOOST_FIXTURE_TEST_CASE(write_test_loaded_abs, JPP)
@@ -338,7 +344,7 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded_abs, JPP)
 	std::stringstream ss;
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"aptr":{"@typeid":"SubObject","base":"set base","sub":"set sub"},"vptr":[]})");
+			R"({"p.typeid":"TestObject","flt":0,"str":"","bl":false,"pos":[0,0,0],"flts":[],"poss":[],"nest":[],"aptr":{"p.typeid":"SubObject","base":"set base","sub":"set sub"},"vptr":[]})");
 }
 
 BOOST_FIXTURE_TEST_CASE(write_test_loaded_shared, JPP)
@@ -349,7 +355,7 @@ BOOST_FIXTURE_TEST_CASE(write_test_loaded_shared, JPP)
 	Persistence::JsonWritePersistence {ss}.saveState(to);
 	BOOST_CHECK_EQUAL(Persistence::seenSharedObjects.size(), 1);
 	BOOST_CHECK_EQUAL(ss.str(),
-			R"({"@typeid":"SharedTestObject","sptr":{"@typeid":"SubObject","@id":"someid","base":"","sub":""},"ssptr":"someid"})");
+			R"({"p.typeid":"SharedTestObject","sptr":{"p.typeid":"SubObject","p.id":"someid","base":"","sub":""},"ssptr":"someid"})");
 }
 
 BOOST_DATA_TEST_CASE(write_special_strings, TEST_STRINGS, exp, in)

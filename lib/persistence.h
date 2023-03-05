@@ -1,11 +1,13 @@
 #pragma once
 
+#include <charconv>
 #include <functional>
 #include <glm/glm.hpp>
 #include <iosfwd>
 #include <map>
 #include <memory>
 #include <special_members.hpp>
+#include <sstream>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -86,13 +88,53 @@ namespace Persistence {
 		T & v;
 	};
 
-	template<typename T> struct SelectionT : public SelectionV<T> {
+	template<typename T>
+	concept Scalar = std::is_scalar_v<T>;
+	template<typename T>
+	concept NotScalar = (!Scalar<T>);
+
+	template<Scalar T> struct SelectionT<T> : public SelectionV<T> {
 		using SelectionV<T>::SelectionV;
 		using Selection::setValue;
-		using P = std::conditional_t<std::is_scalar_v<T>, T, T &&>;
 
 		void
-		setValue(P evalue) override
+		setValue(T evalue) override
+		{
+			std::swap(this->v, evalue);
+		}
+
+		void
+		setValue(std::string && evalue) override
+		{
+			if constexpr (std::same_as<T, bool>) {
+				using namespace std::literals;
+				if (!(this->v = evalue == "true"sv)) {
+					if (evalue != "false"sv) {
+						throw std::runtime_error("Value conversion failure");
+					}
+				}
+			}
+			else {
+				if (auto res = std::from_chars(evalue.c_str(), evalue.c_str() + evalue.length(), this->v).ec;
+						res != std::errc {}) {
+					throw std::runtime_error("Value conversion failure");
+				}
+			}
+		}
+
+		void
+		write(const Writer & out) const override
+		{
+			out.pushValue(this->v);
+		}
+	};
+
+	template<NotScalar T> struct SelectionT<T> : public SelectionV<T> {
+		using SelectionV<T>::SelectionV;
+		using Selection::setValue;
+
+		void
+		setValue(T && evalue) override
 		{
 			std::swap(this->v, evalue);
 		}
@@ -113,14 +155,14 @@ namespace Persistence {
 		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 
 		enum class NameAction { Push, HandleAndContinue, Ignore };
-		template<typename T>
+		template<typename Helper, typename T>
 		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
 		{
-			SelectionT<T> s {value};
-			const auto act {setName(key, s)};
+			auto s = std::make_unique<Helper>(value);
+			const auto act {setName(key, *s)};
 			if (act != NameAction::Ignore) {
-				sel = std::make_unique<decltype(s)>(std::move(s));
+				sel = std::move(s);
 				if (act == NameAction::HandleAndContinue) {
 					selHandler();
 				}
@@ -187,6 +229,17 @@ namespace Persistence {
 		};
 
 		using SelectionV<V>::SelectionV;
+		using SelectionV<V>::setValue;
+
+		void
+		setValue(std::string && s) override
+		{
+			std::stringstream ss {std::move(s)};
+			for (glm::length_t n = 0; n < L; n += 1) {
+				ss >> this->v[n];
+				ss.get();
+			}
+		}
 
 		void
 		beginArray(Stack & stk) override
@@ -244,6 +297,39 @@ namespace Persistence {
 		}
 	};
 
+	template<typename Map, typename Type = typename Map::mapped_type, auto Key = &Type::element_type::id>
+	struct MapByMember : public Persistence::SelectionT<Type> {
+		MapByMember(Map & m) : Persistence::SelectionT<Type> {s}, map {m} { }
+
+		using Persistence::SelectionT<Type>::SelectionT;
+		void
+		endObject(Persistence::Stack & stk) override
+		{
+			map.emplace(std::invoke(Key, s), std::move(s));
+			stk.pop();
+		}
+
+	private:
+		Type s;
+		Map & map;
+	};
+
+	template<typename Container, typename Type = typename Container::value_type>
+	struct Appender : public Persistence::SelectionT<Type> {
+		Appender(Container & c) : Persistence::SelectionT<Type> {s}, container {c} { }
+		using Persistence::SelectionT<Type>::SelectionT;
+		void
+		endObject(Persistence::Stack & stk) override
+		{
+			container.emplace_back(std::move(s));
+			stk.pop();
+		}
+
+	private:
+		Type s;
+		Container & container;
+	};
+
 	struct Persistable {
 		Persistable() = default;
 		virtual ~Persistable() = default;
@@ -289,13 +375,41 @@ namespace Persistence {
 		return true;
 	}
 
+	class ParseBase {
+	public:
+		using SharedObjects = std::map<std::string, std::shared_ptr<Persistable>>;
+		using SharedObjectsWPtr = std::weak_ptr<SharedObjects>;
+		using SharedObjectsPtr = std::shared_ptr<SharedObjects>;
+
+		ParseBase();
+		DEFAULT_MOVE_NO_COPY(ParseBase);
+
+		template<typename T>
+		static auto
+		getShared(auto && k)
+		{
+			return std::dynamic_pointer_cast<T>(Persistence::ParseBase::sharedObjects.lock()->at(k));
+		}
+		template<typename... T>
+		static auto
+		emplaceShared(T &&... v)
+		{
+			return sharedObjects.lock()->emplace(std::forward<T>(v)...);
+		}
+
+	protected:
+		Stack stk;
+
+	private:
+		inline static thread_local SharedObjectsWPtr sharedObjects;
+		SharedObjectsPtr sharedObjectsInstance;
+	};
 	// TODO Move these
-	using SharedObjects = std::map<std::string, std::shared_ptr<Persistable>>;
-	inline SharedObjects sharedObjects;
 	using SeenSharedObjects = std::map<void *, std::string>;
 	inline SeenSharedObjects seenSharedObjects;
 
-	template<typename Ptr, bool shared> struct SelectionPtrBase : public SelectionV<Ptr> {
+	template<typename Ptr> struct SelectionPtrBase : public SelectionV<Ptr> {
+		static constexpr auto shared = std::is_copy_assignable_v<Ptr>;
 		using T = typename Ptr::element_type;
 		struct SelectionObj : public SelectionV<Ptr> {
 			struct MakeObjectByTypeName : public SelectionV<Ptr> {
@@ -330,7 +444,7 @@ namespace Persistence {
 				void
 				setValue(std::string && id) override
 				{
-					sharedObjects.emplace(id, this->v);
+					ParseBase::emplaceShared(id, this->v);
 				}
 			};
 
@@ -340,14 +454,15 @@ namespace Persistence {
 			select(const std::string & mbr) override
 			{
 				using namespace std::literals;
-				if (mbr == "@typeid"sv) {
+				if (mbr == "p.typeid"sv) {
 					if (this->v) {
 						throw std::runtime_error("cannot set object type after creation");
 					}
 					return this->template make_s<MakeObjectByTypeName>(this->v);
 				}
 				if constexpr (shared) {
-					if (mbr == "@id"sv) {
+					if (mbr == "p.id"sv) {
+						make_default_as_needed(this->v);
 						return this->template make_s<RememberObjectById>(this->v);
 					}
 				}
@@ -439,18 +554,18 @@ namespace Persistence {
 		}
 	};
 
-	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionPtrBase<std::unique_ptr<T>, false> {
-		using SelectionPtrBase<std::unique_ptr<T>, false>::SelectionPtrBase;
+	template<typename T> struct SelectionT<std::unique_ptr<T>> : public SelectionPtrBase<std::unique_ptr<T>> {
+		using SelectionPtrBase<std::unique_ptr<T>>::SelectionPtrBase;
 	};
 
-	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionPtrBase<std::shared_ptr<T>, true> {
-		using SelectionPtrBase<std::shared_ptr<T>, true>::SelectionPtrBase;
-		using SelectionPtrBase<std::shared_ptr<T>, true>::setValue;
+	template<typename T> struct SelectionT<std::shared_ptr<T>> : public SelectionPtrBase<std::shared_ptr<T>> {
+		using SelectionPtrBase<std::shared_ptr<T>>::SelectionPtrBase;
+		using SelectionPtrBase<std::shared_ptr<T>>::setValue;
 
 		void
 		setValue(std::string && id) override
 		{
-			if (auto teo = std::dynamic_pointer_cast<T>(sharedObjects.at(id))) {
+			if (auto teo = ParseBase::getShared<T>(id)) {
 				this->v = std::move(teo);
 			}
 			else {
@@ -461,4 +576,7 @@ namespace Persistence {
 }
 
 #define STORE_TYPE store.persistType(this, typeid(*this))
-#define STORE_MEMBER(mbr) store.persistValue(#mbr, mbr)
+#define STORE_MEMBER(mbr) STORE_NAME_MEMBER(#mbr, mbr)
+#define STORE_NAME_MEMBER(name, mbr) store.persistValue<Persistence::SelectionT<decltype(mbr)>>(name, mbr)
+#define STORE_HELPER(mbr, Helper) STORE_NAME_HELPER(#mbr, mbr, Helper)
+#define STORE_NAME_HELPER(name, mbr, Helper) store.persistValue<Helper>(name, mbr)

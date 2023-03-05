@@ -1,5 +1,5 @@
 {
-	"@typeid": "TestObject",
+	"p.typeid": "TestObject",
 	"flt": 3.14,
 	"str": "Lovely string",
 	"bl": true,
@@ -48,7 +48,7 @@
 		[]
 	],
 	"ptr": {
-		"@typeid": "TestObject",
+		"p.typeid": "TestObject",
 		"flt": 3.14,
 		"str": "Lovely string"
 	}

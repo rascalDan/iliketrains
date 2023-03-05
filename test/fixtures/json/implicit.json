@@ -1,5 +1,5 @@
 {
-	"@typeid": "TestObject",
+	"p.typeid": "TestObject",
 	"flt": 1,
 	"ptr": {
 		"str": "trigger",

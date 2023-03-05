@@ -39,12 +39,24 @@ RailVehicleClass::RailVehicleClass(std::unique_ptr<ObjParser> o, std::shared_ptr
 	bogies[1] = m.at("Bogie2");
 }
 
+RailVehicleClass::RailVehicleClass() { }
+
+bool
+RailVehicleClass::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_TYPE && STORE_MEMBER(length) && STORE_MEMBER(wheelBase) && STORE_MEMBER(maxSpeed)
+			&& STORE_NAME_HELPER("bogie", bogies, Asset::MeshArrayConstruct)
+			&& STORE_HELPER(bodyMesh, Asset::MeshConstruct) && Asset::persist(store);
+}
+
 void
 RailVehicleClass::render(
 		const SceneShader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {
 	shader.basic.use(location);
-	texture->bind();
+	if (texture) {
+		texture->bind();
+	}
 	bodyMesh->Draw();
 	for (auto b = 0U; b < bogies.size(); ++b) {
 		shader.basic.setModel(bl[b]);
@@ -52,10 +64,15 @@ RailVehicleClass::render(
 	}
 }
 void
-RailVehicleClass::shadows(const ShadowMapper & shadowMapper, const Location & location) const
+RailVehicleClass::shadows(
+		const ShadowMapper & shadowMapper, const Location & location, const std::array<Location, 2> & bl) const
 {
 	shadowMapper.dynamicPoint.use(location);
 	bodyMesh->Draw();
+	for (auto b = 0U; b < bogies.size(); ++b) {
+		shadowMapper.dynamicPoint.setModel(bl[b]);
+		bogies[b]->Draw();
+	}
 }
 
 float

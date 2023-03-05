@@ -1,5 +1,5 @@
 {
 	"ptr": {
-		"@typeid": "SubObject"
+		"p.typeid": "SubObject"
 	}
 }

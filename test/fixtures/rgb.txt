@@ -1,0 +1,20 @@
+127 255	  0		chartreuse1
+190 190 190		x11 gray
+169 169 169		DarkGrey
+  0 255 255		cyan
+173 173 173 		gray68
+202 225 255		LightSteelBlue1
+ 72 209 204		medium turquoise
+224 238 224		honeydew2
+238 197 145		burlywood2
+205 133  63		peru
+ 28  28  28 		gray11
+ 83 134 139		CadetBlue4
+139  76	 57		salmon4
+238 232 170		pale goldenrod
+112 128 144		slate grey
+255 255	  0		yellow1
+159 121 238		MediumPurple2
+190 190 190		gray
+ 66  66  66 		grey26
+0     0 139		DarkBlue

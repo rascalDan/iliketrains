@@ -15,9 +15,11 @@ concept SequentialCollection = requires(T c) {
 									   c.data()
 									   } -> std::same_as<const E *>;
 							   };
+template<typename T>
+concept IterableCollection = std::is_same_v<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>;
 
 template<typename T, std::size_t first, std::size_t second>
-constexpr std::array<T, first + second>
+[[nodiscard]] constexpr std::array<T, first + second>
 operator+(const std::array<T, first> & a, const std::array<T, second> & b)
 {
 	std::array<T, first + second> r;
@@ -28,7 +30,7 @@ operator+(const std::array<T, first> & a, const std::array<T, second> & b)
 }
 
 template<typename T, typename V, std::size_t first, std::size_t second>
-constexpr std::array<std::pair<T, V>, first * second>
+[[nodiscard]] constexpr std::array<std::pair<T, V>, first * second>
 operator*(const std::array<T, first> & a, const std::array<V, second> & b)
 {
 	std::array<std::pair<T, V>, first * second> r;
@@ -42,7 +44,7 @@ operator*(const std::array<T, first> & a, const std::array<V, second> & b)
 }
 
 template<typename T, std::size_t N>
-constexpr auto
+[[nodiscard]] constexpr auto
 operator*(const std::array<T, N> & in, auto && f)
 {
 	std::array<decltype(f(in[0])), N> out;
@@ -53,9 +55,8 @@ operator*(const std::array<T, N> & in, auto && f)
 	return out;
 }
 
-template<typename T>
 constexpr auto &
-operator*=(std::span<T> & in, auto && f)
+operator*=(IterableCollection auto & in, auto && f)
 {
 	for (auto & v : in) {
 		f(v);
@@ -64,7 +65,7 @@ operator*=(std::span<T> & in, auto && f)
 }
 
 template<template<typename...> typename C, typename... T>
-constexpr auto
+[[nodiscard]] constexpr auto
 operator*(const C<T...> & in, auto && f)
 {
 	C<decltype(f(in[0]))> out;
@@ -82,17 +83,17 @@ operator+=(std::vector<T...> & in, std::vector<T...> && src)
 	return in;
 }
 
-template<typename... T>
-constexpr auto
-operator+(std::vector<T...> && in, std::vector<T...> && src)
+template<typename... T, typename Vn>
+[[nodiscard]] constexpr auto
+operator+(const std::vector<T...> & in, Vn && vn)
 {
-	in.reserve(in.size() + src.size());
-	std::move(src.begin(), src.end(), std::back_inserter(in));
-	return in;
+	auto out(in);
+	out.emplace_back(std::forward<Vn>(vn));
+	return out;
 }
 
 template<template<typename> typename Direction = std::plus>
-static auto
+[[nodiscard]] static auto
 vectorOfN(std::integral auto N, unsigned int start = {}, unsigned int step = 1)
 {
 	std::vector<unsigned int> v;
@@ -101,4 +102,18 @@ vectorOfN(std::integral auto N, unsigned int start = {}, unsigned int step = 1)
 		return std::exchange(start, adj(start, step));
 	});
 	return v;
+}
+
+template<template<typename...> typename Rtn = std::vector, IterableCollection In>
+[[nodiscard]] auto
+materializeRange(In && in)
+{
+	return Rtn(in.begin(), in.end());
+}
+
+template<template<typename...> typename Rtn = std::vector, typename In>
+[[nodiscard]] auto
+materializeRange(const std::pair<In, In> & in)
+{
+	return Rtn(in.first, in.second);
 }

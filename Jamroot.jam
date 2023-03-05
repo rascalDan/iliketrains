@@ -12,7 +12,9 @@ pkg-config.import sdl2 ;
 pkg-config.import glew ;
 pkg-config.import freetype2 ;
 pkg-config.import glib-2.0 ;
+pkg-config.import mxml ;
 lib pthread ;
+lib OpenMeshCore ;
 
 variant coverage : debug ;
 project : requirements
@@ -111,7 +113,9 @@ lib ilt :
 	<library>glew
 	<library>freetype2
 	<library>glib-2.0
+	<library>mxml
 	<library>pthread
+	<library>OpenMeshCore
 	: :
 	<include>.
 	<include>lib

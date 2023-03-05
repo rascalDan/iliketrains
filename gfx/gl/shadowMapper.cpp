@@ -184,6 +184,13 @@ void
 ShadowMapper::DynamicPoint::use(const Location & location) const
 {
 	glUseProgram(*this);
+	setModel(location);
+	const auto model = glm::translate(location.pos) * rotate_ypr(location.rot);
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+}
+void
+ShadowMapper::DynamicPoint::setModel(const Location & location) const
+{
 	const auto model = glm::translate(location.pos) * rotate_ypr(location.rot);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 }

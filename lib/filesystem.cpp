@@ -62,4 +62,13 @@ namespace filesystem {
 	{
 		return memmap {length, prot, flags, h, static_cast<off_t>(offset)};
 	}
+
+	FILE *
+	checked_fopen(const char * pathname, const char * mode)
+	{
+		if (auto file = fopen(pathname, mode)) {
+			return file;
+		}
+		throw_filesystem_error("fopen", errno, pathname);
+	}
 }

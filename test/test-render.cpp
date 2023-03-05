@@ -29,8 +29,8 @@ class TestScene : public SceneProvider {
 	content(const SceneShader & shader) const override
 	{
 		terrain.render(shader);
-		train.render(shader, Location {{52, 50, 2}}, {Location {}, Location {}});
-		train.render(shader, Location {{52, 30, 2}}, {Location {}, Location {}});
+		train.render(shader, Location {{52, 50, 2}}, {Location {{52, 56, 2}}, Location {{52, 44, 2}}});
+		train.render(shader, Location {{52, 30, 2}}, {Location {{52, 36, 2}}, Location {{52, 24, 2}}});
 	}
 	void
 	lights(const SceneShader &) const override
@@ -40,8 +40,8 @@ class TestScene : public SceneProvider {
 	shadows(const ShadowMapper & shadowMapper) const override
 	{
 		terrain.shadows(shadowMapper);
-		train.shadows(shadowMapper, Location {{52, 50, 2}});
-		train.shadows(shadowMapper, Location {{52, 30, 2}});
+		train.shadows(shadowMapper, Location {{52, 50, 2}}, {Location {{52, 56, 2}}, Location {{52, 44, 2}}});
+		train.shadows(shadowMapper, Location {{52, 30, 2}}, {Location {{52, 36, 2}}, Location {{52, 24, 2}}});
 	}
 };
 

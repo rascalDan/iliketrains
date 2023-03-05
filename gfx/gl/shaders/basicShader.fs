@@ -3,6 +3,7 @@
 in vec3 FragPos;
 in vec2 TexCoords;
 in vec3 Normal;
+in vec4 Colour;
 
 out vec4 gPosition;
 out vec4 gNormal;
@@ -16,5 +17,5 @@ main()
 	float clear = round(texture(texture0, TexCoords).a);
 	gPosition = vec4(FragPos, clear);
 	gNormal = vec4(Normal, clear);
-	gAlbedoSpec = texture(texture0, TexCoords);
+	gAlbedoSpec = mix(texture(texture0, TexCoords), vec4(Colour.rgb, 1), Colour.a);
 }
