@@ -6,6 +6,7 @@
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <span>
 #include <special_members.hpp>
 #include <sstream>
 #include <stack>
@@ -201,9 +202,8 @@ namespace Persistence {
 		bool shared;
 	};
 
-	template<glm::length_t L, typename T, glm::qualifier Q>
-	struct SelectionT<glm::vec<L, T, Q>> : public SelectionV<glm::vec<L, T, Q>> {
-		using V = glm::vec<L, T, Q>;
+	template<typename T> struct SelectionT<std::span<T>> : public SelectionV<std::span<T>> {
+		using V = std::span<T>;
 
 		struct Members : public SelectionV<V> {
 			using SelectionV<V>::SelectionV;
@@ -214,12 +214,12 @@ namespace Persistence {
 				stk.push(SelectionV<T>::make(this->v[idx++]));
 			}
 
-			glm::length_t idx {0};
+			std::size_t idx {0};
 
 			void
 			write(const Writer & out) const override
 			{
-				for (glm::length_t n = 0; n < L; n += 1) {
+				for (std::size_t n = 0; n < this->v.size(); n += 1) {
 					if (n) {
 						out.nextValue();
 					}
@@ -235,7 +235,7 @@ namespace Persistence {
 		setValue(std::string && s) override
 		{
 			std::stringstream ss {std::move(s)};
-			for (glm::length_t n = 0; n < L; n += 1) {
+			for (std::size_t n = 0; n < this->v.size(); n += 1) {
 				ss >> this->v[n];
 				ss.get();
 			}
@@ -254,6 +254,12 @@ namespace Persistence {
 			Members {this->v}.write(out);
 			out.endArray();
 		}
+	};
+
+	template<glm::length_t L, typename T, glm::qualifier Q>
+	struct SelectionT<glm::vec<L, T, Q>> : public SelectionT<std::span<T>> {
+		SelectionT(glm::vec<L, T, Q> & v) : SelectionT<std::span<T>> {spn}, spn {&v[0], L} { }
+		std::span<T> spn;
 	};
 
 	template<typename T> struct SelectionT<std::vector<T>> : public SelectionV<std::vector<T>> {
