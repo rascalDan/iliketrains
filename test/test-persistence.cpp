@@ -3,6 +3,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "testStructures.h"
 #include <filesystem>
 #include <glm/glm.hpp>
 #include <iosfwd>
@@ -13,75 +14,6 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
-
-struct AbsObject : public Persistence::Persistable {
-	std::string base;
-
-	bool
-	persist(Persistence::PersistenceStore & store) override
-	{
-		return STORE_TYPE && STORE_MEMBER(base);
-	}
-
-	virtual void dummy() const = 0;
-};
-
-struct SubObject : public AbsObject {
-	std::string sub;
-
-	bool
-	persist(Persistence::PersistenceStore & store) override
-	{
-		return STORE_TYPE && AbsObject::persist(store) && STORE_MEMBER(sub);
-	}
-
-	void
-	dummy() const override
-	{
-	}
-
-	[[nodiscard]] std::string
-	getId() const override
-	{
-		return "someid";
-	}
-};
-
-struct SubObject2 : public AbsObject {
-	bool
-	persist(Persistence::PersistenceStore & store) override
-	{
-		return STORE_TYPE && AbsObject::persist(store);
-	}
-
-	void
-	dummy() const override
-	{
-	}
-};
-
-struct TestObject : public Persistence::Persistable {
-	TestObject() = default;
-
-	float flt {};
-	std::string str {};
-	bool bl {};
-	glm::vec3 pos {};
-	std::vector<float> flts;
-	std::vector<glm::vec3> poss;
-	std::vector<std::vector<std::vector<std::string>>> nest;
-	std::unique_ptr<TestObject> ptr;
-	std::unique_ptr<AbsObject> aptr;
-	std::vector<std::unique_ptr<TestObject>> vptr;
-
-	bool
-	persist(Persistence::PersistenceStore & store) override
-	{
-		return STORE_TYPE && STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos)
-				&& STORE_MEMBER(flts) && STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr)
-				&& STORE_MEMBER(aptr) && STORE_MEMBER(vptr);
-	}
-};
 
 struct JPP {
 	template<typename T>
@@ -213,19 +145,6 @@ BOOST_FIXTURE_TEST_CASE(test_conversion, JPP)
 	BOOST_CHECK_EQUAL(to->bl, true);
 	BOOST_CHECK_EQUAL(to->flt, 3.14F);
 }
-
-struct SharedTestObject : public Persistence::Persistable {
-	SharedTestObject() = default;
-
-	std::shared_ptr<AbsObject> sptr;
-	std::shared_ptr<SubObject> ssptr;
-
-	bool
-	persist(Persistence::PersistenceStore & store) override
-	{
-		return STORE_TYPE && STORE_MEMBER(sptr) && STORE_MEMBER(ssptr);
-	}
-};
 
 BOOST_FIXTURE_TEST_CASE(load_shared_object_diff, JPP)
 {

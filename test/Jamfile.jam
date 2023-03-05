@@ -48,7 +48,7 @@ run test-maths.cpp ;
 run test-lib.cpp ;
 run test-geo.cpp ;
 run test-network.cpp ;
-run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json fixtures/json/bad/*.json ] ] ;
+run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json fixtures/json/bad/*.json ] ] : <library>test ;
 run test-text.cpp ;
 run test-enumDetails.cpp ;
 run test-render.cpp : : : <library>test ;
