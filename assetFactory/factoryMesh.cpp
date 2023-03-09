@@ -11,7 +11,7 @@ FactoryMesh::createMesh() const
 
 	ModelFactoryMesh mesh;
 	for (const auto & use : uses) {
-		use->createMesh(mesh, glm::identity<Mutation::Matrix>());
+		use->createMesh(mesh, 1);
 	}
 	mesh.garbage_collection();
 

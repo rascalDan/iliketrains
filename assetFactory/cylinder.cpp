@@ -3,44 +3,51 @@
 #include "modelFactoryMesh.h"
 
 Cylinder::CreatedFaces
-Cylinder::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const
+Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 {
-	const glm::vec2 scale {std::accumulate(&mutation[0][0], &mutation[0][3], 0.f),
-			std::accumulate(&mutation[1][0], &mutation[1][3], 0.f)};
-	const unsigned int P = static_cast<unsigned int>(std::round(15.F * std::sqrt(glm::length(scale))));
-	std::vector<OpenMesh::VertexHandle> bottom(P), top(P);
-	std::generate_n(bottom.begin(), P, [a = 0.f, step = two_pi / static_cast<float>(P), &mesh, &mutation]() mutable {
-		const auto xy = sincosf(a += step) * .5F;
-		const auto xyz = (xy ^ 0) % mutation;
-		return mesh.add_vertex({xyz.x, xyz.y, xyz.z});
+	const auto P = static_cast<unsigned int>(std::round(15.F * std::sqrt(lodf)));
+	const auto step = two_pi / static_cast<float>(P);
+
+	// Generate 2D circumference points
+	std::vector<glm::vec2> circumference(P);
+	std::generate(circumference.begin(), circumference.end(), [a = 0.f, step]() mutable {
+		return sincosf(a += step) * .5F;
 	});
-	std::generate_n(top.begin(), P, [a = 0.f, step = two_pi / static_cast<float>(P), &mesh, &mutation]() mutable {
-		const auto xy = sincosf(a -= step) * .5F;
-		const auto xyz = (xy ^ 1) % mutation;
-		return mesh.add_vertex({xyz.x, xyz.y, xyz.z});
-	});
+
 	CreatedFaces surface;
-	std::generate_n(std::inserter(surface, surface.end()), P,
-			[a = 0.f, step = two_pi / static_cast<float>(P), &mesh, &mutation]() mutable {
-				const auto xy1 = sincosf(a) * .5F;
-				const auto xy2 = sincosf(a -= step) * .5F;
-				const auto xyz1b = (xy1 ^ 0) % mutation;
-				const auto xyz2b = (xy2 ^ 0) % mutation;
-				const auto xyz1t = (xy1 ^ 1) % mutation;
-				const auto xyz2t = (xy2 ^ 1) % mutation;
-				return mesh.add_namedFace("edge",
-						{
-								mesh.add_vertex({xyz1b.x, xyz1b.y, xyz1b.z}),
-								mesh.add_vertex({xyz2b.x, xyz2b.y, xyz2b.z}),
-								mesh.add_vertex({xyz2t.x, xyz2t.y, xyz2t.z}),
-								mesh.add_vertex({xyz1t.x, xyz1t.y, xyz1t.z}),
-						});
-			});
-	for (const auto & [name, face] : surface) {
-		mesh.property(mesh.smoothFaceProperty, face) = true;
+	{
+		// Generate bottom face vertices
+		std::vector<OpenMesh::VertexHandle> bottom(P);
+		std::transform(circumference.begin(), circumference.end(), bottom.begin(), [&mesh](const auto & xy) {
+			return mesh.add_vertex({xy.x, xy.y, 0.f});
+		});
+		surface.insert(mesh.add_namedFace("bottom", bottom));
 	}
-	surface.insert(mesh.add_namedFace("bottom", bottom));
-	surface.insert(mesh.add_namedFace("top", top));
+	{
+		// Generate top face vertices
+		std::vector<OpenMesh::VertexHandle> top(P);
+		std::transform(circumference.rbegin(), circumference.rend(), top.begin(), [&mesh](const auto & xy) {
+			return mesh.add_vertex({xy.x, xy.y, 1.f});
+		});
+		surface.insert(mesh.add_namedFace("top", top));
+	}
+	{
+		// Generate edge vertices
+		std::vector<std::pair<OpenMesh::VertexHandle, OpenMesh::VertexHandle>> edge(P + 1);
+		std::transform(circumference.begin(), circumference.end(), edge.begin(), [&mesh](const auto & xy) {
+			return std::make_pair(mesh.add_vertex({xy.x, xy.y, 0.f}), mesh.add_vertex({xy.x, xy.y, 1.f}));
+		});
+		// Wrap around
+		edge.back() = edge.front();
+		// Transform adjacent pairs of top/bottom pairs to faces
+		std::adjacent_find(edge.begin(), edge.end(), [&mesh, &surface](const auto & first, const auto & second) {
+			const auto fh
+					= surface.insert(mesh.add_namedFace("edge", first.first, first.second, second.second, second.first))
+							  ->second;
+			mesh.property(mesh.smoothFaceProperty, fh) = true;
+			return false;
+		});
+	}
 
 	return surface;
 }

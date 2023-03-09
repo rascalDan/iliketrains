@@ -1,9 +1,9 @@
 #pragma once
 
 #include "modelFactoryMesh_fwd.h"
-#include "mutation.h"
 #include "stdTypeDefs.hpp"
 #include <OpenMesh/Core/Mesh/Handles.hh>
+#include <glm/vec3.hpp>
 #include <map>
 #include <span>
 #include <string>
@@ -18,8 +18,8 @@ public:
 
 	virtual ~Shape() = default;
 
-	virtual CreatedFaces createMesh(ModelFactoryMesh &, const Mutation::Matrix & mutation) const = 0;
+	virtual CreatedFaces createMesh(ModelFactoryMesh &, float levelOfDetailFactor) const = 0;
 
-	static std::vector<OpenMesh::VertexHandle> addMutatedToMesh(
-			ModelFactoryMesh & mesh, const std::span<const glm::vec3> vertices, const Mutation::Matrix & mutation);
+	static std::vector<OpenMesh::VertexHandle> addToMesh(
+			ModelFactoryMesh & mesh, const std::span<const glm::vec3> vertices);
 };
