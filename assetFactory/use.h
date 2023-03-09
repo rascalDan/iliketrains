@@ -11,7 +11,7 @@ class Use : public StdTypeDefs<Use>, public Mutation, public Style, public Persi
 public:
 	using FaceControllers = std::map<std::string, std::unique_ptr<FaceController>>;
 
-	Shape::CreatedFaces createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const;
+	Shape::CreatedFaces createMesh(ModelFactoryMesh & mesh, float lodf) const;
 
 	Shape::CPtr type;
 	FaceControllers faceControllers;

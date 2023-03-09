@@ -1,33 +1,30 @@
 #include "cylinder.h"
 #include "maths.h"
 #include "modelFactoryMesh.h"
+#include <stream_support.hpp>
 
 Cylinder::CreatedFaces
-Cylinder::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const
+Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 {
-	const glm::vec2 scale {std::accumulate(&mutation[0][0], &mutation[0][3], 0.f),
-			std::accumulate(&mutation[1][0], &mutation[1][3], 0.f)};
-	const unsigned int P = static_cast<unsigned int>(std::round(15.F * std::sqrt(glm::length(scale))));
+	const unsigned int P = static_cast<unsigned int>(std::round(15.F * std::sqrt(lodf)));
 	std::vector<OpenMesh::VertexHandle> bottom(P), top(P);
-	std::generate_n(bottom.begin(), P, [a = 0.f, step = two_pi / static_cast<float>(P), &mesh, &mutation]() mutable {
+	std::generate_n(bottom.begin(), P, [a = 0.f, step = two_pi / static_cast<float>(P), &mesh]() mutable {
 		const auto xy = sincosf(a += step) * .5F;
-		const auto xyz = (xy ^ 0) % mutation;
-		return mesh.add_vertex({xyz.x, xyz.y, xyz.z});
+		return mesh.add_vertex({xy.x, xy.y, 0.f});
 	});
-	std::generate_n(top.begin(), P, [a = 0.f, step = two_pi / static_cast<float>(P), &mesh, &mutation]() mutable {
+	std::generate_n(top.begin(), P, [a = 0.f, step = two_pi / static_cast<float>(P), &mesh]() mutable {
 		const auto xy = sincosf(a -= step) * .5F;
-		const auto xyz = (xy ^ 1) % mutation;
-		return mesh.add_vertex({xyz.x, xyz.y, xyz.z});
+		return mesh.add_vertex({xy.x, xy.y, 1.f});
 	});
 	CreatedFaces surface;
 	std::generate_n(std::inserter(surface, surface.end()), P,
-			[a = 0.f, step = two_pi / static_cast<float>(P), &mesh, &mutation]() mutable {
+			[a = 0.f, step = two_pi / static_cast<float>(P), &mesh]() mutable {
 				const auto xy1 = sincosf(a) * .5F;
 				const auto xy2 = sincosf(a -= step) * .5F;
-				const auto xyz1b = (xy1 ^ 0) % mutation;
-				const auto xyz2b = (xy2 ^ 0) % mutation;
-				const auto xyz1t = (xy1 ^ 1) % mutation;
-				const auto xyz2t = (xy2 ^ 1) % mutation;
+				const auto xyz1b = (xy1 ^ 0);
+				const auto xyz2b = (xy2 ^ 0);
+				const auto xyz1t = (xy1 ^ 1);
+				const auto xyz2t = (xy2 ^ 1);
 				return mesh.add_namedFace("edge",
 						{
 								mesh.add_vertex({xyz1b.x, xyz1b.y, xyz1b.z}),

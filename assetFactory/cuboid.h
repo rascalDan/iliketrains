@@ -4,5 +4,5 @@
 
 class Cuboid : public Shape {
 public:
-	CreatedFaces createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const override;
+	CreatedFaces createMesh(ModelFactoryMesh & mesh, float lodf) const override;
 };

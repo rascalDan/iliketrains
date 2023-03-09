@@ -2,7 +2,7 @@
 #include "modelFactoryMesh.h"
 
 Plane::CreatedFaces
-Plane::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) const
+Plane::createMesh(ModelFactoryMesh & mesh, float) const
 {
 	static constexpr std::array<glm::vec3, 4> VERTICES {{
 			{n, n, z},
@@ -11,5 +11,5 @@ Plane::createMesh(ModelFactoryMesh & mesh, const Mutation::Matrix & mutation) co
 			{n, y, z},
 	}};
 
-	return {mesh.add_namedFace("plane", addMutatedToMesh(mesh, VERTICES, mutation))};
+	return {mesh.add_namedFace("plane", addToMesh(mesh, VERTICES))};
 }
