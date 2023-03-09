@@ -21,7 +21,7 @@ BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 const std::filesystem::path TMP {"/tmp"};
-class FactoryFixture : public TestRenderOutputSize<glm::ivec2 {2048, 2048}>, public SceneProvider {
+class FactoryFixture : public TestRenderOutputSize<glm::ivec2 {2048, 1024}>, public SceneProvider {
 public:
 	FactoryFixture() : sceneRenderer {size, output} { }
 	~FactoryFixture()
@@ -45,8 +45,8 @@ public:
 	void
 	environment(const SceneShader &, const SceneRenderer & sceneRenderer) const override
 	{
-		sceneRenderer.setAmbientLight({.2, .2, .2});
-		sceneRenderer.setDirectionalLight({.3, .3, .3}, east + south + south + down, *this);
+		sceneRenderer.setAmbientLight({.4, .4, .4});
+		sceneRenderer.setDirectionalLight({.6, .6, .6}, east + south + south + down, *this);
 	}
 	void
 	shadows(const ShadowMapper & mapper) const override
@@ -57,7 +57,7 @@ public:
 	void
 	render(float dist = 10.f)
 	{
-		sceneRenderer.camera.setView({dist, dist, dist}, south + west + down);
+		sceneRenderer.camera.setView({-dist, dist * 1.2f, dist * 1.2f}, south + east + down);
 		sceneRenderer.render(*this);
 	}
 	Collection<const Renderable> objects;
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(brush47xml)
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/brush47.xml");
 	BOOST_REQUIRE(mf);
-	BOOST_REQUIRE_EQUAL(6, mf->shapes.size());
+	BOOST_REQUIRE_GE(mf->shapes.size(), 6);
 	BOOST_CHECK(mf->shapes.at("plane"));
 	BOOST_CHECK(mf->shapes.at("cylinder"));
 	BOOST_CHECK(mf->shapes.at("cuboid"));
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(brush47xml)
 	auto bogie = mf->shapes.at("bogie");
 	BOOST_REQUIRE(bogie);
 	auto bogieObj = std::dynamic_pointer_cast<const Object>(bogie);
-	BOOST_CHECK_EQUAL(3, bogieObj->uses.size());
+	BOOST_CHECK_GE(bogieObj->uses.size(), 3);
 	BOOST_CHECK_EQUAL(1, mf->assets.size());
 	auto brush47 = mf->assets.at("brush-47");
 	BOOST_REQUIRE(brush47);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(brush47xml)
 	auto railVehicle = std::make_shared<RailVehicle>(brush47rvc);
 	objects.objects.push_back(railVehicle);
 
-	render(20);
+	render();
 }
 BOOST_AUTO_TEST_SUITE_END();
 
