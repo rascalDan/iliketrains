@@ -25,13 +25,9 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 				const auto xyz2b = (xy2 ^ 0);
 				const auto xyz1t = (xy1 ^ 1);
 				const auto xyz2t = (xy2 ^ 1);
-				return mesh.add_namedFace("edge",
-						{
-								mesh.add_vertex({xyz1b.x, xyz1b.y, xyz1b.z}),
-								mesh.add_vertex({xyz2b.x, xyz2b.y, xyz2b.z}),
-								mesh.add_vertex({xyz2t.x, xyz2t.y, xyz2t.z}),
-								mesh.add_vertex({xyz1t.x, xyz1t.y, xyz1t.z}),
-						});
+				return mesh.add_namedFace("edge", mesh.add_vertex({xyz1b.x, xyz1b.y, xyz1b.z}),
+						mesh.add_vertex({xyz2b.x, xyz2b.y, xyz2b.z}), mesh.add_vertex({xyz2t.x, xyz2t.y, xyz2t.z}),
+						mesh.add_vertex({xyz1t.x, xyz1t.y, xyz1t.z}));
 			});
 	for (const auto & [name, face] : surface) {
 		mesh.property(mesh.smoothFaceProperty, face) = true;
