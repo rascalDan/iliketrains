@@ -49,7 +49,6 @@ struct Lookup : public Persistence::SelectionV<Shape::CPtr> {
 bool
 Use::persist(Persistence::PersistenceStore & store)
 {
-	return STORE_TYPE && STORE_HELPER(type, Lookup) && STORE_MEMBER(position) && STORE_MEMBER(scale)
-			&& STORE_MEMBER(rotation) && Style::persist(store)
+	return STORE_TYPE && STORE_HELPER(type, Lookup) && Mutation::persist(store) && Style::persist(store)
 			&& STORE_NAME_HELPER("face", faceControllers, Persistence::MapByMember<FaceControllers>);
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "persistence.h"
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 
@@ -15,4 +16,7 @@ struct Mutation {
 	glm::vec3 position {};
 	glm::vec3 rotation {};
 	glm::vec3 scale {1};
+
+protected:
+	bool persist(Persistence::PersistenceStore & store);
 };

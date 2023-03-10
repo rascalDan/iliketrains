@@ -27,3 +27,8 @@ Mutation::relativeLevelOfDetail() const
 {
 	return std::max({scale.x, scale.y, scale.z});
 }
+bool
+Mutation::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_MEMBER(scale) && STORE_MEMBER(position) && STORE_MEMBER(rotation);
+}

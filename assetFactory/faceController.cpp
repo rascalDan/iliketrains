@@ -86,6 +86,6 @@ bool
 FaceController::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_TYPE && STORE_MEMBER(id) && Style::persist(store) && STORE_MEMBER(type) && STORE_MEMBER(smooth)
-			&& STORE_MEMBER(scale) && STORE_MEMBER(position) && STORE_MEMBER(rotation)
+			&& Mutation::persist(store)
 			&& STORE_NAME_HELPER("face", faceControllers, Persistence::MapByMember<FaceControllers>);
 }
