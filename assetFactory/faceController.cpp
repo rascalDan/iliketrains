@@ -44,7 +44,7 @@ FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const
 				// create new vertices
 				std::vector<OpenMesh::VertexHandle> vertices;
 				std::transform(points.begin(), points.end(), std::back_inserter(vertices), [&mesh](auto && p) {
-					return mesh.add_vertex({p.x, p.y, p.z});
+					return mesh.add_vertex(p);
 				});
 				// create new faces
 				const auto ofrange = materializeRange(mesh.ff_range(cf.second));

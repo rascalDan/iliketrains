@@ -9,7 +9,7 @@ Shape::addToMesh(ModelFactoryMesh & mesh, const std::span<const glm::vec3> verti
 {
 	std::vector<OpenMesh::VertexHandle> vhs;
 	std::transform(vertices.begin(), vertices.end(), std::back_inserter(vhs), [&mesh](const auto & p) {
-		return mesh.add_vertex({p.x, p.y, p.z});
+		return mesh.add_vertex(p);
 	});
 	return vhs;
 }

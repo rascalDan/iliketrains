@@ -7,16 +7,27 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+namespace glm {
+	template<length_t L, typename T, qualifier Q>
+	auto
+	norm(const vec<L, T, Q> & v)
+	{
+		return length(v);
+	}
+
+	template<length_t L, typename T, qualifier Q, typename S>
+	auto
+	vectorize(vec<L, T, Q> & v, S scalar)
+	{
+		v = vec<L, T, Q> {static_cast<T>(scalar)};
+	}
+}
+
 namespace OpenMesh {
-	template<typename Scalar, int DIM> struct glmvec : public VectorT<Scalar, DIM> {
-		using VectorT<Scalar, DIM>::VectorT;
-		glmvec(const VectorT<Scalar, DIM> & v) : VectorT<Scalar, DIM> {v} { }
-		operator glm::vec<DIM, Scalar>() const
-		{
-			glm::vec<DIM, Scalar> out;
-			std::copy(this->begin(), this->end(), &out[0]);
-			return out;
-		}
+	template<glm::length_t L, typename T, glm::qualifier Q> struct vector_traits<glm::vec<L, T, Q>> {
+		using vector_type = glm::vec<L, T, Q>;
+		using value_type = T;
+		static constexpr glm::length_t size_ = L;
 	};
 }
 
@@ -24,8 +35,8 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status | OpenMesh::Attributes::Color);
 	EdgeAttributes(OpenMesh::Attributes::Status);
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
-	using Point = OpenMesh::glmvec<float, 3>;
-	using Normal = OpenMesh::glmvec<float, 3>;
+	using Point = glm::vec3;
+	using Normal = glm::vec3;
 	using Color = glm::vec4;
 };
 

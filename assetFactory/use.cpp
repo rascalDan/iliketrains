@@ -15,9 +15,7 @@ Use::createMesh(ModelFactoryMesh & mesh, float levelOfDetailFactor) const
 			const auto fvr = mesh.fv_range(f.second);
 			for (const auto & v : fvr) {
 				if (!vs.contains(v)) {
-					glm::vec3 p = mesh.point(v);
-					p = p % m;
-					mesh.set_point(v, ModelFactoryMesh::Point(p.x, p.y, p.z));
+					mesh.point(v) %= m;
 					vs.insert(v);
 				}
 			}

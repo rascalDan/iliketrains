@@ -19,7 +19,7 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 		// Generate bottom face vertices
 		std::vector<OpenMesh::VertexHandle> bottom(P);
 		std::transform(circumference.begin(), circumference.end(), bottom.begin(), [&mesh](const auto & xy) {
-			return mesh.add_vertex({xy.x, xy.y, 0.f});
+			return mesh.add_vertex(xy ^ 0.f);
 		});
 		surface.insert(mesh.add_namedFace("bottom", bottom));
 	}
@@ -27,7 +27,7 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 		// Generate top face vertices
 		std::vector<OpenMesh::VertexHandle> top(P);
 		std::transform(circumference.rbegin(), circumference.rend(), top.begin(), [&mesh](const auto & xy) {
-			return mesh.add_vertex({xy.x, xy.y, 1.f});
+			return mesh.add_vertex(xy ^ 1);
 		});
 		surface.insert(mesh.add_namedFace("top", top));
 	}
@@ -35,7 +35,7 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 		// Generate edge vertices
 		std::vector<std::pair<OpenMesh::VertexHandle, OpenMesh::VertexHandle>> edge(P + 1);
 		std::transform(circumference.begin(), circumference.end(), edge.begin(), [&mesh](const auto & xy) {
-			return std::make_pair(mesh.add_vertex({xy.x, xy.y, 0.f}), mesh.add_vertex({xy.x, xy.y, 1.f}));
+			return std::make_pair(mesh.add_vertex(xy ^ 0), mesh.add_vertex(xy ^ 1));
 		});
 		// Wrap around
 		edge.back() = edge.front();
