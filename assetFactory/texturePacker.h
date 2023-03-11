@@ -1,0 +1,36 @@
+#pragma once
+
+#include <glm/vec2.hpp>
+#include <span>
+#include <vector>
+
+class TexturePacker {
+public:
+	using Position = glm::uvec2;
+	using Size = glm::uvec2;
+
+	struct Area {
+		Position position;
+		Size size;
+		bool
+		operator<(const Area & other) const
+		{
+			return area(size) < area(other.size);
+		}
+	};
+	using Image = Size;
+	using Space = Area;
+	using Positions = std::vector<Position>;
+	using Result = std::pair<Positions, Size>;
+
+	TexturePacker(std::vector<Image>);
+
+	Result pack(Size) const;
+	Result pack() const;
+
+	Size minSize() const;
+	static decltype(Size::x) area(const Size & size);
+
+private:
+	std::vector<Image> inputImages;
+};

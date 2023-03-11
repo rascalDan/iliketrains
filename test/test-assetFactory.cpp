@@ -7,6 +7,7 @@
 
 #include "assetFactory/assetFactory.h"
 #include "assetFactory/object.h"
+#include "assetFactory/texturePacker.h"
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
 #include "gfx/gl/sceneRenderer.h"
@@ -124,4 +125,46 @@ BOOST_AUTO_TEST_CASE(parseX11RGB)
 	BOOST_CHECK_CLOSE_VEC(parsedColours.at("cyan"), AssetFactory::Colour(0, 1, 1));
 	BOOST_CHECK_CLOSE_VEC(parsedColours.at("slategrey"), AssetFactory::Colour(0.44F, 0.5, 0.56F));
 	BOOST_CHECK_CLOSE_VEC(parsedColours.at("lightsteelblue1"), AssetFactory::Colour(0.79, 0.88, 1));
+}
+
+BOOST_AUTO_TEST_CASE(texturePacker)
+{
+	TexturePacker tp {{
+			{10, 10},
+			{10, 10},
+			{10, 10},
+			{100, 10},
+			{10, 200},
+			{5, 5},
+	}};
+	BOOST_CHECK_EQUAL(TexturePacker::Size(128, 256), tp.minSize());
+	const auto result = tp.pack();
+}
+
+BOOST_AUTO_TEST_CASE(texturePacker_many, *boost::unit_test::timeout(5))
+{
+	std::vector<TexturePacker::Image> images(256);
+	std::fill(images.begin(), images.end(), TexturePacker::Image {32, 32});
+	const auto totalSize = std::accumulate(images.begin(), images.end(), 0U, [](auto t, const auto & i) {
+		return t + TexturePacker::area(i);
+	});
+	TexturePacker tp {images};
+	BOOST_CHECK_EQUAL(TexturePacker::Size(32, 32), tp.minSize());
+	const auto result = tp.pack();
+	BOOST_CHECK_EQUAL(result.first.size(), images.size());
+	BOOST_CHECK_GE(TexturePacker::area(result.second), TexturePacker::area(images.front()) * images.size());
+	BOOST_CHECK_EQUAL(totalSize, TexturePacker::area(result.second));
+}
+
+BOOST_AUTO_TEST_CASE(texturePacker_many_random, *boost::unit_test::timeout(5))
+{
+	std::vector<TexturePacker::Image> images(2048);
+	std::mt19937 gen(std::random_device {}());
+	std::uniform_int_distribution<> dim {1, 10};
+	std::generate(images.begin(), images.end(), [&dim, &gen]() {
+		return TexturePacker::Image {2 ^ dim(gen), 2 ^ dim(gen)};
+	});
+	TexturePacker tp {images};
+	const auto result = tp.pack();
+	BOOST_CHECK_EQUAL(result.first.size(), images.size());
 }
