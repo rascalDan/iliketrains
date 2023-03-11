@@ -83,4 +83,4 @@ streamed_string(const T & v)
 	return std::move(ss).str();
 }
 
-#define CLOG(x) std::cerr << #x " : " << x << "\n";
+#define CLOG(x) std::cerr << __LINE__ << " : " #x " : " << x << "\n";
