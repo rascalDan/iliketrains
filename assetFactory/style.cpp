@@ -4,22 +4,27 @@
 void
 Style::applyStyle(ModelFactoryMesh & mesh, const StyleStack & parents, const Shape::CreatedFaces & faces) const
 {
-	if (const auto effectiveColour = getColour(parents); effectiveColour.has_value()) {
-		for (const auto & face : faces) {
-			mesh.set_color(face.second, effectiveColour->get());
-		}
+	for (const auto & face : faces) {
+		applyStyle(mesh, face.second, getColour(parents));
 	}
 }
 
 void
 Style::applyStyle(ModelFactoryMesh & mesh, const StyleStack & parents, const ModelFactoryMesh::FaceHandle & face) const
 {
-	if (const auto effectiveColour = getColour(parents); effectiveColour.has_value()) {
+	applyStyle(mesh, face, getColour(parents));
+}
+
+void
+Style::applyStyle(
+		ModelFactoryMesh & mesh, const ModelFactoryMesh::FaceHandle & face, EffectiveColour effectiveColour) const
+{
+	if (effectiveColour.has_value()) {
 		mesh.set_color(face, effectiveColour->get());
 	}
 }
 
-std::optional<std::reference_wrapper<const Style::ColourAlpha>>
+Style::EffectiveColour
 Style::getColour(const StyleStack & parents)
 {
 	return getProperty(parents, &Style::colour, [](auto && style) {

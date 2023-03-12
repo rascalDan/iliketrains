@@ -12,6 +12,7 @@ public:
 	using StyleStack = std::vector<const Style *>;
 	using Colour = glm::vec3;
 	using ColourAlpha = glm::vec4;
+	using EffectiveColour = std::optional<std::reference_wrapper<const ColourAlpha>>;
 
 	void applyStyle(ModelFactoryMesh &, const StyleStack & parents, const Shape::CreatedFaces &) const;
 	void applyStyle(ModelFactoryMesh &, const StyleStack & parents, const ModelFactoryMesh::FaceHandle &) const;
@@ -27,7 +28,7 @@ public:
 		return {};
 	}
 
-	static std::optional<std::reference_wrapper<const ColourAlpha>> getColour(const StyleStack & parents);
+	static EffectiveColour getColour(const StyleStack & parents);
 
 	ColourAlpha colour {};
 	std::string texture;
@@ -35,4 +36,5 @@ public:
 
 protected:
 	bool persist(Persistence::PersistenceStore & store);
+	void applyStyle(ModelFactoryMesh &, const ModelFactoryMesh::FaceHandle &, EffectiveColour) const;
 };
