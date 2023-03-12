@@ -75,11 +75,14 @@ AssetFactory::parseColour(std::string_view in) const
 	}
 	throw std::runtime_error("No such asset factory colour");
 }
+
 bool
 AssetFactory::persist(Persistence::PersistenceStore & store)
 {
 	using MapObjects = Persistence::MapByMember<Shapes, std::shared_ptr<Object>>;
 	using MapAssets = Persistence::MapByMember<Assets>;
+	using MapTextureFragments = Persistence::MapByMember<TextureFragments>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects)
+			&& STORE_NAME_HELPER("textureFragment", textureFragments, MapTextureFragments)
 			&& STORE_NAME_HELPER("asset", assets, MapAssets);
 }

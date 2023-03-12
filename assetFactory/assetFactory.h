@@ -3,12 +3,14 @@
 #include "asset.h"
 #include "persistence.h"
 #include "shape.h"
+#include "textureFragment.h"
 #include <filesystem>
 
 class AssetFactory : public Persistence::Persistable {
 public:
 	using Shapes = std::map<std::string, Shape::Ptr, std::less<>>;
 	using Assets = std::map<std::string, Asset::Ptr, std::less<>>;
+	using TextureFragments = std::map<std::string, TextureFragment::Ptr, std::less<>>;
 	using Colour = glm::vec3;
 	using ColourAlpha = glm::vec4;
 	using Colours = std::map<std::string, Colour, std::less<>>;
@@ -20,6 +22,7 @@ public:
 	Shapes shapes;
 	Assets assets;
 	Colours colours;
+	TextureFragments textureFragments;
 
 	static Colours parseX11RGB(const char * rgbtxtpath);
 	static void normalizeColourName(std::string &);
