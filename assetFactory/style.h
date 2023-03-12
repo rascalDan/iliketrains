@@ -27,6 +27,8 @@ public:
 		return {};
 	}
 
+	static std::optional<std::reference_wrapper<const ColourAlpha>> getColour(const StyleStack & parents);
+
 	ColourAlpha colour {};
 	std::string texture;
 	std::string textureRotation; // Multiples of 90deg, no int/enum support
