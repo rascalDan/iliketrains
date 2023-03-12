@@ -42,5 +42,5 @@ Style::persist(Persistence::PersistenceStore & store)
 		}
 	};
 
-	return STORE_HELPER(colour, ColourParser);
+	return STORE_HELPER(colour, ColourParser) && STORE_MEMBER(texture) && STORE_MEMBER(textureRotation);
 }

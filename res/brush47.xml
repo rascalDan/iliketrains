@@ -71,7 +71,11 @@
           <face id="top" type="extrude" scale="1,0.96,1" position="0,0,0.775">
             <face id="front" colour="#e1eff3"/>
             <face id="back" colour="#e1eff3"/>
-            <face id="top" type="extrude" scale="0.5,0.85,0" smooth="true" position="0,0,0.575" colour="#aeb0b0"/>
+            <face id="top" type="extrude" scale="0.5,0.85,0" smooth="true" position="0,0,0.575" colour="#aeb0b0">
+              <face id="top" texture="roofTopWithVents"/>
+              <face id="left" texture="roofSideWithVents"/>
+              <face id="right" texture="roofSideWithVents"/>
+            </face>
           </face>
         </face>
       </use>

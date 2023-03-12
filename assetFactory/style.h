@@ -28,6 +28,8 @@ public:
 	}
 
 	ColourAlpha colour {};
+	std::string texture;
+	std::string textureRotation; // Multiples of 90deg, no int/enum support
 
 protected:
 	bool persist(Persistence::PersistenceStore & store);
