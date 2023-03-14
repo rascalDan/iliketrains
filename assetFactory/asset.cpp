@@ -1,9 +1,19 @@
 #include "asset.h"
+#include "assetFactory.h"
 
 bool
 Asset::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_MEMBER(id) && STORE_MEMBER(name);
+}
+
+Asset::TexturePtr
+Asset::getTexture() const
+{
+	if (auto mf = Persistence::ParseBase::getShared<const AssetFactory>("assetFactory")) {
+		return mf->getTexture();
+	}
+	return nullptr;
 }
 
 Asset::MeshConstruct::MeshConstruct(Mesh::Ptr & m) :

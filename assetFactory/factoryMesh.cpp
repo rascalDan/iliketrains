@@ -2,13 +2,10 @@
 #include "collections.hpp"
 #include "gfx/models/vertex.hpp"
 #include "modelFactoryMesh.h"
-#include <glm/ext/matrix_transform.hpp>
 
 Mesh::Ptr
 FactoryMesh::createMesh() const
 {
-	constexpr glm::vec2 NullUV {};
-
 	ModelFactoryMesh mesh;
 	for (const auto & use : uses) {
 		use->createMesh(mesh, 1);
@@ -23,7 +20,8 @@ FactoryMesh::createMesh() const
 		const auto smooth = mesh.property(mesh.smoothFaceProperty, face);
 		const auto colour = mesh.color(face);
 		for (const auto & vertex : mesh.fv_range(face)) {
-			vertices.emplace_back(mesh.point(vertex), NullUV,
+			const auto textureUV = mesh.texcoord2D(vertex);
+			vertices.emplace_back(mesh.point(vertex), textureUV,
 					smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
 						   : mesh.property(mesh.face_normals_pph(), face),
 					colour);

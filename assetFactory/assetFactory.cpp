@@ -2,11 +2,16 @@
 #include "collections.hpp"
 #include "cuboid.h"
 #include "cylinder.h"
+#include "filesystem.h"
+#include "gfx/image.h"
+#include "gfx/models/texture.h"
 #include "modelFactoryMesh_fwd.h"
 #include "object.h"
 #include "plane.h"
+#include "resource.h"
 #include "saxParse-persistence.h"
-#include <filesystem.h>
+#include "texturePacker.h"
+#include <stb/stb_image.h>
 
 AssetFactory::AssetFactory() :
 	shapes {
@@ -74,6 +79,61 @@ AssetFactory::parseColour(std::string_view in) const
 		}
 	}
 	throw std::runtime_error("No such asset factory colour");
+}
+
+AssetFactory::TextureFragmentCoords
+AssetFactory::getTextureCoords(std::string_view id) const
+{
+	createTexutre();
+	const auto & fragmentUV = textureFragmentPositions.at(id);
+	return {
+			fragmentUV.xy(),
+			fragmentUV.zy(),
+			fragmentUV.zw(),
+			fragmentUV.xw(),
+	};
+}
+
+Asset::TexturePtr
+AssetFactory::getTexture() const
+{
+	createTexutre();
+	return texture;
+}
+
+void
+AssetFactory::createTexutre() const
+{
+	if (!textureFragments.empty() && (!texture || textureFragmentPositions.empty())) {
+		// * load images
+		std::vector<std::unique_ptr<Image>> images;
+		std::transform(
+				textureFragments.begin(), textureFragments.end(), std::back_inserter(images), [](const auto & tf) {
+					return std::make_unique<Image>(Resource::mapPath(tf.second->path), STBI_rgb_alpha);
+				});
+		// * layout images
+		std::vector<TexturePacker::Image> imageSizes;
+		std::transform(images.begin(), images.end(), std::back_inserter(imageSizes), [](const auto & image) {
+			return TexturePacker::Image {image->width, image->height};
+		});
+		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
+		// * create texture
+		std::vector<glm::u8vec4> textureData(TexturePacker::area(outSize), {127, 127, 127, 255});
+		std::transform(textureFragments.begin(), textureFragments.end(),
+				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
+				[position = layout.begin(), size = imageSizes.begin(), outSize = outSize](const auto & tf) mutable {
+					const glm::vec4 positionFraction {
+							static_cast<float>(position->x) / static_cast<float>(outSize.x),
+							static_cast<float>(position->y) / static_cast<float>(outSize.y),
+							static_cast<float>(position->x + size->x) / static_cast<float>(outSize.x),
+							static_cast<float>(position->y + size->y) / static_cast<float>(outSize.y),
+					};
+					position++;
+					size++;
+					return decltype(textureFragmentPositions)::value_type {tf.first, positionFraction};
+				});
+		texture = std::make_shared<Texture>(outSize.x, outSize.y, textureData.data());
+	}
 }
 
 bool

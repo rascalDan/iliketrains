@@ -19,8 +19,21 @@ void
 Style::applyStyle(
 		ModelFactoryMesh & mesh, const ModelFactoryMesh::FaceHandle & face, EffectiveColour effectiveColour) const
 {
-	if (effectiveColour.has_value()) {
-		mesh.set_color(face, effectiveColour->get());
+	if (texture.empty()) {
+		if (effectiveColour.has_value()) {
+			mesh.set_color(face, effectiveColour->get());
+		}
+	}
+	else {
+		mesh.set_color(face, {});
+		if (auto mf = Persistence::ParseBase::getShared<const AssetFactory>("assetFactory")) {
+			auto coords = mf->getTextureCoords(texture);
+			auto coord = coords.begin();
+			// Wild assumption that face is a quad and the texture should apply linearly
+			for (const auto & vh : mesh.fv_range(face)) {
+				mesh.set_texcoord2D(vh, *coord++);
+			}
+		}
 	}
 }
 

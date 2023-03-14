@@ -4,12 +4,18 @@
 #include "persistence.h"
 #include <stdTypeDefs.hpp>
 
+class Texture;
+
 class Asset : public Persistence::Persistable, public StdTypeDefs<Asset> {
 public:
+	using TexturePtr = std::shared_ptr<Texture>;
+
 	std::string id;
 	std::string name;
 
 protected:
+	TexturePtr getTexture() const;
+
 	struct MeshConstruct : public Persistence::SelectionPtrBase<FactoryMesh::Ptr> {
 		using Persistence::SelectionPtrBase<FactoryMesh::Ptr>::setValue;
 
