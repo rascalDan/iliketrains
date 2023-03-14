@@ -34,6 +34,7 @@ struct JPP {
 BOOST_FIXTURE_TEST_CASE(load_object, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/load_object.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_CHECK_CLOSE(to->flt, 3.14, 0.01);
 	BOOST_CHECK_EQUAL(to->str, "Lovely string");
 	BOOST_CHECK_EQUAL(to->bl, true);
@@ -69,6 +70,7 @@ BOOST_FIXTURE_TEST_CASE(load_object, JPP)
 BOOST_FIXTURE_TEST_CASE(load_nested_object, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/nested.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_CHECK_EQUAL(to->flt, 1.F);
 	BOOST_CHECK_EQUAL(to->str, "one");
 	BOOST_REQUIRE(to->ptr);
@@ -86,6 +88,7 @@ BOOST_FIXTURE_TEST_CASE(load_nested_object, JPP)
 BOOST_FIXTURE_TEST_CASE(load_implicit_object, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/implicit.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_CHECK(to->ptr);
 	BOOST_CHECK_EQUAL(to->flt, 1.F);
 	BOOST_CHECK_EQUAL(to->ptr->str, "trigger");
@@ -95,6 +98,7 @@ BOOST_FIXTURE_TEST_CASE(load_implicit_object, JPP)
 BOOST_FIXTURE_TEST_CASE(load_empty_object, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/empty.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_CHECK_EQUAL(to->flt, 1.F);
 	BOOST_CHECK(to->ptr);
 	BOOST_CHECK_EQUAL(to->str, "after");
@@ -119,6 +123,7 @@ BOOST_FIXTURE_TEST_CASE(load_obj_no_such_type, JPP)
 BOOST_FIXTURE_TEST_CASE(load_abs_object, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/abs.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_REQUIRE(to->aptr);
 	BOOST_CHECK_NO_THROW(to->aptr->dummy());
 	BOOST_CHECK_EQUAL(to->aptr->base, "set base");
@@ -130,6 +135,7 @@ BOOST_FIXTURE_TEST_CASE(load_abs_object, JPP)
 BOOST_FIXTURE_TEST_CASE(load_vector_ptr, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/vector_ptr.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_CHECK(to->str.empty());
 	BOOST_CHECK_EQUAL(to->vptr.size(), 4);
 	BOOST_CHECK_EQUAL(to->vptr.at(0)->str, "type");
@@ -141,6 +147,7 @@ BOOST_FIXTURE_TEST_CASE(load_vector_ptr, JPP)
 BOOST_FIXTURE_TEST_CASE(test_conversion, JPP)
 {
 	auto to = load_json<std::unique_ptr<TestObject>>(FIXTURESDIR "json/conv.json");
+	BOOST_CHECK_EQUAL(to->postLoadCalled, 1);
 	BOOST_REQUIRE(to);
 	BOOST_CHECK_EQUAL(to->bl, true);
 	BOOST_CHECK_EQUAL(to->flt, 3.14F);

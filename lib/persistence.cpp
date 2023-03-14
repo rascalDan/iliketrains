@@ -41,6 +41,11 @@ namespace Persistence {
 		return ss.str();
 	}
 
+	void
+	Persistable::postLoad()
+	{
+	}
+
 	PersistenceSelect::PersistenceSelect(const std::string & n) : name {n} { }
 
 	PersistenceStore::NameAction

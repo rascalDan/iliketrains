@@ -311,8 +311,9 @@ namespace Persistence {
 		void
 		endObject(Persistence::Stack & stk) override
 		{
+			// TODO test with unique_ptr
 			map.emplace(std::invoke(Key, s), std::move(s));
-			stk.pop();
+			Persistence::SelectionT<Type>::endObject(stk);
 		}
 
 	private:
@@ -327,8 +328,9 @@ namespace Persistence {
 		void
 		endObject(Persistence::Stack & stk) override
 		{
+			// TODO test with unique_ptr
 			container.emplace_back(std::move(s));
-			stk.pop();
+			Persistence::SelectionT<Type>::endObject(stk);
 		}
 
 	private:
@@ -342,6 +344,7 @@ namespace Persistence {
 		DEFAULT_MOVE_COPY(Persistable);
 
 		virtual bool persist(PersistenceStore & store) = 0;
+		virtual void postLoad();
 
 		[[nodiscard]] virtual std::string getId() const;
 
@@ -484,6 +487,9 @@ namespace Persistence {
 			endObject(Stack & stk) override
 			{
 				make_default_as_needed(this->v);
+				if (this->v) {
+					this->v->postLoad();
+				}
 				stk.pop();
 			}
 
