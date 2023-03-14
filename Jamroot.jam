@@ -90,6 +90,7 @@ lib ilt :
 		<warnings-as-errors>off
 	]
 	:
+	<define>GLM_FORCE_SWIZZLE
 	<variant>debug:<warnings>pedantic
 	<variant>debug:<warnings-as-errors>on
 	<variant>debug:<cflags>-Wnon-virtual-dtor
