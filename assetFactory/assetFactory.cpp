@@ -118,21 +118,25 @@ AssetFactory::createTexutre() const
 		});
 		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
 		// * create texture
-		std::vector<glm::u8vec4> textureData(TexturePacker::area(outSize), {127, 127, 127, 255});
+		texture = std::make_shared<Texture>(outSize.x, outSize.y, TextureOptions {.wrap = GL_CLAMP_TO_EDGE});
 		std::transform(textureFragments.begin(), textureFragments.end(),
 				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
-				[position = layout.begin(), size = imageSizes.begin(), outSize = outSize](const auto & tf) mutable {
-					const glm::vec4 positionFraction {
-							static_cast<float>(position->x) / static_cast<float>(outSize.x),
-							static_cast<float>(position->y) / static_cast<float>(outSize.y),
-							static_cast<float>(position->x + size->x) / static_cast<float>(outSize.x),
-							static_cast<float>(position->y + size->y) / static_cast<float>(outSize.y),
+				[position = layout.begin(), image = images.begin(), size = imageSizes.begin(),
+						outSize = glm::vec2 {outSize}](const auto & tf) mutable {
+					glm::vec4 positionFraction {
+							static_cast<float>(position->x) / outSize.x,
+							static_cast<float>(position->y) / outSize.y,
+							static_cast<float>(position->x + size->x) / outSize.x,
+							static_cast<float>(position->y + size->y) / outSize.y,
 					};
+					glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(position->x), static_cast<GLint>(position->y),
+							static_cast<GLint>(size->x), static_cast<GLint>(size->y), GL_RGBA, GL_UNSIGNED_BYTE,
+							image->get()->data.data());
 					position++;
+					image++;
 					size++;
 					return decltype(textureFragmentPositions)::value_type {tf.first, positionFraction};
 				});
-		texture = std::make_shared<Texture>(outSize.x, outSize.y, textureData.data());
 	}
 }
 
