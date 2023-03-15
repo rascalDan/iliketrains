@@ -12,26 +12,28 @@
 
 Cache<Texture, std::filesystem::path> Texture::cachedTexture;
 
-Texture::Texture(const std::filesystem::path & fileName) :
-	Texture {Image {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha}}
+Texture::Texture(const std::filesystem::path & fileName, TextureOptions to) :
+	Texture {Image {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha}, to}
 {
 }
 
-Texture::Texture(const Image & tex) :
-	Texture {static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), tex.data.data()}
+Texture::Texture(const Image & tex, TextureOptions to) :
+	Texture {static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), tex.data.data(), to}
 {
 }
 
-Texture::Texture(GLsizei width, GLsizei height, const void * data)
+Texture::Texture(GLsizei width, GLsizei height, TextureOptions to) : Texture {width, height, nullptr, to} { }
+
+Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to)
 {
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, to.wrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, to.wrap);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, to.minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, to.magFilter);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 

@@ -8,11 +8,17 @@
 // IWYU pragma: no_forward_declare Cache
 class Image;
 
+struct TextureOptions {
+	GLint wrap {GL_REPEAT};
+	GLint minFilter {GL_LINEAR}, magFilter {GL_LINEAR};
+};
+
 class Texture {
 public:
-	explicit Texture(const std::filesystem::path & fileName);
-	explicit Texture(const Image & image);
-	explicit Texture(GLsizei width, GLsizei height, const void * data);
+	explicit Texture(const std::filesystem::path & fileName, TextureOptions = {});
+	explicit Texture(const Image & image, TextureOptions = {});
+	explicit Texture(GLsizei width, GLsizei height, TextureOptions = {});
+	explicit Texture(GLsizei width, GLsizei height, const void * data, TextureOptions = {});
 
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
