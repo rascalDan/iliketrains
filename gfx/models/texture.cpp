@@ -63,6 +63,12 @@ Texture::save(const glTexture & texture, GLenum format, GLenum type, const glm::
 }
 
 void
+Texture::save(const glm::ivec2 & size, const char * path) const
+{
+	save(m_texture, GL_BGR, GL_UNSIGNED_BYTE, size, 3, path, 2);
+}
+
+void
 Texture::save(const glTexture & texture, const glm::ivec2 & size, const char * path)
 {
 	save(texture, GL_BGR, GL_UNSIGNED_BYTE, size, 3, path, 2);

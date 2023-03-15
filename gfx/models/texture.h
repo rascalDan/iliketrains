@@ -24,6 +24,7 @@ public:
 
 	void bind(GLenum unit = GL_TEXTURE0) const;
 
+	void save(const glm::ivec2 & size, const char * path) const;
 	static void save(const glTexture &, const glm::ivec2 & size, const char * path);
 	static void saveDepth(const glTexture &, const glm::ivec2 & size, const char * path);
 	static void saveNormal(const glTexture &, const glm::ivec2 & size, const char * path);
