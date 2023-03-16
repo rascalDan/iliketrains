@@ -11,6 +11,7 @@ class Image;
 struct TextureOptions {
 	GLint wrap {GL_REPEAT};
 	GLint minFilter {GL_LINEAR}, magFilter {GL_LINEAR};
+	GLenum type {GL_TEXTURE_2D};
 };
 
 class Texture {
@@ -34,4 +35,5 @@ private:
 			const char * path, short tgaFormat);
 
 	glTexture m_texture;
+	GLenum type;
 };

@@ -24,24 +24,24 @@ Texture::Texture(const Image & tex, TextureOptions to) :
 
 Texture::Texture(GLsizei width, GLsizei height, TextureOptions to) : Texture {width, height, nullptr, to} { }
 
-Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to)
+Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to) : type {to.type}
 {
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glBindTexture(type, m_texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, to.wrap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, to.wrap);
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, to.wrap);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, to.wrap);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, to.minFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, to.magFilter);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
+	glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 void
 Texture::bind(GLenum unit) const
 {
 	glActiveTexture(unit);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glBindTexture(type, m_texture);
 }
 
 void
