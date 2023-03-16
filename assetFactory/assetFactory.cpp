@@ -123,12 +123,7 @@ AssetFactory::createTexutre() const
 				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
 				[position = layout.begin(), image = images.begin(), size = imageSizes.begin(),
 						outSize = glm::vec2 {outSize}](const auto & tf) mutable {
-					glm::vec4 positionFraction {
-							static_cast<float>(position->x) / outSize.x,
-							static_cast<float>(position->y) / outSize.y,
-							static_cast<float>(position->x + size->x) / outSize.x,
-							static_cast<float>(position->y + size->y) / outSize.y,
-					};
+					const auto positionFraction = glm::vec4 {*position, *position + *size} / outSize.xyxy();
 					glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(position->x), static_cast<GLint>(position->y),
 							static_cast<GLint>(size->x), static_cast<GLint>(size->y), GL_RGBA, GL_UNSIGNED_BYTE,
 							image->get()->data.data());
