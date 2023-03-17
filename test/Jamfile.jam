@@ -1,5 +1,6 @@
 import testing ;
 import sequence ;
+import path : glob-tree ;
 
 lib boost_unit_test_framework ;
 lib benchmark ;
@@ -48,12 +49,12 @@ run test-maths.cpp ;
 run test-lib.cpp ;
 run test-geo.cpp ;
 run test-network.cpp ;
-run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob fixtures/json/*.json fixtures/json/bad/*.json ] ] : <library>test ;
+run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob-tree fixtures : *.json ] ] : <library>test ;
 run test-text.cpp ;
 run test-enumDetails.cpp ;
 run test-render.cpp : : : <library>test ;
 run test-glContextBhvr.cpp ;
-run test-assetFactory.cpp : -- : ../res/brush47.xml : <library>test ;
+run test-assetFactory.cpp : -- : [ sequence.insertion-sort [ glob-tree $(res) : *.xml *.png ] fixtures/rgb.txt ] : <library>test ;
 run perf-assetFactory.cpp : : : <library>benchmark <library>test ;
 run perf-persistence.cpp : : : <library>benchmark <library>test ;
 compile test-static-enumDetails.cpp ;
