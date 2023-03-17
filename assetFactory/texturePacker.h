@@ -23,7 +23,7 @@ public:
 	using Positions = std::vector<Position>;
 	using Result = std::pair<Positions, Size>;
 
-	TexturePacker(std::vector<Image>);
+	TexturePacker(std::span<const Image>);
 
 	Result pack(Size) const;
 	Result pack() const;
@@ -32,5 +32,6 @@ public:
 	static decltype(Size::x) area(const Size & size);
 
 private:
-	std::vector<Image> inputImages;
+	std::span<const Image> inputImages;
+	std::vector<size_t> sortedIndexes;
 };

@@ -1,14 +1,16 @@
 #include "texturePacker.h"
+#include "collections.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <numeric>
 #include <ostream>
 #include <set>
 
-TexturePacker::TexturePacker(std::vector<Image> in) : inputImages {std::move(in)}
+TexturePacker::TexturePacker(std::span<const Image> in) :
+	inputImages {std::move(in)}, sortedIndexes {vectorOfN(inputImages.size(), size_t {})}
 {
-	std::sort(inputImages.rbegin(), inputImages.rend(), [](const auto & a, const auto & b) {
-		return area(a) < area(b);
+	std::sort(sortedIndexes.rbegin(), sortedIndexes.rend(), [this](const auto a, const auto b) {
+		return area(inputImages[a]) < area(inputImages[b]);
 	});
 }
 
@@ -24,15 +26,16 @@ TexturePacker::pack(Size size) const
 	using Spaces = std::set<Space>;
 	Spaces spaces {{{}, size}};
 
-	Positions result;
-	for (const auto & image : inputImages) {
+	Positions result(inputImages.size());
+	for (const auto & idx : sortedIndexes) {
+		const auto & image = inputImages[idx];
 		if (const auto spaceItr = std::find_if(spaces.begin(), spaces.end(),
 					[image](const Space & s) {
 						return image.x <= s.size.x && image.y <= s.size.y;
 					});
 				spaceItr != spaces.end()) {
 			auto space = *spaceItr;
-			result.push_back(space.position);
+			result[idx] = space.position;
 			spaces.erase(spaceItr);
 			if (space.size.x > image.x) {
 				spaces.emplace(Position {space.position.x + image.x, space.position.y},

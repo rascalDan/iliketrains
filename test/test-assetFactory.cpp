@@ -129,14 +129,15 @@ BOOST_AUTO_TEST_CASE(parseX11RGB)
 
 BOOST_AUTO_TEST_CASE(texturePacker)
 {
-	TexturePacker tp {{
+	std::vector<TexturePacker::Image> input {
 			{10, 10},
 			{10, 10},
 			{10, 10},
 			{100, 10},
 			{10, 200},
 			{5, 5},
-	}};
+	};
+	TexturePacker tp {input};
 	BOOST_CHECK_EQUAL(TexturePacker::Size(128, 256), tp.minSize());
 	const auto result = tp.pack();
 }
