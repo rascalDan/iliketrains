@@ -18,16 +18,17 @@ FactoryMesh::createMesh() const
 	for (const auto & face : mesh.faces()) {
 		const auto smooth = mesh.property(mesh.smoothFaceProperty, face);
 		const auto colour = mesh.color(face);
-		auto vrange = mesh.fv_range(face);
+		auto hrange = mesh.fh_range(face);
 		const unsigned int start = static_cast<unsigned int>(vertices.size());
-		for (const auto & vertex : vrange) {
-			const auto textureUV = mesh.texcoord2D(vertex);
+		for (const auto & heh : hrange) {
+			const auto & vertex = mesh.to_vertex_handle(heh);
+			const auto textureUV = mesh.texcoord2D(heh);
 			vertices.emplace_back(mesh.point(vertex), textureUV,
 					smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
 						   : mesh.property(mesh.face_normals_pph(), face),
 					colour);
 		}
-		const auto vcount = std::distance(vrange.begin(), vrange.end());
+		const auto vcount = std::distance(hrange.begin(), hrange.end());
 		for (unsigned int i = 2; i < vcount; i++) {
 			indices.push_back(start);
 			indices.push_back(start + i - 1);

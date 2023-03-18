@@ -30,8 +30,8 @@ Style::applyStyle(
 			auto coords = mf->getTextureCoords(texture);
 			auto coord = coords.begin();
 			// Wild assumption that face is a quad and the texture should apply linearly
-			for (const auto & vh : mesh.fv_range(face)) {
-				mesh.set_texcoord2D(vh, *coord++);
+			for (const auto & heh : mesh.fh_range(face)) {
+				mesh.set_texcoord2D(heh, *coord++);
 			}
 		}
 	}

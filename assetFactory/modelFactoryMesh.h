@@ -35,7 +35,8 @@ namespace OpenMesh {
 struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status | OpenMesh::Attributes::Color);
 	EdgeAttributes(OpenMesh::Attributes::Status);
-	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status | OpenMesh::Attributes::TexCoord2D);
+	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	HalfedgeAttributes(OpenMesh::Attributes::TexCoord2D);
 	using Point = glm::vec3;
 	using Normal = glm::vec3;
 	using Color = glm::vec4;
