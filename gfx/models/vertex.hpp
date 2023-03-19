@@ -11,6 +11,8 @@ public:
 	}
 #endif
 
+	bool operator==(const Vertex &) const = default;
+
 	glm::vec3 pos;
 	glm::vec2 texCoord;
 	glm::vec3 normal;
