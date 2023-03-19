@@ -10,6 +10,10 @@ public:
 	using Size = glm::uvec2;
 
 	struct Area {
+#ifndef __cpp_aggregate_paren_init
+		constexpr Area(Position p, Size s) : position {std::move(p)}, size {std::move(s)} { }
+#endif
+
 		Position position;
 		Size size;
 		bool
