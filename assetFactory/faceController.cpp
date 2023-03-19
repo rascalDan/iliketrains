@@ -33,8 +33,7 @@ FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const
 						return std::move(out);
 					});
 			const auto vertexCount = points.size();
-			const auto centre
-					= std::accumulate(points.begin(), points.end(), glm::vec3 {}) / static_cast<float>(vertexCount);
+			const auto centre = mesh.calc_face_centroid(cf.second);
 			if (type == "extrude") {
 				Shape::CreatedFaces newFaces;
 				// mutate points
