@@ -16,23 +16,31 @@ FactoryMesh::createMesh() const
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	for (const auto & face : mesh.faces()) {
-		const auto smooth = mesh.property(mesh.smoothFaceProperty, face);
-		const auto colour = mesh.color(face);
-		auto hrange = mesh.fh_range(face);
-		const unsigned int start = static_cast<unsigned int>(vertices.size());
-		for (const auto & heh : hrange) {
+		const auto & smooth = mesh.property(mesh.smoothFaceProperty, face);
+		const auto & colour = mesh.color(face);
+
+		std::vector<unsigned int> faceIndices;
+		for (const auto & heh : mesh.fh_range(face)) {
 			const auto & vertex = mesh.to_vertex_handle(heh);
-			const auto textureUV = mesh.texcoord2D(heh);
-			vertices.emplace_back(mesh.point(vertex), textureUV,
-					smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
-						   : mesh.property(mesh.face_normals_pph(), face),
-					colour);
+			const auto & textureUV = mesh.texcoord2D(heh);
+			const auto & point = mesh.point(vertex);
+			const auto & normal = smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
+										 : mesh.property(mesh.face_normals_pph(), face);
+			Vertex outVertex {point, textureUV, normal, colour};
+			if (const auto existingItr = std::find(vertices.rbegin(), vertices.rend(), outVertex);
+					existingItr != vertices.rend()) {
+				faceIndices.push_back(static_cast<unsigned int>(std::distance(existingItr, vertices.rend()) - 1));
+			}
+			else {
+				faceIndices.push_back(static_cast<unsigned int>(vertices.size()));
+				vertices.emplace_back(outVertex);
+			}
 		}
-		const auto vcount = std::distance(hrange.begin(), hrange.end());
-		for (unsigned int i = 2; i < vcount; i++) {
-			indices.push_back(start);
-			indices.push_back(start + i - 1);
-			indices.push_back(start + i);
+
+		for (unsigned int i = 2; i < faceIndices.size(); i++) {
+			indices.push_back(faceIndices[0]);
+			indices.push_back(faceIndices[i - 1]);
+			indices.push_back(faceIndices[i]);
 		}
 	}
 	return std::make_shared<Mesh>(vertices, indices);
