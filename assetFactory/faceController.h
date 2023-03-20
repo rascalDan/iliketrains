@@ -17,7 +17,6 @@ public:
 
 	std::string id;
 	std::string type;
-	bool smooth {false};
 	FaceControllers faceControllers;
 
 private:

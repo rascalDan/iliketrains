@@ -48,12 +48,10 @@ FaceController::applySingle(ModelFactoryMesh & mesh, const StyleStack & parents,
 			faces.merge(std::move(newFaces));
 		}
 		else {
-			mesh.property(mesh.smoothFaceProperty, faceHandle) = smooth;
 			applyStyle(mesh, parents + this, faceHandle);
 		}
 	}
 	for (const auto & [faceName, faceHandle] : controlledFaces) {
-		mesh.property(mesh.smoothFaceProperty, faceHandle) = smooth;
 		applyStyle(mesh, parents + this, faceHandle);
 	}
 }
@@ -89,9 +87,8 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 		auto & newFaceName = mesh.property(mesh.nameFaceProperty, newFace);
 		newFaceName = getAdjacentFaceName(mesh, ofrange, newFace);
 		newFaces.emplace(newFaceName, newFace);
-		mesh.property(mesh.smoothFaceProperty, newFace) = smooth;
 	}
-	mesh.property(mesh.smoothFaceProperty, newFaces.emplace(faceName, mesh.add_face(vertices))->second) = smooth;
+	newFaces.emplace(faceName, mesh.add_face(vertices));
 
 	return newFaces;
 }
@@ -99,7 +96,6 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 bool
 FaceController::persist(Persistence::PersistenceStore & store)
 {
-	return STORE_TYPE && STORE_MEMBER(id) && Style::persist(store) && STORE_MEMBER(type) && STORE_MEMBER(smooth)
-			&& Mutation::persist(store)
+	return STORE_TYPE && STORE_MEMBER(id) && Style::persist(store) && STORE_MEMBER(type) && Mutation::persist(store)
 			&& STORE_NAME_HELPER("face", faceControllers, Persistence::MapByMember<FaceControllers>);
 }

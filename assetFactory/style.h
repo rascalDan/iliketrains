@@ -31,6 +31,7 @@ public:
 	static EffectiveColour getColour(const StyleStack & parents);
 
 	ColourAlpha colour {};
+	std::optional<bool> smooth;
 	std::string texture;
 	std::string textureRotation; // Multiples of 90deg, no int/enum support
 

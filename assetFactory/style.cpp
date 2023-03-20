@@ -19,6 +19,9 @@ void
 Style::applyStyle(
 		ModelFactoryMesh & mesh, const ModelFactoryMesh::FaceHandle & face, EffectiveColour effectiveColour) const
 {
+	if (smooth.has_value()) {
+		mesh.property(mesh.smoothFaceProperty, face) = smooth.value();
+	}
 	if (texture.empty()) {
 		if (effectiveColour.has_value()) {
 			mesh.set_color(face, effectiveColour->get());
@@ -60,5 +63,6 @@ Style::persist(Persistence::PersistenceStore & store)
 		}
 	};
 
-	return STORE_HELPER(colour, ColourParser) && STORE_MEMBER(texture) && STORE_MEMBER(textureRotation);
+	return STORE_HELPER(colour, ColourParser) && STORE_MEMBER(smooth) && STORE_MEMBER(texture)
+			&& STORE_MEMBER(textureRotation);
 }
