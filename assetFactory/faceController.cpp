@@ -4,7 +4,18 @@
 #include "modelFactoryMesh.h"
 
 void
-FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & name,
+FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & names,
+		Shape::CreatedFaces & faces) const
+{
+	std::stringstream nameStream {names};
+	std::for_each(std::istream_iterator<std::string>(nameStream), std::istream_iterator<std::string> {},
+			[&](const auto & name) {
+				applySingle(mesh, parents, name, faces);
+			});
+}
+
+void
+FaceController::applySingle(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & name,
 		Shape::CreatedFaces & faces) const
 {
 	const auto getAdjacentFaceName = [&mesh](const auto & ofrange, OpenMesh::FaceHandle nf) -> std::string {

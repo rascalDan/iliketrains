@@ -2,8 +2,7 @@
 <ilt p.id="assetFactory">
   <object id="wheel">
     <use type="cylinder" position="0,0,0.571" scale="1.142,1.142,0.07" rotation="0,0,1.5708" colour="silver">
-      <face id="top" colour="#413b3a"/>
-      <face id="bottom" colour="#413b3a"/>
+      <face id="top bottom" colour="#413b3a"/>
     </use>
     <use type="cuboid" scale="0.3,0.5,0.3" position="0.2,0,0.421" colour="grey30"/>
   </object>
@@ -66,15 +65,12 @@
       <use type="cuboid" position="0,0,1.2" scale="2.69,19.38,0.3" colour="goldenrod">
         <face id="bottom" colour="#2c3539"/>
         <face id="top" type="extrude" position="0,0,1.05" colour="#2c4f5a">
-          <face id="front" colour="goldenrod"/>
-          <face id="back" colour="goldenrod"/>
+          <face id="front back" colour="goldenrod"/>
           <face id="top" type="extrude" scale="1,0.96,1" position="0,0,0.775">
-            <face id="front" colour="#e1eff3"/>
-            <face id="back" colour="#e1eff3"/>
+            <face id="front back" colour="#e1eff3"/>
             <face id="top" type="extrude" scale="0.5,0.85,0" smooth="true" position="0,0,0.575" colour="#aeb0b0">
               <face id="top" texture="roofTopWithVents"/>
-              <face id="left" texture="roofSideWithVents"/>
-              <face id="right" texture="roofSideWithVents"/>
+              <face id="right left" texture="roofSideWithVents"/>
             </face>
           </face>
         </face>

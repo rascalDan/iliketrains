@@ -12,7 +12,7 @@ class FaceController : public Mutation, public Style, public Persistence::Persis
 public:
 	using FaceControllers = std::map<std::string, std::unique_ptr<FaceController>>;
 
-	void apply(ModelFactoryMesh & mesh, const Style::StyleStack & parents, const std::string & name,
+	void apply(ModelFactoryMesh & mesh, const Style::StyleStack & parents, const std::string & names,
 			Shape::CreatedFaces & faces) const;
 
 	std::string id;
@@ -28,4 +28,7 @@ private:
 	{
 		return {};
 	};
+
+	void applySingle(ModelFactoryMesh & mesh, const Style::StyleStack & parents, const std::string & name,
+			Shape::CreatedFaces & faces) const;
 };
