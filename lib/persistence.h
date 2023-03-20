@@ -6,6 +6,7 @@
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <optional>
 #include <span>
 #include <special_members.hpp>
 #include <sstream>
@@ -145,6 +146,10 @@ namespace Persistence {
 		{
 			out.pushValue(this->v);
 		}
+	};
+
+	template<typename T> struct SelectionT<std::optional<T>> : public SelectionT<T> {
+		explicit SelectionT(std::optional<T> & value) : SelectionT<T> {value.emplace()} { }
 	};
 
 	struct Persistable;
