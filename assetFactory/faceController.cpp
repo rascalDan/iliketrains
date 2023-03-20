@@ -52,9 +52,9 @@ FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const
 					const auto next = (idx + 1) % vertexCount;
 					const auto newFace
 							= mesh.add_face({baseVertices[idx], baseVertices[next], vertices[next], vertices[idx]});
-					auto & name = mesh.property(mesh.nameFaceProperty, newFace);
-					name = getAdjacentFaceName(ofrange, newFace);
-					newFaces.emplace(name, newFace);
+					auto & newFaceName = mesh.property(mesh.nameFaceProperty, newFace);
+					newFaceName = getAdjacentFaceName(ofrange, newFace);
+					newFaces.emplace(newFaceName, newFace);
 				}
 				newFaces.emplace(name, mesh.add_face(vertices));
 				if (smooth) {
@@ -63,8 +63,8 @@ FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const
 					}
 				}
 				applyStyle(mesh, parents + this, newFaces);
-				for (const auto & [name, faceController] : faceControllers) {
-					faceController->apply(mesh, parents + this, name, newFaces);
+				for (const auto & [subFaceName, faceController] : faceControllers) {
+					faceController->apply(mesh, parents + this, subFaceName, newFaces);
 				}
 				faces.merge(std::move(newFaces));
 			}
