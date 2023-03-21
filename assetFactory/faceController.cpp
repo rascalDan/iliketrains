@@ -47,11 +47,6 @@ FaceController::applySingle(ModelFactoryMesh & mesh, const StyleStack & parents,
 			}
 			faces.merge(std::move(newFaces));
 		}
-		else {
-			applyStyle(mesh, parents + this, faceHandle);
-		}
-	}
-	for (const auto & [faceName, faceHandle] : controlledFaces) {
 		applyStyle(mesh, parents + this, faceHandle);
 	}
 }
