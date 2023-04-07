@@ -68,7 +68,7 @@ private:
 };
 
 BOOST_FIXTURE_TEST_SUITE(m, FactoryFixture);
-BOOST_AUTO_TEST_CASE(brush47xml)
+BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/brush47.xml");
 	BOOST_REQUIRE(mf);
@@ -118,7 +118,7 @@ BOOST_DATA_TEST_CASE(normalizeColourName,
 	BOOST_CHECK_EQUAL(in, exp);
 }
 
-BOOST_AUTO_TEST_CASE(parseX11RGB)
+BOOST_AUTO_TEST_CASE(parseX11RGB, *boost::unit_test::timeout(5))
 {
 	const auto parsedColours = AssetFactory::parseX11RGB(FIXTURESDIR "rgb.txt");
 	BOOST_REQUIRE_EQUAL(parsedColours.size(), 20);
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(parseX11RGB)
 	BOOST_CHECK_CLOSE_VEC(parsedColours.at("lightsteelblue1"), AssetFactory::Colour(0.79, 0.88, 1));
 }
 
-BOOST_AUTO_TEST_CASE(texturePacker)
+BOOST_AUTO_TEST_CASE(texturePacker, *boost::unit_test::timeout(5))
 {
 	std::vector<TexturePacker::Image> input {
 			{10, 10},
