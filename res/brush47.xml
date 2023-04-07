@@ -70,7 +70,11 @@
             <face id="front back" colour="#e1eff3"/>
             <face id="top" type="extrude" scale="0.5,0.85,0" smooth="true" position="0,0,0.575" colour="#aeb0b0">
               <face id="top" texture="roofTopWithVents"/>
-              <face id="right left" texture="roofSideWithVents"/>
+              <face id="right left">
+                <split id="frontcorner" origin="0,7.90704,0" normal="0,1,0"/>
+                <split id="backcorner" origin="0,-7.90704,0" normal="0,-1,0"/>
+                <face id="right left" texture="roofSideWithVents"/>
+              </face>
             </face>
           </face>
         </face>
