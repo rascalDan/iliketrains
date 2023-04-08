@@ -50,23 +50,13 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 {
 	// get points
 	const auto baseVertices {materializeRange(mesh.fv_range(faceHandle))};
-	auto points = std::accumulate(
-			baseVertices.begin(), baseVertices.end(), std::vector<glm::vec3> {}, [&mesh](auto && out, auto && v) {
-				out.push_back(mesh.point(v));
-				return std::move(out);
-			});
-	const auto vertexCount = points.size();
-	const auto centre = mesh.calc_face_centroid(faceHandle);
-	// mutate points
-	std::for_each(points.begin(), points.end(), [mutation = getMatrix(), &centre](auto && p) {
-		p = centre + ((p - centre) % mutation);
-	});
 	// create new vertices
-	std::vector<OpenMesh::VertexHandle> vertices;
-	std::transform(points.begin(), points.end(), std::back_inserter(vertices), [&mesh](auto && p) {
-		return mesh.add_vertex(p);
-	});
+	const auto vertices
+			= baseVertices * [&mesh, mutation = getMatrix(), centre = mesh.calc_face_centroid(faceHandle)](auto && v) {
+				  return mesh.add_vertex(centre + ((mesh.point(v) - centre) % mutation));
+			  };
 	// get new faces names
+	const auto vertexCount = baseVertices.size();
 	std::vector<std::string> faceNames;
 	for (size_t idx {}; idx < vertexCount; ++idx) {
 		const auto next = (idx + 1) % vertexCount;
