@@ -46,8 +46,6 @@ private:
 
 	void applySingle(ModelFactoryMesh & mesh, const Style::StyleStack & parents, const std::string & name,
 			Shape::CreatedFaces & faces) const;
-	static std::string getAdjacentFaceName(const ModelFactoryMesh & mesh,
-			const std::span<const OpenMesh::FaceHandle> ofrange, OpenMesh::FaceHandle nf);
 	Shape::CreatedFaces extrude(ModelFactoryMesh & mesh, const std::string & faceName, OpenMesh::FaceHandle) const;
 	Shape::CreatedFaces split(
 			ModelFactoryMesh & mesh, const std::string & faceName, OpenMesh::FaceHandle &, const Split &) const;

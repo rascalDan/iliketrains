@@ -15,18 +15,6 @@ FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const
 			});
 }
 
-std::string
-FaceController::getAdjacentFaceName(
-		const ModelFactoryMesh & mesh, const std::span<const OpenMesh::FaceHandle> ofrange, OpenMesh::FaceHandle nf)
-{
-	const auto nfrange = mesh.ff_range(nf);
-	if (const auto target = std::find_first_of(ofrange.begin(), ofrange.end(), nfrange.begin(), nfrange.end());
-			target != ofrange.end()) {
-		return mesh.property(mesh.nameFaceProperty, *target);
-	};
-	return {};
-};
-
 void
 FaceController::applySingle(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & name,
 		Shape::CreatedFaces & faces) const
