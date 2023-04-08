@@ -69,7 +69,6 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 			});
 	const auto vertexCount = points.size();
 	const auto centre = mesh.calc_face_centroid(faceHandle);
-	Shape::CreatedFaces newFaces;
 	// mutate points
 	std::for_each(points.begin(), points.end(), [mutation = getMatrix(), &centre](auto && p) {
 		p = centre + ((p - centre) % mutation);
@@ -79,17 +78,22 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 	std::transform(points.begin(), points.end(), std::back_inserter(vertices), [&mesh](auto && p) {
 		return mesh.add_vertex(p);
 	});
-	// create new faces
-	const auto ofrange = materializeRange(mesh.ff_range(faceHandle));
-	mesh.delete_face(faceHandle);
+	// get new faces names
+	std::vector<std::string> faceNames;
 	for (size_t idx {}; idx < vertexCount; ++idx) {
 		const auto next = (idx + 1) % vertexCount;
-		const auto newFace = mesh.add_face({baseVertices[idx], baseVertices[next], vertices[next], vertices[idx]});
-		auto & newFaceName = mesh.property(mesh.nameFaceProperty, newFace);
-		newFaceName = getAdjacentFaceName(mesh, ofrange, newFace);
-		newFaces.emplace(newFaceName, newFace);
+		const auto existingEdge = mesh.find_halfedge(baseVertices[idx], baseVertices[next]);
+		faceNames.push_back(mesh.property(mesh.nameAdjFaceProperty, existingEdge));
 	}
-	newFaces.emplace(faceName, mesh.add_face(vertices));
+	// create new faces
+	mesh.delete_face(faceHandle);
+	Shape::CreatedFaces newFaces;
+	for (size_t idx {}; idx < vertexCount; ++idx) {
+		const auto next = (idx + 1) % vertexCount;
+		newFaces.emplace(mesh.add_namedFace(
+				faceNames[idx], baseVertices[idx], baseVertices[next], vertices[next], vertices[idx]));
+	}
+	newFaces.emplace(mesh.add_namedFace(faceName, vertices));
 
 	return newFaces;
 }
