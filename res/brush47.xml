@@ -60,14 +60,25 @@
   </object>
   <textureFragment id="roofSideWithVents" path="rail/roofSideWithVents.png"/>
   <textureFragment id="roofTopWithVents" path="rail/roofTopWithVents.png"/>
+  <textureFragment id="cabWindowFront" path="rail/cabWindowFront.png"/>
   <asset p.typeid="RailVehicleClass" id="brush-47" name="Brush 47" length="19.38" wheelBase="15.70" maxSpeed="42.4688">
     <bodyMesh id="body" size="2.69,19.38,3.9">
       <use type="cuboid" position="0,0,1.2" scale="2.69,19.38,0.3" colour="goldenrod">
         <face id="bottom" colour="#2c3539"/>
         <face id="top" type="extrude" position="0,0,1.05" colour="#2c4f5a">
           <face id="front back" colour="goldenrod"/>
+          <face id="right left">
+            <split id="frontcorner" origin="0,7.90704,0" normal="0,1,0"/>
+            <split id="backcorner" origin="0,-7.90704,0" normal="0,-1,0"/>
+            <face id="rightfrontcorner leftfrontcorner rightbackcorner leftbackcorner" colour="goldenrod"/>
+          </face>
           <face id="top" type="extrude" scale="1,0.96,1" position="0,0,0.775">
-            <face id="front back" colour="#e1eff3"/>
+            <face id="front back" texture="cabWindowFront"/>
+            <face id="right left">
+              <split id="frontcorner" origin="0,7.90704,0" normal="0,1,0"/>
+              <split id="backcorner" origin="0,-7.90704,0" normal="0,-1,0"/>
+              <face id="rightfrontcorner leftfrontcorner rightbackcorner leftbackcorner" texture="cabWindowFront"/>
+            </face>
             <face id="top" type="extrude" scale="0.5,0.85,0" smooth="true" position="0,0,0.575" colour="#aeb0b0">
               <face id="top" texture="roofTopWithVents"/>
               <face id="right left">
