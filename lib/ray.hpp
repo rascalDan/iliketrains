@@ -7,6 +7,8 @@ class Ray {
 public:
 	Ray(glm::vec3 start, glm::vec3 direction) : start {start}, direction {direction} { }
 
+	static Ray fromPoints(glm::vec3, glm::vec3);
+
 	glm::vec3 start;
 	glm::vec3 direction;
 

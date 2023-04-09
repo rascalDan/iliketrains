@@ -1,6 +1,12 @@
 #include "ray.hpp"
 #include <algorithm>
 
+Ray
+Ray::fromPoints(glm::vec3 start, glm::vec3 p)
+{
+	return {start, glm::normalize(p - start)};
+}
+
 float
 Ray::distanceToLine(const glm::vec3 & p1, const glm::vec3 & e1) const
 {
