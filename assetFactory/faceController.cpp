@@ -2,7 +2,7 @@
 #include "collections.hpp"
 #include "maths.h"
 #include "modelFactoryMesh.h"
-#include <glm/gtx/intersect.hpp>
+#include "ray.hpp"
 
 void
 FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & names,
@@ -89,15 +89,11 @@ FaceController::split(
 	for (size_t curIdx = 0; curIdx < vertexRelations.size(); ++curIdx) {
 		const size_t nextIdx = (curIdx + 1) % vertexRelations.size();
 		const auto &current = vertexRelations[curIdx], next = vertexRelations[nextIdx];
-		if ((current.second == GeometricPlane::PlaneRelation::Above
-					&& next.second == GeometricPlane::PlaneRelation::Below)
-				|| (current.second == GeometricPlane::PlaneRelation::Below
-						&& next.second == GeometricPlane::PlaneRelation::Above)) {
-			const auto origin = mesh.point(current.first), dir = glm::normalize(mesh.point(next.first) - origin);
-
-			float dist {};
-			glm::intersectRayPlane(origin, dir, split.origin, split.normal, dist);
-			const auto newv = mesh.add_vertex(origin + (dir * dist));
+		if (GeometricPlane::isIntersect(current.second, next.second)) {
+			const auto ray = Ray::fromPoints(mesh.point(current.first), mesh.point(next.first));
+			const auto intersect = split.getRayIntersectPosition(ray);
+			assert(intersect);
+			const auto newv = mesh.add_vertex(intersect->position);
 			auto where = vertexRelations.begin();
 			++curIdx;
 			std::advance(where, curIdx);
