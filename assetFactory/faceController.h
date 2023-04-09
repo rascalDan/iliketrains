@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometricPlane.h"
 #include "modelFactoryMesh_fwd.h"
 #include "mutation.h"
 #include "persistence.h"
@@ -10,10 +11,9 @@
 
 class FaceController : public Mutation, public Style, public Persistence::Persistable {
 public:
-	class Split : public Persistable {
+	class Split : public Persistable, public GeometricPlane {
 	public:
 		std::string id;
-		glm::vec3 origin, normal;
 
 	private:
 		friend Persistence::SelectionPtrBase<std::unique_ptr<Split>>;

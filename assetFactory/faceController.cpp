@@ -76,7 +76,6 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 	return newFaces;
 }
 
-enum class PlaneRelation { Above, Below, On };
 Shape::CreatedFaces
 FaceController::split(
 		ModelFactoryMesh & mesh, const std::string & name, OpenMesh::FaceHandle & fh, const Split & split) const
@@ -84,15 +83,16 @@ FaceController::split(
 	// Map face vertex handles to their relationship to the split plane
 	const auto vertices = materializeRange(mesh.fv_range(fh));
 	auto vertexRelations = vertices * [&split, &mesh](OpenMesh::VertexHandle vh) {
-		const auto d = glm::dot(split.normal, mesh.point(vh) - split.origin);
-		return std::make_pair(vh, d < 0.f ? PlaneRelation::Below : d > 0.f ? PlaneRelation::Above : PlaneRelation::On);
+		return std::make_pair(vh, split.getRelation(mesh.point(vh)));
 	};
 	// Insert new vertices where half edges intersect the split plane
 	for (size_t curIdx = 0; curIdx < vertexRelations.size(); ++curIdx) {
 		const size_t nextIdx = (curIdx + 1) % vertexRelations.size();
 		const auto &current = vertexRelations[curIdx], next = vertexRelations[nextIdx];
-		if ((current.second == PlaneRelation::Above && next.second == PlaneRelation::Below)
-				|| (current.second == PlaneRelation::Below && next.second == PlaneRelation::Above)) {
+		if ((current.second == GeometricPlane::PlaneRelation::Above
+					&& next.second == GeometricPlane::PlaneRelation::Below)
+				|| (current.second == GeometricPlane::PlaneRelation::Below
+						&& next.second == GeometricPlane::PlaneRelation::Above)) {
 			const auto origin = mesh.point(current.first), dir = glm::normalize(mesh.point(next.first) - origin);
 
 			float dist {};
@@ -101,7 +101,7 @@ FaceController::split(
 			auto where = vertexRelations.begin();
 			++curIdx;
 			std::advance(where, curIdx);
-			vertexRelations.emplace(where, newv, PlaneRelation::On);
+			vertexRelations.emplace(where, newv, GeometricPlane::PlaneRelation::On);
 		}
 	}
 	// Create vertex vectors
@@ -113,8 +113,8 @@ FaceController::split(
 			}
 		}
 	};
-	filterVertices(out.front(), PlaneRelation::Above);
-	filterVertices(out.back(), PlaneRelation::Below);
+	filterVertices(out.front(), GeometricPlane::PlaneRelation::Above);
+	filterVertices(out.back(), GeometricPlane::PlaneRelation::Below);
 
 	if (out.back().size() > 2) {
 		Shape::CreatedFaces newFaces;
