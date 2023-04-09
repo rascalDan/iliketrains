@@ -8,16 +8,24 @@
 // IWYU pragma: no_forward_declare Cache
 class Image;
 
+struct TextureOptions {
+	GLint wrap {GL_REPEAT};
+	GLint minFilter {GL_LINEAR}, magFilter {GL_LINEAR};
+	GLenum type {GL_TEXTURE_2D};
+};
+
 class Texture {
 public:
-	explicit Texture(const std::filesystem::path & fileName);
-	explicit Texture(const Image & image);
-	explicit Texture(GLsizei width, GLsizei height, const void * data);
+	explicit Texture(const std::filesystem::path & fileName, TextureOptions = {});
+	explicit Texture(const Image & image, TextureOptions = {});
+	explicit Texture(GLsizei width, GLsizei height, TextureOptions = {});
+	explicit Texture(GLsizei width, GLsizei height, const void * data, TextureOptions = {});
 
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
 	void bind(GLenum unit = GL_TEXTURE0) const;
 
+	void save(const glm::ivec2 & size, const char * path) const;
 	static void save(const glTexture &, const glm::ivec2 & size, const char * path);
 	static void saveDepth(const glTexture &, const glm::ivec2 & size, const char * path);
 	static void saveNormal(const glTexture &, const glm::ivec2 & size, const char * path);
@@ -27,4 +35,5 @@ private:
 			const char * path, short tgaFormat);
 
 	glTexture m_texture;
+	GLenum type;
 };

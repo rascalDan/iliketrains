@@ -21,8 +21,8 @@ Cuboid::createMesh(ModelFactoryMesh & mesh, float) const
 	return {
 			mesh.add_namedFace("top", vhs[4], vhs[5], vhs[6], vhs[7]),
 			mesh.add_namedFace("bottom", vhs[0], vhs[1], vhs[2], vhs[3]),
-			mesh.add_namedFace("left", vhs[0], vhs[7], vhs[6], vhs[1]),
-			mesh.add_namedFace("right", vhs[2], vhs[5], vhs[4], vhs[3]),
+			mesh.add_namedFace("right", vhs[0], vhs[7], vhs[6], vhs[1]),
+			mesh.add_namedFace("left", vhs[2], vhs[5], vhs[4], vhs[3]),
 			mesh.add_namedFace("front", vhs[0], vhs[3], vhs[4], vhs[7]),
 			mesh.add_namedFace("back", vhs[2], vhs[1], vhs[6], vhs[5]),
 	};

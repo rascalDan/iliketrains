@@ -6,8 +6,8 @@
 #include <ray.hpp>
 
 Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
-	position {pos}, forward {::north}, up {::up}, fov {fov}, aspect {aspect}, near {zNear}, far {zFar},
-	projection {glm::perspective(fov, aspect, zNear, zFar)},
+	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar}, projection {glm::perspective(
+																					fov, aspect, zNear, zFar)},
 	viewProjection {projection * glm::lookAt(position, position + forward, up)}, inverseViewProjection {
 																						 glm::inverse(viewProjection)}
 {

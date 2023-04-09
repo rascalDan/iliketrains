@@ -14,8 +14,9 @@ uniform sampler2D texture0;
 void
 main()
 {
-	float clear = round(texture(texture0, TexCoords).a);
+	vec4 textureColour = texture(texture0, TexCoords);
+	float clear = round(mix(textureColour.a, 1, Colour.a));
 	gPosition = vec4(FragPos, clear);
 	gNormal = vec4(Normal, clear);
-	gAlbedoSpec = mix(texture(texture0, TexCoords), vec4(Colour.rgb, 1), Colour.a);
+	gAlbedoSpec = mix(textureColour, vec4(Colour.rgb, 1), Colour.a);
 }

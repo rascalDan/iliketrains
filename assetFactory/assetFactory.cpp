@@ -2,11 +2,16 @@
 #include "collections.hpp"
 #include "cuboid.h"
 #include "cylinder.h"
+#include "filesystem.h"
+#include "gfx/image.h"
+#include "gfx/models/texture.h"
 #include "modelFactoryMesh_fwd.h"
 #include "object.h"
 #include "plane.h"
+#include "resource.h"
 #include "saxParse-persistence.h"
-#include <filesystem.h>
+#include "texturePacker.h"
+#include <stb/stb_image.h>
 
 AssetFactory::AssetFactory() :
 	shapes {
@@ -75,11 +80,68 @@ AssetFactory::parseColour(std::string_view in) const
 	}
 	throw std::runtime_error("No such asset factory colour");
 }
+
+AssetFactory::TextureFragmentCoords
+AssetFactory::getTextureCoords(std::string_view id) const
+{
+	createTexutre();
+	const auto & fragmentUV = textureFragmentPositions.at(id);
+	return {
+			fragmentUV.xy(),
+			fragmentUV.zy(),
+			fragmentUV.zw(),
+			fragmentUV.xw(),
+	};
+}
+
+Asset::TexturePtr
+AssetFactory::getTexture() const
+{
+	createTexutre();
+	return texture;
+}
+
+void
+AssetFactory::createTexutre() const
+{
+	if (!textureFragments.empty() && (!texture || textureFragmentPositions.empty())) {
+		// * load images
+		std::vector<std::unique_ptr<Image>> images;
+		std::transform(
+				textureFragments.begin(), textureFragments.end(), std::back_inserter(images), [](const auto & tf) {
+					return std::make_unique<Image>(Resource::mapPath(tf.second->path), STBI_rgb_alpha);
+				});
+		// * layout images
+		std::vector<TexturePacker::Image> imageSizes;
+		std::transform(images.begin(), images.end(), std::back_inserter(imageSizes), [](const auto & image) {
+			return TexturePacker::Image {image->width, image->height};
+		});
+		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
+		// * create texture
+		texture = std::make_shared<Texture>(outSize.x, outSize.y, TextureOptions {.wrap = GL_CLAMP_TO_EDGE});
+		std::transform(textureFragments.begin(), textureFragments.end(),
+				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
+				[position = layout.begin(), image = images.begin(), size = imageSizes.begin(),
+						outSize = glm::vec2 {outSize}](const auto & tf) mutable {
+					const auto positionFraction = glm::vec4 {*position, *position + *size} / outSize.xyxy();
+					glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(position->x), static_cast<GLint>(position->y),
+							static_cast<GLint>(size->x), static_cast<GLint>(size->y), GL_RGBA, GL_UNSIGNED_BYTE,
+							image->get()->data.data());
+					position++;
+					image++;
+					size++;
+					return decltype(textureFragmentPositions)::value_type {tf.first, positionFraction};
+				});
+	}
+}
+
 bool
 AssetFactory::persist(Persistence::PersistenceStore & store)
 {
 	using MapObjects = Persistence::MapByMember<Shapes, std::shared_ptr<Object>>;
 	using MapAssets = Persistence::MapByMember<Assets>;
+	using MapTextureFragments = Persistence::MapByMember<TextureFragments>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects)
+			&& STORE_NAME_HELPER("textureFragment", textureFragments, MapTextureFragments)
 			&& STORE_NAME_HELPER("asset", assets, MapAssets);
 }

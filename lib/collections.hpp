@@ -92,11 +92,11 @@ operator+(const std::vector<T...> & in, Vn && vn)
 	return out;
 }
 
-template<template<typename> typename Direction = std::plus>
+template<template<typename> typename Direction = std::plus, typename T = unsigned int>
 [[nodiscard]] static auto
-vectorOfN(std::integral auto N, unsigned int start = {}, unsigned int step = 1)
+vectorOfN(std::integral auto N, T start = {}, T step = 1)
 {
-	std::vector<unsigned int> v;
+	std::vector<T> v;
 	v.resize(N);
 	std::generate_n(v.begin(), N, [&start, step, adj = Direction {}]() {
 		return std::exchange(start, adj(start, step));
@@ -117,3 +117,18 @@ materializeRange(const std::pair<In, In> & in)
 {
 	return Rtn(in.first, in.second);
 }
+
+template<typename T> struct pair_range {
+	constexpr auto &
+	begin() const noexcept
+	{
+		return pair.first;
+	}
+	constexpr auto &
+	end() const noexcept
+	{
+		return pair.second;
+	}
+	const std::pair<T, T> & pair;
+};
+template<typename T> pair_range(std::pair<T, T>) -> pair_range<T>;

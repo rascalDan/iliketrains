@@ -12,34 +12,36 @@
 
 Cache<Texture, std::filesystem::path> Texture::cachedTexture;
 
-Texture::Texture(const std::filesystem::path & fileName) :
-	Texture {Image {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha}}
+Texture::Texture(const std::filesystem::path & fileName, TextureOptions to) :
+	Texture {Image {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha}, to}
 {
 }
 
-Texture::Texture(const Image & tex) :
-	Texture {static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), tex.data.data()}
+Texture::Texture(const Image & tex, TextureOptions to) :
+	Texture {static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), tex.data.data(), to}
 {
 }
 
-Texture::Texture(GLsizei width, GLsizei height, const void * data)
+Texture::Texture(GLsizei width, GLsizei height, TextureOptions to) : Texture {width, height, nullptr, to} { }
+
+Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to) : type {to.type}
 {
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glBindTexture(type, m_texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, to.wrap);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, to.wrap);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
+	glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 void
 Texture::bind(GLenum unit) const
 {
 	glActiveTexture(unit);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glBindTexture(type, m_texture);
 }
 
 void
@@ -58,6 +60,12 @@ Texture::save(const glTexture & texture, GLenum format, GLenum type, const glm::
 			static_cast<short>(8 * channels)};
 	glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
 	tga.msync(MS_ASYNC);
+}
+
+void
+Texture::save(const glm::ivec2 & size, const char * path) const
+{
+	save(m_texture, GL_BGR, GL_UNSIGNED_BYTE, size, 3, path, 2);
 }
 
 void

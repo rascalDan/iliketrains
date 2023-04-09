@@ -39,7 +39,10 @@ struct TestObject : public Persistence::Persistable {
 	std::unique_ptr<AbsObject> aptr;
 	std::vector<std::unique_ptr<TestObject>> vptr;
 
+	unsigned int postLoadCalled {};
+
 	bool persist(Persistence::PersistenceStore & store) override;
+	void postLoad() override;
 };
 
 struct SharedTestObject : public Persistence::Persistable {

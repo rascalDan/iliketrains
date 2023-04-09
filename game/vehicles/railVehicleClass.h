@@ -30,6 +30,7 @@ public:
 protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<RailVehicleClass>>;
 	bool persist(Persistence::PersistenceStore & store) override;
+	void postLoad() override;
 
 private:
 	RailVehicleClass(std::unique_ptr<ObjParser> obj, std::shared_ptr<Texture>);

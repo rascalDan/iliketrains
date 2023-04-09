@@ -41,12 +41,22 @@ namespace Persistence {
 		return ss.str();
 	}
 
+	void
+	Persistable::postLoad()
+	{
+	}
+
 	PersistenceSelect::PersistenceSelect(const std::string & n) : name {n} { }
 
-	PersistenceStore::NameAction
-	PersistenceSelect::setName(const std::string_view key, const Selection &)
+	PersistenceStore::NameActionSelection
+	PersistenceSelect::setName(const std::string_view key, SelectionFactory && factory)
 	{
-		return (key == name) ? NameAction::Push : NameAction::Ignore;
+		if (key == name) {
+			return {NameAction::Push, factory()};
+		}
+		else {
+			return {NameAction::Ignore, nullptr};
+		}
 	}
 
 	void
@@ -56,10 +66,11 @@ namespace Persistence {
 
 	PersistenceWrite::PersistenceWrite(const Writer & o, bool sh) : out {o}, shared {sh} { }
 
-	PersistenceStore::NameAction
-	PersistenceWrite::setName(const std::string_view key, const Selection & s)
+	PersistenceStore::NameActionSelection
+	PersistenceWrite::setName(const std::string_view key, SelectionFactory && factory)
 	{
-		if (s.needsWrite()) {
+		auto s = factory();
+		if (s->needsWrite()) {
 			if (!first) {
 				out.nextValue();
 			}
@@ -67,9 +78,9 @@ namespace Persistence {
 				first = false;
 			}
 			out.pushKey(key);
-			return NameAction::HandleAndContinue;
+			return {NameAction::HandleAndContinue, std::move(s)};
 		}
-		return NameAction::Ignore;
+		return {NameAction::Ignore, nullptr};
 	}
 
 	void

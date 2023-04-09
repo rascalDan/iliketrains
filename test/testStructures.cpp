@@ -42,6 +42,12 @@ TestObject::persist(Persistence::PersistenceStore & store)
 			&& STORE_MEMBER(vptr);
 }
 
+void
+TestObject::postLoad()
+{
+	postLoadCalled++;
+}
+
 bool
 SharedTestObject::persist(Persistence::PersistenceStore & store)
 {

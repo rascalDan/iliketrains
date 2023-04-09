@@ -6,6 +6,7 @@
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <optional>
 #include <span>
 #include <special_members.hpp>
 #include <sstream>
@@ -147,8 +148,13 @@ namespace Persistence {
 		}
 	};
 
+	template<typename T> struct SelectionT<std::optional<T>> : public SelectionT<T> {
+		explicit SelectionT(std::optional<T> & value) : SelectionT<T> {value.emplace()} { }
+	};
+
 	struct Persistable;
 	struct PersistenceStore {
+		using SelectionFactory = std::function<SelectionPtr()>;
 		PersistenceStore() = default;
 		virtual ~PersistenceStore() = default;
 		DEFAULT_MOVE_NO_COPY(PersistenceStore);
@@ -156,12 +162,14 @@ namespace Persistence {
 		template<typename T> [[nodiscard]] inline bool persistType(const T * const, const std::type_info & ti);
 
 		enum class NameAction { Push, HandleAndContinue, Ignore };
+		using NameActionSelection = std::pair<NameAction, SelectionPtr>;
 		template<typename Helper, typename T>
 		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
 		{
-			auto s = std::make_unique<Helper>(value);
-			const auto act {setName(key, *s)};
+			auto [act, s] = setName(key, [&value]() {
+				return std::make_unique<Helper>(value);
+			});
 			if (act != NameAction::Ignore) {
 				sel = std::move(s);
 				if (act == NameAction::HandleAndContinue) {
@@ -171,7 +179,7 @@ namespace Persistence {
 			return (act != NameAction::Push);
 		}
 
-		virtual NameAction setName(const std::string_view key, const Selection &) = 0;
+		[[nodiscard]] virtual NameActionSelection setName(const std::string_view key, SelectionFactory &&) = 0;
 		virtual void selHandler() {};
 		virtual void setType(const std::string_view, const Persistable *) = 0;
 
@@ -181,7 +189,7 @@ namespace Persistence {
 	struct PersistenceSelect : public PersistenceStore {
 		explicit PersistenceSelect(const std::string & n);
 
-		NameAction setName(const std::string_view key, const Selection &) override;
+		NameActionSelection setName(const std::string_view key, SelectionFactory &&) override;
 
 		void setType(const std::string_view, const Persistable *) override;
 
@@ -191,7 +199,7 @@ namespace Persistence {
 	struct PersistenceWrite : public PersistenceStore {
 		explicit PersistenceWrite(const Writer & o, bool sh);
 
-		NameAction setName(const std::string_view key, const Selection &) override;
+		NameActionSelection setName(const std::string_view key, SelectionFactory &&) override;
 
 		void selHandler() override;
 
@@ -311,8 +319,9 @@ namespace Persistence {
 		void
 		endObject(Persistence::Stack & stk) override
 		{
+			// TODO test with unique_ptr
 			map.emplace(std::invoke(Key, s), std::move(s));
-			stk.pop();
+			Persistence::SelectionT<Type>::endObject(stk);
 		}
 
 	private:
@@ -327,8 +336,9 @@ namespace Persistence {
 		void
 		endObject(Persistence::Stack & stk) override
 		{
+			// TODO test with unique_ptr
 			container.emplace_back(std::move(s));
-			stk.pop();
+			Persistence::SelectionT<Type>::endObject(stk);
 		}
 
 	private:
@@ -342,6 +352,7 @@ namespace Persistence {
 		DEFAULT_MOVE_COPY(Persistable);
 
 		virtual bool persist(PersistenceStore & store) = 0;
+		virtual void postLoad();
 
 		[[nodiscard]] virtual std::string getId() const;
 
@@ -484,6 +495,9 @@ namespace Persistence {
 			endObject(Stack & stk) override
 			{
 				make_default_as_needed(this->v);
+				if (this->v) {
+					this->v->postLoad();
+				}
 				stk.pop();
 			}
 

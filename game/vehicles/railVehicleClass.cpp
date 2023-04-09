@@ -50,6 +50,12 @@ RailVehicleClass::persist(Persistence::PersistenceStore & store)
 }
 
 void
+RailVehicleClass::postLoad()
+{
+	texture = getTexture();
+}
+
+void
 RailVehicleClass::render(
 		const SceneShader & shader, const Location & location, const std::array<Location, 2> & bl) const
 {

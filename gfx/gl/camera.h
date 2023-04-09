@@ -72,7 +72,7 @@ private:
 	glm::vec3 forward;
 	glm::vec3 up;
 
-	float fov, aspect, near, far;
+	float near, far;
 	glm::mat4 projection;
 	glm::mat4 viewProjection, inverseViewProjection;
 };

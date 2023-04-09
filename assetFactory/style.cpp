@@ -4,27 +4,48 @@
 void
 Style::applyStyle(ModelFactoryMesh & mesh, const StyleStack & parents, const Shape::CreatedFaces & faces) const
 {
-	if (const auto effectiveColour = getProperty(parents, &Style::colour,
-				[](auto && style) {
-					return style->colour.a > 0;
-				});
-			effectiveColour.has_value()) {
-		for (const auto & face : faces) {
-			mesh.set_color(face.second, effectiveColour->get());
-		}
+	for (const auto & face : faces) {
+		applyStyle(mesh, face.second, getColour(parents));
 	}
 }
 
 void
 Style::applyStyle(ModelFactoryMesh & mesh, const StyleStack & parents, const ModelFactoryMesh::FaceHandle & face) const
 {
-	if (const auto effectiveColour = getProperty(parents, &Style::colour,
-				[](auto && style) {
-					return style->colour.a > 0;
-				});
-			effectiveColour.has_value()) {
-		mesh.set_color(face, effectiveColour->get());
+	applyStyle(mesh, face, getColour(parents));
+}
+
+void
+Style::applyStyle(
+		ModelFactoryMesh & mesh, const ModelFactoryMesh::FaceHandle & face, EffectiveColour effectiveColour) const
+{
+	if (smooth.has_value()) {
+		mesh.property(mesh.smoothFaceProperty, face) = smooth.value();
 	}
+	if (texture.empty()) {
+		if (effectiveColour.has_value()) {
+			mesh.set_color(face, effectiveColour->get());
+		}
+	}
+	else {
+		mesh.set_color(face, {});
+		if (auto mf = Persistence::ParseBase::getShared<const AssetFactory>("assetFactory")) {
+			auto coords = mf->getTextureCoords(texture);
+			auto coord = coords.begin();
+			// Wild assumption that face is a quad and the texture should apply linearly
+			for (const auto & heh : mesh.fh_range(face)) {
+				mesh.set_texcoord2D(heh, *coord++);
+			}
+		}
+	}
+}
+
+Style::EffectiveColour
+Style::getColour(const StyleStack & parents)
+{
+	return getProperty(parents, &Style::colour, [](auto && style) {
+		return style->colour.a > 0;
+	});
 }
 
 bool
@@ -42,5 +63,6 @@ Style::persist(Persistence::PersistenceStore & store)
 		}
 	};
 
-	return STORE_HELPER(colour, ColourParser);
+	return STORE_HELPER(colour, ColourParser) && STORE_MEMBER(smooth) && STORE_MEMBER(texture)
+			&& STORE_MEMBER(textureRotation);
 }
