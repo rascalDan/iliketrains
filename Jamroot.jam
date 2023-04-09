@@ -13,6 +13,7 @@ pkg-config.import glew ;
 pkg-config.import freetype2 ;
 pkg-config.import glib-2.0 ;
 pkg-config.import mxml ;
+pkg-config.import assimp ;
 lib pthread ;
 lib OpenMeshCore ;
 
@@ -115,6 +116,7 @@ lib ilt :
 	<library>freetype2
 	<library>glib-2.0
 	<library>mxml
+	<library>assimp
 	<library>pthread
 	<library>OpenMeshCore
 	: :
