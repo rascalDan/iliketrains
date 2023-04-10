@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ilt p.id="assetFactory">
+  <assimp path="shapespark-low-poly-plants-kit.fbx"/>
+  <asset p.typeid="Foliage" id="Tree-01-1" name="Tree-01-1">
+    <bodyMesh id="body">
+      <use type="Tree-01-1"/>
+    </bodyMesh>
+  </asset>
+</ilt>

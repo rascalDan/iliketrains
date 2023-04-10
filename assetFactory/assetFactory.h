@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asset.h"
+#include "assimp.h"
 #include "persistence.h"
 #include "shape.h"
 #include "textureFragment.h"
@@ -12,6 +13,7 @@ class AssetFactory : public Persistence::Persistable {
 public:
 	using Shapes = std::map<std::string, Shape::Ptr, std::less<>>;
 	using Assets = std::map<std::string, Asset::Ptr, std::less<>>;
+	using AssImps = std::map<std::string, AssImp::Ptr, std::less<>>;
 	using TextureFragments = std::map<std::string, TextureFragment::Ptr, std::less<>>;
 	using Colour = glm::vec3;
 	using ColourAlpha = glm::vec4;
@@ -26,6 +28,7 @@ public:
 
 	Shapes shapes;
 	Assets assets;
+	AssImps assimps;
 	Colours colours;
 	TextureFragments textureFragments;
 

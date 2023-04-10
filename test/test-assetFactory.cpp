@@ -8,6 +8,8 @@
 #include "assetFactory/assetFactory.h"
 #include "assetFactory/object.h"
 #include "assetFactory/texturePacker.h"
+#include "game/scenary/foliage.h"
+#include "game/scenary/plant.h"
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
 #include "gfx/gl/sceneRenderer.h"
@@ -93,6 +95,21 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 
 	auto railVehicle = std::make_shared<RailVehicle>(brush47rvc);
 	objects.objects.push_back(railVehicle);
+
+	render();
+}
+
+BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
+{
+	auto mf = AssetFactory::loadXML(RESDIR "/foliage.xml");
+	BOOST_REQUIRE(mf);
+	auto tree_01_1 = mf->assets.at("Tree-01-1");
+	BOOST_REQUIRE(tree_01_1);
+	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
+	BOOST_REQUIRE(tree_01_1_f);
+
+	auto plant = std::make_shared<Plant>(tree_01_1_f, Location {});
+	objects.objects.push_back(plant);
 
 	render();
 }

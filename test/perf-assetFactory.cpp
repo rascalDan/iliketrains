@@ -14,6 +14,17 @@ brush47xml_load(benchmark::State & state)
 	}
 }
 
+static void
+foliagexml_load(benchmark::State & state)
+{
+	TestMainWindow window;
+
+	for (auto _ : state) {
+		benchmark::DoNotOptimize(AssetFactory::loadXML(RESDIR "/foliage.xml"));
+	}
+}
+
 BENCHMARK(brush47xml_load);
+BENCHMARK(foliagexml_load);
 
 BENCHMARK_MAIN();

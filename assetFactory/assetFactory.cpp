@@ -109,7 +109,7 @@ AssetFactory::createTexutre() const
 		std::transform(
 				textureFragments.begin(), textureFragments.end(), std::back_inserter(imageSizes), [](const auto & tf) {
 					return TexturePacker::Image {tf.second->image->width, tf.second->image->height};
-		});
+				});
 		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
 		// * create texture
 		texture = std::make_shared<Texture>(outSize.x, outSize.y, TextureOptions {.wrap = GL_CLAMP_TO_EDGE});
@@ -134,7 +134,8 @@ AssetFactory::persist(Persistence::PersistenceStore & store)
 	using MapObjects = Persistence::MapByMember<Shapes, std::shared_ptr<Object>>;
 	using MapAssets = Persistence::MapByMember<Assets>;
 	using MapTextureFragments = Persistence::MapByMember<TextureFragments>;
+	using MapAssImp = Persistence::MapByMember<AssImps, std::shared_ptr<AssImp>, &AssImp::path>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects)
 			&& STORE_NAME_HELPER("textureFragment", textureFragments, MapTextureFragments)
-			&& STORE_NAME_HELPER("asset", assets, MapAssets);
+			&& STORE_NAME_HELPER("assimp", assimps, MapAssImp) && STORE_NAME_HELPER("asset", assets, MapAssets);
 }
