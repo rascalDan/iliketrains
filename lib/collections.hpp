@@ -65,10 +65,11 @@ operator*=(IterableCollection auto & in, auto && f)
 }
 
 template<template<typename...> typename C, typename... T>
+	requires IterableCollection<C<T...>>
 [[nodiscard]] constexpr auto
 operator*(const C<T...> & in, auto && f)
 {
-	C<decltype(f(in[0]))> out;
+	C<decltype(f(*in.begin()))> out;
 
 	std::transform(in.begin(), in.end(), std::inserter(out, out.end()), f);
 	return out;
