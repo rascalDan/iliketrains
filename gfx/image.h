@@ -8,6 +8,7 @@ class Image {
 public:
 	Image(const char * fileName, int flags);
 	Image(const std::string & fileName, int flags) : Image(fileName.c_str(), flags) { }
+	Image(std::span<unsigned char> data, int flags);
 	~Image();
 
 	NO_COPY(Image);
