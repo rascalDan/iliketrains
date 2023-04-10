@@ -70,6 +70,9 @@ template<template<typename...> typename C, typename... T>
 operator*(const C<T...> & in, auto && f)
 {
 	C<decltype(f(*in.begin()))> out;
+	if constexpr (requires { out.reserve(in.size()); }) {
+		out.reserve(in.size());
+	}
 
 	std::transform(in.begin(), in.end(), std::inserter(out, out.end()), f);
 	return out;
