@@ -11,7 +11,6 @@
 #include "resource.h"
 #include "saxParse-persistence.h"
 #include "texturePacker.h"
-#include <stb/stb_image.h>
 
 AssetFactory::AssetFactory() :
 	shapes {
@@ -105,30 +104,24 @@ void
 AssetFactory::createTexutre() const
 {
 	if (!textureFragments.empty() && (!texture || textureFragmentPositions.empty())) {
-		// * load images
-		std::vector<std::unique_ptr<Image>> images;
-		std::transform(
-				textureFragments.begin(), textureFragments.end(), std::back_inserter(images), [](const auto & tf) {
-					return std::make_unique<Image>(Resource::mapPath(tf.second->path), STBI_rgb_alpha);
-				});
 		// * layout images
 		std::vector<TexturePacker::Image> imageSizes;
-		std::transform(images.begin(), images.end(), std::back_inserter(imageSizes), [](const auto & image) {
-			return TexturePacker::Image {image->width, image->height};
+		std::transform(
+				textureFragments.begin(), textureFragments.end(), std::back_inserter(imageSizes), [](const auto & tf) {
+					return TexturePacker::Image {tf.second->image->width, tf.second->image->height};
 		});
 		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
 		// * create texture
 		texture = std::make_shared<Texture>(outSize.x, outSize.y, TextureOptions {.wrap = GL_CLAMP_TO_EDGE});
 		std::transform(textureFragments.begin(), textureFragments.end(),
 				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
-				[position = layout.begin(), image = images.begin(), size = imageSizes.begin(),
-						outSize = glm::vec2 {outSize}](const auto & tf) mutable {
+				[position = layout.begin(), size = imageSizes.begin(), outSize = glm::vec2 {outSize}](
+						const auto & tf) mutable {
 					const auto positionFraction = glm::vec4 {*position, *position + *size} / outSize.xyxy();
 					glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(position->x), static_cast<GLint>(position->y),
 							static_cast<GLint>(size->x), static_cast<GLint>(size->y), GL_RGBA, GL_UNSIGNED_BYTE,
-							image->get()->data.data());
+							tf.second->image->data.data());
 					position++;
-					image++;
 					size++;
 					return decltype(textureFragmentPositions)::value_type {tf.first, positionFraction};
 				});
