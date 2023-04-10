@@ -78,6 +78,27 @@ operator*(const C<T...> & in, auto && f)
 	return out;
 }
 
+template<typename T, std::size_t N>
+[[nodiscard]] constexpr auto
+operator*(const std::span<T, N> in, auto && f)
+{
+	std::array<decltype(f(std::declval<T>())), N> out;
+
+	std::transform(in.begin(), in.end(), out.begin(), f);
+	return out;
+}
+
+template<typename T>
+[[nodiscard]] constexpr auto
+operator*(const std::span<T, std::dynamic_extent> in, auto && f)
+{
+	std::vector<decltype(f(std::declval<T>()))> out;
+
+	out.reserve(in.size());
+	std::transform(in.begin(), in.end(), std::inserter(out, out.end()), f);
+	return out;
+}
+
 template<typename... T>
 constexpr auto &
 operator+=(std::vector<T...> & in, std::vector<T...> && src)
