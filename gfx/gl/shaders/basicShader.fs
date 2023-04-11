@@ -4,10 +4,7 @@ in vec3 FragPos;
 in vec2 TexCoords;
 in vec3 Normal;
 in vec4 Colour;
-
-out vec4 gPosition;
-out vec4 gNormal;
-out vec4 gAlbedoSpec;
+include(`geometryOut.glsl')
 
 uniform sampler2D texture0;
 

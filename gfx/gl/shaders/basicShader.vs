@@ -1,10 +1,6 @@
 #version 330 core
 
-in vec3 position;
-in vec2 texCoord;
-in vec3 normal;
-in vec4 colour;
-
+include(`meshIn.glsl')
 out vec3 FragPos;
 out vec2 TexCoords;
 out vec3 Normal;
