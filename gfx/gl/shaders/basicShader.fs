@@ -1,9 +1,6 @@
 #version 330 core
 
-in vec3 FragPos;
-in vec2 TexCoords;
-in vec3 Normal;
-in vec4 Colour;
+include(`materialInterface.glsl')
 include(`geometryOut.glsl')
 
 uniform sampler2D texture0;

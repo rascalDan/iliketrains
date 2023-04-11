@@ -1,9 +1,7 @@
 #version 330 core
 #extension GL_ARB_shading_language_420pack : enable
 
-in vec3 FragPos;
-in vec2 TexCoords;
-in vec3 Normal;
+include(`materialInterface.glsl')
 include(`geometryOut.glsl')
 
 uniform sampler2D texture0;

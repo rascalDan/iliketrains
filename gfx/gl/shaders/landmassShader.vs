@@ -1,10 +1,7 @@
 #version 330 core
 
 include(`meshIn.glsl')
-out vec3 FragPos;
-out vec2 TexCoords;
-out vec3 Normal;
-out vec4 Colour;
+include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
 
