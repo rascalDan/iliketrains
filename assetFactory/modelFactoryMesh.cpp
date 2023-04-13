@@ -3,6 +3,7 @@
 ModelFactoryMesh::ModelFactoryMesh()
 {
 	add_property(smoothFaceProperty);
+	add_property(materialFaceProperty);
 	add_property(nameFaceProperty);
 	add_property(nameAdjFaceProperty);
 }

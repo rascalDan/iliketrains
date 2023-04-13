@@ -80,17 +80,11 @@ AssetFactory::parseColour(std::string_view in) const
 	throw std::runtime_error("No such asset factory colour");
 }
 
-AssetFactory::TextureFragmentCoords
-AssetFactory::getTextureCoords(std::string_view id) const
+GLuint
+AssetFactory::getMaterialIndex(std::string_view id) const
 {
 	createTexutre();
-	const auto & fragmentUV = textureFragmentPositions.at(id);
-	return {
-			fragmentUV.xy(),
-			fragmentUV.zy(),
-			fragmentUV.zw(),
-			fragmentUV.xw(),
-	};
+	return textureFragmentPositions.at(id);
 }
 
 Asset::TexturePtr
@@ -103,7 +97,7 @@ AssetFactory::getTexture() const
 void
 AssetFactory::createTexutre() const
 {
-	if (!textureFragments.empty() && (!texture || textureFragmentPositions.empty())) {
+	if (!textureFragments.empty() && !texture) {
 		// * layout images
 		std::vector<TexturePacker::Image> imageSizes;
 		std::transform(
@@ -112,18 +106,14 @@ AssetFactory::createTexutre() const
 				});
 		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
 		// * create texture
-		texture = std::make_shared<Texture>(outSize.x, outSize.y, TextureOptions {.wrap = GL_CLAMP_TO_EDGE});
+		texture = std::make_shared<TextureAtlas>(outSize.x, outSize.y, layout.size());
 		std::transform(textureFragments.begin(), textureFragments.end(),
 				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
-				[position = layout.begin(), size = imageSizes.begin(), outSize = glm::vec2 {outSize}](
-						const auto & tf) mutable {
-					const auto positionFraction = glm::vec4 {*position, *position + *size} / outSize.xyxy();
-					glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(position->x), static_cast<GLint>(position->y),
-							static_cast<GLint>(size->x), static_cast<GLint>(size->y), GL_RGBA, GL_UNSIGNED_BYTE,
-							tf.second->image->data.data());
+				[position = layout.begin(), size = imageSizes.begin(), this](const auto & tf) mutable {
+					const auto m = texture->add(*position, *size, tf.second->image->data.data());
 					position++;
 					size++;
-					return decltype(textureFragmentPositions)::value_type {tf.first, positionFraction};
+					return decltype(textureFragmentPositions)::value_type {tf.first, m};
 				});
 	}
 }

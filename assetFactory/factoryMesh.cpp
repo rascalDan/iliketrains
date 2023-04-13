@@ -18,6 +18,7 @@ FactoryMesh::createMesh() const
 		for (const auto & face : mesh.faces()) {
 			const auto & smooth = mesh.property(mesh.smoothFaceProperty, face);
 			const auto & colour = mesh.color(face);
+			const auto & material = mesh.property(mesh.materialFaceProperty, face);
 
 			std::vector<unsigned int> faceIndices;
 			for (const auto & heh : mesh.fh_range(face)) {
@@ -26,7 +27,7 @@ FactoryMesh::createMesh() const
 				const auto & point = mesh.point(vertex);
 				const auto & normal = smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
 											 : mesh.property(mesh.face_normals_pph(), face);
-				Vertex outVertex {point, textureUV, normal, colour};
+				Vertex outVertex {point, textureUV, normal, colour, material};
 				if (const auto existingItr = std::find(vertices.rbegin(), vertices.rend(), outVertex);
 						existingItr != vertices.rend()) {
 					faceIndices.push_back(static_cast<unsigned int>(std::distance(existingItr, vertices.rend()) - 1));

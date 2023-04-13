@@ -64,11 +64,11 @@ public:
 		};
 		const auto & m = *scene->mMaterials[amesh->mMaterialIndex];
 
-		AssetFactory::TextureFragmentCoords tfc;
+		GLuint material {};
 		if (auto mf = Persistence::ParseBase::getShared<AssetFactory>("assetFactory")) {
 			aiString path;
 			m.Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path);
-			tfc = mf->getTextureCoords(path.C_Str());
+			material = mf->getMaterialIndex(path.C_Str());
 		}
 
 		for (const auto & f : AIRANGE(amesh, Faces)) {
@@ -79,8 +79,8 @@ public:
 			if (amesh->HasTextureCoords(0)) {
 				for (auto idx = f.mIndices; const auto fheh : mesh.fh_range(fh)) {
 					const auto ouv = !amesh->mTextureCoords[0][*idx++];
-					const auto uv = glm::mix(tfc[0], tfc[2], ouv);
-					mesh.set_texcoord2D(fheh, uv);
+					mesh.set_texcoord2D(fheh, ouv);
+					mesh.property(mesh.materialFaceProperty, fh) = material;
 				}
 			}
 		}
