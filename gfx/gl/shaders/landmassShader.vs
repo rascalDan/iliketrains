@@ -12,6 +12,7 @@ main()
 	TexCoords = texCoord;
 	Normal = normal;
 	Colour = colour;
+	Material = material;
 
 	gl_Position = viewProjection * vec4(position, 1.0);
 }
