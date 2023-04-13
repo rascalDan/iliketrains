@@ -29,12 +29,12 @@ operator!(const aiVector3t<T> & v)
 		(parent)->m##member, (parent)->mNum##member \
 	}
 
-using ScemeCPtr = std::shared_ptr<const aiScene>;
+using SceneCPtr = std::shared_ptr<const aiScene>;
 class AssImpNode : public Shape {
 public:
-	AssImpNode(ScemeCPtr scene, const aiNode * node) : scene(std::move(scene)), node(node) { }
+	AssImpNode(SceneCPtr scene, const aiNode * node) : scene(std::move(scene)), node(node) { }
 
-	ScemeCPtr scene;
+	SceneCPtr scene;
 	const aiNode * node;
 
 	CreatedFaces
@@ -90,7 +90,7 @@ public:
 void
 AssImp::postLoad()
 {
-	ScemeCPtr scene {
+	SceneCPtr scene {
 			aiImportFile(Resource::mapPath(path).c_str(), aiProcess_RemoveRedundantMaterials), &aiReleaseImport};
 	if (!scene) {
 		throw std::runtime_error("Failed to load asset library: " + path);
