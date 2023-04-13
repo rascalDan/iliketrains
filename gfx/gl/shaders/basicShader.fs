@@ -21,9 +21,9 @@ void
 main()
 {
 	vec4 textureColour = getTextureColour(Material, TexCoords);
-	float clear = round(mix(textureColour.a, 1, Colour.a));
-	gPosition = vec4(FragPos, clear);
-	gNormal = vec4(Normal, clear);
-	gl_FragDepth = mix(1.0, gl_FragCoord.z, clear);
+	float opaque = step(0.5, mix(textureColour.a, 1, Colour.a));
+	gPosition = vec4(FragPos, opaque);
+	gNormal = vec4(Normal, opaque);
+	gl_FragDepth = mix(1.0, gl_FragCoord.z, opaque);
 	gAlbedoSpec = mix(textureColour, vec4(Colour.rgb, 1), Colour.a);
 }
