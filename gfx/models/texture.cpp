@@ -85,3 +85,35 @@ Texture::saveNormal(const glTexture & texture, const glm::ivec2 & size, const ch
 {
 	save(texture, GL_BGR, GL_BYTE, size, 3, path, 2);
 }
+
+TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Texture(width, height, nullptr, {})
+{
+	glBindTexture(GL_TEXTURE_RECTANGLE, m_atlas);
+
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA16UI, 2, static_cast<GLsizei>(count), 0, GL_RGBA_INTEGER,
+			GL_UNSIGNED_BYTE, nullptr);
+}
+
+void
+TextureAtlas::bind(GLenum unit) const
+{
+	Texture::bind(unit);
+	glActiveTexture(unit + 1);
+	glBindTexture(GL_TEXTURE_RECTANGLE, m_atlas);
+}
+
+GLuint
+TextureAtlas::add(glm::ivec2 position, glm::ivec2 size, void * data, TextureOptions)
+{
+	glTextureSubImage2D(m_texture, 0, position.x, position.y, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	struct Material {
+		glm::vec<2, uint16_t> position, size, unused1 {}, unused2 {};
+	} material {position, size};
+	glTextureSubImage2D(m_atlas, 0, 0, static_cast<GLsizei>(used), 2, 1, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, &material);
+	return ++used;
+}

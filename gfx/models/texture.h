@@ -16,6 +16,9 @@ struct TextureOptions {
 
 class Texture {
 public:
+	virtual ~Texture() = default;
+	DEFAULT_MOVE_NO_COPY(Texture);
+
 	explicit Texture(const std::filesystem::path & fileName, TextureOptions = {});
 	explicit Texture(const Image & image, TextureOptions = {});
 	explicit Texture(GLsizei width, GLsizei height, TextureOptions = {});
@@ -23,17 +26,29 @@ public:
 
 	static Cache<Texture, std::filesystem::path> cachedTexture;
 
-	void bind(GLenum unit = GL_TEXTURE0) const;
+	virtual void bind(GLenum unit = GL_TEXTURE0) const;
 
 	void save(const glm::ivec2 & size, const char * path) const;
 	static void save(const glTexture &, const glm::ivec2 & size, const char * path);
 	static void saveDepth(const glTexture &, const glm::ivec2 & size, const char * path);
 	static void saveNormal(const glTexture &, const glm::ivec2 & size, const char * path);
 
-private:
+protected:
 	static void save(const glTexture &, GLenum, GLenum, const glm::ivec2 & size, unsigned short channels,
 			const char * path, short tgaFormat);
 
 	glTexture m_texture;
 	GLenum type;
+};
+
+class TextureAtlas : public Texture {
+public:
+	TextureAtlas(GLsizei width, GLsizei height, GLuint count);
+
+	void bind(GLenum unit = GL_TEXTURE0) const override;
+	GLuint add(glm::ivec2 position, glm::ivec2 size, void * data, TextureOptions = {});
+
+private:
+	glTexture m_atlas;
+	GLuint used {};
 };
