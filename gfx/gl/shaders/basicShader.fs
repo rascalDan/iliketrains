@@ -1,22 +1,29 @@
 #version 330 core
+#extension GL_ARB_shading_language_420pack : enable
 
-in vec3 FragPos;
-in vec2 TexCoords;
-in vec3 Normal;
-in vec4 Colour;
+include(`materialInterface.glsl')
+include(`geometryOut.glsl')
 
-out vec4 gPosition;
-out vec4 gNormal;
-out vec4 gAlbedoSpec;
+layout(binding = 0) uniform sampler2D texture0;
+layout(binding = 1) uniform usampler2DRect material;
 
-uniform sampler2D texture0;
+vec4 getTextureColour(uint midx, vec2 uv)
+{
+	if (midx > 0u) {
+		const vec2 tSize = textureSize(texture0, 0);
+		const vec4 sPosSize = texture(material, uvec2(0, midx - 1u));
+		uv = (sPosSize.xy + sPosSize.zw * fract(uv)) / tSize;
+	}
+	return texture(texture0, uv);
+}
 
 void
 main()
 {
-	vec4 textureColour = texture(texture0, TexCoords);
-	float clear = round(mix(textureColour.a, 1, Colour.a));
-	gPosition = vec4(FragPos, clear);
-	gNormal = vec4(Normal, clear);
+	vec4 textureColour = getTextureColour(Material, TexCoords);
+	float opaque = step(0.5, mix(textureColour.a, 1, Colour.a));
+	gPosition = vec4(FragPos, opaque);
+	gNormal = vec4(Normal, opaque);
+	gl_FragDepth = mix(1.0, gl_FragCoord.z, opaque);
 	gAlbedoSpec = mix(textureColour, vec4(Colour.rgb, 1), Colour.a);
 }

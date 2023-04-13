@@ -1,12 +1,7 @@
 #version 330 core
 
-in vec3 position;
-in vec2 texCoord;
-in vec3 normal;
-
-out vec3 FragPos;
-out vec2 TexCoords;
-out vec3 Normal;
+include(`meshIn.glsl')
+include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
 uniform vec3 waves;

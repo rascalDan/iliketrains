@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 position;
+include(`meshIn.glsl')
 
 uniform mat4 viewProjection;
 uniform mat4 model;

@@ -1,14 +1,7 @@
 #version 330 core
 
-in vec3 position;
-in vec2 texCoord;
-in vec3 normal;
-in vec4 colour;
-
-out vec3 FragPos;
-out vec2 TexCoords;
-out vec3 Normal;
-out vec4 Colour;
+include(`meshIn.glsl')
+include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
 uniform mat4 model;
@@ -22,6 +15,7 @@ main()
 	TexCoords = texCoord;
 	Normal = (model * vec4(normal, 0.0)).xyz;
 	Colour = colour;
+	Material = material;
 
 	gl_Position = viewProjection * worldPos;
 }

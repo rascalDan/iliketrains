@@ -30,7 +30,14 @@ Style::applyStyle(
 	else {
 		mesh.set_color(face, {});
 		if (auto mf = Persistence::ParseBase::getShared<const AssetFactory>("assetFactory")) {
-			auto coords = mf->getTextureCoords(texture);
+			const auto material = mf->getMaterialIndex(texture);
+			mesh.property(mesh.materialFaceProperty, face) = material;
+			static constexpr std::array<ModelFactoryTraits::TexCoord2D, 4> coords {{
+					{0.f, 0.f},
+					{1.f, 0.f},
+					{1.f, 1.f},
+					{0.f, 1.f},
+			}};
 			auto coord = coords.begin();
 			// Wild assumption that face is a quad and the texture should apply linearly
 			for (const auto & heh : mesh.fh_range(face)) {

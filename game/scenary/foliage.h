@@ -5,6 +5,7 @@
 class SceneShader;
 class ShadowMapper;
 class Location;
+class Texture;
 
 class Foliage : public Asset, public StdTypeDefs<Foliage> {
 	Mesh::Ptr bodyMesh;

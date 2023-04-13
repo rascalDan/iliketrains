@@ -1,12 +1,10 @@
 using gcc ;
 using pkg-config ;
 import pkg-config ;
-import type : register ;
-import type : type ;
-import generators : register-standard ;
 import testing ;
 import lex ;
 import sequence ;
+import glsl ;
 
 pkg-config.import sdl2 ;
 pkg-config.import glew ;
@@ -49,26 +47,6 @@ project : requirements
 	<toolset>tidy:<librarydef>std
 	<toolset>tidy:<define>TIDY
 	;
-
-type.register GL_VERTEX_SHADER : vs ;
-type.register GL_GEOMETRY_SHADER : gs ;
-type.register GL_FRAGMENT_SHADER : fs ;
-
-generators.register-standard embed.glsl : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) ;
-generators.register-standard embed.glsl : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) ;
-generators.register-standard embed.glsl : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) ;
-
-actions embed.glsl
-{
-	m4 -DNAME=$(2:B) -DTYPE=$(2:S) > $(1[2]) lib/embed-glsl.h.m4
-	m4 -DSOURCE=$(2) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) > $(1[1]) lib/embed-glsl.cpp.m4
-}
-rule embed.glsl ( targets * : sources * : properties * )
-{
-	DEPENDS $(targets) : lib/embed-glsl.h.m4 lib/embed-glsl.cpp.m4 ;
-	OPTIONS on $(targets) = [ type.type $(sources) ] ;
-}
-IMPORT $(__name__) : embed.glsl : : embed.glsl ;
 
 exe iliketrains :
 	application/main.cpp

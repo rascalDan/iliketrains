@@ -23,7 +23,7 @@ public:
 	AssetFactory();
 	[[nodiscard]] static std::shared_ptr<AssetFactory> loadXML(const std::filesystem::path &);
 	[[nodiscard]] ColourAlpha parseColour(std::string_view) const;
-	[[nodiscard]] TextureFragmentCoords getTextureCoords(std::string_view) const;
+	[[nodiscard]] GLuint getMaterialIndex(std::string_view) const;
 	[[nodiscard]] Asset::TexturePtr getTexture() const;
 
 	Shapes shapes;
@@ -42,5 +42,5 @@ private:
 	void createTexutre() const;
 
 	mutable Asset::TexturePtr texture;
-	mutable std::map<std::string_view, glm::vec4, std::less<>> textureFragmentPositions;
+	mutable std::map<std::string_view, GLuint, std::less<>> textureFragmentPositions;
 };

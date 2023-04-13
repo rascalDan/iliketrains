@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec4 position;
+in ivec4 position;
 
 out vec2 TexCoords;
 

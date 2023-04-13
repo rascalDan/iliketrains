@@ -29,12 +29,12 @@ operator!(const aiVector3t<T> & v)
 		(parent)->m##member, (parent)->mNum##member \
 	}
 
-using ScemeCPtr = std::shared_ptr<const aiScene>;
+using SceneCPtr = std::shared_ptr<const aiScene>;
 class AssImpNode : public Shape {
 public:
-	AssImpNode(ScemeCPtr scene, const aiNode * node) : scene(std::move(scene)), node(node) { }
+	AssImpNode(SceneCPtr scene, const aiNode * node) : scene(std::move(scene)), node(node) { }
 
-	ScemeCPtr scene;
+	SceneCPtr scene;
 	const aiNode * node;
 
 	CreatedFaces
@@ -64,11 +64,11 @@ public:
 		};
 		const auto & m = *scene->mMaterials[amesh->mMaterialIndex];
 
-		AssetFactory::TextureFragmentCoords tfc;
+		GLuint material {};
 		if (auto mf = Persistence::ParseBase::getShared<AssetFactory>("assetFactory")) {
 			aiString path;
 			m.Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path);
-			tfc = mf->getTextureCoords(path.C_Str());
+			material = mf->getMaterialIndex(path.C_Str());
 		}
 
 		for (const auto & f : AIRANGE(amesh, Faces)) {
@@ -79,8 +79,8 @@ public:
 			if (amesh->HasTextureCoords(0)) {
 				for (auto idx = f.mIndices; const auto fheh : mesh.fh_range(fh)) {
 					const auto ouv = !amesh->mTextureCoords[0][*idx++];
-					const auto uv = glm::mix(tfc[0], tfc[2], ouv);
-					mesh.set_texcoord2D(fheh, uv);
+					mesh.set_texcoord2D(fheh, ouv);
+					mesh.property(mesh.materialFaceProperty, fh) = material;
 				}
 			}
 		}
@@ -90,7 +90,7 @@ public:
 void
 AssImp::postLoad()
 {
-	ScemeCPtr scene {
+	SceneCPtr scene {
 			aiImportFile(Resource::mapPath(path).c_str(), aiProcess_RemoveRedundantMaterials), &aiReleaseImport};
 	if (!scene) {
 		throw std::runtime_error("Failed to load asset library: " + path);

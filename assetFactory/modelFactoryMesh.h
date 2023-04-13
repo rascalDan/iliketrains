@@ -1,6 +1,7 @@
 #pragma once
 
 #include "modelFactoryMesh_fwd.h"
+#include <GL/glew.h>
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/Mesh/Traits.hh>
 #include <glm/geometric.hpp>
@@ -47,6 +48,7 @@ struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTra
 	ModelFactoryMesh();
 
 	OpenMesh::FPropHandleT<bool> smoothFaceProperty;
+	OpenMesh::FPropHandleT<GLuint> materialFaceProperty;
 	OpenMesh::FPropHandleT<std::string> nameFaceProperty;
 	OpenMesh::HPropHandleT<std::string> nameAdjFaceProperty;
 
