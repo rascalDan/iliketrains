@@ -85,6 +85,11 @@ public:
 	}
 };
 
+static_assert(TextureOptions::MapMode::Repeat == static_cast<TextureOptions::MapMode>(aiTextureMapMode_Wrap));
+static_assert(TextureOptions::MapMode::Clamp == static_cast<TextureOptions::MapMode>(aiTextureMapMode_Clamp));
+static_assert(TextureOptions::MapMode::Decal == static_cast<TextureOptions::MapMode>(aiTextureMapMode_Decal));
+static_assert(TextureOptions::MapMode::Mirror == static_cast<TextureOptions::MapMode>(aiTextureMapMode_Mirror));
+
 void
 AssImp::postLoad()
 {
@@ -107,6 +112,8 @@ AssImp::postLoad()
 					auto texture = std::make_shared<TextureFragment>();
 					texture->id = m->GetName().C_Str();
 					texture->path = path.C_Str();
+					m->Get(AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0), texture->mapmodeU);
+					m->Get(AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0), texture->mapmodeV);
 					texture->image = Worker::addWork([t = scene->GetEmbeddedTexture(path.C_Str())]() {
 						return std::make_unique<Image>(
 								std::span {reinterpret_cast<unsigned char *>(t->pcData), t->mWidth}, STBI_rgb_alpha);
