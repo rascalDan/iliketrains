@@ -9,9 +9,16 @@
 class Image;
 
 struct TextureOptions {
-	GLint wrap {GL_REPEAT};
+	enum class MapMode {
+		Repeat,
+		Clamp,
+		Mirror,
+		Decal,
+	};
+	MapMode wrapU {MapMode::Repeat}, wrapV {MapMode::Repeat};
 	GLint minFilter {GL_LINEAR}, magFilter {GL_LINEAR};
 	GLenum type {GL_TEXTURE_2D};
+	static GLint glMapMode(MapMode);
 };
 
 class Texture {

@@ -13,6 +13,21 @@
 
 Cache<Texture, std::filesystem::path> Texture::cachedTexture;
 
+GLint
+TextureOptions::glMapMode(TextureOptions::MapMode mm)
+{
+	switch (mm) {
+		case MapMode::Repeat:
+			return GL_REPEAT;
+		case MapMode::Clamp:
+			return GL_CLAMP_TO_EDGE;
+		case MapMode::Mirror:
+			return GL_MIRRORED_REPEAT;
+		default:
+			throw std::domain_error("Invalid MapMode value");
+	}
+}
+
 Texture::Texture(const std::filesystem::path & fileName, TextureOptions to) :
 	Texture {Image {Resource::mapPath(fileName).c_str(), STBI_rgb_alpha}, to}
 {
@@ -30,8 +45,8 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 	glBindTexture(type, m_texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, to.wrap);
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, to.wrap);
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
 
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
