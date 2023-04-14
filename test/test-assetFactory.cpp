@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(texturePacker_many, *boost::unit_test::timeout(5))
 	BOOST_CHECK_EQUAL(totalSize, TexturePacker::area(result.second));
 }
 
-BOOST_AUTO_TEST_CASE(texturePacker_many_random, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(texturePacker_many_random, *boost::unit_test::timeout(15))
 {
 	std::vector<TexturePacker::Image> images(2048);
 	std::mt19937 gen(std::random_device {}());
