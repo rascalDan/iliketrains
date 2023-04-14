@@ -108,10 +108,10 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
 	BOOST_REQUIRE(tree_01_1_f);
 
-	auto plant = std::make_shared<Plant>(tree_01_1_f, Location {});
+	auto plant = std::make_shared<Plant>(tree_01_1_f, Location {{-2, 2, 0}, {}});
 	objects.objects.push_back(plant);
 
-	render();
+	render(5);
 }
 BOOST_AUTO_TEST_SUITE_END();
 
