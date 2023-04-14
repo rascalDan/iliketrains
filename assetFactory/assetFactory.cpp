@@ -99,10 +99,10 @@ AssetFactory::createTexutre() const
 {
 	if (!textureFragments.empty() && !texture) {
 		// * layout images
-		std::map<std::string_view, std::unique_ptr<const Image>> images;
+		std::map<const TextureFragment *, std::unique_ptr<const Image>> images;
 		std::transform(
 				textureFragments.begin(), textureFragments.end(), std::inserter(images, images.end()), [](auto && tf) {
-					return decltype(images)::value_type {tf.first, tf.second->image->get()};
+					return decltype(images)::value_type {tf.second.get(), tf.second->image->get()};
 				});
 		std::vector<TexturePacker::Image> imageSizes;
 		std::transform(images.begin(), images.end(), std::back_inserter(imageSizes), [](const auto & i) {
@@ -114,10 +114,14 @@ AssetFactory::createTexutre() const
 		std::transform(images.begin(), images.end(),
 				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
 				[position = layout.begin(), size = imageSizes.begin(), this](const auto & i) mutable {
-					const auto m = texture->add(*position, *size, i.second->data.data());
+					const auto m = texture->add(*position, *size, i.second->data.data(),
+							{
+									.wrapU = i.first->mapmodeU,
+									.wrapV = i.first->mapmodeV,
+							});
 					position++;
 					size++;
-					return decltype(textureFragmentPositions)::value_type {i.first, m};
+					return decltype(textureFragmentPositions)::value_type {i.first->id, m};
 				});
 	}
 }
