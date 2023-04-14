@@ -8,6 +8,7 @@
 #include <gfx/gl/shaders/gs-pointLight.h>
 #include <gfx/gl/shaders/gs-spotLight.h>
 #include <gfx/gl/shaders/vs-dynamicPoint.h>
+#include <gfx/gl/shaders/vs-dynamicPointInst.h>
 #include <gfx/gl/shaders/vs-fixedPoint.h>
 #include <gfx/gl/shaders/vs-pointLight.h>
 #include <gfx/gl/shaders/vs-spotLight.h>
@@ -18,7 +19,11 @@
 #include <location.hpp>
 #include <maths.h>
 
-SceneShader::SceneShader() : landmass {fixedPoint_vs, landmass_fs}, absolute {fixedPoint_vs, material_fs} { }
+SceneShader::SceneShader() :
+	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs}, absolute {fixedPoint_vs,
+																								 material_fs}
+{
+}
 
 void
 SceneShader::setViewProjection(const glm::mat4 & viewProjection) const

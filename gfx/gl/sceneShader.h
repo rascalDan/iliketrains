@@ -80,6 +80,7 @@ public:
 	SceneShader();
 
 	BasicProgram basic;
+	SceneProgram basicInst;
 	WaterProgram water;
 	AbsolutePosProgram landmass, absolute;
 	PointLightShader pointLight;
