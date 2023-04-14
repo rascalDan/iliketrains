@@ -6,4 +6,154 @@
       <use type="Tree-01-1"/>
     </bodyMesh>
   </asset>
+  <asset p.typeid="Foliage" id="Tree-01-1" name="Tree-01-1">
+    <bodyMesh id="body">
+      <use type="Tree-01-1"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-01-2" name="Tree-01-2">
+    <bodyMesh id="body">
+      <use type="Tree-01-2"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-01-3" name="Tree-01-3">
+    <bodyMesh id="body">
+      <use type="Tree-01-3"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-01-4" name="Tree-01-4">
+    <bodyMesh id="body">
+      <use type="Tree-01-4"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-02-1" name="Tree-02-1">
+    <bodyMesh id="body">
+      <use type="Tree-02-1"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-02-2" name="Tree-02-2">
+    <bodyMesh id="body">
+      <use type="Tree-02-2"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-02-3" name="Tree-02-3">
+    <bodyMesh id="body">
+      <use type="Tree-02-3"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-02-4" name="Tree-02-4">
+    <bodyMesh id="body">
+      <use type="Tree-02-4"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-03-1" name="Tree-03-1">
+    <bodyMesh id="body">
+      <use type="Tree-03-1"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-03-2" name="Tree-03-2">
+    <bodyMesh id="body">
+      <use type="Tree-03-2"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-03-3" name="Tree-03-3">
+    <bodyMesh id="body">
+      <use type="Tree-03-3"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Tree-03-4" name="Tree-03-4">
+    <bodyMesh id="body">
+      <use type="Tree-03-4"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Hedge-01" name="Hedge-01">
+    <bodyMesh id="body">
+      <use type="Hedge-01"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Bush-01" name="Bush-01">
+    <bodyMesh id="body">
+      <use type="Bush-01"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Bush-02" name="Bush-02">
+    <bodyMesh id="body">
+      <use type="Bush-02"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Bush-03" name="Bush-03">
+    <bodyMesh id="body">
+      <use type="Bush-03"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Bush-04" name="Bush-04">
+    <bodyMesh id="body">
+      <use type="Bush-04"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Bush-05" name="Bush-05">
+    <bodyMesh id="body">
+      <use type="Bush-05"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Clover-01" name="Clover-01">
+    <bodyMesh id="body">
+      <use type="Clover-01"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Clover-02" name="Clover-02">
+    <bodyMesh id="body">
+      <use type="Clover-02"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Clover-03" name="Clover-03">
+    <bodyMesh id="body">
+      <use type="Clover-03"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Clover-04" name="Clover-04">
+    <bodyMesh id="body">
+      <use type="Clover-04"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Clover-05" name="Clover-05">
+    <bodyMesh id="body">
+      <use type="Clover-05"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Grass-01" name="Grass-01">
+    <bodyMesh id="body">
+      <use type="Grass-01"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Grass-02" name="Grass-02">
+    <bodyMesh id="body">
+      <use type="Grass-02"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Grass-03" name="Grass-03">
+    <bodyMesh id="body">
+      <use type="Grass-03"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Flowers-02" name="Flowers-02">
+    <bodyMesh id="body">
+      <use type="Flowers-02"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Flowers-04" name="Flowers-04">
+    <bodyMesh id="body">
+      <use type="Flowers-04"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Flowers-01" name="Flowers-01">
+    <bodyMesh id="body">
+      <use type="Flowers-01"/>
+    </bodyMesh>
+  </asset>
+  <asset p.typeid="Foliage" id="Flowers-03" name="Flowers-03">
+    <bodyMesh id="body">
+      <use type="Flowers-03"/>
+    </bodyMesh>
+  </asset>
 </ilt>
