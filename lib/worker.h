@@ -14,12 +14,20 @@
 class Worker {
 public:
 	class WorkItem {
-	public:
-		WorkItem() = default;
+	protected:
+		WorkItem(Worker * worker) : worker {worker} { }
 		virtual ~WorkItem() = default;
 		NO_MOVE(WorkItem);
 		NO_COPY(WorkItem);
 
+		void
+		assist() const
+		{
+			worker->assist();
+		}
+		Worker * worker;
+
+	public:
 		virtual void doWork() = 0;
 	};
 
@@ -28,10 +36,16 @@ public:
 		T
 		get()
 		{
+			using namespace std::chrono_literals;
+			while (future.wait_for(0s) == std::future_status::timeout) {
+				assist();
+			}
 			return future.get();
 		}
 
 	protected:
+		WorkItemT(Worker * worker) : WorkItem {worker} { }
+
 		std::promise<T> promise;
 		std::future<T> future {promise.get_future()};
 		friend Worker;
@@ -48,7 +62,10 @@ public:
 private:
 	template<typename T, typename... Params> class WorkItemTImpl : public WorkItemT<T> {
 	public:
-		WorkItemTImpl(Params &&... params) : params {std::forward<Params>(params)...} { }
+		WorkItemTImpl(Worker * worker, Params &&... params) :
+			WorkItemT<T> {worker}, params {std::forward<Params>(params)...}
+		{
+		}
 
 	private:
 		void
@@ -84,13 +101,14 @@ private:
 	addWorkImpl(Params &&... params)
 	{
 		using T = decltype(std::invoke(std::forward<Params>(params)...));
-		auto work = std::make_shared<WorkItemTImpl<T, Params...>>(std::forward<Params>(params)...);
+		auto work = std::make_shared<WorkItemTImpl<T, Params...>>(this, std::forward<Params>(params)...);
 		addWorkPtr(work);
 		return work;
 	}
 
 	void addWorkPtr(WorkPtr w);
 	void worker();
+	void assist();
 
 	using Threads = std::vector<std::jthread>;
 	using ToDo = std::deque<WorkPtr>;

@@ -42,3 +42,24 @@ Worker::worker()
 		j->doWork();
 	}
 }
+
+void
+Worker::assist()
+{
+	auto job = [this]() {
+		using namespace std::chrono_literals;
+		if (todoLen.try_acquire_for(100us)) {
+			if (std::lock_guard<std::mutex> lck {todoMutex}; todo.size()) {
+				WorkPtr x = std::move(todo.front());
+				if (x) {
+					todo.pop_front();
+				}
+				return x;
+			}
+		}
+		return WorkPtr {};
+	};
+	if (auto j = job()) {
+		j->doWork();
+	}
+}

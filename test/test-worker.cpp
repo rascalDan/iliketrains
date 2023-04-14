@@ -81,3 +81,24 @@ BOOST_AUTO_TEST_CASE(lambda_value)
 					1, 2)
 					->get());
 }
+
+BOOST_AUTO_TEST_CASE(recursive, *boost::unit_test::timeout(5))
+{
+	auto recurse = []() {
+		std::vector<Worker::WorkPtrT<uint32_t>> ps;
+		for (int i {}; i < 30; ++i) {
+			ps.push_back(Worker::addWork(workCounter));
+		}
+		return std::accumulate(ps.begin(), ps.end(), 0U, [](auto && out, auto && p) {
+			return out += p->get();
+		});
+	};
+	std::vector<Worker::WorkPtrT<uint32_t>> ps;
+	for (int i {}; i < 30; ++i) {
+		ps.push_back(Worker::addWork(recurse));
+	}
+	std::set<uint32_t> out;
+	std::transform(ps.begin(), ps.end(), std::inserter(out, out.end()), [](auto && p) {
+		return p->get();
+	});
+}
