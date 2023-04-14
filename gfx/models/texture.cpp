@@ -70,6 +70,7 @@ Texture::save(
 			.size = size,
 			.pixelDepth = static_cast<uint8_t>(8 * channels),
 	};
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
 	tga.msync(MS_ASYNC);
 }
