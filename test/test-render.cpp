@@ -6,8 +6,10 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <assetFactory/assetFactory.h>
 #include <game/geoData.h>
 #include <game/terrain.h>
+#include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
 #include <gfx/gl/sceneRenderer.h>
 #include <gfx/models/texture.h>
@@ -19,18 +21,30 @@
 #include <ui/window.h>
 
 class TestScene : public SceneProvider {
-	RailVehicleClass train {"brush47"};
+	std::shared_ptr<RailVehicle> train1, train2;
+
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
 		gd->generateRandom();
 		return gd;
 	}()};
+
+public:
+	TestScene()
+	{
+		const auto assetFactory = AssetFactory::loadXML(RESDIR "/brush47.xml");
+		const auto brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(assetFactory->assets.at("brush-47"));
+		train1 = std::make_shared<RailVehicle>(brush47rvc);
+		train1->location.pos = {52, 50, 2};
+		train2 = std::make_shared<RailVehicle>(brush47rvc);
+		train2->location.pos = {52, 30, 2};
+	}
 	void
 	content(const SceneShader & shader) const override
 	{
 		terrain.render(shader);
-		train.render(shader, Location {{52, 50, 2}}, {Location {{52, 56, 2}}, Location {{52, 44, 2}}});
-		train.render(shader, Location {{52, 30, 2}}, {Location {{52, 36, 2}}, Location {{52, 24, 2}}});
+		train1->render(shader);
+		train2->render(shader);
 	}
 	void
 	lights(const SceneShader &) const override
@@ -40,8 +54,8 @@ class TestScene : public SceneProvider {
 	shadows(const ShadowMapper & shadowMapper) const override
 	{
 		terrain.shadows(shadowMapper);
-		train.shadows(shadowMapper, Location {{52, 50, 2}}, {Location {{52, 56, 2}}, Location {{52, 44, 2}}});
-		train.shadows(shadowMapper, Location {{52, 30, 2}}, {Location {{52, 36, 2}}, Location {{52, 24, 2}}});
+		train1->shadows(shadowMapper);
+		train2->shadows(shadowMapper);
 	}
 };
 
@@ -73,7 +87,7 @@ BOOST_AUTO_TEST_CASE(basic)
 	const TestScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
-	Texture::save(outImage, size, "/tmp/basic.tga");
+	Texture::save(outImage, "/tmp/basic.tga");
 }
 
 BOOST_AUTO_TEST_CASE(pointlight)
@@ -101,7 +115,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 	const PointLightScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
-	Texture::save(outImage, size, "/tmp/pointlight.tga");
+	Texture::save(outImage, "/tmp/pointlight.tga");
 }
 
 BOOST_AUTO_TEST_CASE(spotlight)
@@ -128,7 +142,7 @@ BOOST_AUTO_TEST_CASE(spotlight)
 	const PointLightScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
-	Texture::save(outImage, size, "/tmp/spotlight.tga");
+	Texture::save(outImage, "/tmp/spotlight.tga");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

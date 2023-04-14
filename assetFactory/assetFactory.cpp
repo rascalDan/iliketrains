@@ -11,7 +11,7 @@
 #include "resource.h"
 #include "saxParse-persistence.h"
 #include "texturePacker.h"
-#include <stb/stb_image.h>
+#include <numeric>
 
 AssetFactory::AssetFactory() :
 	shapes {
@@ -28,6 +28,18 @@ AssetFactory::loadXML(const std::filesystem::path & filename)
 {
 	filesystem::FileStar file {filename.c_str(), "r"};
 	return Persistence::SAXParsePersistence {}.loadState<std::shared_ptr<AssetFactory>>(file);
+}
+
+AssetFactory::Assets
+AssetFactory::loadAll(const std::filesystem::path & root)
+{
+	return std::accumulate(std::filesystem::recursive_directory_iterator {root},
+			std::filesystem::recursive_directory_iterator {}, Assets {}, [](auto && out, auto && path) {
+				if (path.path().extension() == ".xml") {
+					out.merge(loadXML(path)->assets);
+				}
+				return std::move(out);
+			});
 }
 
 AssetFactory::Colours
@@ -81,17 +93,11 @@ AssetFactory::parseColour(std::string_view in) const
 	throw std::runtime_error("No such asset factory colour");
 }
 
-AssetFactory::TextureFragmentCoords
-AssetFactory::getTextureCoords(std::string_view id) const
+GLuint
+AssetFactory::getMaterialIndex(std::string_view id) const
 {
 	createTexutre();
-	const auto & fragmentUV = textureFragmentPositions.at(id);
-	return {
-			fragmentUV.xy(),
-			fragmentUV.zy(),
-			fragmentUV.zw(),
-			fragmentUV.xw(),
-	};
+	return textureFragmentPositions.at(id);
 }
 
 Asset::TexturePtr
@@ -104,33 +110,31 @@ AssetFactory::getTexture() const
 void
 AssetFactory::createTexutre() const
 {
-	if (!textureFragments.empty() && (!texture || textureFragmentPositions.empty())) {
-		// * load images
-		std::vector<std::unique_ptr<Image>> images;
-		std::transform(
-				textureFragments.begin(), textureFragments.end(), std::back_inserter(images), [](const auto & tf) {
-					return std::make_unique<Image>(Resource::mapPath(tf.second->path), STBI_rgb_alpha);
-				});
+	if (!textureFragments.empty() && !texture) {
 		// * layout images
+		std::map<const TextureFragment *, std::unique_ptr<const Image>> images;
+		std::transform(
+				textureFragments.begin(), textureFragments.end(), std::inserter(images, images.end()), [](auto && tf) {
+					return decltype(images)::value_type {tf.second.get(), tf.second->image->get()};
+				});
 		std::vector<TexturePacker::Image> imageSizes;
-		std::transform(images.begin(), images.end(), std::back_inserter(imageSizes), [](const auto & image) {
-			return TexturePacker::Image {image->width, image->height};
+		std::transform(images.begin(), images.end(), std::back_inserter(imageSizes), [](const auto & i) {
+			return TexturePacker::Image {i.second->width, i.second->height};
 		});
 		const auto [layout, outSize] = TexturePacker {imageSizes}.pack();
 		// * create texture
-		texture = std::make_shared<Texture>(outSize.x, outSize.y, TextureOptions {.wrap = GL_CLAMP_TO_EDGE});
-		std::transform(textureFragments.begin(), textureFragments.end(),
+		texture = std::make_shared<TextureAtlas>(outSize.x, outSize.y, layout.size());
+		std::transform(images.begin(), images.end(),
 				std::inserter(textureFragmentPositions, textureFragmentPositions.end()),
-				[position = layout.begin(), image = images.begin(), size = imageSizes.begin(),
-						outSize = glm::vec2 {outSize}](const auto & tf) mutable {
-					const auto positionFraction = glm::vec4 {*position, *position + *size} / outSize.xyxy();
-					glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(position->x), static_cast<GLint>(position->y),
-							static_cast<GLint>(size->x), static_cast<GLint>(size->y), GL_RGBA, GL_UNSIGNED_BYTE,
-							image->get()->data.data());
+				[position = layout.begin(), size = imageSizes.begin(), this](const auto & i) mutable {
+					const auto m = texture->add(*position, *size, i.second->data.data(),
+							{
+									.wrapU = i.first->mapmodeU,
+									.wrapV = i.first->mapmodeV,
+							});
 					position++;
-					image++;
 					size++;
-					return decltype(textureFragmentPositions)::value_type {tf.first, positionFraction};
+					return decltype(textureFragmentPositions)::value_type {i.first->id, m};
 				});
 	}
 }
@@ -141,7 +145,8 @@ AssetFactory::persist(Persistence::PersistenceStore & store)
 	using MapObjects = Persistence::MapByMember<Shapes, std::shared_ptr<Object>>;
 	using MapAssets = Persistence::MapByMember<Assets>;
 	using MapTextureFragments = Persistence::MapByMember<TextureFragments>;
+	using MapAssImp = Persistence::MapByMember<AssImps, std::shared_ptr<AssImp>, &AssImp::path>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects)
 			&& STORE_NAME_HELPER("textureFragment", textureFragments, MapTextureFragments)
-			&& STORE_NAME_HELPER("asset", assets, MapAssets);
+			&& STORE_NAME_HELPER("assimp", assimps, MapAssImp) && STORE_NAME_HELPER("asset", assets, MapAssets);
 }

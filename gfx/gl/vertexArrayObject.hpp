@@ -61,7 +61,7 @@ private:
 	{
 		glEnableVertexAttribArray(vertexArrayId);
 		using traits = gl_traits<T>;
-		glVertexAttribPointer(vertexArrayId, traits::size, traits::type, GL_FALSE, sizeof(Vertex), ptr);
+		traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(Vertex), ptr);
 	}
 
 	template<auto Vertex::*attrib>

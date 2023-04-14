@@ -6,37 +6,50 @@
 #include <glm/fwd.hpp>
 
 template<typename T> struct gl_traits;
-template<> struct gl_traits<glm::f32> {
+struct gl_traits_base {
+	static constexpr GLint size {1};
+};
+struct gl_traits_float : public gl_traits_base {
+	static constexpr auto vertexAttribFunc {
+			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) {
+				glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
+			}};
+};
+struct gl_traits_longfloat : public gl_traits_base {
+	static constexpr auto vertexAttribFunc {
+			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) {
+				glVertexAttribLPointer(index, size, type, stride, pointer);
+			}};
+};
+struct gl_traits_integer : public gl_traits_base {
+	static constexpr auto vertexAttribFunc {
+			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) {
+				glVertexAttribIPointer(index, size, type, stride, pointer);
+			}};
+};
+template<> struct gl_traits<glm::f32> : public gl_traits_float {
 	static constexpr GLenum type {GL_FLOAT};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::f64> {
+template<> struct gl_traits<glm::f64> : public gl_traits_longfloat {
 	static constexpr GLenum type {GL_DOUBLE};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::int8> {
+template<> struct gl_traits<glm::int8> : public gl_traits_integer {
 	static constexpr GLenum type {GL_BYTE};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::int16> {
+template<> struct gl_traits<glm::int16> : public gl_traits_integer {
 	static constexpr GLenum type {GL_SHORT};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::int32> {
+template<> struct gl_traits<glm::int32> : public gl_traits_integer {
 	static constexpr GLenum type {GL_INT};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::uint8> {
+template<> struct gl_traits<glm::uint8> : public gl_traits_integer {
 	static constexpr GLenum type {GL_UNSIGNED_BYTE};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::uint16> {
+template<> struct gl_traits<glm::uint16> : public gl_traits_integer {
 	static constexpr GLenum type {GL_UNSIGNED_SHORT};
-	static constexpr GLint size {1};
 };
-template<> struct gl_traits<glm::uint32> {
+template<> struct gl_traits<glm::uint32> : public gl_traits_integer {
 	static constexpr GLenum type {GL_UNSIGNED_INT};
-	static constexpr GLint size {1};
 };
 
 template<typename T, std::size_t S> struct gl_traits<std::array<T, S>> : public gl_traits<T> {

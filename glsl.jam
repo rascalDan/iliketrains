@@ -1,0 +1,36 @@
+import type : register ;
+import type : type ;
+import generators : register-standard ;
+import scanner : register ;
+
+type.register GL_VERTEX_SHADER : vs ;
+type.register GL_GEOMETRY_SHADER : gs ;
+type.register GL_FRAGMENT_SHADER : fs ;
+
+generators.register-standard glsl.embed : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) ;
+generators.register-standard glsl.embed : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) ;
+generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) ;
+
+class m4-scanner : common-scanner {
+    rule pattern ( ) {
+        return "s?include\\(`([^']*)'\\)" ;
+    }
+}
+
+scanner.register m4-scanner : include ;
+
+type.set-scanner GL_VERTEX_SHADER : m4-scanner ;
+type.set-scanner GL_GEOMETRY_SHADER : m4-scanner ;
+type.set-scanner GL_FRAGMENT_SHADER : m4-scanner ;
+
+actions glsl.embed
+{
+	m4 -I$(2:D) -DNAME=$(2:B) -DTYPE=$(2:S) > $(1[2]) lib/embed-glsl.h.m4
+	m4 -I$(2:D) -DSOURCE=$(2) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) > $(1[1]) lib/embed-glsl.cpp.m4
+}
+
+rule glsl.embed ( targets * : sources * : properties * )
+{
+	DEPENDS $(targets) : lib/embed-glsl.h.m4 lib/embed-glsl.cpp.m4 ;
+	OPTIONS on $(targets) = [ type.type $(sources) ] ;
+}

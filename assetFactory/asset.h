@@ -4,11 +4,11 @@
 #include "persistence.h"
 #include <stdTypeDefs.hpp>
 
-class Texture;
+class TextureAtlas;
 
 class Asset : public Persistence::Persistable, public StdTypeDefs<Asset> {
 public:
-	using TexturePtr = std::shared_ptr<Texture>;
+	using TexturePtr = std::shared_ptr<TextureAtlas>;
 
 	std::string id;
 	std::string name;

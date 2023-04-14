@@ -1,4 +1,5 @@
 #include <array>
+#include <assetFactory/assetFactory.h>
 #include <chrono>
 #include <collection.hpp>
 #include <game/activities/go.h>
@@ -11,6 +12,8 @@
 #include <game/objective.h>
 #include <game/objectives/goto.h>
 #include <game/orders.h>
+#include <game/scenary/foliage.h>
+#include <game/scenary/plant.h>
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
@@ -43,6 +46,7 @@ public:
 		world.create<Terrain>(geoData);
 
 		{
+			const auto assets = AssetFactory::loadAll("res");
 			auto rl = world.create<RailLinks>();
 			const glm::vec3 j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
 					n {-600, -500, 32}, o {-500, -800, 30}, p {-600, -900, 25}, q {-1025, -1175, 10},
@@ -66,13 +70,16 @@ public:
 			rl->addLinksBetween(t, u);
 			rl->addLinksBetween(u, m);
 			const std::shared_ptr<Train> train = world.create<Train>(l3);
-			auto b47 = std::make_shared<RailVehicleClass>("brush47");
+			auto b47 = std::dynamic_pointer_cast<RailVehicleClass>(assets.at("brush-47"));
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);
 			}
 			train->orders.removeAll();
 			train->orders.create<GoTo>(&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100, -450, 15}));
 			train->currentActivity = train->orders.current()->createActivity();
+
+			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
+			world.create<Plant>(foliage, Location {{-1100, -1100, 0}});
 		}
 
 		auto t_start = std::chrono::high_resolution_clock::now();

@@ -38,4 +38,5 @@ public:
 private:
 	std::span<const Image> inputImages;
 	std::vector<size_t> sortedIndexes;
+	unsigned int maxTextureSize;
 };

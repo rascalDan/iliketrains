@@ -65,11 +65,36 @@ operator*=(IterableCollection auto & in, auto && f)
 }
 
 template<template<typename...> typename C, typename... T>
+	requires IterableCollection<C<T...>>
 [[nodiscard]] constexpr auto
 operator*(const C<T...> & in, auto && f)
 {
-	C<decltype(f(in[0]))> out;
+	C<decltype(f(*in.begin()))> out;
+	if constexpr (requires { out.reserve(in.size()); }) {
+		out.reserve(in.size());
+	}
 
+	std::transform(in.begin(), in.end(), std::inserter(out, out.end()), f);
+	return out;
+}
+
+template<typename T, std::size_t N>
+[[nodiscard]] constexpr auto
+operator*(const std::span<T, N> in, auto && f)
+{
+	std::array<decltype(f(std::declval<T>())), N> out;
+
+	std::transform(in.begin(), in.end(), out.begin(), f);
+	return out;
+}
+
+template<typename T>
+[[nodiscard]] constexpr auto
+operator*(const std::span<T, std::dynamic_extent> in, auto && f)
+{
+	std::vector<decltype(f(std::declval<T>()))> out;
+
+	out.reserve(in.size());
 	std::transform(in.begin(), in.end(), std::inserter(out, out.end()), f);
 	return out;
 }

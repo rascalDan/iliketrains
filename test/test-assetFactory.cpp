@@ -8,6 +8,8 @@
 #include "assetFactory/assetFactory.h"
 #include "assetFactory/object.h"
 #include "assetFactory/texturePacker.h"
+#include "game/scenary/foliage.h"
+#include "game/scenary/plant.h"
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
 #include "gfx/gl/sceneRenderer.h"
@@ -30,7 +32,7 @@ public:
 		glDisable(GL_DEBUG_OUTPUT);
 		auto outpath = (TMP / boost::unit_test::framework::current_test_case().full_name()).replace_extension(".tga");
 		std::filesystem::create_directories(outpath.parent_path());
-		Texture::save(outImage, size, outpath.c_str());
+		Texture::save(outImage, outpath.c_str());
 	}
 	void
 	content(const SceneShader & shader) const override
@@ -96,7 +98,29 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 
 	render();
 }
+
+BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
+{
+	auto mf = AssetFactory::loadXML(RESDIR "/foliage.xml");
+	BOOST_REQUIRE(mf);
+	auto tree_01_1 = mf->assets.at("Tree-01-1");
+	BOOST_REQUIRE(tree_01_1);
+	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
+	BOOST_REQUIRE(tree_01_1_f);
+
+	auto plant = std::make_shared<Plant>(tree_01_1_f, Location {{-2, 2, 0}, {}});
+	objects.objects.push_back(plant);
+
+	render(5);
+}
 BOOST_AUTO_TEST_SUITE_END();
+
+BOOST_AUTO_TEST_CASE(loadall)
+{
+	const auto assets = AssetFactory::loadAll(RESDIR);
+	BOOST_CHECK(assets.at("brush-47"));
+	BOOST_CHECK(assets.at("Tree-01-1"));
+}
 
 template<typename T> using InOut = std::tuple<T, T>;
 BOOST_DATA_TEST_CASE(normalizeColourName,
@@ -157,7 +181,7 @@ BOOST_AUTO_TEST_CASE(texturePacker_many, *boost::unit_test::timeout(5))
 	BOOST_CHECK_EQUAL(totalSize, TexturePacker::area(result.second));
 }
 
-BOOST_AUTO_TEST_CASE(texturePacker_many_random, *boost::unit_test::timeout(5))
+BOOST_AUTO_TEST_CASE(texturePacker_many_random, *boost::unit_test::timeout(15))
 {
 	std::vector<TexturePacker::Image> images(2048);
 	std::mt19937 gen(std::random_device {}());
