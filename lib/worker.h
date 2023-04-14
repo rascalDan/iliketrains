@@ -1,19 +1,17 @@
 #pragma once
 
+#include <deque>
+#include <memory>
+#include <mutex>
+#include <semaphore>
+#include <special_members.hpp>
+#include <thread>
 #include <utility>
+#include <vector>
+
 class Work;
-
-#if __cpp_lib_semaphore
-#	include <deque>
-#	include <memory>
-#	include <mutex>
-#	include <semaphore>
-#	include <special_members.hpp>
-#	include <thread>
-#	include <vector>
-
 class Worker {
-public:
+private:
 	Worker();
 	~Worker();
 
@@ -42,19 +40,6 @@ private:
 	ToDo todo;
 	std::counting_semaphore<16> todoLen;
 	std::mutex todoMutex;
+
+	static Worker instance;
 };
-
-#else
-
-class Worker {
-public:
-	template<typename T, typename... Params>
-	void
-	addWork(Params &&... params)
-		requires std::is_base_of_v<Work, T>
-	{
-		T(std::forward<Params>(params)...).doWork();
-	}
-};
-
-#endif
