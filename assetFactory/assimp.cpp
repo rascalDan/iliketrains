@@ -62,13 +62,11 @@ public:
 		const auto vhs = AIRANGE(amesh, Vertices) * [&mesh](auto && v) {
 			return mesh.add_vertex(*v);
 		};
-		const auto & m = *scene->mMaterials[amesh->mMaterialIndex];
+		const auto & m = scene->mMaterials[amesh->mMaterialIndex]->GetName();
 
 		GLuint material {};
 		if (auto mf = Persistence::ParseBase::getShared<AssetFactory>("assetFactory")) {
-			aiString path;
-			m.Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path);
-			material = mf->getMaterialIndex(path.C_Str());
+			material = mf->getMaterialIndex(m.C_Str());
 		}
 
 		for (const auto & f : AIRANGE(amesh, Faces)) {
@@ -101,12 +99,15 @@ AssImp::postLoad()
 				root.begin(), root.end(), std::inserter(mf->shapes, mf->shapes.end()), [&scene](const aiNode * m) {
 					return AssetFactory::Shapes::value_type {m->mName.C_Str(), std::make_shared<AssImpNode>(scene, m)};
 				});
-		const auto textures = AIRANGE(scene, Textures);
-		std::transform(textures.begin(), textures.end(),
-				std::inserter(mf->textureFragments, mf->textureFragments.end()), [](auto && t) {
+		const auto materials = AIRANGE(scene, Materials);
+		std::transform(materials.begin(), materials.end(),
+				std::inserter(mf->textureFragments, mf->textureFragments.end()), [&scene](const aiMaterial * m) {
+					aiString path;
+					m->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path);
 					auto texture = std::make_shared<TextureFragment>();
-					texture->id = texture->path = t->mFilename.C_Str();
-					texture->image = Worker::addWork([t]() {
+					texture->id = m->GetName().C_Str();
+					texture->path = path.C_Str();
+					texture->image = Worker::addWork([t = scene->GetEmbeddedTexture(path.C_Str())]() {
 						return std::make_unique<Image>(
 								std::span {reinterpret_cast<unsigned char *>(t->pcData), t->mWidth}, STBI_rgb_alpha);
 					});
