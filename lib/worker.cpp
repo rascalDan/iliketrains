@@ -1,5 +1,4 @@
 #include "worker.h"
-#include "work.h"
 #include <algorithm>
 #include <iterator>
 #include <mutex>
@@ -19,7 +18,7 @@ Worker::~Worker()
 }
 
 void
-Worker::addWork(WorkPtr j)
+Worker::addWorkPtr(WorkPtr j)
 {
 	std::lock_guard<std::mutex> lck {todoMutex};
 	todoLen.release();
