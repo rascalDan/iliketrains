@@ -14,6 +14,9 @@ TexturePacker::TexturePacker(std::span<const Image> in) :
 	std::sort(sortedIndexes.rbegin(), sortedIndexes.rend(), [this](const auto a, const auto b) {
 		return area(inputImages[a]) < area(inputImages[b]);
 	});
+	int mts;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mts);
+	maxTextureSize = static_cast<unsigned int>(mts);
 }
 
 TexturePacker::Result
@@ -25,6 +28,9 @@ TexturePacker::pack() const
 TexturePacker::Result
 TexturePacker::pack(Size size) const
 {
+	if (size.x > maxTextureSize || size.y > maxTextureSize) {
+		return {};
+	}
 	using Spaces = std::set<Space>;
 	Spaces spaces {{{}, size}};
 
@@ -49,12 +55,14 @@ TexturePacker::pack(Size size) const
 			}
 		}
 		else {
-			if (size.x < size.y) {
-				return pack({size.x * 2, size.y});
+			const auto x = pack({size.x * 2, size.y}), y = pack({size.x, size.y * 2});
+			if (!x.first.empty() && (y.first.empty() || area(x.second) < area(y.second))) {
+				return x;
 			}
-			else {
-				return pack({size.x, size.y * 2});
+			else if (!y.first.empty()) {
+				return y;
 			}
+			return {};
 		}
 	}
 	if (GLEW_ARB_texture_non_power_of_two) {
