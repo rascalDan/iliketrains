@@ -102,18 +102,14 @@ AssImp::postLoad()
 					return AssetFactory::Shapes::value_type {m->mName.C_Str(), std::make_shared<AssImpNode>(scene, m)};
 				});
 		const auto textures = AIRANGE(scene, Textures);
-		auto textureFutures = textures * [](const aiTexture * t) {
-			return std::async(std::launch::async, [t]() {
-				auto texture = std::make_shared<TextureFragment>();
-				texture->id = texture->path = t->mFilename.C_Str();
-				texture->image = std::make_unique<Image>(
-						std::span {reinterpret_cast<unsigned char *>(t->pcData), t->mWidth}, STBI_rgb_alpha);
-				return texture;
-			});
-		};
-		std::transform(textureFutures.begin(), textureFutures.end(),
-				std::inserter(mf->textureFragments, mf->textureFragments.end()), [](auto && textureFuture) {
-					auto texture = textureFuture.get();
+		std::transform(textures.begin(), textures.end(),
+				std::inserter(mf->textureFragments, mf->textureFragments.end()), [](auto && t) {
+					auto texture = std::make_shared<TextureFragment>();
+					texture->id = texture->path = t->mFilename.C_Str();
+					texture->image = Worker::addWork([t]() {
+						return std::make_unique<Image>(
+								std::span {reinterpret_cast<unsigned char *>(t->pcData), t->mWidth}, STBI_rgb_alpha);
+					});
 					return AssetFactory::TextureFragments::value_type {texture->id, texture};
 				});
 	}
