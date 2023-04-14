@@ -28,14 +28,14 @@ public:
 
 	virtual void bind(GLenum unit = GL_TEXTURE0) const;
 
-	void save(const glm::ivec2 & size, const char * path) const;
-	static void save(const glTexture &, const glm::ivec2 & size, const char * path);
-	static void saveDepth(const glTexture &, const glm::ivec2 & size, const char * path);
-	static void saveNormal(const glTexture &, const glm::ivec2 & size, const char * path);
+	void save(const char * path) const;
+	static void save(const glTexture &, const char * path);
+	static void saveDepth(const glTexture &, const char * path);
+	static void saveNormal(const glTexture &, const char * path);
 
 protected:
-	static void save(const glTexture &, GLenum, GLenum, const glm::ivec2 & size, unsigned short channels,
-			const char * path, short tgaFormat);
+	static void save(const glTexture &, GLenum, GLenum, unsigned short channels, const char * path, short tgaFormat);
+	static glm::ivec2 getSize(const glTexture &);
 
 	glTexture m_texture;
 	GLenum type;

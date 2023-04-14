@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(basic)
 	const TestScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
-	Texture::save(outImage, size, "/tmp/basic.tga");
+	Texture::save(outImage, "/tmp/basic.tga");
 }
 
 BOOST_AUTO_TEST_CASE(pointlight)
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 	const PointLightScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
-	Texture::save(outImage, size, "/tmp/pointlight.tga");
+	Texture::save(outImage, "/tmp/pointlight.tga");
 }
 
 BOOST_AUTO_TEST_CASE(spotlight)
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(spotlight)
 	const PointLightScene scene;
 	ss.render(scene);
 	glDisable(GL_DEBUG_OUTPUT);
-	Texture::save(outImage, size, "/tmp/spotlight.tga");
+	Texture::save(outImage, "/tmp/spotlight.tga");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

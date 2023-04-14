@@ -44,12 +44,22 @@ Texture::bind(GLenum unit) const
 	glBindTexture(type, m_texture);
 }
 
+glm::ivec2
+Texture::getSize(const glTexture & texture)
+{
+	glm::ivec2 size;
+	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_WIDTH, &size.x);
+	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_HEIGHT, &size.y);
+	return size;
+}
+
 void
-Texture::save(const glTexture & texture, GLenum format, GLenum type, const glm::ivec2 & size, unsigned short channels,
-		const char * path, short tgaFormat)
+Texture::save(const glTexture & texture, GLenum format, GLenum type, unsigned short channels, const char * path,
+		short tgaFormat)
 {
 	using TGAHead = std::array<short, 9>;
 
+	const auto size = getSize(texture);
 	const size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
 	const size_t fileSize = dataSize + sizeof(TGAHead);
 
@@ -63,27 +73,27 @@ Texture::save(const glTexture & texture, GLenum format, GLenum type, const glm::
 }
 
 void
-Texture::save(const glm::ivec2 & size, const char * path) const
+Texture::save(const char * path) const
 {
-	save(m_texture, GL_BGR, GL_UNSIGNED_BYTE, size, 3, path, 2);
+	save(m_texture, GL_BGR, GL_UNSIGNED_BYTE, 3, path, 2);
 }
 
 void
-Texture::save(const glTexture & texture, const glm::ivec2 & size, const char * path)
+Texture::save(const glTexture & texture, const char * path)
 {
-	save(texture, GL_BGR, GL_UNSIGNED_BYTE, size, 3, path, 2);
+	save(texture, GL_BGR, GL_UNSIGNED_BYTE, 3, path, 2);
 }
 
 void
-Texture::saveDepth(const glTexture & texture, const glm::ivec2 & size, const char * path)
+Texture::saveDepth(const glTexture & texture, const char * path)
 {
-	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, size, 1, path, 3);
+	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 1, path, 3);
 }
 
 void
-Texture::saveNormal(const glTexture & texture, const glm::ivec2 & size, const char * path)
+Texture::saveNormal(const glTexture & texture, const char * path)
 {
-	save(texture, GL_BGR, GL_BYTE, size, 3, path, 2);
+	save(texture, GL_BGR, GL_BYTE, 3, path, 2);
 }
 
 TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Texture(width, height, nullptr, {})
