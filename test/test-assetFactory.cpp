@@ -115,6 +115,13 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 }
 BOOST_AUTO_TEST_SUITE_END();
 
+BOOST_AUTO_TEST_CASE(loadall)
+{
+	const auto assets = AssetFactory::loadAll(RESDIR);
+	BOOST_CHECK(assets.at("brush-47"));
+	BOOST_CHECK(assets.at("Tree-01-1"));
+}
+
 template<typename T> using InOut = std::tuple<T, T>;
 BOOST_DATA_TEST_CASE(normalizeColourName,
 		boost::unit_test::data::make<InOut<std::string>>({

@@ -22,6 +22,7 @@ public:
 
 	AssetFactory();
 	[[nodiscard]] static std::shared_ptr<AssetFactory> loadXML(const std::filesystem::path &);
+	[[nodiscard]] static Assets loadAll(const std::filesystem::path &);
 	[[nodiscard]] ColourAlpha parseColour(std::string_view) const;
 	[[nodiscard]] GLuint getMaterialIndex(std::string_view) const;
 	[[nodiscard]] Asset::TexturePtr getTexture() const;

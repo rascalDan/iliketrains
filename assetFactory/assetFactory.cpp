@@ -11,6 +11,7 @@
 #include "resource.h"
 #include "saxParse-persistence.h"
 #include "texturePacker.h"
+#include <numeric>
 
 AssetFactory::AssetFactory() :
 	shapes {
@@ -27,6 +28,18 @@ AssetFactory::loadXML(const std::filesystem::path & filename)
 {
 	filesystem::FileStar file {filename.c_str(), "r"};
 	return Persistence::SAXParsePersistence {}.loadState<std::shared_ptr<AssetFactory>>(file);
+}
+
+AssetFactory::Assets
+AssetFactory::loadAll(const std::filesystem::path & root)
+{
+	return std::accumulate(std::filesystem::recursive_directory_iterator {root},
+			std::filesystem::recursive_directory_iterator {}, Assets {}, [](auto && out, auto && path) {
+				if (path.path().extension() == ".xml") {
+					out.merge(loadXML(path)->assets);
+				}
+				return std::move(out);
+			});
 }
 
 AssetFactory::Colours
