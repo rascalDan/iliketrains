@@ -7,12 +7,37 @@ include(`geometryOut.glsl')
 layout(binding = 0) uniform sampler2D texture0;
 layout(binding = 1) uniform usampler2DRect material;
 
+float map(uint mapmode, float value)
+{
+	switch (mapmode) {
+		case 0u: // Repeat
+			return fract(value);
+		case 1u: // Clamp to edge
+			return clamp(0.0, 1.0, value);
+		case 2u: // Mirror
+			discard;
+		case 3u: // Decal
+			if (value != clamp(0.0, 1.0, value)) {
+				discard;
+			}
+	}
+	return 0;
+}
+
+vec2 map(uint mapmodeU, uint mapmodeV, vec2 value)
+{
+	return vec2(map(mapmodeU, value.x), map(mapmodeV, value.y));
+}
+
 vec4 getTextureColour(uint midx, vec2 uv)
 {
 	if (midx > 0u) {
 		const vec2 tSize = textureSize(texture0, 0);
 		const vec4 sPosSize = texture(material, uvec2(0, midx - 1u));
-		uv = (sPosSize.xy + sPosSize.zw * fract(uv)) / tSize;
+		const uvec4 sMode = texture(material, uvec2(1, midx - 1u));
+		const uint mapmodeU = sMode.x & 0xFu;
+		const uint mapmodeV = (sMode.x & 0xF0u) >> 1;
+		uv = (sPosSize.xy + sPosSize.zw * map(mapmodeU, mapmodeV, uv)) / tSize;
 	}
 	return texture(texture0, uv);
 }
