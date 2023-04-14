@@ -2,8 +2,8 @@
 #include "maths.h"
 #include "vertexArrayObject.hpp"
 #include <gfx/gl/shaders/fs-directionalLight.h>
-#include <gfx/gl/shaders/fs-lightingShader.h>
-#include <gfx/gl/shaders/vs-lightingShader.h>
+#include <gfx/gl/shaders/fs-lighting.h>
+#include <gfx/gl/shaders/vs-lighting.h>
 #include <glm/gtc/type_ptr.hpp>
 
 static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
@@ -15,7 +15,7 @@ static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
 }};
 SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
-	lighting {lightingShader_vs, lightingShader_fs}, shadowMapper {{2048, 2048}}
+	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
 	VertexArrayObject<glm::i8vec4>::configure(displayVAO, displayVBO, displayVAOdata);
@@ -126,7 +126,7 @@ SceneRenderer::renderQuad() const
 }
 
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
-	Program {lightingShader_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
+	Program {lighting_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
 	colourLoc {*this, "lightColour"}, lightViewProjectionLoc {*this, "lightViewProjection"},
 	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"}, lightViewShadowMapRegionLoc {
 																			 *this, "shadowMapRegion"}

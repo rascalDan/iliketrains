@@ -1,27 +1,24 @@
 #include "sceneShader.h"
 #include <array>
-#include <gfx/gl/shaders/fs-basicShader.h>
-#include <gfx/gl/shaders/fs-landmassShader.h>
+#include <gfx/gl/shaders/fs-landmass.h>
+#include <gfx/gl/shaders/fs-material.h>
 #include <gfx/gl/shaders/fs-pointLight.h>
 #include <gfx/gl/shaders/fs-spotLight.h>
-#include <gfx/gl/shaders/fs-waterShader.h>
+#include <gfx/gl/shaders/fs-water.h>
 #include <gfx/gl/shaders/gs-pointLight.h>
 #include <gfx/gl/shaders/gs-spotLight.h>
-#include <gfx/gl/shaders/vs-basicShader.h>
-#include <gfx/gl/shaders/vs-landmassShader.h>
+#include <gfx/gl/shaders/vs-dynamicPoint.h>
+#include <gfx/gl/shaders/vs-fixedPoint.h>
 #include <gfx/gl/shaders/vs-pointLight.h>
 #include <gfx/gl/shaders/vs-spotLight.h>
-#include <gfx/gl/shaders/vs-waterShader.h>
+#include <gfx/gl/shaders/vs-water.h>
 #include <gfx/gl/vertexArrayObject.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <location.hpp>
 #include <maths.h>
 
-SceneShader::SceneShader() :
-	landmass {landmassShader_vs, landmassShader_fs}, absolute {landmassShader_vs, basicShader_fs}
-{
-}
+SceneShader::SceneShader() : landmass {fixedPoint_vs, landmass_fs}, absolute {fixedPoint_vs, material_fs} { }
 
 void
 SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
@@ -57,7 +54,7 @@ SceneShader::SceneProgram::setViewPort(const glm::ivec4 & viewPort) const
 	}
 }
 
-SceneShader::BasicProgram::BasicProgram() : SceneProgram {basicShader_vs, basicShader_fs}, modelLoc {*this, "model"} { }
+SceneShader::BasicProgram::BasicProgram() : SceneProgram {dynamicPoint_vs, material_fs}, modelLoc {*this, "model"} { }
 
 void
 SceneShader::BasicProgram::setModel(Location const & location) const
@@ -73,7 +70,7 @@ SceneShader::BasicProgram::use(Location const & location) const
 	setModel(location);
 }
 
-SceneShader::WaterProgram::WaterProgram() : SceneProgram {waterShader_vs, waterShader_fs}, waveLoc {*this, "waves"} { }
+SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vs, water_fs}, waveLoc {*this, "waves"} { }
 
 void
 SceneShader::WaterProgram::use(float waveCycle) const

@@ -1,7 +1,7 @@
 #version 330 core
 
 include(`materialInterface.glsl')
-include(`geometryOut.glsl')
+include(`materialOut.glsl')
 
 uniform sampler2D texture0;
 

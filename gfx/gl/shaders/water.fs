@@ -2,7 +2,7 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 include(`materialInterface.glsl')
-include(`geometryOut.glsl')
+include(`materialOut.glsl')
 
 uniform sampler2D texture0;
 uniform vec3 waves;

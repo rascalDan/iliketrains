@@ -2,7 +2,7 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 include(`materialInterface.glsl')
-include(`geometryOut.glsl')
+include(`materialOut.glsl')
 
 layout(binding = 0) uniform sampler2D texture0;
 layout(binding = 1) uniform usampler2DRect material;
