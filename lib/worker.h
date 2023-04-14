@@ -33,13 +33,13 @@ private:
 private:
 	void worker();
 
-	using Threads = std::vector<std::thread>;
+	using Threads = std::vector<std::jthread>;
 	using ToDo = std::deque<WorkPtr>;
 
-	Threads threads;
 	ToDo todo;
 	std::counting_semaphore<16> todoLen;
 	std::mutex todoMutex;
+	Threads threads;
 
 	static Worker instance;
 };

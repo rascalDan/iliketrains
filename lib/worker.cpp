@@ -9,16 +9,13 @@ Worker Worker::instance;
 Worker::Worker() : todoLen {0}
 {
 	std::generate_n(std::back_inserter(threads), std::thread::hardware_concurrency(), [this]() {
-		return std::thread {&Worker::worker, this};
+		return std::jthread {&Worker::worker, this};
 	});
 }
 
 Worker::~Worker()
 {
 	todoLen.release(std::thread::hardware_concurrency());
-	std::for_each(threads.begin(), threads.end(), [](auto & th) {
-		th.join();
-	});
 }
 
 void
