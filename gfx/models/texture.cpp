@@ -1,5 +1,6 @@
 #include "texture.h"
 #include "glArrays.h"
+#include "tga.h"
 #include <GL/glew.h>
 #include <cache.h>
 #include <fcntl.h>
@@ -54,11 +55,9 @@ Texture::getSize(const glTexture & texture)
 }
 
 void
-Texture::save(const glTexture & texture, GLenum format, GLenum type, unsigned short channels, const char * path,
-		short tgaFormat)
+Texture::save(
+		const glTexture & texture, GLenum format, GLenum type, uint8_t channels, const char * path, uint8_t tgaFormat)
 {
-	using TGAHead = std::array<short, 9>;
-
 	const auto size = getSize(texture);
 	const size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
 	const size_t fileSize = dataSize + sizeof(TGAHead);
@@ -66,8 +65,11 @@ Texture::save(const glTexture & texture, GLenum format, GLenum type, unsigned sh
 	filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
 	out.truncate(fileSize);
 	auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
-	*tga.get<TGAHead>() = {0, tgaFormat, 0, 0, 0, 0, static_cast<short>(size.x), static_cast<short>(size.y),
-			static_cast<short>(8 * channels)};
+	*tga.get<TGAHead>() = {
+			.format = tgaFormat,
+			.size = size,
+			.pixelDepth = static_cast<uint8_t>(8 * channels),
+	};
 	glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
 	tga.msync(MS_ASYNC);
 }

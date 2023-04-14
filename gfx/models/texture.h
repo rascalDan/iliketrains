@@ -34,7 +34,7 @@ public:
 	static void saveNormal(const glTexture &, const char * path);
 
 protected:
-	static void save(const glTexture &, GLenum, GLenum, unsigned short channels, const char * path, short tgaFormat);
+	static void save(const glTexture &, GLenum, GLenum, uint8_t channels, const char * path, uint8_t tgaFormat);
 	static glm::ivec2 getSize(const glTexture &);
 
 	glTexture m_texture;
