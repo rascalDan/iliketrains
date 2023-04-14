@@ -57,6 +57,7 @@ run test-glContextBhvr.cpp ;
 run test-assetFactory.cpp : -- : [ sequence.insertion-sort [ glob-tree $(res) : *.* ] fixtures/rgb.txt ] : <library>test ;
 run perf-assetFactory.cpp : : : <library>benchmark <library>test <dependency>test-assetFactory ;
 run perf-persistence.cpp : : : <library>benchmark <library>test <dependency>test-persistence ;
+run test-worker.cpp ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
 explicit perf-assetFactory ;

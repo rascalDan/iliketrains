@@ -1,27 +1,24 @@
 #include "worker.h"
-#if __cpp_lib_semaphore
-#	include "work.h"
-#	include <algorithm>
-#	include <iterator>
-#	include <mutex>
+#include <algorithm>
+#include <iterator>
+#include <mutex>
+
+Worker Worker::instance;
 
 Worker::Worker() : todoLen {0}
 {
 	std::generate_n(std::back_inserter(threads), std::thread::hardware_concurrency(), [this]() {
-		return std::thread {&Worker::worker, this};
+		return std::jthread {&Worker::worker, this};
 	});
 }
 
 Worker::~Worker()
 {
 	todoLen.release(std::thread::hardware_concurrency());
-	std::for_each(threads.begin(), threads.end(), [](auto & th) {
-		th.join();
-	});
 }
 
 void
-Worker::addWork(WorkPtr j)
+Worker::addWorkPtr(WorkPtr j)
 {
 	std::lock_guard<std::mutex> lck {todoMutex};
 	todoLen.release();
@@ -45,4 +42,24 @@ Worker::worker()
 		j->doWork();
 	}
 }
-#endif
+
+void
+Worker::assist()
+{
+	auto job = [this]() {
+		using namespace std::chrono_literals;
+		if (todoLen.try_acquire_for(100us)) {
+			if (std::lock_guard<std::mutex> lck {todoMutex}; todo.size()) {
+				WorkPtr x = std::move(todo.front());
+				if (x) {
+					todo.pop_front();
+				}
+				return x;
+			}
+		}
+		return WorkPtr {};
+	};
+	if (auto j = job()) {
+		j->doWork();
+	}
+}

@@ -11,5 +11,7 @@ TextureFragment::persist(Persistence::PersistenceStore & store)
 void
 TextureFragment::postLoad()
 {
-	image = std::make_unique<Image>(Resource::mapPath(path), STBI_rgb_alpha);
+	image = Worker::addWork([this]() {
+		return std::make_unique<Image>(Resource::mapPath(path), STBI_rgb_alpha);
+	});
 }
