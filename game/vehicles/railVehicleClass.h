@@ -9,14 +9,10 @@
 class SceneShader;
 class ShadowMapper;
 class Texture;
-class ObjParser;
 class Location;
 
 class RailVehicleClass : public Asset {
 public:
-	explicit RailVehicleClass(const std::string & name);
-	RailVehicleClass();
-
 	void render(const SceneShader &, const Location &, const std::array<Location, 2> &) const;
 	void shadows(const ShadowMapper &, const Location &, const std::array<Location, 2> &) const;
 
@@ -31,10 +27,5 @@ protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<RailVehicleClass>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	void postLoad() override;
-
-private:
-	RailVehicleClass(std::unique_ptr<ObjParser> obj, std::shared_ptr<Texture>);
-	static float bogieOffset(ObjParser & o);
-	static float objectLength(ObjParser & o);
 };
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;

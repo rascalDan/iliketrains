@@ -44,7 +44,6 @@ project : requirements
 lib test : [ glob *.cpp : test-*.cpp perf-*.cpp ] ;
 
 run test-collection.cpp ;
-run test-obj.cpp ;
 run test-maths.cpp ;
 run test-lib.cpp ;
 run test-geo.cpp ;

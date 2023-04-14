@@ -22,7 +22,6 @@ project : requirements
 	<variant>profile:<lto>on
 	<variant>coverage:<coverage>on
 	<toolset>tidy:<enable>all
-	<toolset>tidy:<exclude>bin/link-static/gfx/models/obj.cpp
 	<toolset>tidy:<exclude>bin/link-static/lib/jsonParse.cpp
 	<toolset>tidy:<checkxx>boost-*
 	<toolset>tidy:<checkxx>bugprone-*
