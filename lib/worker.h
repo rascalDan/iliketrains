@@ -56,19 +56,11 @@ private:
 		{
 			try {
 				if constexpr (std::is_void_v<T>) {
-					std::apply(
-							[](auto &&... p) {
-								return std::invoke(p...);
-							},
-							params);
+					std::apply(std::invoke<Params &...>, params);
 					WorkItemT<T>::promise.set_value();
 				}
 				else {
-					WorkItemT<T>::promise.set_value(std::apply(
-							[](auto &&... p) {
-								return std::invoke(p...);
-							},
-							params));
+					WorkItemT<T>::promise.set_value(std::apply(std::invoke<Params &...>, params));
 				}
 			}
 			catch (...) {

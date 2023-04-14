@@ -14,6 +14,19 @@ workCounter()
 	return n++;
 }
 
+void
+workVoid()
+{
+	usleep(1000);
+}
+
+void
+workFail()
+{
+	usleep(1000);
+	throw std::runtime_error {"test"};
+}
+
 BOOST_AUTO_TEST_CASE(basic_slow_counter)
 {
 	std::vector<Worker::WorkPtrT<uint32_t>> ps;
@@ -31,14 +44,40 @@ BOOST_AUTO_TEST_CASE(basic_slow_counter)
 
 BOOST_AUTO_TEST_CASE(basic_error_handler)
 {
-	auto workitem = Worker::addWork([]() {
-		throw std::runtime_error {"test"};
-	});
+	auto workitem = Worker::addWork(workFail);
 	BOOST_CHECK_THROW(workitem->get(), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(basic_void_work)
 {
-	auto workitem = Worker::addWork([]() {});
+	auto workitem = Worker::addWork(workVoid);
 	BOOST_CHECK_NO_THROW(workitem->get());
+}
+
+BOOST_AUTO_TEST_CASE(lambda_void)
+{
+	BOOST_CHECK_NO_THROW(Worker::addWork([]() {})->get());
+	BOOST_CHECK_NO_THROW(Worker::addWork([](int) {}, 0)->get());
+	BOOST_CHECK_NO_THROW(Worker::addWork([](int, int) {}, 0, 0)->get());
+}
+
+BOOST_AUTO_TEST_CASE(lambda_value)
+{
+	BOOST_CHECK_EQUAL(1, Worker::addWork([]() {
+		return 1;
+	})->get());
+	BOOST_CHECK_EQUAL(2,
+			Worker::addWork(
+					[](int i) {
+						return i;
+					},
+					2)
+					->get());
+	BOOST_CHECK_EQUAL(3,
+			Worker::addWork(
+					[](int i, int j) {
+						return i + j;
+					},
+					1, 2)
+					->get());
 }
