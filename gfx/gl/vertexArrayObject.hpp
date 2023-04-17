@@ -72,19 +72,19 @@ public:
 
 private:
 	template<typename VertexT, typename T>
-	static void
+	static auto
 	set_pointer(const GLuint vertexArrayId, const void * ptr)
 	{
 		glEnableVertexAttribArray(vertexArrayId);
 		using traits = gl_traits<T>;
-		traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(VertexT), ptr);
+		return traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(VertexT), ptr);
 	}
 
 	template<typename VertexT, MP attrib>
-	static void
+	static auto
 	set_pointer(const GLuint vertexArrayId)
 	{
-		set_pointer<VertexT, typename decltype(attrib)::value_type>(vertexArrayId, attrib);
+		return set_pointer<VertexT, typename decltype(attrib)::value_type>(vertexArrayId, attrib);
 	}
 
 	template<typename VertexT, MP... attribs>
@@ -97,7 +97,7 @@ private:
 		}
 		else {
 			GLuint vertexArrayId {};
-			(set_pointer<VertexT, attribs>(vertexArrayId++), ...);
+			((vertexArrayId += set_pointer<VertexT, attribs>(vertexArrayId)), ...);
 		}
 	}
 };

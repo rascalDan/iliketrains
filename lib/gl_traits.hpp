@@ -11,20 +11,23 @@ struct gl_traits_base {
 };
 struct gl_traits_float : public gl_traits_base {
 	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) {
+			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
 				glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
+				return 1;
 			}};
 };
 struct gl_traits_longfloat : public gl_traits_base {
 	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) {
+			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
 				glVertexAttribLPointer(index, size, type, stride, pointer);
+				return 1;
 			}};
 };
 struct gl_traits_integer : public gl_traits_base {
 	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) {
+			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
 				glVertexAttribIPointer(index, size, type, stride, pointer);
+				return 1;
 			}};
 };
 template<> struct gl_traits<glm::f32> : public gl_traits_float {
@@ -63,4 +66,12 @@ template<glm::length_t L, typename T, glm::qualifier Q> struct gl_traits<glm::ve
 template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
 struct gl_traits<glm::mat<C, R, T, Q>> : public gl_traits<T> {
 	static constexpr GLint size {C * R};
+	static constexpr auto vertexAttribFunc {
+			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
+				const auto m = static_cast<glm::mat<C, R, T, Q>>(pointer);
+				for (glm::length_t r = 0; r < R; r++) {
+					glVertexAttribPointer(index, C, type, GL_FALSE, stride, &m[r]);
+				}
+				return R;
+			}};
 };
