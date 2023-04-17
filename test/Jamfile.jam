@@ -57,6 +57,7 @@ run test-assetFactory.cpp : -- : [ sequence.insertion-sort [ glob-tree $(res) : 
 run perf-assetFactory.cpp : -- : test-assetFactory : <library>benchmark <library>test ;
 run perf-persistence.cpp : -- : test-persistence : <library>benchmark <library>test ;
 run test-worker.cpp ;
+run test-instancing.cpp : : : <library>test ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
 explicit perf-assetFactory ;
