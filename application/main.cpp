@@ -44,9 +44,9 @@ public:
 		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 		world.create<Terrain>(geoData);
+		assets = AssetFactory::loadAll("res");
 
 		{
-			const auto assets = AssetFactory::loadAll("res");
 			auto rl = world.create<RailLinks>();
 			const glm::vec3 j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
 					n {-600, -500, 32}, o {-500, -800, 30}, p {-600, -900, 25}, q {-1025, -1175, 10},
