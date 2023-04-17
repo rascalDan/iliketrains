@@ -69,6 +69,7 @@ class SceneShader {
 				const float arc) const;
 
 	private:
+		UniformLocation directionLoc;
 		UniformLocation colourLoc;
 		UniformLocation kqLoc;
 		UniformLocation arcLoc;

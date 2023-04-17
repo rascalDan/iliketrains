@@ -20,8 +20,8 @@
 #include <maths.h>
 
 SceneShader::SceneShader() :
-	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs}, absolute {fixedPoint_vs,
-																								 material_fs}
+	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs},
+	absolute {fixedPoint_vs, material_fs}
 {
 }
 
@@ -104,8 +104,8 @@ SceneShader::PointLightShader::add(const glm::vec3 & position, const glm::vec3 &
 }
 
 SceneShader::SpotLightShader::SpotLightShader() :
-	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"},
-	arcLoc {*this, "arc"}
+	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, directionLoc {*this, "v_direction"},
+	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}
 {
 	using v3pair = std::pair<glm::vec3, glm::vec3>;
 	VertexArrayObject<v3pair>::configure<&v3pair::first, &v3pair::second>(va, b);
@@ -119,9 +119,9 @@ SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & 
 	glBindVertexArray(va);
 	glBindBuffer(GL_ARRAY_BUFFER, b);
 	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
+	glUniform3fv(directionLoc, 1, glm::value_ptr(direction));
 	glUniform1f(kqLoc, kq);
 	glUniform1f(arcLoc, arc);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(position));
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(direction));
 	glDrawArrays(GL_POINTS, 0, 1);
 }
