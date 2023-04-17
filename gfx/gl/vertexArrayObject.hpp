@@ -7,7 +7,7 @@
 
 class VertexArrayObject {
 public:
-	[[nodiscard]] VertexArrayObject(const GLuint arrayObject)
+	template<typename T> [[nodiscard]] VertexArrayObject(const T & arrayObject)
 	{
 		glBindVertexArray(arrayObject);
 	}
@@ -54,7 +54,13 @@ public:
 		return *this;
 	}
 
-private:
+	VertexArrayObject &
+	addIndices(const GLuint arrayBuffer)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, arrayBuffer);
+		return *this;
+	}
+
 	template<typename Data>
 	static void
 	data(const Data & data, const GLuint arrayBuffer, GLenum target)
@@ -64,6 +70,7 @@ private:
 		glBufferData(target, static_cast<GLsizeiptr>(sizeof(Value) * data.size()), data.data(), GL_STATIC_DRAW);
 	}
 
+private:
 	template<typename VertexT, typename T>
 	static void
 	set_pointer(const GLuint vertexArrayId, const void * ptr)
