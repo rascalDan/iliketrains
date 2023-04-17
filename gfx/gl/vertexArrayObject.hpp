@@ -2,47 +2,56 @@
 
 #include "collections.hpp"
 #include "gl_traits.hpp"
+#include "special_members.hpp"
 #include <GL/glew.h>
-#include <glm/common.hpp>
 
-template<typename Vertex> class VertexArrayObject {
+class VertexArrayObject {
 public:
-	template<auto Vertex::*... attribs>
-	static void
-	configure(const GLuint arrayObject, const GLuint arrayBuffer, const GLuint indexBuffer,
-			const SequentialCollection<Vertex> auto & vertices, const SequentialCollection<unsigned int> auto & indices)
+	[[nodiscard]] VertexArrayObject(const GLuint arrayObject)
 	{
 		glBindVertexArray(arrayObject);
-
-		configure_attribs<attribs...>(arrayBuffer);
-		data(vertices, arrayBuffer, GL_ARRAY_BUFFER);
-		data(indices, indexBuffer, GL_ELEMENT_ARRAY_BUFFER);
-
+	}
+	~VertexArrayObject()
+	{
 		glBindVertexArray(0);
 	}
+	NO_MOVE(VertexArrayObject);
+	NO_COPY(VertexArrayObject);
 
-	template<auto Vertex::*... attribs>
-	static void
-	configure(const GLuint arrayObject, const GLuint arrayBuffer, const SequentialCollection<Vertex> auto & vertices)
+	template<typename m, typename T> struct MP {
+		constexpr MP(m T::*p) : P {p} { }
+		operator void *() const
+		{
+			return &(static_cast<T *>(nullptr)->*P);
+		}
+		m T::*P;
+		using value_type = m;
+	};
+	template<typename m, typename T> MP(m T::*) -> MP<m, T>;
+
+	template<typename VertexT, MP... attribs>
+	VertexArrayObject &
+	addAttribs(const GLuint arrayBuffer, const SequentialCollection<VertexT> auto & vertices)
 	{
-		glBindVertexArray(arrayObject);
-
-		configure_attribs<attribs...>(arrayBuffer);
+		addAttribs<VertexT, attribs...>(arrayBuffer);
 		data(vertices, arrayBuffer, GL_ARRAY_BUFFER);
-
-		glBindVertexArray(0);
+		return *this;
 	}
 
-	template<auto Vertex::*... attribs>
-	static void
-	configure(const GLuint arrayObject, const GLuint arrayBuffer)
+	template<typename VertexT, MP... attribs>
+	VertexArrayObject &
+	addAttribs(const GLuint arrayBuffer)
 	{
-		glBindVertexArray(arrayObject);
+		configure_attribs<VertexT, attribs...>(arrayBuffer);
+		return *this;
+	}
 
-		configure_attribs<attribs...>(arrayBuffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(Vertex)), nullptr, GL_DYNAMIC_DRAW);
-
-		glBindVertexArray(0);
+	template<typename Indices>
+	VertexArrayObject &
+	addIndices(const GLuint arrayBuffer, const Indices & indices)
+	{
+		data(indices, arrayBuffer, GL_ELEMENT_ARRAY_BUFFER);
+		return *this;
 	}
 
 private:
@@ -55,34 +64,33 @@ private:
 		glBufferData(target, static_cast<GLsizeiptr>(sizeof(Value) * data.size()), data.data(), GL_STATIC_DRAW);
 	}
 
-	template<typename T>
+	template<typename VertexT, typename T>
 	static void
 	set_pointer(const GLuint vertexArrayId, const void * ptr)
 	{
 		glEnableVertexAttribArray(vertexArrayId);
 		using traits = gl_traits<T>;
-		traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(Vertex), ptr);
+		traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(VertexT), ptr);
 	}
 
-	template<auto Vertex::*attrib>
+	template<typename VertexT, MP attrib>
 	static void
 	set_pointer(const GLuint vertexArrayId)
 	{
-		set_pointer<std::decay_t<decltype(std::declval<Vertex>().*attrib)>>(
-				vertexArrayId, &(static_cast<const Vertex *>(nullptr)->*attrib));
+		set_pointer<VertexT, typename decltype(attrib)::value_type>(vertexArrayId, attrib);
 	}
 
-	template<auto Vertex::*... attribs>
+	template<typename VertexT, MP... attribs>
 	static void
 	configure_attribs(const GLuint arrayBuffer)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
 		if constexpr (sizeof...(attribs) == 0) {
-			set_pointer<Vertex>(0, nullptr);
+			set_pointer<VertexT, VertexT>(0, nullptr);
 		}
 		else {
 			GLuint vertexArrayId {};
-			(set_pointer<attribs>(vertexArrayId++), ...);
+			(set_pointer<VertexT, attribs>(vertexArrayId++), ...);
 		}
 	}
 };

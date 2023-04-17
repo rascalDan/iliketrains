@@ -88,7 +88,7 @@ SceneShader::WaterProgram::use(float waveCycle) const
 SceneShader::PointLightShader::PointLightShader() :
 	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"}
 {
-	VertexArrayObject<glm::vec3>::configure(va, b);
+	VertexArrayObject {va}.addAttribs<glm::vec3>(b);
 }
 
 void
@@ -99,7 +99,7 @@ SceneShader::PointLightShader::add(const glm::vec3 & position, const glm::vec3 &
 	glBindBuffer(GL_ARRAY_BUFFER, b);
 	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
 	glUniform1f(kqLoc, kq);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(position));
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }
 
@@ -108,7 +108,7 @@ SceneShader::SpotLightShader::SpotLightShader() :
 	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}
 {
 	using v3pair = std::pair<glm::vec3, glm::vec3>;
-	VertexArrayObject<v3pair>::configure<&v3pair::first, &v3pair::second>(va, b);
+	VertexArrayObject {va}.addAttribs<v3pair, &v3pair::first, &v3pair::second>(b);
 }
 
 void
@@ -122,6 +122,6 @@ SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & 
 	glUniform3fv(directionLoc, 1, glm::value_ptr(direction));
 	glUniform1f(kqLoc, kq);
 	glUniform1f(arcLoc, arc);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(position));
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }

@@ -18,7 +18,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
-	VertexArrayObject<glm::i8vec4>::configure(displayVAO, displayVBO, displayVAOdata);
+	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	const auto configuregdata
@@ -128,8 +128,8 @@ SceneRenderer::renderQuad() const
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 	Program {lighting_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
 	colourLoc {*this, "lightColour"}, lightViewProjectionLoc {*this, "lightViewProjection"},
-	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"}, lightViewShadowMapRegionLoc {
-																			 *this, "shadowMapRegion"}
+	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"},
+	lightViewShadowMapRegionLoc {*this, "shadowMapRegion"}
 {
 }
 
