@@ -79,7 +79,11 @@ public:
 			train->currentActivity = train->orders.current()->createActivity();
 
 			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
-			world.create<Plant>(foliage, Location {{-1100, -1100, 0}});
+			for (float x = 900; x < 1100; x += 3) {
+				for (float y = 900; y < 1100; y += 3) {
+					world.create<Plant>(foliage, Location {geoData->positionAt({-x, -y})});
+				}
+			}
 		}
 
 		auto t_start = std::chrono::high_resolution_clock::now();
