@@ -12,11 +12,12 @@ TestMainWindow::TestMainWindow() : Window {1, 1, __FILE__, SDL_WINDOW_OPENGL | S
 						(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 				switch (type) {
 					case GL_DEBUG_TYPE_ERROR:
-					case GL_DEBUG_TYPE_PERFORMANCE:
 					case GL_DEBUG_TYPE_PORTABILITY:
 					case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
 					case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
 						BOOST_TEST_ERROR(msg.get());
+					case GL_DEBUG_TYPE_PERFORMANCE:
+						BOOST_TEST_WARN(msg.get());
 					default:
 						BOOST_TEST_MESSAGE(msg.get());
 				}

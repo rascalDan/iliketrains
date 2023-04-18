@@ -29,7 +29,6 @@ public:
 	FactoryFixture() : sceneRenderer {size, output} { }
 	~FactoryFixture()
 	{
-		glDisable(GL_DEBUG_OUTPUT);
 		auto outpath = (TMP / boost::unit_test::framework::current_test_case().full_name()).replace_extension(".tga");
 		std::filesystem::create_directories(outpath.parent_path());
 		Texture::save(outImage, outpath.c_str());
