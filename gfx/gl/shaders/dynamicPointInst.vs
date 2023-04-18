@@ -1,7 +1,7 @@
 #version 330 core
 
 include(`meshIn.glsl')
-layout(location = 6) in mat4 model;
+layout(location = 5) in mat4 model;
 include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
