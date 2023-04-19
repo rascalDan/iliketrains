@@ -88,16 +88,17 @@ private:
 	}
 
 	template<typename VertexT, MP... attribs>
-	static void
+	void
 	configure_attribs(const GLuint arrayBuffer)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
 		if constexpr (sizeof...(attribs) == 0) {
-			set_pointer<VertexT, VertexT>(0, nullptr);
+			vertexArrayId += set_pointer<VertexT, VertexT>(vertexArrayId, nullptr);
 		}
 		else {
-			GLuint vertexArrayId {};
 			((vertexArrayId += set_pointer<VertexT, attribs>(vertexArrayId)), ...);
 		}
 	}
+
+	GLuint vertexArrayId {};
 };
