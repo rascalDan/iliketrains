@@ -75,9 +75,13 @@ private:
 	static auto
 	set_pointer(const GLuint vertexArrayId, const void * ptr)
 	{
-		glEnableVertexAttribArray(vertexArrayId);
 		using traits = gl_traits<T>;
-		return traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(VertexT), ptr);
+		const auto usedAttribs
+				= traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(VertexT), ptr);
+		for (GLuint i {}; i < usedAttribs; i++) {
+			glEnableVertexAttribArray(vertexArrayId + i);
+		}
+		return usedAttribs;
 	}
 
 	template<typename VertexT, MP attrib>
