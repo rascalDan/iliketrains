@@ -31,18 +31,18 @@ public:
 
 	template<typename VertexT, MP... attribs>
 	VertexArrayObject &
-	addAttribs(const GLuint arrayBuffer, const SequentialCollection<VertexT> auto & vertices)
+	addAttribs(const GLuint arrayBuffer, const SequentialCollection<VertexT> auto & vertices, const GLuint divisor = 0)
 	{
-		addAttribs<VertexT, attribs...>(arrayBuffer);
+		addAttribs<VertexT, attribs...>(arrayBuffer, divisor);
 		data(vertices, arrayBuffer, GL_ARRAY_BUFFER);
 		return *this;
 	}
 
 	template<typename VertexT, MP... attribs>
 	VertexArrayObject &
-	addAttribs(const GLuint arrayBuffer)
+	addAttribs(const GLuint arrayBuffer, const GLuint divisor = 0)
 	{
-		configure_attribs<VertexT, attribs...>(arrayBuffer);
+		configure_attribs<VertexT, attribs...>(arrayBuffer, divisor);
 		return *this;
 	}
 
@@ -73,34 +73,35 @@ public:
 private:
 	template<typename VertexT, typename T>
 	static auto
-	set_pointer(const GLuint vertexArrayId, const void * ptr)
+	set_pointer(const GLuint vertexArrayId, const void * ptr, const GLuint divisor)
 	{
 		using traits = gl_traits<T>;
 		const auto usedAttribs
 				= traits::vertexAttribFunc(vertexArrayId, traits::size, traits::type, sizeof(VertexT), ptr);
 		for (GLuint i {}; i < usedAttribs; i++) {
 			glEnableVertexAttribArray(vertexArrayId + i);
+			glVertexAttribDivisor(vertexArrayId + i, divisor);
 		}
 		return usedAttribs;
 	}
 
 	template<typename VertexT, MP attrib>
 	static auto
-	set_pointer(const GLuint vertexArrayId)
+	set_pointer(const GLuint vertexArrayId, const GLuint divisor)
 	{
-		return set_pointer<VertexT, typename decltype(attrib)::value_type>(vertexArrayId, attrib);
+		return set_pointer<VertexT, typename decltype(attrib)::value_type>(vertexArrayId, attrib, divisor);
 	}
 
 	template<typename VertexT, MP... attribs>
 	void
-	configure_attribs(const GLuint arrayBuffer)
+	configure_attribs(const GLuint arrayBuffer, const GLuint divisor)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
 		if constexpr (sizeof...(attribs) == 0) {
-			vertexArrayId += set_pointer<VertexT, VertexT>(vertexArrayId, nullptr);
+			vertexArrayId += set_pointer<VertexT, VertexT>(vertexArrayId, nullptr, divisor);
 		}
 		else {
-			((vertexArrayId += set_pointer<VertexT, attribs>(vertexArrayId)), ...);
+			((vertexArrayId += set_pointer<VertexT, attribs>(vertexArrayId, divisor)), ...);
 		}
 	}
 
