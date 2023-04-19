@@ -68,9 +68,9 @@ struct gl_traits<glm::mat<C, R, T, Q>> : public gl_traits<T> {
 	static constexpr GLint size {C * R};
 	static constexpr auto vertexAttribFunc {
 			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				const auto m = static_cast<glm::mat<C, R, T, Q>>(pointer);
-				for (glm::length_t r = 0; r < R; r++) {
-					glVertexAttribPointer(index, C, type, GL_FALSE, stride, &m[r]);
+				const auto base = static_cast<const T *>(pointer);
+				for (GLuint r = 0; r < R; r++) {
+					glVertexAttribPointer(index + r, C, type, GL_FALSE, stride, base + (r * C));
 				}
 				return R;
 			}};
