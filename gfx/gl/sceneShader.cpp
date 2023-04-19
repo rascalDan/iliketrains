@@ -28,8 +28,8 @@ SceneShader::SceneShader() :
 void
 SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 {
-	for (const auto & prog :
-			std::array<const SceneProgram *, 6> {&basic, &water, &landmass, &absolute, &pointLight, &spotLight}) {
+	for (const auto & prog : std::array<const SceneProgram *, 7> {
+				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
 		prog->setViewProjection(viewProjection);
 	}
 }
@@ -37,8 +37,8 @@ SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 void
 SceneShader::setViewPort(const glm::ivec4 & viewPort) const
 {
-	for (const auto & prog :
-			std::array<const SceneProgram *, 6> {&basic, &water, &landmass, &absolute, &pointLight, &spotLight}) {
+	for (const auto & prog : std::array<const SceneProgram *, 7> {
+				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
 		prog->setViewPort(viewPort);
 	}
 }
