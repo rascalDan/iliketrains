@@ -1,13 +1,7 @@
 #include "plant.h"
 
-void
-Plant::render(const SceneShader & shader) const
+Plant::Plant(std::shared_ptr<const Foliage> type, Location position) :
+	type {std::move(type)},
+	location {this->type->instances.acquire(glm::translate(position.pos) * rotate_ypr(position.rot))}
 {
-	type->render(shader, position);
-}
-
-void
-Plant::shadows(const ShadowMapper & mapper) const
-{
-	type->shadows(mapper, position);
 }

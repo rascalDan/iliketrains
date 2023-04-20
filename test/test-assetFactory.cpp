@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	BOOST_REQUIRE(tree_01_1_f);
 
 	auto plant = std::make_shared<Plant>(tree_01_1_f, Location {{-2, 2, 0}, {}});
-	objects.objects.push_back(plant);
+	objects.objects.push_back(tree_01_1_f);
 
 	render(5);
 }

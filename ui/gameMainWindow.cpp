@@ -51,6 +51,11 @@ GameMainWindow::render() const
 void
 GameMainWindow::content(const SceneShader & shader) const
 {
+	for (const auto & [id, asset] : gameState->assets) {
+		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
+			r->render(shader);
+		}
+	}
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
 	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
 }
@@ -68,5 +73,10 @@ GameMainWindow::lights(const SceneShader & shader) const
 void
 GameMainWindow::shadows(const ShadowMapper & shadowMapper) const
 {
+	for (const auto & [id, asset] : gameState->assets) {
+		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
+			r->shadows(shadowMapper);
+		}
+	}
 	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper);
 }
