@@ -115,6 +115,18 @@ public:
 		unused.push_back(p.index);
 	}
 
+	const auto &
+	bufferName() const
+	{
+		return buffer;
+	}
+
+	auto
+	count() const
+	{
+		return next;
+	}
+
 protected:
 	friend InstanceProxy;
 
