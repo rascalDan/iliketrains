@@ -53,7 +53,7 @@ run test-text.cpp ;
 run test-enumDetails.cpp ;
 run test-render.cpp : -- : test-assetFactory : <library>test ;
 run test-glContextBhvr.cpp ;
-run test-assetFactory.cpp : -- : [ sequence.insertion-sort [ glob-tree $(res) : *.* ] fixtures/rgb.txt ] : <library>test ;
+run test-assetFactory.cpp : -- : [ sequence.insertion-sort [ glob-tree $(res) : *.* ] fixtures/rgb.txt test-instancing ] : <library>test ;
 run perf-assetFactory.cpp : -- : test-assetFactory : <library>benchmark <library>test ;
 run perf-persistence.cpp : -- : test-persistence : <library>benchmark <library>test ;
 run test-worker.cpp ;

@@ -9,11 +9,9 @@
 
 template<typename T> class InstanceVertices {
 public:
-	InstanceVertices(size_t initialSize = 16) : data {allocBuffer(buffer, initialSize)}, next {} { }
-
-	~InstanceVertices()
+	InstanceVertices(size_t initialSize = 16)
 	{
-		glUnmapNamedBuffer(buffer);
+		allocBuffer(initialSize);
 	}
 
 	class InstanceProxy {
@@ -50,17 +48,20 @@ public:
 		T &
 		operator=(U && v)
 		{
+			instances->map();
 			return instances->data[index] = std::forward<U>(v);
 		}
 
 		T *
 		get()
 		{
+			instances->map();
 			return &instances->data[index];
 		}
 		const T *
 		get() const
 		{
+			instances->map();
 			return &instances->data[index];
 		}
 		T *
@@ -95,22 +96,24 @@ public:
 	InstanceProxy
 	acquire(Params &&... params)
 	{
+		map();
 		if (!unused.empty()) {
 			auto idx = unused.back();
 			unused.pop_back();
-			new (&data[idx]) T(std::forward<Params>(params)...);
+			new (data + idx) T(std::forward<Params>(params)...);
 			return InstanceProxy {this, idx};
 		}
-		if (next >= data.size()) {
-			resize(data.size() * 2);
+		if (next >= capacity) {
+			resize(capacity * 2);
 		}
-		new (&data[next]) T(std::forward<Params>(params)...);
+		new (data + next) T(std::forward<Params>(params)...);
 		return InstanceProxy {this, next++};
 	}
 
 	void
 	release(const InstanceProxy & p)
 	{
+		map();
 		data[p.index].~T();
 		unused.push_back(p.index);
 	}
@@ -118,42 +121,65 @@ public:
 	const auto &
 	bufferName() const
 	{
+		unmap();
 		return buffer;
 	}
 
 	auto
 	count() const
 	{
+		unmap();
 		return next;
 	}
 
 protected:
 	friend InstanceProxy;
 
-	static std::span<T>
-	allocBuffer(const glBuffer & buffer, std::size_t count)
+	void
+	allocBuffer(std::size_t newCapacity)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(T) * count), nullptr, GL_DYNAMIC_DRAW);
-		auto data = static_cast<T *>(glMapNamedBuffer(buffer, GL_READ_WRITE));
+		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(T) * newCapacity), nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		return {data, count};
+		capacity = newCapacity;
+		data = nullptr;
 	}
 
 	void
 	resize(size_t newCapacity)
 	{
-		const auto maintain = std::min(newCapacity, data.size());
-		const auto maintaind = static_cast<typename decltype(data)::difference_type>(maintain);
+		const auto maintain = std::min(newCapacity, capacity);
 		std::vector<T> existing;
+		const auto maintaind = static_cast<typename decltype(existing)::difference_type>(maintain);
 		existing.reserve(maintain);
-		std::move(data.begin(), data.begin() + maintaind, std::back_inserter(existing));
-		data = allocBuffer(buffer, newCapacity);
-		std::move(existing.begin(), existing.begin() + maintaind, data.begin());
+		map();
+		std::move(data, data + maintain, std::back_inserter(existing));
+		allocBuffer(newCapacity);
+		map();
+		std::move(existing.begin(), existing.begin() + maintaind, data);
+		capacity = newCapacity;
+	}
+
+	void
+	map() const
+	{
+		if (!data) {
+			data = static_cast<T *>(glMapNamedBuffer(buffer, GL_READ_WRITE));
+		}
+	}
+
+	void
+	unmap() const
+	{
+		if (data) {
+			glUnmapNamedBuffer(buffer);
+			data = nullptr;
+		}
 	}
 
 	glBuffer buffer;
-	std::span<T> data;
-	std::size_t next;
+	mutable T * data {};
+	std::size_t capacity {};
+	std::size_t next {};
 	std::vector<size_t> unused;
 };
