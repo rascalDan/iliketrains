@@ -32,37 +32,38 @@ public:
 		InstanceProxy &
 		operator=(InstanceProxy && other)
 		{
+			if (instances) {
+				instances->release(*this);
+			}
 			instances = std::exchange(other.instances, nullptr);
 			index = other.index;
-		}
-
-		operator T &()
-		{
-			return *get();
-		}
-		operator const T &() const
-		{
-			return *get();
+			return *this;
 		}
 		template<typename U>
 		T &
 		operator=(U && v)
 		{
-			instances->map();
-			return instances->data[index] = std::forward<U>(v);
+			return instances->at(index) = std::forward<U>(v);
+		}
+
+		operator T &()
+		{
+			return instances->at(index);
+		}
+		operator const T &() const
+		{
+			return instances->at(index);
 		}
 
 		T *
 		get()
 		{
-			instances->map();
-			return &instances->data[index];
+			return &instances->at(index);
 		}
 		const T *
 		get() const
 		{
-			instances->map();
-			return &instances->data[index];
+			return &instances->at(index);
 		}
 		T *
 		operator->()
@@ -77,12 +78,12 @@ public:
 		T &
 		operator*()
 		{
-			return *get();
+			return instances->at(index);
 		}
 		const T &
 		operator*() const
 		{
-			return *get();
+			return instances->at(index);
 		}
 
 	private:
@@ -100,22 +101,16 @@ public:
 		if (!unused.empty()) {
 			auto idx = unused.back();
 			unused.pop_back();
-			new (data + idx) T(std::forward<Params>(params)...);
+			index[idx] = next++;
+			new (&at(idx)) T(std::forward<Params>(params)...);
 			return InstanceProxy {this, idx};
 		}
 		if (next >= capacity) {
 			resize(capacity * 2);
 		}
-		new (data + next) T(std::forward<Params>(params)...);
-		return InstanceProxy {this, next++};
-	}
-
-	void
-	release(const InstanceProxy & p)
-	{
-		map();
-		data[p.index].~T();
-		unused.push_back(p.index);
+		index.emplace_back(next++);
+		new (data + index.back()) T(std::forward<Params>(params)...);
+		return InstanceProxy {this, index.size() - 1};
 	}
 
 	const auto &
@@ -134,6 +129,30 @@ public:
 
 protected:
 	friend InstanceProxy;
+
+	void
+	release(const InstanceProxy & p)
+	{
+		// Destroy p's object
+		at(p.index).~T();
+		if (next-- > index[p.index]) {
+			// Remember p.index is free index now
+			unused.push_back(p.index);
+			// Move last object into p's slot
+			new (&at(p.index)) T {std::move(data[next])};
+			(data[next]).~T();
+			for (auto & i : index) {
+				if (i == next) {
+					i = index[p.index];
+					break;
+				}
+			}
+			index[p.index] = 100000;
+		}
+		else {
+			index.pop_back();
+		}
+	}
 
 	void
 	allocBuffer(std::size_t newCapacity)
@@ -160,6 +179,13 @@ protected:
 		capacity = newCapacity;
 	}
 
+	T &
+	at(size_t pindex)
+	{
+		map();
+		return data[index[pindex]];
+	}
+
 	void
 	map() const
 	{
@@ -179,7 +205,12 @@ protected:
 
 	glBuffer buffer;
 	mutable T * data {};
+	// Size of buffer
 	std::size_t capacity {};
+	// # used of capacity
 	std::size_t next {};
+	// Index into buffer given to nth proxy
+	std::vector<size_t> index;
+	// List of free spaces in index
 	std::vector<size_t> unused;
 };
