@@ -2,15 +2,13 @@
 
 #include "foliage.h"
 #include "game/worldobject.h"
-#include "gfx/renderable.h"
 #include "location.hpp"
+#include "maths.h"
+#include <glm/gtx/transform.hpp>
 
-class Plant : public Renderable, public WorldObject {
+class Plant : public WorldObject {
 	std::shared_ptr<const Foliage> type;
-	Location position;
-
-	void render(const SceneShader & shader) const override;
-	void shadows(const ShadowMapper & shadowMapper) const override;
+	InstanceVertices<glm::mat4>::InstanceProxy location;
 
 	void
 	tick(TickDuration) override
@@ -18,5 +16,5 @@ class Plant : public Renderable, public WorldObject {
 	}
 
 public:
-	Plant(std::shared_ptr<const Foliage> type, Location position) : type(std::move(type)), position(position) { }
+	Plant(std::shared_ptr<const Foliage> type, Location position);
 };

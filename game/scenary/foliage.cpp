@@ -1,7 +1,9 @@
 #include "foliage.h"
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
+#include "gfx/gl/vertexArrayObject.hpp"
 #include "gfx/models/texture.h"
+#include "location.hpp"
 
 bool
 Foliage::persist(Persistence::PersistenceStore & store)
@@ -13,21 +15,25 @@ void
 Foliage::postLoad()
 {
 	texture = getTexture();
+	bodyMesh->configureVAO(instanceVAO).addAttribs<glm::mat4>(instances.bufferName(), 1);
 }
 
 void
-Foliage::render(const SceneShader & shader, const Location & loc) const
+Foliage::render(const SceneShader & shader) const
 {
-	shader.basic.use(loc);
-	if (texture) {
-		texture->bind();
+	if (const auto count = instances.count()) {
+		shader.basicInst.use();
+		if (texture) {
+			texture->bind();
+		}
+		glBindVertexArray(instanceVAO);
+		glDrawElementsInstanced(
+				bodyMesh->type(), bodyMesh->count(), GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(count));
+		glBindVertexArray(0);
 	}
-	bodyMesh->Draw();
 }
 
 void
-Foliage::shadows(const ShadowMapper & mapper, const Location & loc) const
+Foliage::shadows(const ShadowMapper &) const
 {
-	mapper.dynamicPoint.use(loc);
-	bodyMesh->Draw();
 }

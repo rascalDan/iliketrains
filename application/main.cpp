@@ -44,9 +44,9 @@ public:
 		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 		world.create<Terrain>(geoData);
+		assets = AssetFactory::loadAll("res");
 
 		{
-			const auto assets = AssetFactory::loadAll("res");
 			auto rl = world.create<RailLinks>();
 			const glm::vec3 j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
 					n {-600, -500, 32}, o {-500, -800, 30}, p {-600, -900, 25}, q {-1025, -1175, 10},
@@ -79,7 +79,11 @@ public:
 			train->currentActivity = train->orders.current()->createActivity();
 
 			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
-			world.create<Plant>(foliage, Location {{-1100, -1100, 0}});
+			for (float x = 900; x < 1100; x += 3) {
+				for (float y = 900; y < 1100; y += 3) {
+					world.create<Plant>(foliage, Location {geoData->positionAt({-x, -y})});
+				}
+			}
 		}
 
 		auto t_start = std::chrono::high_resolution_clock::now();

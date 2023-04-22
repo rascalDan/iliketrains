@@ -29,7 +29,6 @@ public:
 	FactoryFixture() : sceneRenderer {size, output} { }
 	~FactoryFixture()
 	{
-		glDisable(GL_DEBUG_OUTPUT);
 		auto outpath = (TMP / boost::unit_test::framework::current_test_case().full_name()).replace_extension(".tga");
 		std::filesystem::create_directories(outpath.parent_path());
 		Texture::save(outImage, outpath.c_str());
@@ -108,8 +107,11 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
 	BOOST_REQUIRE(tree_01_1_f);
 
-	auto plant = std::make_shared<Plant>(tree_01_1_f, Location {{-2, 2, 0}, {}});
-	objects.objects.push_back(plant);
+	auto plant1 = std::make_shared<Plant>(tree_01_1_f, Location {{-2, 2, 0}, {0, 0, 0}});
+	auto plant2 = std::make_shared<Plant>(tree_01_1_f, Location {{3, -4, 0}, {0, 1, 0}});
+	auto plant3 = std::make_shared<Plant>(tree_01_1_f, Location {{-2, -4, 0}, {0, 2, 0}});
+	auto plant4 = std::make_shared<Plant>(tree_01_1_f, Location {{3, 2, 0}, {0, 3, 0}});
+	objects.objects.push_back(tree_01_1_f);
 
 	render(5);
 }

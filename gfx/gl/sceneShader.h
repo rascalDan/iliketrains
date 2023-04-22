@@ -69,6 +69,7 @@ class SceneShader {
 				const float arc) const;
 
 	private:
+		UniformLocation directionLoc;
 		UniformLocation colourLoc;
 		UniformLocation kqLoc;
 		UniformLocation arcLoc;
@@ -81,7 +82,7 @@ public:
 
 	BasicProgram basic;
 	WaterProgram water;
-	AbsolutePosProgram landmass, absolute;
+	AbsolutePosProgram basicInst, landmass, absolute;
 	PointLightShader pointLight;
 	SpotLightShader spotLight;
 

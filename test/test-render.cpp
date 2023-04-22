@@ -86,7 +86,6 @@ BOOST_AUTO_TEST_CASE(basic)
 	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	const TestScene scene;
 	ss.render(scene);
-	glDisable(GL_DEBUG_OUTPUT);
 	Texture::save(outImage, "/tmp/basic.tga");
 }
 
@@ -114,7 +113,6 @@ BOOST_AUTO_TEST_CASE(pointlight)
 	};
 	const PointLightScene scene;
 	ss.render(scene);
-	glDisable(GL_DEBUG_OUTPUT);
 	Texture::save(outImage, "/tmp/pointlight.tga");
 }
 
@@ -141,7 +139,6 @@ BOOST_AUTO_TEST_CASE(spotlight)
 	};
 	const PointLightScene scene;
 	ss.render(scene);
-	glDisable(GL_DEBUG_OUTPUT);
 	Texture::save(outImage, "/tmp/spotlight.tga");
 }
 
