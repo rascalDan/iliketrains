@@ -38,9 +38,8 @@ BOOST_AUTO_TEST_CASE(acquireRelease)
 		BOOST_CHECK(unused.empty());
 	}
 	BOOST_CHECK_EQUAL(0, next);
-	BOOST_CHECK_EQUAL(1, unused.size());
-	BOOST_CHECK_EQUAL(0, unused.front());
-	BOOST_CHECK_EQUAL(1, index.size());
+	BOOST_CHECK(unused.empty());
+	BOOST_CHECK(index.empty());
 }
 
 BOOST_AUTO_TEST_CASE(acquireReleaseMove)
@@ -55,9 +54,8 @@ BOOST_AUTO_TEST_CASE(acquireReleaseMove)
 		BOOST_CHECK_EQUAL(data[0], 40);
 	}
 	BOOST_CHECK_EQUAL(0, next);
-	BOOST_CHECK_EQUAL(1, unused.size());
-	BOOST_CHECK_EQUAL(0, unused.front());
-	BOOST_CHECK_EQUAL(1, index.size());
+	BOOST_CHECK(unused.empty());
+	BOOST_CHECK(index.empty());
 }
 
 BOOST_AUTO_TEST_CASE(autoMapUnmap)

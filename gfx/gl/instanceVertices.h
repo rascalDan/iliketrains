@@ -132,18 +132,21 @@ protected:
 	{
 		// Destroy p's object
 		at(pidx).~T();
-		if (next-- > index[pidx]) {
-			// Remember p.index is free index now
-			unused.push_back(pidx);
+		if (--next != index[pidx]) {
 			// Move last object into p's slot
 			new (&at(pidx)) T {std::move(data[next])};
 			(data[next]).~T();
-			*std::find(index.begin(), index.end(), next) = index[pidx];
-			// Not strictly required, but needed for uniqueness unit test assertion
-			index[pidx] = static_cast<size_t>(-1);
+			*std::find_if(index.begin(), index.end(), [this](const auto & i) {
+				const auto n = &i - index.data();
+				return i == next && std::find(unused.begin(), unused.end(), n) == unused.end();
+			}) = index[pidx];
+		}
+		if (pidx == index.size() - 1) {
+			index.pop_back();
 		}
 		else {
-			index.pop_back();
+			// Remember p.index is free index now
+			unused.push_back(pidx);
 		}
 	}
 
