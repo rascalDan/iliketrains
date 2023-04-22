@@ -25,7 +25,7 @@ public:
 		~InstanceProxy()
 		{
 			if (instances) {
-				instances->release(*this);
+				instances->release(index);
 			}
 		}
 
@@ -33,7 +33,7 @@ public:
 		operator=(InstanceProxy && other)
 		{
 			if (instances) {
-				instances->release(*this);
+				instances->release(index);
 			}
 			instances = std::exchange(other.instances, nullptr);
 			index = other.index;
@@ -87,8 +87,6 @@ public:
 		}
 
 	private:
-		friend InstanceVertices;
-
 		InstanceVertices<T> * instances;
 		std::size_t index;
 	};
@@ -131,23 +129,19 @@ protected:
 	friend InstanceProxy;
 
 	void
-	release(const InstanceProxy & p)
+	release(const size_t pidx)
 	{
 		// Destroy p's object
-		at(p.index).~T();
-		if (next-- > index[p.index]) {
+		at(pidx).~T();
+		if (next-- > index[pidx]) {
 			// Remember p.index is free index now
-			unused.push_back(p.index);
+			unused.push_back(pidx);
 			// Move last object into p's slot
-			new (&at(p.index)) T {std::move(data[next])};
+			new (&at(pidx)) T {std::move(data[next])};
 			(data[next]).~T();
-			for (auto & i : index) {
-				if (i == next) {
-					i = index[p.index];
-					break;
-				}
-			}
-			index[p.index] = 100000;
+			*std::find(index.begin(), index.end(), next) = index[pidx];
+			// Not strictly required, but needed for uniqueness unit test assertion
+			index[pidx] = static_cast<size_t>(-1);
 		}
 		else {
 			index.pop_back();
