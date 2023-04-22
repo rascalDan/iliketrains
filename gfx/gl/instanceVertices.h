@@ -14,7 +14,7 @@ public:
 		allocBuffer(initialSize);
 	}
 
-	class InstanceProxy {
+	class [[nodiscard]] InstanceProxy {
 	public:
 		InstanceProxy(InstanceVertices * iv, std::size_t idx) : instances {iv}, index {idx} { }
 		InstanceProxy(InstanceProxy && other) : instances {std::exchange(other.instances, nullptr)}, index {other.index}
@@ -46,41 +46,41 @@ public:
 			return instances->at(index) = std::forward<U>(v);
 		}
 
+		[[nodiscard]]
 		operator T &()
 		{
 			return instances->at(index);
 		}
-		operator const T &() const
+		[[nodiscard]] operator const T &() const
 		{
 			return instances->at(index);
 		}
-
-		T *
+		[[nodiscard]] T *
 		get()
 		{
 			return &instances->at(index);
 		}
-		const T *
+		[[nodiscard]] const T *
 		get() const
 		{
 			return &instances->at(index);
 		}
-		T *
+		[[nodiscard]] T *
 		operator->()
 		{
 			return get();
 		}
-		const T *
+		[[nodiscard]] const T *
 		operator->() const
 		{
 			return get();
 		}
-		T &
+		[[nodiscard]] T &
 		operator*()
 		{
 			return instances->at(index);
 		}
-		const T &
+		[[nodiscard]] const T &
 		operator*() const
 		{
 			return instances->at(index);
@@ -92,7 +92,7 @@ public:
 	};
 
 	template<typename... Params>
-	InstanceProxy
+	[[nodiscard]] InstanceProxy
 	acquire(Params &&... params)
 	{
 		map();
@@ -111,14 +111,13 @@ public:
 		return InstanceProxy {this, index.size() - 1};
 	}
 
-	const auto &
+	[[nodiscard]] const auto &
 	bufferName() const
 	{
-		unmap();
 		return buffer;
 	}
 
-	auto
+	[[nodiscard]] auto
 	count() const
 	{
 		unmap();
@@ -173,7 +172,7 @@ protected:
 		capacity = newCapacity;
 	}
 
-	T &
+	[[nodiscard]] T &
 	at(size_t pindex)
 	{
 		map();

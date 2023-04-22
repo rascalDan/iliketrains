@@ -50,8 +50,9 @@ BOOST_AUTO_TEST_CASE(acquireReleaseMove)
 		*proxy1 = 20;
 		BOOST_CHECK_EQUAL(1, next);
 		auto proxy2 = std::move(proxy1);
-		*proxy2 = 40;
+		proxy2 = 40;
 		BOOST_CHECK_EQUAL(1, next);
+		BOOST_CHECK_EQUAL(data[0], 40);
 	}
 	BOOST_CHECK_EQUAL(0, next);
 	BOOST_CHECK_EQUAL(1, unused.size());
@@ -59,10 +60,26 @@ BOOST_AUTO_TEST_CASE(acquireReleaseMove)
 	BOOST_CHECK_EQUAL(1, index.size());
 }
 
+BOOST_AUTO_TEST_CASE(autoMapUnmap)
+{
+	{
+		auto proxy = acquire();
+		BOOST_CHECK(data);
+		std::ignore = bufferName();
+		BOOST_CHECK(data);
+		BOOST_CHECK_EQUAL(1, count());
+		BOOST_CHECK(!data);
+	}
+	BOOST_CHECK_EQUAL(0, count());
+}
+
 BOOST_AUTO_TEST_CASE(initialize)
 {
 	auto proxy = acquire(5);
+	const auto & constProxy = proxy;
 	BOOST_CHECK_EQUAL(*proxy, 5);
+	BOOST_CHECK_EQUAL(*constProxy, 5);
+	BOOST_CHECK_EQUAL(constProxy.get(), constProxy.get());
 }
 
 BOOST_AUTO_TEST_CASE(resize)
