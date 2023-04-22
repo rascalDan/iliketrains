@@ -137,16 +137,15 @@ protected:
 			new (&at(pidx)) T {std::move(data[next])};
 			(data[next]).~T();
 			*std::find_if(index.begin(), index.end(), [this](const auto & i) {
-				const auto n = &i - index.data();
-				return i == next && std::find(unused.begin(), unused.end(), n) == unused.end();
+				return i == next && !std::binary_search(unused.begin(), unused.end(), &i - index.data());
 			}) = index[pidx];
 		}
 		if (pidx == index.size() - 1) {
 			index.pop_back();
 		}
 		else {
-			// Remember p.index is free index now
-			unused.push_back(pidx);
+			// Remember p.index is free index now, keeping it sorted
+			unused.insert(std::upper_bound(unused.begin(), unused.end(), pidx), pidx);
 		}
 	}
 
