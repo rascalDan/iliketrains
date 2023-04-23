@@ -65,6 +65,19 @@ RailVehicleClass::render(const SceneShader & shader) const
 }
 
 void
-RailVehicleClass::shadows(const ShadowMapper &) const
+RailVehicleClass::shadows(const ShadowMapper & mapper) const
 {
+	if (const auto count = instancesBody.count()) {
+		mapper.dynamicPointInst.use();
+		glBindVertexArray(instanceVAO);
+		glDrawElementsInstanced(
+				bodyMesh->type(), bodyMesh->count(), GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(count));
+		glBindVertexArray(instancesBogiesVAO.front());
+		glDrawElementsInstanced(bogies.front()->type(), bogies.front()->count(), GL_UNSIGNED_INT, nullptr,
+				static_cast<GLsizei>(instancesBogies.front().count()));
+		glBindVertexArray(instancesBogiesVAO.back());
+		glDrawElementsInstanced(bogies.back()->type(), bogies.back()->count(), GL_UNSIGNED_INT, nullptr,
+				static_cast<GLsizei>(instancesBogies.back().count()));
+		glBindVertexArray(0);
+	}
 }

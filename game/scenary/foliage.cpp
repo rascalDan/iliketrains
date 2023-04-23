@@ -34,6 +34,13 @@ Foliage::render(const SceneShader & shader) const
 }
 
 void
-Foliage::shadows(const ShadowMapper &) const
+Foliage::shadows(const ShadowMapper & mapper) const
 {
+	if (const auto count = instances.count()) {
+		mapper.dynamicPointInst.use();
+		glBindVertexArray(instanceVAO);
+		glDrawElementsInstanced(
+				bodyMesh->type(), bodyMesh->count(), GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(count));
+		glBindVertexArray(0);
+	}
 }
