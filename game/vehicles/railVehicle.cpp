@@ -11,22 +11,14 @@
 #include <memory>
 #include <ray.hpp>
 
-RailVehicle::RailVehicle(RailVehicleClassPtr rvc) : rvClass {std::move(rvc)}
+RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
+	rvClass {std::move(rvc)}, location {rvClass->instancesBody}, bogies {
+																		 rvClass->instancesBogies.front(),
+																		 rvClass->instancesBogies.back(),
+																 }
 {
-	bogies.front().pos.y = rvClass->wheelBase / 2.F;
-	bogies.back().pos.y = -bogies.front().pos.y;
-}
-
-void
-RailVehicle::render(const SceneShader & shader) const
-{
-	rvClass->render(shader, location, bogies);
-}
-
-void
-RailVehicle::shadows(const ShadowMapper & shadowMapper) const
-{
-	rvClass->shadows(shadowMapper, location, bogies);
+	bogies.front().setPosition({0, rvClass->wheelBase / 2.F, 0});
+	bogies.back().setPosition({0, -bogies.front().position().y, 0});
 }
 
 void
@@ -35,9 +27,8 @@ RailVehicle::move(const Train * t, float & trailBy)
 	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};
 	const auto & b1Pos = bogies[0] = t->getBogiePosition(t->linkDist, trailBy += overhang);
 	const auto & b2Pos = bogies[1] = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase);
-	const auto diff = glm::normalize(b2Pos.pos - b1Pos.pos);
-	location.pos = (b1Pos.pos + b2Pos.pos) / 2.F;
-	location.rot = {vector_pitch(diff), vector_yaw(diff), 0};
+	const auto diff = glm::normalize(b2Pos.position() - b1Pos.position());
+	location.setLocation((b1Pos.position() + b2Pos.position()) / 2.F, {vector_pitch(diff), vector_yaw(diff), 0});
 	trailBy += 0.6F + overhang;
 }
 
@@ -47,7 +38,7 @@ RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance
 	constexpr const auto X = 1.35F;
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3.9F;
-	const auto moveBy = glm::translate(location.pos) * rotate_ypr(location.rot);
+	const auto moveBy = location.getTransform();
 	const std::array<glm::vec3, 8> cornerVertices {{
 			moveBy * glm::vec4 {-X, Y, 0, 1}, //  LFB
 			moveBy * glm::vec4 {X, Y, 0, 1}, //   RFB

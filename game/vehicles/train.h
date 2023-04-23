@@ -27,9 +27,6 @@ public:
 		return objects.front()->location;
 	}
 
-	void render(const SceneShader & shader) const override;
-	void shadows(const ShadowMapper & shadowMapper) const override;
-
 	[[nodiscard]] bool intersectRay(const Ray &, glm::vec2 *, float *) const override;
 
 	void tick(TickDuration elapsed) override;

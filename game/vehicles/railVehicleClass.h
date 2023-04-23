@@ -1,7 +1,9 @@
 #pragma once
 
 #include "assetFactory/asset.h"
+#include "gfx/gl/instanceVertices.h"
 #include "gfx/models/mesh.h"
+#include "gfx/renderable.h"
 #include <array>
 #include <memory>
 #include <string>
@@ -11,10 +13,10 @@ class ShadowMapper;
 class Texture;
 class Location;
 
-class RailVehicleClass : public Asset {
+class RailVehicleClass : public Renderable, public Asset {
 public:
-	void render(const SceneShader &, const Location &, const std::array<Location, 2> &) const;
-	void shadows(const ShadowMapper &, const Location &, const std::array<Location, 2> &) const;
+	void render(const SceneShader & shader) const override;
+	void shadows(const ShadowMapper & shadowMapper) const override;
 
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;
@@ -23,9 +25,16 @@ public:
 	float length;
 	float maxSpeed;
 
+	mutable InstanceVertices<glm::mat4> instancesBody;
+	mutable std::array<InstanceVertices<glm::mat4>, 2> instancesBogies;
+
 protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<RailVehicleClass>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	void postLoad() override;
+
+private:
+	glVertexArray instanceVAO;
+	std::array<glVertexArray, 2> instancesBogiesVAO;
 };
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;

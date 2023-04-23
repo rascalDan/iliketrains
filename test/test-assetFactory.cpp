@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 	BOOST_REQUIRE(brush47rvc->bogies.back());
 
 	auto railVehicle = std::make_shared<RailVehicle>(brush47rvc);
-	objects.objects.push_back(railVehicle);
+	objects.objects.push_back(brush47rvc);
 
 	render();
 }

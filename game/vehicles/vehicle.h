@@ -12,7 +12,7 @@
 
 class Location;
 
-class Vehicle : public WorldObject, public Renderable, public Selectable {
+class Vehicle : public WorldObject, public Selectable {
 public:
 	explicit Vehicle(const Link::Ptr & link, float linkDist = 0);
 	float linkDist; // distance along current link
