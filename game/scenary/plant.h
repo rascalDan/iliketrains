@@ -2,9 +2,8 @@
 
 #include "foliage.h"
 #include "game/worldobject.h"
-#include "location.hpp"
-#include "maths.h"
-#include <glm/gtx/transform.hpp>
+
+class Location;
 
 class Plant : public WorldObject {
 	std::shared_ptr<const Foliage> type;
@@ -16,5 +15,5 @@ class Plant : public WorldObject {
 	}
 
 public:
-	Plant(std::shared_ptr<const Foliage> type, Location position);
+	Plant(std::shared_ptr<const Foliage> type, const Location & position);
 };
