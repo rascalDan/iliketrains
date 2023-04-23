@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glArrays.h"
+#include <cassert>
 #include <iterator>
 #include <span>
 #include <special_members.hpp>
@@ -186,6 +187,7 @@ protected:
 	{
 		if (!data) {
 			data = static_cast<T *>(glMapNamedBuffer(buffer, GL_READ_WRITE));
+			assert(data);
 		}
 	}
 
