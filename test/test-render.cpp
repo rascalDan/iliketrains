@@ -36,8 +36,12 @@ public:
 	{
 		train1 = std::make_shared<RailVehicle>(brush47rvc);
 		train1->location.setPosition({52, 50, 2});
+		train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
+		train1->bogies.back().setPosition(train1->bogies.back().position() + train1->location.position());
 		train2 = std::make_shared<RailVehicle>(brush47rvc);
 		train2->location.setPosition({52, 30, 2});
+		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
+		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
 	}
 	void
 	content(const SceneShader & shader) const override
