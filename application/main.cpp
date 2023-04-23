@@ -99,6 +99,7 @@ public:
 			t_start = t_end;
 		}
 
+		world.objects.clear();
 		return 0;
 	}
 
