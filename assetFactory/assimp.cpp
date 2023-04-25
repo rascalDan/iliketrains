@@ -59,9 +59,15 @@ public:
 	void
 	addMesh(CreatedFaces & faces, ModelFactoryMesh & mesh, const aiMesh * amesh) const
 	{
-		const auto vhs = AIRANGE(amesh, Vertices) * [&mesh](auto && v) {
-			return mesh.add_vertex(*v);
-		};
+		mesh.normalsProvidedProperty = amesh->HasNormals();
+		const auto vhs = AIRANGE(amesh, Vertices) *
+				[&mesh, normals = amesh->HasNormals() ? amesh->mNormals : nullptr](auto && v) mutable {
+					const auto vh = mesh.add_vertex(*v);
+					if (normals) {
+						mesh.set_normal(vh, **(normals++));
+					}
+					return vh;
+				};
 		const auto & m = scene->mMaterials[amesh->mMaterialIndex]->GetName();
 
 		GLuint material {};
