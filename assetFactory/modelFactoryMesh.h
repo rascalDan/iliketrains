@@ -47,6 +47,7 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTraits> {
 	ModelFactoryMesh();
 
+	bool normalsProvidedProperty {};
 	OpenMesh::FPropHandleT<bool> smoothFaceProperty;
 	OpenMesh::FPropHandleT<GLuint> materialFaceProperty;
 	OpenMesh::FPropHandleT<std::string> nameFaceProperty;
