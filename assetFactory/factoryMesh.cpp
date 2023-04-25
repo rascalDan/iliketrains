@@ -13,10 +13,13 @@ FactoryMesh::createMesh() const
 		ModelFactoryMesh mesh;
 		use->createMesh(mesh, 1);
 
-		mesh.update_face_normals();
-		mesh.update_vertex_normals();
+		if (!mesh.normalsProvidedProperty) {
+			mesh.update_face_normals();
+			mesh.update_vertex_normals();
+		}
 		for (const auto & face : mesh.faces()) {
-			const auto & smooth = mesh.property(mesh.smoothFaceProperty, face);
+			const auto & useVertexNormals
+					= mesh.property(mesh.smoothFaceProperty, face) || mesh.normalsProvidedProperty;
 			const auto & colour = mesh.color(face);
 			const auto & material = mesh.property(mesh.materialFaceProperty, face);
 
@@ -25,8 +28,8 @@ FactoryMesh::createMesh() const
 				const auto & vertex = mesh.to_vertex_handle(heh);
 				const auto & textureUV = mesh.texcoord2D(heh);
 				const auto & point = mesh.point(vertex);
-				const auto & normal = smooth ? mesh.property(mesh.vertex_normals_pph(), vertex)
-											 : mesh.property(mesh.face_normals_pph(), face);
+				const auto & normal = useVertexNormals ? mesh.property(mesh.vertex_normals_pph(), vertex)
+													   : mesh.property(mesh.face_normals_pph(), face);
 				Vertex outVertex {point, textureUV, normal, colour, material};
 				if (const auto existingItr = std::find(vertices.rbegin(), vertices.rend(), outVertex);
 						existingItr != vertices.rend()) {
