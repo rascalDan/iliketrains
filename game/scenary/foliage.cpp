@@ -26,10 +26,7 @@ Foliage::render(const SceneShader & shader) const
 		if (texture) {
 			texture->bind();
 		}
-		glBindVertexArray(instanceVAO);
-		glDrawElementsInstanced(
-				bodyMesh->type(), bodyMesh->count(), GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(count));
-		glBindVertexArray(0);
+		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }
 
@@ -38,9 +35,6 @@ Foliage::shadows(const ShadowMapper & mapper) const
 {
 	if (const auto count = instances.count()) {
 		mapper.dynamicPointInst.use();
-		glBindVertexArray(instanceVAO);
-		glDrawElementsInstanced(
-				bodyMesh->type(), bodyMesh->count(), GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(count));
-		glBindVertexArray(0);
+		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }
