@@ -42,3 +42,13 @@ Mesh::Draw() const
 
 	glBindVertexArray(0);
 }
+
+void
+Mesh::DrawInstanced(GLuint vao, GLsizei count) const
+{
+	glBindVertexArray(vao);
+
+	glDrawElementsInstanced(mode, m_numIndices, GL_UNSIGNED_INT, nullptr, count);
+
+	glBindVertexArray(0);
+}
