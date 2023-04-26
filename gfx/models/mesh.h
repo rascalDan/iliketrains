@@ -16,8 +16,6 @@ public:
 	void Draw() const;
 	void DrawInstanced(GLuint vao, GLsizei count) const;
 	VertexArrayObject & configureVAO(VertexArrayObject &&) const;
-	GLsizei count() const;
-	GLenum type() const;
 
 private:
 	glVertexArray m_vertexArrayObject;
