@@ -21,24 +21,22 @@ Mesh::configureVAO(VertexArrayObject && vao) const
 			.addIndices(m_vertexArrayBuffers[1]);
 }
 
-GLsizei
-Mesh::count() const
-{
-	return m_numIndices;
-}
-
-GLenum
-Mesh::type() const
-{
-	return mode;
-}
-
 void
 Mesh::Draw() const
 {
 	glBindVertexArray(m_vertexArrayObject);
 
 	glDrawElements(mode, m_numIndices, GL_UNSIGNED_INT, nullptr);
+
+	glBindVertexArray(0);
+}
+
+void
+Mesh::DrawInstanced(GLuint vao, GLsizei count) const
+{
+	glBindVertexArray(vao);
+
+	glDrawElementsInstanced(mode, m_numIndices, GL_UNSIGNED_INT, nullptr, count);
 
 	glBindVertexArray(0);
 }

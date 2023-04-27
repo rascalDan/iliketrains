@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "collections.hpp"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
+#include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowFixedPoint.h"
 #include "location.hpp"
 #include "maths.h"
@@ -14,7 +15,8 @@
 #include <tuple>
 #include <vector>
 
-ShadowMapper::ShadowMapper(const glm::ivec2 & s) : size {s}
+ShadowMapper::ShadowMapper(const glm::ivec2 & s) :
+	fixedPoint {shadowFixedPoint_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
 {
 	glBindTexture(GL_TEXTURE_2D, depthMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -144,6 +146,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 				const auto lightViewProjection = lightProjection * lightView;
 				fixedPoint.setViewProjection(lightViewProjection);
 				dynamicPoint.setViewProjection(lightViewProjection);
+				dynamicPointInst.setViewProjection(lightViewProjection);
 
 				const auto & viewport = viewports[bands][out.maps];
 				glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
@@ -157,7 +160,7 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 	return out;
 }
 
-ShadowMapper::FixedPoint::FixedPoint() : Program {shadowFixedPoint_vs}, viewProjectionLoc {*this, "viewProjection"} { }
+ShadowMapper::FixedPoint::FixedPoint(const Shader & vs) : Program {vs}, viewProjectionLoc {*this, "viewProjection"} { }
 void
 ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection) const
 {

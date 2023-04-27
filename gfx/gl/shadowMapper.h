@@ -22,7 +22,7 @@ public:
 
 	class FixedPoint : public Program {
 	public:
-		FixedPoint();
+		FixedPoint(const Shader & vs);
 		void setViewProjection(const glm::mat4 &) const;
 		void use() const;
 
@@ -40,7 +40,7 @@ public:
 		RequiredUniformLocation viewProjectionLoc;
 		RequiredUniformLocation modelLoc;
 	};
-	FixedPoint fixedPoint;
+	FixedPoint fixedPoint, dynamicPointInst;
 	DynamicPoint dynamicPoint;
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)

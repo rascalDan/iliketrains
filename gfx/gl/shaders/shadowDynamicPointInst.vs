@@ -3,6 +3,6 @@
 include(`meshIn.glsl')
 
 uniform mat4 viewProjection;
-const mat4 model = mat4(1);
+layout(location = 5) in mat4 model;
 
 include(`commonShadowPoint.glsl')

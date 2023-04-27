@@ -14,9 +14,8 @@ public:
 	Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum = GL_TRIANGLES);
 
 	void Draw() const;
+	void DrawInstanced(GLuint vao, GLsizei count) const;
 	VertexArrayObject & configureVAO(VertexArrayObject &&) const;
-	GLsizei count() const;
-	GLenum type() const;
 
 private:
 	glVertexArray m_vertexArrayObject;

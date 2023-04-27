@@ -22,6 +22,8 @@
 
 class TestScene : public SceneProvider {
 	std::shared_ptr<RailVehicle> train1, train2;
+	const RailVehicleClassPtr brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(
+			AssetFactory::loadXML(RESDIR "/brush47.xml")->assets.at("brush-47"));
 
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
@@ -32,19 +34,20 @@ class TestScene : public SceneProvider {
 public:
 	TestScene()
 	{
-		const auto assetFactory = AssetFactory::loadXML(RESDIR "/brush47.xml");
-		const auto brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(assetFactory->assets.at("brush-47"));
 		train1 = std::make_shared<RailVehicle>(brush47rvc);
-		train1->location.pos = {52, 50, 2};
+		train1->location.setPosition({52, 50, 2});
+		train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
+		train1->bogies.back().setPosition(train1->bogies.back().position() + train1->location.position());
 		train2 = std::make_shared<RailVehicle>(brush47rvc);
-		train2->location.pos = {52, 30, 2};
+		train2->location.setPosition({52, 30, 2});
+		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
+		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
 	}
 	void
 	content(const SceneShader & shader) const override
 	{
 		terrain.render(shader);
-		train1->render(shader);
-		train2->render(shader);
+		brush47rvc->render(shader);
 	}
 	void
 	lights(const SceneShader &) const override
@@ -54,8 +57,7 @@ public:
 	shadows(const ShadowMapper & shadowMapper) const override
 	{
 		terrain.shadows(shadowMapper);
-		train1->shadows(shadowMapper);
-		train2->shadows(shadowMapper);
+		brush47rvc->shadows(shadowMapper);
 	}
 };
 

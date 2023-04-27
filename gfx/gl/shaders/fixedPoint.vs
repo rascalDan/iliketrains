@@ -4,15 +4,6 @@ include(`meshIn.glsl')
 include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
+const mat4 model = mat4(1);
 
-void
-main()
-{
-	FragPos = position;
-	TexCoords = texCoord;
-	Normal = normal;
-	Colour = colour;
-	Material = material;
-
-	gl_Position = viewProjection * vec4(position, 1.0);
-}
+include(`commonPoint.glsl')
