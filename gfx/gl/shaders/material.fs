@@ -5,7 +5,6 @@ include(`materialInterface.glsl')
 include(`materialOut.glsl')
 
 layout(binding = 0) uniform sampler2D texture0;
-layout(binding = 1) uniform usampler2DRect material;
 
 float map(uint mapmode, float value)
 {
@@ -24,20 +23,16 @@ float map(uint mapmode, float value)
 	return 0;
 }
 
-vec2 map(uint mapmodeU, uint mapmodeV, vec2 value)
+vec2 map(uvec2 mapmode, vec2 value)
 {
-	return vec2(map(mapmodeU, value.x), map(mapmodeV, value.y));
+	return vec2(map(mapmode.x, value.x), map(mapmode.y, value.y));
 }
 
-vec4 getTextureColour(uint midx, vec2 uv)
+vec4 getTextureColour(MaterialDetail mat, vec2 uv)
 {
-	if (midx > 0u) {
+	if (mat.textureSize.x > 0) {
 		const vec2 tSize = textureSize(texture0, 0);
-		const vec4 sPosSize = texture(material, uvec2(0, midx - 1u));
-		const uvec4 sMode = texture(material, uvec2(1, midx - 1u));
-		const uint mapmodeU = sMode.x & 0xFu;
-		const uint mapmodeV = (sMode.x & 0xF0u) >> 1;
-		uv = (sPosSize.xy + sPosSize.zw * map(mapmodeU, mapmodeV, uv)) / tSize;
+		uv = (mat.textureOrigin + mat.textureSize * map(mat.mapmode, uv)) / tSize;
 	}
 	return texture(texture0, uv);
 }
