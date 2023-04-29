@@ -1,6 +1,6 @@
 #include "factoryMesh.h"
-#include "collections.hpp"
-#include "gfx/models/vertex.hpp"
+#include "collections.h"
+#include "gfx/models/vertex.h"
 #include "modelFactoryMesh.h"
 
 Mesh::Ptr

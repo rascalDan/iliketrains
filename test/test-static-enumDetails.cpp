@@ -1,6 +1,6 @@
 #define ENUM_PROBE
-#include "enumDetailsData.hpp"
-#include <enumDetails.hpp>
+#include "enumDetailsData.h"
+#include <enumDetails.h>
 
 // Test type name
 static_assert(EnumTypeDetails<GlobalUnscoped>::typeName == "GlobalUnscoped");

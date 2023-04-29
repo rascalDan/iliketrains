@@ -4,7 +4,7 @@
 #include <glm/matrix.hpp>
 #include <maths.h>
 #include <set>
-#include <stream_support.hpp>
+#include <stream_support.h>
 
 Shape::CreatedFaces
 Use::createMesh(ModelFactoryMesh & mesh, float levelOfDetailFactor) const

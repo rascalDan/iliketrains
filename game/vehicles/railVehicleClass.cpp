@@ -1,7 +1,7 @@
 #include "railVehicleClass.h"
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
-#include "gfx/gl/vertexArrayObject.hpp"
+#include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/texture.h"
 #include <algorithm>
@@ -13,7 +13,7 @@
 #include <glm/glm.hpp>
 #include <iterator>
 #include <lib/resource.h>
-#include <location.hpp>
+#include <location.h>
 #include <map>
 #include <maths.h>
 #include <memory>

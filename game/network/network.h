@@ -1,13 +1,13 @@
 #pragma once
 
 #include "link.h"
-#include <collection.hpp>
+#include <collection.h>
 #include <gfx/renderable.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <set>
-#include <sorting.hpp>
-#include <special_members.hpp>
+#include <sorting.h>
+#include <special_members.h>
 #include <string>
 #include <utility>
 #include <variant>

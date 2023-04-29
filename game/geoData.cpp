@@ -9,7 +9,7 @@
 #include <limits>
 #include <maths.h>
 #include <random>
-#include <ray.hpp>
+#include <ray.h>
 #include <stb/stb_image.h>
 #include <stdexcept>
 #include <util.h>

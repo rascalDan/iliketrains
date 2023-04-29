@@ -14,9 +14,9 @@
 #include "game/vehicles/railVehicleClass.h"
 #include "gfx/gl/sceneRenderer.h"
 #include "gfx/renderable.h"
-#include "lib/collection.hpp"
-#include "lib/location.hpp"
-#include "lib/stream_support.hpp"
+#include "lib/collection.h"
+#include "lib/location.h"
+#include "lib/stream_support.h"
 #include "testMainWindow.h"
 #include "ui/applicationBase.h"
 

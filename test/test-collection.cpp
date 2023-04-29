@@ -2,10 +2,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <collection.hpp>
+#include <collection.h>
 #include <memory>
-#include <ptr.hpp>
-#include <special_members.hpp>
+#include <ptr.h>
+#include <special_members.h>
 #include <vector>
 
 class Base {

@@ -3,11 +3,11 @@
 #include <GL/glew.h>
 #include <array>
 #include <cmath>
-#include <collection.hpp>
+#include <collection.h>
 #include <cstddef>
 #include <game/network/link.h>
 #include <game/network/network.impl.h> // IWYU pragma: keep
-#include <gfx/models/vertex.hpp>
+#include <gfx/models/vertex.h>
 #include <glm/gtx/transform.hpp>
 #include <initializer_list>
 #include <maths.h>

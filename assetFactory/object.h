@@ -2,7 +2,7 @@
 
 #include "persistence.h"
 #include "shape.h"
-#include "stdTypeDefs.hpp"
+#include "stdTypeDefs.h"
 #include "use.h"
 
 class Object : public StdTypeDefs<Object>, public Shape, public Persistence::Persistable {

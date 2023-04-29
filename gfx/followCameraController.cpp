@@ -2,7 +2,7 @@
 #include "game/vehicles/vehicle.h"
 #include <gfx/gl/camera.h>
 #include <glm/glm.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
 #include <memory>
 #include <tuple>

@@ -4,7 +4,7 @@
 #include "modelFactoryMesh_fwd.h"
 #include "persistence.h"
 #include "shape.h"
-#include "stdTypeDefs.hpp"
+#include "stdTypeDefs.h"
 #include "style.h"
 
 class Use : public StdTypeDefs<Use>, public Mutation, public Style, public Persistence::Persistable {

@@ -1,9 +1,9 @@
 #include "foliage.h"
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
-#include "gfx/gl/vertexArrayObject.hpp"
+#include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/texture.h"
-#include "location.hpp"
+#include "location.h"
 
 bool
 Foliage::persist(Persistence::PersistenceStore & store)

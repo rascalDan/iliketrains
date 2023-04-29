@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <maths.h>
-#include <ray.hpp>
+#include <ray.h>
 
 class Camera {
 public:

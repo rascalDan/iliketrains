@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chronology.hpp"
+#include "chronology.h"
 #include "gfx/gl/sceneRenderer.h"
 #include "window.h"
 #include <cstddef>

@@ -1,7 +1,7 @@
 #include "assimp.h"
 #include "assetFactory.h"
-#include "collections.hpp"
-#include "ptr.hpp"
+#include "collections.h"
+#include "ptr.h"
 #include "resource.h"
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>

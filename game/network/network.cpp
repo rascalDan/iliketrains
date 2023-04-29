@@ -7,7 +7,7 @@
 #include <gfx/models/texture.h>
 #include <glm/gtx/intersect.hpp>
 #include <initializer_list>
-#include <ray.hpp>
+#include <ray.h>
 #include <stdexcept>
 #include <utility>
 

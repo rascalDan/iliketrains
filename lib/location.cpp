@@ -1,4 +1,4 @@
-#include "location.hpp"
+#include "location.h"
 #include "maths.h"
 #include <glm/gtx/transform.hpp>
 

@@ -3,7 +3,7 @@
 #include "gfx/image.h"
 #include "gfx/models/texture.h"
 #include "persistence.h"
-#include "stdTypeDefs.hpp"
+#include "stdTypeDefs.h"
 #include "worker.h"
 
 class TextureFragment : public Persistence::Persistable, public StdTypeDefs<TextureFragment> {

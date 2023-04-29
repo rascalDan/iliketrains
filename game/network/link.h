@@ -2,11 +2,11 @@
 
 #include <array>
 #include <glm/glm.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
 #include <memory>
-#include <special_members.hpp>
-#include <stdTypeDefs.hpp>
+#include <special_members.h>
+#include <stdTypeDefs.h>
 #include <utility>
 #include <vector>
 

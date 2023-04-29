@@ -1,7 +1,7 @@
 #pragma once
 
-#include "chronology.hpp"
-#include <special_members.hpp>
+#include "chronology.h"
+#include <special_members.h>
 
 class WorldObject {
 public:

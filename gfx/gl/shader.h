@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <glRef.hpp>
+#include <glRef.h>
 #include <optional>
 #include <string_view>
 

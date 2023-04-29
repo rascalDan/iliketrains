@@ -2,7 +2,7 @@
 
 #include "factoryMesh.h"
 #include "persistence.h"
-#include <stdTypeDefs.hpp>
+#include <stdTypeDefs.h>
 
 class TextureAtlas;
 

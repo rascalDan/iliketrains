@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <special_members.hpp>
+#include <special_members.h>
 
 class Ray;
 

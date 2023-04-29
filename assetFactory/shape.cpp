@@ -1,5 +1,5 @@
 #include "shape.h"
-#include "gfx/models/vertex.hpp"
+#include "gfx/models/vertex.h"
 #include "maths.h"
 #include "modelFactoryMesh.h"
 #include "shape.h"

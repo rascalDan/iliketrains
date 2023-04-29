@@ -1,5 +1,5 @@
 #include "texturePacker.h"
-#include "collections.hpp"
+#include "collections.h"
 #include <GL/glew.h>
 #include <algorithm>
 #include <cstdio>

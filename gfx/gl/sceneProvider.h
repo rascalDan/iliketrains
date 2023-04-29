@@ -1,6 +1,6 @@
 #pragma once
 
-#include <special_members.hpp>
+#include <special_members.h>
 
 class SceneRenderer;
 class ShadowMapper;

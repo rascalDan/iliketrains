@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE instancing
 
-#include "stream_support.hpp"
+#include "stream_support.h"
 #include "testHelpers.h"
 #include "testMainWindow.h"
 #include "ui/applicationBase.h"

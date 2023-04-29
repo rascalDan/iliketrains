@@ -2,7 +2,7 @@
 
 #include <functional>
 #include <glm/glm.hpp>
-#include <special_members.hpp>
+#include <special_members.h>
 
 class UIShader;
 union SDL_Event;

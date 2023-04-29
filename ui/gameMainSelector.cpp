@@ -1,5 +1,5 @@
 #include "gameMainSelector.h"
-#include "collection.hpp"
+#include "collection.h"
 #include "text.h"
 #include "ui/uiComponent.h"
 #include <SDL2/SDL.h>
@@ -10,7 +10,7 @@
 #include <gfx/gl/camera.h>
 #include <optional>
 #include <span>
-#include <stream_support.hpp>
+#include <stream_support.h>
 #include <typeinfo>
 #include <vector>
 

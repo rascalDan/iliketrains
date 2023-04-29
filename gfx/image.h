@@ -1,7 +1,7 @@
 #pragma once
 
 #include <span> // IWYU pragma: export
-#include <special_members.hpp>
+#include <special_members.h>
 #include <string>
 
 class Image {

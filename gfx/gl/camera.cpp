@@ -1,9 +1,9 @@
 #include "camera.h"
-#include <collections.hpp>
+#include <collections.h>
 #include <glm/gtx/intersect.hpp> // IWYU pragma: keep
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <maths.h>
-#include <ray.hpp>
+#include <ray.h>
 
 Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
 	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar}, projection {glm::perspective(

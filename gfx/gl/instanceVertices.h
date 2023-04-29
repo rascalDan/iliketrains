@@ -4,7 +4,7 @@
 #include <cassert>
 #include <iterator>
 #include <span>
-#include <special_members.hpp>
+#include <special_members.h>
 #include <utility>
 #include <vector>
 

@@ -1,7 +1,7 @@
 #include <array>
 #include <assetFactory/assetFactory.h>
 #include <chrono>
-#include <collection.hpp>
+#include <collection.h>
 #include <game/activities/go.h>
 #include <game/activities/idle.h>
 #include <game/activity.h>
@@ -22,7 +22,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <memory>
-#include <special_members.hpp>
+#include <special_members.h>
 #include <ui/applicationBase.h>
 #include <ui/gameMainWindow.h>
 #include <ui/window.h>

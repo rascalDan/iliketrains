@@ -1,6 +1,6 @@
 #include "sceneRenderer.h"
 #include "maths.h"
-#include "vertexArrayObject.hpp"
+#include "vertexArrayObject.h"
 #include <gfx/gl/shaders/fs-directionalLight.h>
 #include <gfx/gl/shaders/fs-lighting.h>
 #include <gfx/gl/shaders/vs-lighting.h>

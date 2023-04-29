@@ -5,7 +5,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <array>
-#include <collection.hpp>
+#include <collection.h>
 #include <game/network/link.h>
 #include <game/network/network.h>
 #include <game/network/network.impl.h> // IWYU pragma: keep
@@ -14,7 +14,7 @@
 #include <maths.h>
 #include <memory>
 #include <stdexcept>
-#include <stream_support.hpp>
+#include <stream_support.h>
 #include <utility>
 #include <vector>
 

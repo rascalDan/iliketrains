@@ -4,7 +4,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <glm/gtx/transform.hpp>
-#include <stream_support.hpp>
+#include <stream_support.h>
 #include <string_view>
 #include <type_traits>
 

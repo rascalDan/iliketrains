@@ -6,10 +6,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/transform.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
 #include <memory>
-#include <ray.hpp>
+#include <ray.h>
 
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
 	rvClass {std::move(rvc)}, location {rvClass->instancesBody}, bogies {

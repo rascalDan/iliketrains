@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/models/mesh.h"
-#include "stdTypeDefs.hpp"
+#include "stdTypeDefs.h"
 #include "use.h"
 
 class FactoryMesh : public Persistence::Persistable, public StdTypeDefs<FactoryMesh> {

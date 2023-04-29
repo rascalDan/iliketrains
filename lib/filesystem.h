@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ptr.hpp"
-#include "special_members.hpp"
+#include "ptr.h"
+#include "special_members.h"
 #include <cstddef>
 #include <cstdio>
 #include <sys/types.h>

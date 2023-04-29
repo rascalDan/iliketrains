@@ -13,10 +13,10 @@
 #include <gfx/gl/shaders/vs-pointLight.h>
 #include <gfx/gl/shaders/vs-spotLight.h>
 #include <gfx/gl/shaders/vs-water.h>
-#include <gfx/gl/vertexArrayObject.hpp>
+#include <gfx/gl/vertexArrayObject.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
 
 SceneShader::SceneShader() :

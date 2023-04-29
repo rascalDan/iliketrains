@@ -1,7 +1,7 @@
 #pragma once
 
 #include "modelFactoryMesh_fwd.h"
-#include "stdTypeDefs.hpp"
+#include "stdTypeDefs.h"
 #include <OpenMesh/Core/Mesh/Handles.hh>
 #include <glm/vec3.hpp>
 #include <map>

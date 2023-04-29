@@ -4,7 +4,7 @@
 #include <algorithm> // IWYU pragma: keep
 #include <array>
 #include <cstddef>
-#include <special_members.hpp>
+#include <special_members.h>
 
 template<size_t N> class glArraysBase {
 	static_assert(N > 0);

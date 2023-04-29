@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SDL_events.h"
-#include "special_members.hpp"
+#include "special_members.h"
 #include "uiComponent.h"
 #include "worldOverlay.h"
 #include <glm/glm.hpp>

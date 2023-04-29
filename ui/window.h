@@ -1,13 +1,13 @@
 #pragma once
 
-#include "chronology.hpp"
-#include "collection.hpp"
+#include "chronology.h"
+#include "collection.h"
 #include "gfx/gl/uiShader.h"
-#include "ptr.hpp"
+#include "ptr.h"
 #include "uiComponent.h" // IWYU pragma: keep
 #include <SDL2/SDL.h>
 #include <cstddef>
-#include <special_members.hpp>
+#include <special_members.h>
 #include <string>
 
 using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;

@@ -1,4 +1,4 @@
-#include "stream_support.hpp"
+#include "stream_support.h"
 
 #include <array>
 #include <vector>

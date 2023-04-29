@@ -1,14 +1,14 @@
 #include "shadowMapper.h"
 #include "camera.h"
-#include "collections.hpp"
+#include "collections.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowFixedPoint.h"
-#include "location.hpp"
+#include "location.h"
 #include "maths.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
-#include "sorting.hpp"
+#include "sorting.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>

@@ -1,11 +1,11 @@
 #define BOOST_TEST_MODULE test_enumDetails
 
-#include "enumDetailsData.hpp"
+#include "enumDetailsData.h"
 #include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
-#include <enumDetails.hpp>
-#include <stream_support.hpp>
+#include <enumDetails.h>
+#include <stream_support.h>
 
 constexpr std::array INVALID_NAMES {"", "missing", "GlobalScoped::aa", "GlobalScoped", "ns::aa", "a", "bb"};
 constexpr std::array VALID_NAMES {"aa", "b", "c"};

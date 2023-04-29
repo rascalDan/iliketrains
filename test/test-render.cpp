@@ -14,9 +14,9 @@
 #include <gfx/gl/sceneRenderer.h>
 #include <gfx/models/texture.h>
 #include <lib/glArrays.h>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
-#include <stream_support.hpp>
+#include <stream_support.h>
 #include <ui/applicationBase.h>
 #include <ui/window.h>
 

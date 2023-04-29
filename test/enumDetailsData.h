@@ -1,5 +1,5 @@
 #pragma once
-#include <enumDetails.hpp>
+#include <enumDetails.h>
 
 enum GlobalUnscoped { aa, b, c };
 enum class GlobalScoped { aa, b, c };

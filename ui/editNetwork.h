@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gameMainSelector.h"
-#include "modeHelper.hpp"
+#include "modeHelper.h"
 #include "toolbar.h"
 #include "worldOverlay.h"
 #include <game/gamestate.h>

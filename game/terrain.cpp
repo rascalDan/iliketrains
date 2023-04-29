@@ -10,10 +10,10 @@
 #include <gfx/gl/shadowMapper.h>
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>
-#include <gfx/models/vertex.hpp>
+#include <gfx/models/vertex.h>
 #include <glm/glm.hpp>
 #include <iterator>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
 #include <utility>
 #include <vector>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "enumDetails.hpp"
+#include "enumDetails.h"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <maths.h>

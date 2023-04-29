@@ -3,10 +3,10 @@
 #include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
-#include <stream_support.hpp>
+#include <stream_support.h>
 
 #include <game/geoData.h>
-#include <lib/ray.hpp>
+#include <lib/ray.h>
 
 struct TestGeoData : public GeoData {
 	TestGeoData() : GeoData {{{-10, -5}, {30, 40}}, 5.F} { }

@@ -1,9 +1,9 @@
 #include "link.h"
 #include <compare>
 #include <glm/gtx/transform.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
-#include <ray.hpp>
+#include <ray.h>
 #include <tuple>
 
 Link::Link(End a, End b, float l) : ends {{std::move(a), std::move(b)}}, length {l} { }

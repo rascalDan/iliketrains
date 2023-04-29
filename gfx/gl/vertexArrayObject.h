@@ -1,8 +1,8 @@
 #pragma once
 
-#include "collections.hpp"
-#include "gl_traits.hpp"
-#include "special_members.hpp"
+#include "collections.h"
+#include "gl_traits.h"
+#include "special_members.h"
 #include <GL/glew.h>
 
 class VertexArrayObject {

@@ -5,7 +5,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "glArrays.h"
-#include <glRef.hpp>
+#include <glRef.h>
 #include <maths.h>
 #include <memory>
 #include <optional>

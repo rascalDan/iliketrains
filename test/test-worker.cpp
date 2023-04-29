@@ -3,7 +3,7 @@
 #include "testHelpers.h"
 #include <boost/test/unit_test.hpp>
 #include <set>
-#include <stream_support.hpp>
+#include <stream_support.h>
 #include <worker.h>
 
 uint32_t

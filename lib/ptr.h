@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <special_members.hpp>
+#include <special_members.h>
 
 template<typename Obj, auto Destroy> class wrapped_ptr {
 public:

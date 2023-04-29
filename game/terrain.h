@@ -1,7 +1,7 @@
 #pragma once
 
-#include "chronology.hpp"
-#include "collection.hpp"
+#include "chronology.h"
+#include "collection.h"
 #include "game/worldobject.h"
 #include <gfx/models/mesh.h>
 #include <gfx/renderable.h>

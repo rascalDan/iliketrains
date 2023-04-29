@@ -3,7 +3,7 @@
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
 #include "gfx/renderable.h"
-#include "location.hpp"
+#include "location.h"
 #include <algorithm>
 #include <functional>
 #include <optional>

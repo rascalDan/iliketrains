@@ -1,7 +1,7 @@
 #pragma once
 
 #include "instanceVertices.h"
-#include "location.hpp"
+#include "location.h"
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 

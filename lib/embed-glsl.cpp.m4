@@ -3,7 +3,7 @@ changecom()dnl
 #include "substr(TYPE,1)-NAME.h"
 #include <GL/glew.h>
 #include "gfx/gl/shader.h"
-#include "lib/strings.hpp"
+#include "lib/strings.h"
 
 constexpr const GLchar * src { R"GLSL-EMBED(dnl
 include(SOURCE))GLSL-EMBED" };

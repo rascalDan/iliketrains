@@ -2,9 +2,9 @@
 
 #include "shader.h"
 #include <GL/glew.h>
-#include <glRef.hpp>
+#include <glRef.h>
 #include <glm/mat4x4.hpp>
-#include <special_members.hpp>
+#include <special_members.h>
 
 class Location;
 

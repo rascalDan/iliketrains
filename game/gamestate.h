@@ -1,9 +1,9 @@
 #pragma once
 
 #include "assetFactory/assetFactory.h"
-#include <collection.hpp>
+#include <collection.h>
 #include <memory>
-#include <special_members.hpp>
+#include <special_members.h>
 
 class WorldObject;
 class GeoData;

@@ -3,12 +3,12 @@
 #include "gameMainSelector.h"
 #include "gfx/camera_controller.h"
 #include "manualCameraController.h"
-#include "modeHelper.hpp"
+#include "modeHelper.h"
 #include "toolbar.h"
 #include "window.h"
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <collection.hpp>
+#include <collection.h>
 #include <game/gamestate.h>
 #include <game/network/rail.h>
 #include <game/worldobject.h> // IWYU pragma: keep

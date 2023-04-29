@@ -4,7 +4,7 @@
 #include <glArrays.h>
 #include <memory>
 #include <span>
-#include <stdTypeDefs.hpp>
+#include <stdTypeDefs.h>
 
 class Vertex;
 class VertexArrayObject;

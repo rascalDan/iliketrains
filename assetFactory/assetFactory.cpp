@@ -1,5 +1,5 @@
 #include "assetFactory.h"
-#include "collections.hpp"
+#include "collections.h"
 #include "cuboid.h"
 #include "cylinder.h"
 #include "filesystem.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <special_members.hpp>
+#include <special_members.h>
 #include <stdexcept>
 
 template<typename IdType, auto get, auto release, auto... fixed> class glRef {

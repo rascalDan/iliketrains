@@ -1,7 +1,7 @@
 #include "mesh.h"
-#include "gfx/gl/vertexArrayObject.hpp"
+#include "gfx/gl/vertexArrayObject.h"
 #include "glArrays.h"
-#include "vertex.hpp"
+#include "vertex.h"
 #include <cstddef>
 
 Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const unsigned int> indices, GLenum m) :

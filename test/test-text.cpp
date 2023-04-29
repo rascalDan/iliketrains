@@ -3,7 +3,7 @@
 #include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
-#include <stream_support.hpp>
+#include <stream_support.h>
 
 #include <array>
 #include <glm/glm.hpp>

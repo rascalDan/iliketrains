@@ -1,8 +1,8 @@
 #include "faceController.h"
-#include "collections.hpp"
+#include "collections.h"
 #include "maths.h"
 #include "modelFactoryMesh.h"
-#include "ray.hpp"
+#include "ray.h"
 
 void
 FaceController::apply(ModelFactoryMesh & mesh, const StyleStack & parents, const std::string & names,

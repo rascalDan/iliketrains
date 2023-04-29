@@ -6,7 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <semaphore>
-#include <special_members.hpp>
+#include <special_members.h>
 #include <thread>
 #include <utility>
 #include <vector>

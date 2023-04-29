@@ -2,7 +2,7 @@
 
 #include "glArrays.h"
 #include <glm/vec2.hpp>
-#include <special_members.hpp>
+#include <special_members.h>
 
 class TestRenderOutput {
 public:

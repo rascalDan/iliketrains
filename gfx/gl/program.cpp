@@ -2,7 +2,7 @@
 #include "shader.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <maths.h>
 
 void

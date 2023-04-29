@@ -1,15 +1,15 @@
 #pragma once
 
-#include "chronology.hpp"
+#include "chronology.h"
 #include "game/activities/go.h" // IWYU pragma: keep
 #include "game/activities/idle.h" // IWYU pragma: keep
 #include "game/activity.h"
 #include "game/network/link.h"
 #include "railVehicle.h"
 #include "vehicle.h"
-#include <collection.hpp>
+#include <collection.h>
 #include <glm/glm.hpp>
-#include <location.hpp>
+#include <location.h>
 #include <memory>
 #include <vector>
 

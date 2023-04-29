@@ -1,6 +1,6 @@
 #pragma once
 
-#include <collection.hpp>
+#include <collection.h>
 #include <memory>
 
 class Objective;

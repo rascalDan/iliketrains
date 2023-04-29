@@ -1,5 +1,5 @@
 #include "geometricPlane.h"
-#include "ray.hpp"
+#include "ray.h"
 #include <glm/geometric.hpp>
 #include <glm/gtx/intersect.hpp>
 

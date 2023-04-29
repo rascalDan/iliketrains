@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chronology.hpp"
+#include "chronology.h"
 #include "game/worldobject.h"
 #include "gfx/models/mesh.h"
 #include "gfx/renderable.h"
@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <span>
-#include <special_members.hpp>
+#include <special_members.h>
 
 class SceneShader;
 class Vertex;
