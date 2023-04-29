@@ -19,8 +19,8 @@
 #include <vector>
 
 Terrain::Terrain(std::shared_ptr<GeoData> gd) :
-	geoData {std::move(gd)}, grass {Texture::cachedTexture.get("grass.png")}, water {Texture::cachedTexture.get(
-																					  "water.png")}
+	geoData {std::move(gd)}, grass {Texture::cachedTexture.get("grass.png")},
+	water {Texture::cachedTexture.get("water.png")}
 {
 	generateMeshes();
 }

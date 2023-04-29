@@ -8,13 +8,13 @@
 
 template<typename T, typename E>
 concept SequentialCollection = requires(T c) {
-								   {
-									   c.size()
-									   } -> std::integral;
-								   {
-									   c.data()
-									   } -> std::same_as<const E *>;
-							   };
+	{
+		c.size()
+	} -> std::integral;
+	{
+		c.data()
+	} -> std::same_as<const E *>;
+};
 template<typename T>
 concept IterableCollection = std::is_same_v<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>;
 

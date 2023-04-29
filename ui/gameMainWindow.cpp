@@ -20,10 +20,10 @@
 class GameMainToolbar : Mode<decltype(GameMainSelector::target)>, public Toolbar {
 public:
 	explicit GameMainToolbar(GameMainSelector * gms_) :
-		Mode<decltype(GameMainSelector::target)> {gms_->target}, Toolbar {
-																		 {"ui/icon/network.png",
-																				 toggle<EditNetworkOf<RailLinks>>()},
-																 }
+		Mode<decltype(GameMainSelector::target)> {gms_->target},
+		Toolbar {
+				{"ui/icon/network.png", toggle<EditNetworkOf<RailLinks>>()},
+		}
 	{
 	}
 };
