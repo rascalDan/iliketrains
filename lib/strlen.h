@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <cstddef>
 
 constexpr auto
 constexpr_strlen(const GLchar * const s)
