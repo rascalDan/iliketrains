@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(emplace_back_test, *boost::unit_test::timeout(1))
 	BOOST_CHECK_EQUAL(size_, 5);
 	BOOST_CHECK_NO_THROW(emplace_back(6));
 	BOOST_CHECK_NO_THROW(emplace_back(7));
-	BOOST_CHECK_EQUAL(capacity_, 7);
+	BOOST_CHECK_EQUAL(capacity_, 10);
 	BOOST_CHECK_EQUAL(size_, 7);
 
 	{
@@ -223,21 +223,21 @@ BOOST_AUTO_TEST_CASE(insert_remove_test)
 	}
 	BOOST_CHECK_NO_THROW(insert(begin() + 2, 6));
 	BOOST_CHECK_EQUAL(size_, 5);
-	BOOST_CHECK_EQUAL(capacity_, 5);
+	BOOST_CHECK_EQUAL(capacity_, 8);
 	{
 		std::array expected1 {5, 1, 6, 2, 3};
 		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
 	}
 	erase(begin() + 1);
 	BOOST_CHECK_EQUAL(size_, 4);
-	BOOST_CHECK_EQUAL(capacity_, 5);
+	BOOST_CHECK_EQUAL(capacity_, 8);
 	{
 		std::array expected1 {5, 6, 2, 3};
 		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
 	}
 	erase(begin() + 1, end() - 1);
 	BOOST_CHECK_EQUAL(size_, 2);
-	BOOST_CHECK_EQUAL(capacity_, 5);
+	BOOST_CHECK_EQUAL(capacity_, 8);
 	{
 		std::array expected1 {5, 3};
 		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
@@ -333,6 +333,9 @@ BOOST_AUTO_TEST_CASE(insert_remove_test)
 	BOOST_CHECK_NO_THROW(emplace(begin(), 5, 6.f));
 	BOOST_CHECK_NO_THROW(emplace(begin() + 1, 7, 8.f));
 	BOOST_CHECK_NO_THROW(emplace(begin() + 2, 9, 10.f));
+	BOOST_CHECK_EQUAL(capacity(), 8);
+	BOOST_CHECK_EQUAL(size(), 5);
+	BOOST_CHECK_NO_THROW(shrink_to_fit());
 	BOOST_CHECK_EQUAL(capacity(), 5);
 	BOOST_CHECK_EQUAL(size(), 5);
 }

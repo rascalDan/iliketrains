@@ -315,6 +315,7 @@ public:
 		if (newCapacity <= capacity_) {
 			return;
 		}
+		newCapacity = std::max(newCapacity, capacity_ * 2);
 
 		std::vector<T> existing;
 		existing.reserve(size_);
