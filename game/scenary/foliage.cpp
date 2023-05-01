@@ -21,7 +21,7 @@ Foliage::postLoad()
 void
 Foliage::render(const SceneShader & shader) const
 {
-	if (const auto count = instances.count()) {
+	if (const auto count = instances.size()) {
 		shader.basicInst.use();
 		if (texture) {
 			texture->bind();
@@ -33,7 +33,7 @@ Foliage::render(const SceneShader & shader) const
 void
 Foliage::shadows(const ShadowMapper & mapper) const
 {
-	if (const auto count = instances.count()) {
+	if (const auto count = instances.size()) {
 		mapper.dynamicPointInst.use();
 		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}

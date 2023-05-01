@@ -46,26 +46,24 @@ RailVehicleClass::postLoad()
 void
 RailVehicleClass::render(const SceneShader & shader) const
 {
-	if (const auto count = instancesBody.count()) {
+	if (const auto count = instancesBody.size()) {
 		if (texture) {
 			texture->bind();
 		}
 		shader.basicInst.use();
 		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
-		bogies.front()->DrawInstanced(
-				instancesBogiesVAO.front(), static_cast<GLsizei>(instancesBogies.front().count()));
-		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), static_cast<GLsizei>(instancesBogies.back().count()));
+		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), static_cast<GLsizei>(instancesBogies.front().size()));
+		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), static_cast<GLsizei>(instancesBogies.back().size()));
 	}
 }
 
 void
 RailVehicleClass::shadows(const ShadowMapper & mapper) const
 {
-	if (const auto count = instancesBody.count()) {
+	if (const auto count = instancesBody.size()) {
 		mapper.dynamicPointInst.use();
 		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
-		bogies.front()->DrawInstanced(
-				instancesBogiesVAO.front(), static_cast<GLsizei>(instancesBogies.front().count()));
-		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), static_cast<GLsizei>(instancesBogies.back().count()));
+		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), static_cast<GLsizei>(instancesBogies.front().size()));
+		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), static_cast<GLsizei>(instancesBogies.back().size()));
 	}
 }
