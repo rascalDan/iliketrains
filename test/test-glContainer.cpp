@@ -264,6 +264,17 @@ BOOST_AUTO_TEST_CASE(stl)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(iter_compare)
+{
+	BOOST_CHECK_EQUAL(begin(), end());
+	BOOST_CHECK_EQUAL(rbegin(), rend());
+	emplace_back();
+	BOOST_CHECK_LT(begin(), end());
+	BOOST_CHECK_LT(rbegin(), rend());
+	BOOST_CHECK_LT(cbegin(), cend());
+	BOOST_CHECK_LT(crbegin(), crend());
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
 struct C {
@@ -326,6 +337,7 @@ BOOST_AUTO_TEST_CASE(basic)
 	BOOST_CHECK_EQUAL(size(), 1);
 	BOOST_CHECK_EQUAL(capacity(), 1);
 }
+
 BOOST_AUTO_TEST_CASE(insert_remove_test)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1, 2.f));
