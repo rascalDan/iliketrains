@@ -206,6 +206,12 @@ public:
 		return const_reserve_iterator {data_ - 1};
 	}
 
+	[[nodiscard]] const auto &
+	bufferName() const
+	{
+		return buffer_;
+	}
+
 	[[nodiscard]] size_type
 	size() const
 	{
