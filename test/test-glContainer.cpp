@@ -22,6 +22,9 @@ BOOST_AUTO_TEST_CASE(createDestroy, *boost::unit_test::timeout(1))
 {
 	BOOST_CHECK(!data_);
 	BOOST_CHECK_NO_THROW(map());
+	BOOST_REQUIRE(!data_);
+	BOOST_CHECK_NO_THROW(emplace_back(0));
+	BOOST_CHECK_NO_THROW(map());
 	BOOST_REQUIRE(data_);
 	BOOST_CHECK_NO_THROW(unmap());
 	BOOST_CHECK(!data_);
@@ -196,12 +199,78 @@ BOOST_AUTO_TEST_CASE(random_access)
 	BOOST_CHECK_EQUAL(1, *i);
 }
 
+BOOST_AUTO_TEST_CASE(insert_remove_test)
+{
+	BOOST_CHECK_NO_THROW(emplace_back(1));
+	BOOST_CHECK_NO_THROW(emplace_back(2));
+	BOOST_CHECK_NO_THROW(emplace_back(3));
+	BOOST_CHECK_NO_THROW(emplace_back(4));
+	BOOST_CHECK_NO_THROW(pop_back());
+	BOOST_CHECK_EQUAL(size_, 3);
+	BOOST_CHECK_EQUAL(capacity_, 4);
+
+	BOOST_CHECK_NO_THROW(emplace(begin(), 5));
+	BOOST_CHECK_EQUAL(size_, 4);
+	BOOST_CHECK_EQUAL(capacity_, 4);
+	{
+		std::array expected1 {5, 1, 2, 3};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+
+	{
+		std::array expected1 {2, 3};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin() + 2, end(), expected1.begin(), expected1.end());
+	}
+	BOOST_CHECK_NO_THROW(insert(begin() + 2, 6));
+	BOOST_CHECK_EQUAL(size_, 5);
+	BOOST_CHECK_EQUAL(capacity_, 5);
+	{
+		std::array expected1 {5, 1, 6, 2, 3};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+	erase(begin() + 1);
+	BOOST_CHECK_EQUAL(size_, 4);
+	BOOST_CHECK_EQUAL(capacity_, 5);
+	{
+		std::array expected1 {5, 6, 2, 3};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+	erase(begin() + 1, end() - 1);
+	BOOST_CHECK_EQUAL(size_, 2);
+	BOOST_CHECK_EQUAL(capacity_, 5);
+	{
+		std::array expected1 {5, 3};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(stl)
+{
+	BOOST_CHECK_NO_THROW(resize(10));
+	BOOST_CHECK_NO_THROW(std::generate(begin(), end(), [x = 0]() mutable {
+		return x++;
+	}));
+	BOOST_CHECK_NO_THROW(std::sort(rbegin(), rend()));
+	{
+		std::array expected1 {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+	const auto newend = std::remove_if(begin(), end(), [](const auto & x) {
+		return x % 2 == 0;
+	});
+	{
+		std::array expected1 {9, 7, 5, 3, 1};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), newend, expected1.begin(), expected1.end());
+	}
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
 struct C {
 	int x;
 	float y;
 };
+static_assert(std::is_trivially_destructible_v<C>);
 
 BOOST_FIXTURE_TEST_SUITE(c, glContainer<C>)
 
@@ -218,6 +287,54 @@ BOOST_AUTO_TEST_CASE(basic)
 	BOOST_CHECK_EQUAL(2.f, begin()->y);
 	BOOST_CHECK_EQUAL(4, rbegin()->x);
 	BOOST_CHECK_EQUAL(5.f, rbegin()->y);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
+struct CC {
+	~CC()
+	{
+		++x;
+	}
+	int x;
+	float y;
+};
+static_assert(!std::is_trivially_destructible_v<CC>);
+
+BOOST_FIXTURE_TEST_SUITE(cc, glContainer<CC>)
+
+BOOST_AUTO_TEST_CASE(basic)
+{
+	BOOST_CHECK_NO_THROW(emplace_back(1, 2.f));
+	BOOST_CHECK_EQUAL(1, begin()->x);
+	BOOST_CHECK_EQUAL(2.f, begin()->y);
+	BOOST_CHECK_NO_THROW(begin()->x = 3);
+	BOOST_CHECK_EQUAL(3, begin()->x);
+
+	BOOST_CHECK_NO_THROW(push_back(CC {4, 5.f}));
+	BOOST_CHECK_EQUAL(3, begin()->x);
+	BOOST_CHECK_EQUAL(2.f, begin()->y);
+	BOOST_CHECK_EQUAL(4, rbegin()->x);
+	BOOST_CHECK_EQUAL(5.f, rbegin()->y);
+	BOOST_CHECK_NO_THROW(pop_back());
+	BOOST_CHECK_EQUAL(size(), 1);
+	BOOST_CHECK_EQUAL(capacity(), 2);
+	BOOST_CHECK_NO_THROW(resize(3));
+	BOOST_CHECK_EQUAL(size(), 3);
+	BOOST_CHECK_EQUAL(capacity(), 3);
+	BOOST_CHECK_NO_THROW(resize(1));
+	BOOST_CHECK_EQUAL(size(), 1);
+	BOOST_CHECK_EQUAL(capacity(), 1);
+}
+BOOST_AUTO_TEST_CASE(insert_remove_test)
+{
+	BOOST_CHECK_NO_THROW(emplace_back(1, 2.f));
+	BOOST_CHECK_NO_THROW(emplace_back(3, 4.f));
+	BOOST_CHECK_NO_THROW(emplace(begin(), 5, 6.f));
+	BOOST_CHECK_NO_THROW(emplace(begin() + 1, 7, 8.f));
+	BOOST_CHECK_NO_THROW(emplace(begin() + 2, 9, 10.f));
+	BOOST_CHECK_EQUAL(capacity(), 5);
+	BOOST_CHECK_EQUAL(size(), 5);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

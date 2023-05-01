@@ -8,6 +8,10 @@
 template<typename I, typename Direction> class basic_glContainer_iterator {
 public:
 	explicit basic_glContainer_iterator(I * i) : i {i} { }
+	template<typename OtherI>
+	basic_glContainer_iterator(const basic_glContainer_iterator<OtherI, Direction> & other) : i {&*other}
+	{
+	}
 
 	auto &
 	operator++() noexcept
@@ -41,6 +45,29 @@ public:
 		else {
 			return other.i - this->i;
 		}
+	}
+
+	[[nodiscard]] auto
+	operator<(const basic_glContainer_iterator & other) const noexcept
+	{
+		if constexpr (std::is_same_v<Direction, std::plus<>>) {
+			return this->i < other.i;
+		}
+		else {
+			return other.i < this->i;
+		}
+	}
+
+	auto
+	operator+(std::integral auto n) const noexcept
+	{
+		return basic_glContainer_iterator<I, Direction> {Direction {}(i, n)};
+	}
+
+	auto
+	operator-(std::integral auto n) const noexcept
+	{
+		return basic_glContainer_iterator<I, Direction> {Direction {}(i, -n)};
 	}
 
 	[[nodiscard]] bool
@@ -81,15 +108,18 @@ public:
 	using const_iterator = basic_glContainer_iterator<const value_type, std::plus<>>;
 	using reserve_iterator = basic_glContainer_iterator<value_type, std::minus<>>;
 	using const_reserve_iterator = basic_glContainer_iterator<const value_type, std::minus<>>;
+	static constexpr bool is_trivial_dest = std::is_trivially_destructible_v<T>;
 
 	glContainer()
 	{
 		allocBuffer(1);
 	}
 
-	~glContainer()
+	~glContainer() noexcept(is_trivial_dest)
 	{
-		clear();
+		if constexpr (!is_trivial_dest) {
+			clear();
+		}
 	}
 
 	[[nodiscard]] iterator
@@ -302,18 +332,25 @@ public:
 			return;
 		}
 
-		const auto maintain = std::min(newSize, capacity_);
-		std::vector<T> existing;
-		const auto maintaind = static_cast<typename decltype(existing)::difference_type>(maintain);
-		existing.reserve(maintain);
-		map();
-		std::move(data_, data_ + maintain, std::back_inserter(existing));
-		for (auto uninitialised = data_ + newSize; uninitialised < data_ + size_; ++uninitialised) {
-			uninitialised->~T();
+		if (const auto maintain = std::min(newSize, size_)) {
+			std::vector<T> existing;
+			const auto maintaind = static_cast<typename decltype(existing)::difference_type>(maintain);
+			existing.reserve(maintain);
+			map();
+			std::move(data_, data_ + maintain, std::back_inserter(existing));
+			if constexpr (!is_trivial_dest) {
+				for (auto uninitialised = data_ + newSize; uninitialised < data_ + size_; ++uninitialised) {
+					uninitialised->~T();
+				}
+			}
+			allocBuffer(newSize);
+			mapForAdd();
+			std::move(existing.begin(), existing.begin() + maintaind, data_);
 		}
-		allocBuffer(newSize);
-		map();
-		std::move(existing.begin(), existing.begin() + maintaind, data_);
+		else {
+			allocBuffer(newSize);
+			mapForAdd();
+		}
 		for (auto uninitialised = data_ + size_; uninitialised < data_ + newSize; ++uninitialised) {
 			new (uninitialised) T {};
 		}
@@ -337,11 +374,14 @@ public:
 	}
 
 	void
-	clear()
+	clear() noexcept(is_trivial_dest)
 	{
-		std::for_each(begin(), end(), [](auto && v) {
-			v.~T();
-		});
+		if constexpr (!is_trivial_dest) {
+			map();
+			std::for_each(begin(), end(), [](auto && v) {
+				v.~T();
+			});
+		}
 		size_ = 0;
 	}
 
@@ -351,10 +391,26 @@ public:
 	{
 		auto newSize = size_ + 1;
 		reserve(newSize);
-		map();
+		mapForAdd();
 		new (data_ + size_) T {std::forward<P>(ps)...};
 		size_ = newSize;
 		return back();
+	}
+
+	template<typename... P>
+	iterator
+	emplace(iterator pos, P &&... ps)
+	{
+		static_assert(std::is_nothrow_constructible_v<T, P...>);
+		auto newSize = size_ + 1;
+		const auto idx = pos - begin();
+		reserve(newSize);
+		mapForAdd();
+		std::move_backward(begin() + idx, end(), end() + 1);
+		(data_ + idx)->~T();
+		new (data_ + idx) T {std::forward<P>(ps)...};
+		size_ = newSize;
+		return pos;
 	}
 
 	reference_type
@@ -362,10 +418,57 @@ public:
 	{
 		auto newSize = size_ + 1;
 		reserve(newSize);
-		map();
+		mapForAdd();
 		new (data_ + size_) T {std::move(p)};
 		size_ = newSize;
 		return back();
+	}
+
+	iterator
+	insert(iterator pos, T p)
+	{
+		static_assert(std::is_nothrow_move_constructible_v<T>);
+		auto newSize = size_ + 1;
+		const auto idx = pos - begin();
+		reserve(newSize);
+		mapForAdd();
+		std::move_backward(begin() + idx, end(), end() + 1);
+		(data_ + idx)->~T();
+		new (data_ + idx) T {std::move(p)};
+		size_ = newSize;
+		return pos;
+	}
+
+	void
+	pop_back()
+	{
+		if constexpr (!is_trivial_dest) {
+			map();
+			data_[--size_].~T();
+		}
+		else {
+			--size_;
+		}
+	}
+
+	void
+	erase(iterator pos)
+	{
+		erase(pos, pos + 1);
+	}
+
+	void
+	erase(iterator pos, iterator to)
+	{
+		const auto eraseSize = to - pos;
+		map();
+		std::move(to, end(), pos);
+		if constexpr (!is_trivial_dest) {
+			std::for_each(end() - eraseSize, end(), [](auto && v) {
+				v.~T();
+			});
+		}
+		size_ -= static_cast<size_type>(eraseSize);
 	}
 
 protected:
@@ -384,6 +487,14 @@ protected:
 
 	void
 	map() const
+	{
+		if (size_ > 0) {
+			mapForAdd();
+		}
+	}
+
+	void
+	mapForAdd() const
 	{
 		if (!data_) {
 			data_ = static_cast<T *>(glMapNamedBuffer(buffer_, GL_READ_WRITE));
