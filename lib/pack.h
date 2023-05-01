@@ -33,9 +33,8 @@ public:
 	void
 	erase(typename Container<T>::iterator pos)
 	{
-		pos->~T();
 		if (&*pos != &Container<T>::back()) {
-			new (&*pos) T(std::move(Container<T>::back()));
+			*pos = std::move(Container<T>::back());
 		}
 		Container<T>::pop_back();
 	}
