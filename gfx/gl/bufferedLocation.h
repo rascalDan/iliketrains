@@ -1,14 +1,16 @@
 #pragma once
 
-#include "instanceVertices.h"
 #include "location.h"
+#include <functional>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
+#include <tuple>
 
 class BufferedLocation {
 public:
-	BufferedLocation(InstanceVertices<glm::mat4> &, glm::vec3 = {}, glm::vec3 = {});
-	BufferedLocation(InstanceVertices<glm::mat4> &, const Location &);
+	BufferedLocation(glm::vec3 = {}, glm::vec3 = {});
+	BufferedLocation(const Location &);
+	virtual ~BufferedLocation() = default;
 
 	BufferedLocation & operator=(const Location &);
 
@@ -23,8 +25,28 @@ public:
 	glm::mat4 getTransform() const;
 
 private:
-	void updateBuffer();
+	virtual void updateBuffer() = 0;
 
 	Location loc;
-	InstanceVertices<glm::mat4>::InstanceProxy buffer;
+};
+
+template<typename... Target> class BufferedLocationT : public BufferedLocation {
+public:
+	template<typename... LocationArgs>
+	BufferedLocationT(Target &&... target, LocationArgs &&... t) :
+		BufferedLocation {std::forward<LocationArgs>(t)...}, target {std::forward<Target>(target)...}
+	{
+		updateBuffer();
+	}
+
+	using BufferedLocation::operator=;
+
+private:
+	void
+	updateBuffer() override
+	{
+		std::apply(std::invoke<const Target &...>, target) = getTransform();
+	}
+
+	std::tuple<Target...> target;
 };

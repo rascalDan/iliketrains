@@ -12,13 +12,12 @@
 #include <ray.h>
 
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
-	rvClass {std::move(rvc)}, location {rvClass->instancesBody}, bogies {
-																		 rvClass->instancesBogies.front(),
-																		 rvClass->instancesBogies.back(),
-																 }
+	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)}, location {&LV::body, *this},
+	bogies {{
+			{&LV::front, *this, glm::vec3 {0, rvClass->wheelBase / 2.F, 0}},
+			{&LV::back, *this, glm::vec3 {0, -rvClass->wheelBase / 2.F, 0}},
+	}}
 {
-	bogies.front().setPosition({0, rvClass->wheelBase / 2.F, 0});
-	bogies.back().setPosition({0, -bogies.front().position().y, 0});
 }
 
 void

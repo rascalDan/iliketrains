@@ -8,12 +8,10 @@
 #include <memory>
 #include <utility>
 
-class SceneShader;
-class ShadowMapper;
 class Ray;
-
 class Train;
-class RailVehicle : Selectable {
+
+class RailVehicle : Selectable, RailVehicleClass::Instance {
 public:
 	explicit RailVehicle(RailVehicleClassPtr rvc);
 
@@ -22,7 +20,9 @@ public:
 	[[nodiscard]] bool intersectRay(const Ray &, glm::vec2 *, float *) const override;
 
 	RailVehicleClassPtr rvClass;
-	BufferedLocation location;
-	std::array<BufferedLocation, 2> bogies;
+	using LV = RailVehicleClass::LocationVertex;
+	using BLocation = BufferedLocationT<glm::mat4 LV::*, RailVehicleClass::Instance &>;
+	BLocation location;
+	std::array<BLocation, 2> bogies;
 };
 using RailVehiclePtr = std::unique_ptr<RailVehicle>;

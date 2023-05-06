@@ -3,15 +3,9 @@
 #include "maths.h"
 #include <glm/gtx/transform.hpp>
 
-BufferedLocation::BufferedLocation(InstanceVertices<glm::mat4> & i, glm::vec3 p, glm::vec3 r) :
-	BufferedLocation {i, Location {p, r}}
-{
-}
+BufferedLocation::BufferedLocation(glm::vec3 p, glm::vec3 r) : BufferedLocation {Location {p, r}} { }
 
-BufferedLocation::BufferedLocation(InstanceVertices<glm::mat4> & i, const Location & l) :
-	loc {l}, buffer {i.acquire(getTransform())}
-{
-}
+BufferedLocation::BufferedLocation(const Location & l) : loc {l} { }
 
 BufferedLocation::operator const Location &() const
 {
@@ -62,12 +56,6 @@ BufferedLocation::setLocation(glm::vec3 p, glm::vec3 r)
 	loc.pos = p;
 	loc.rot = r;
 	updateBuffer();
-}
-
-void
-BufferedLocation::updateBuffer()
-{
-	buffer = getTransform();
 }
 
 glm::mat4

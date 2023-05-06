@@ -21,9 +21,9 @@
 #include <ui/window.h>
 
 class TestScene : public SceneProvider {
-	std::shared_ptr<RailVehicle> train1, train2;
 	const RailVehicleClassPtr brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(
 			AssetFactory::loadXML(RESDIR "/brush47.xml")->assets.at("brush-47"));
+	std::shared_ptr<RailVehicle> train1, train2;
 
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
