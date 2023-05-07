@@ -18,6 +18,10 @@ public:
 	void render(const SceneShader & shader) const override;
 	void shadows(const ShadowMapper & shadowMapper) const override;
 
+	struct LocationVertex {
+		glm::mat4 body, front, back;
+	};
+
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;
 	std::shared_ptr<Texture> texture;
@@ -25,8 +29,8 @@ public:
 	float length;
 	float maxSpeed;
 
-	mutable InstanceVertices<glm::mat4> instancesBody;
-	mutable std::array<InstanceVertices<glm::mat4>, 2> instancesBogies;
+	mutable InstanceVertices<LocationVertex> instances;
+	using Instance = decltype(instances)::InstanceProxy;
 
 protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<RailVehicleClass>>;

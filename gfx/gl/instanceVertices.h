@@ -1,20 +1,15 @@
 #pragma once
 
-#include "glArrays.h"
+#include "glContainer.h"
+#include "pack.h"
 #include <cassert>
-#include <iterator>
-#include <span>
 #include <special_members.h>
 #include <utility>
-#include <vector>
 
-template<typename T> class InstanceVertices {
+template<typename T> class InstanceVertices : protected glContainer<T> {
+	using base = glContainer<T>;
+
 public:
-	InstanceVertices(size_t initialSize = 16)
-	{
-		allocBuffer(initialSize);
-	}
-
 	class [[nodiscard]] InstanceProxy {
 	public:
 		InstanceProxy(InstanceVertices * iv, std::size_t idx) : instances {iv}, index {idx} { }
@@ -44,27 +39,27 @@ public:
 		T &
 		operator=(U && v)
 		{
-			return instances->at(index) = std::forward<U>(v);
+			return instances->lookup(index) = std::forward<U>(v);
 		}
 
 		[[nodiscard]]
 		operator T &()
 		{
-			return instances->at(index);
+			return instances->lookup(index);
 		}
 		[[nodiscard]] operator const T &() const
 		{
-			return instances->at(index);
+			return instances->lookup(index);
 		}
 		[[nodiscard]] T *
 		get()
 		{
-			return &instances->at(index);
+			return &instances->lookup(index);
 		}
 		[[nodiscard]] const T *
 		get() const
 		{
-			return &instances->at(index);
+			return &instances->lookup(index);
 		}
 		[[nodiscard]] T *
 		operator->()
@@ -79,12 +74,12 @@ public:
 		[[nodiscard]] T &
 		operator*()
 		{
-			return instances->at(index);
+			return instances->lookup(index);
 		}
 		[[nodiscard]] const T &
 		operator*() const
 		{
-			return instances->at(index);
+			return instances->lookup(index);
 		}
 
 	private:
@@ -96,33 +91,25 @@ public:
 	[[nodiscard]] InstanceProxy
 	acquire(Params &&... params)
 	{
-		map();
 		if (!unused.empty()) {
 			auto idx = unused.back();
 			unused.pop_back();
-			index[idx] = next++;
-			new (&at(idx)) T(std::forward<Params>(params)...);
+			index[idx] = base::size();
+			base::emplace_back(std::forward<Params>(params)...);
 			return InstanceProxy {this, idx};
 		}
-		if (next >= capacity) {
-			resize(capacity * 2);
-		}
-		index.emplace_back(next++);
-		new (data + index.back()) T(std::forward<Params>(params)...);
+		index.emplace_back(base::size());
+		base::emplace_back(std::forward<Params>(params)...);
 		return InstanceProxy {this, index.size() - 1};
 	}
 
-	[[nodiscard]] const auto &
-	bufferName() const
-	{
-		return buffer;
-	}
+	using base::bufferName;
 
 	[[nodiscard]] auto
-	count() const
+	size() const
 	{
-		unmap();
-		return next;
+		base::unmap();
+		return base::size();
 	}
 
 protected:
@@ -131,16 +118,13 @@ protected:
 	void
 	release(const size_t pidx)
 	{
-		// Destroy p's object
-		at(pidx).~T();
-		if (--next != index[pidx]) {
-			// Move last object into p's slot
-			new (&at(pidx)) T {std::move(data[next])};
-			(data[next]).~T();
-			*std::find_if(index.begin(), index.end(), [this](const auto & i) {
-				return i == next && !std::binary_search(unused.begin(), unused.end(), &i - index.data());
+		if (base::size() - 1 != index[pidx]) {
+			lookup(pidx) = std::move(base::back());
+			*std::find_if(index.begin(), index.end(), [this, old = base::size() - 1](const auto & i) {
+				return i == old && !std::binary_search(unused.begin(), unused.end(), &i - index.data());
 			}) = index[pidx];
 		}
+		base::pop_back();
 		if (pidx == index.size() - 1) {
 			index.pop_back();
 		}
@@ -150,64 +134,14 @@ protected:
 		}
 	}
 
-	void
-	allocBuffer(std::size_t newCapacity)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(T) * newCapacity), nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		capacity = newCapacity;
-		data = nullptr;
-	}
-
-	void
-	resize(size_t newCapacity)
-	{
-		const auto maintain = std::min(newCapacity, capacity);
-		std::vector<T> existing;
-		const auto maintaind = static_cast<typename decltype(existing)::difference_type>(maintain);
-		existing.reserve(maintain);
-		map();
-		std::move(data, data + maintain, std::back_inserter(existing));
-		allocBuffer(newCapacity);
-		map();
-		std::move(existing.begin(), existing.begin() + maintaind, data);
-		capacity = newCapacity;
-	}
-
 	[[nodiscard]] T &
-	at(size_t pindex)
+	lookup(size_t pindex)
 	{
-		map();
-		return data[index[pindex]];
+		return base::data()[index[pindex]];
 	}
 
-	void
-	map() const
-	{
-		if (!data) {
-			data = static_cast<T *>(glMapNamedBuffer(buffer, GL_READ_WRITE));
-			assert(data);
-		}
-	}
-
-	void
-	unmap() const
-	{
-		if (data) {
-			glUnmapNamedBuffer(buffer);
-			data = nullptr;
-		}
-	}
-
-	glBuffer buffer;
-	mutable T * data {};
-	// Size of buffer
-	std::size_t capacity {};
-	// # used of capacity
-	std::size_t next {};
-	// Index into buffer given to nth proxy
+	//  Index into buffer given to nth proxy
 	std::vector<size_t> index;
-	// List of free spaces in index
+	//  List of free spaces in index
 	std::vector<size_t> unused;
 };

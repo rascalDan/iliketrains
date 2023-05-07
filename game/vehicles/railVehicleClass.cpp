@@ -4,6 +4,7 @@
 #include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/texture.h"
+#include "stream_support.h"
 #include <algorithm>
 #include <array>
 #include <cache.h>
@@ -34,38 +35,36 @@ void
 RailVehicleClass::postLoad()
 {
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO).addAttribs<glm::mat4>(instancesBody.bufferName(), 1);
+	bodyMesh->configureVAO(instanceVAO).addAttribs<LocationVertex, &LocationVertex::body>(instances.bufferName(), 1);
 	bogies.front()
 			->configureVAO(instancesBogiesVAO.front())
-			.addAttribs<glm::mat4>(instancesBogies.front().bufferName(), 1);
+			.addAttribs<LocationVertex, &LocationVertex::front>(instances.bufferName(), 1);
 	bogies.back()
 			->configureVAO(instancesBogiesVAO.back())
-			.addAttribs<glm::mat4>(instancesBogies.back().bufferName(), 1);
+			.addAttribs<LocationVertex, &LocationVertex::back>(instances.bufferName(), 1);
 }
 
 void
 RailVehicleClass::render(const SceneShader & shader) const
 {
-	if (const auto count = instancesBody.count()) {
+	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		if (texture) {
 			texture->bind();
 		}
 		shader.basicInst.use();
-		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
-		bogies.front()->DrawInstanced(
-				instancesBogiesVAO.front(), static_cast<GLsizei>(instancesBogies.front().count()));
-		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), static_cast<GLsizei>(instancesBogies.back().count()));
+		bodyMesh->DrawInstanced(instanceVAO, count);
+		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
+		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
 	}
 }
 
 void
 RailVehicleClass::shadows(const ShadowMapper & mapper) const
 {
-	if (const auto count = instancesBody.count()) {
+	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		mapper.dynamicPointInst.use();
-		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
-		bogies.front()->DrawInstanced(
-				instancesBogiesVAO.front(), static_cast<GLsizei>(instancesBogies.front().count()));
-		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), static_cast<GLsizei>(instancesBogies.back().count()));
+		bodyMesh->DrawInstanced(instanceVAO, count);
+		bogies.front()->DrawInstanced(instanceVAO, count);
+		bogies.back()->DrawInstanced(instanceVAO, count);
 	}
 }
