@@ -4,10 +4,14 @@ import generators : register-standard ;
 import scanner : register ;
 
 type.register GL_VERTEX_SHADER : vs ;
+type.register GL_TESS_CONTROL_SHADER : tcs ;
+type.register GL_TESS_EVALUATION_SHADER : tes ;
 type.register GL_GEOMETRY_SHADER : gs ;
 type.register GL_FRAGMENT_SHADER : fs ;
 
 generators.register-standard glsl.embed : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) ;
+generators.register-standard glsl.embed : GL_TESS_CONTROL_SHADER : CPP(tcs-%) H(tcs-%) ;
+generators.register-standard glsl.embed : GL_TESS_EVALUATION_SHADER : CPP(tes-%) H(tes-%) ;
 generators.register-standard glsl.embed : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) ;
 generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) ;
 
@@ -20,6 +24,8 @@ class m4-scanner : common-scanner {
 scanner.register m4-scanner : include ;
 
 type.set-scanner GL_VERTEX_SHADER : m4-scanner ;
+type.set-scanner GL_TESS_CONTROL_SHADER : m4-scanner ;
+type.set-scanner GL_TESS_EVALUATION_SHADER : m4-scanner ;
 type.set-scanner GL_GEOMETRY_SHADER : m4-scanner ;
 type.set-scanner GL_FRAGMENT_SHADER : m4-scanner ;
 
