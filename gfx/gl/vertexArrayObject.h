@@ -46,6 +46,9 @@ public:
 		return *this;
 	}
 
+	// Customisation point
+	template<typename VertexT> VertexArrayObject & addAttribsFor(const GLuint arrayBuffer, const GLuint divisor = 0);
+
 	template<typename Indices>
 	VertexArrayObject &
 	addIndices(const GLuint arrayBuffer, const Indices & indices)
