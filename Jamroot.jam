@@ -54,6 +54,7 @@ exe iliketrains :
 	;
 
 explicit main ;
+always main ;
 run iliketrains : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.* ] ] : : main ;
 
 lib ilt :
