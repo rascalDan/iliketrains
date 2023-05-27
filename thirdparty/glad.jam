@@ -1,0 +1,20 @@
+import generators : register-standard ;
+import feature : feature ;
+import toolset : flags ;
+
+generators.register-standard glad.generate.c : XML : C(%) H(glad/%) XML ;
+feature glad.pythonpath : thirdparty/glad : path ;
+feature glad.profile : core compatibility ;
+feature glad.version : 4.6 ;
+flags glad.generate.c PYTHONPATH <glad.pythonpath> ;
+flags glad.generate.c PROFILE <glad.profile> ;
+flags glad.generate.c VERSION <glad.version> ;
+
+actions glad.generate.c
+{
+	rm -rf $(1:D)
+	PYTHONPATH=$(PYTHONPATH) python -m glad --api=$(2:B):$(PROFILE)=$(VERSION) --merge --out-path=$(1[3]:D) --reproducible --quiet c
+	mv $(1[3]:D)/src/$(1[1]:BS) $(1[1])
+	mkdir -p $(1[2]:D)
+	mv $(1[3]:D)/include/glad/$(1[2]:BS) $(1[2])
+}

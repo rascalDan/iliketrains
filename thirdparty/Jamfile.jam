@@ -1,0 +1,7 @@
+import glad ;
+lib glad : gl.xml :
+	<link>static
+	<cflags>-fPIC
+	<warnings>off
+	<warnings-as-errors>off
+	;

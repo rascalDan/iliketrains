@@ -58,8 +58,8 @@ always main ;
 run iliketrains : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.* ] ] : : main ;
 
 lib ilt :
-	[ glob-tree *.cpp *.?s *.t?s : application bin test ]
-	[ lib generated : [ glob-tree *.ll *.c ] :
+	[ glob-tree *.cpp *.?s *.t?s : application bin test thirdparty ]
+	[ lib generated : [ glob-tree *.ll *.c : bin thirdparty ] :
 		<include>.
 		<include>lib
 		<link>static
@@ -89,6 +89,8 @@ lib ilt :
 	<toolset>gcc,<variant>debug:<cflags>-Wuseless-cast
 	<include>.
 	<include>lib
+	<library>thirdparty//glad
+	<implicit-dependency>thirdparty//glad
 	<library>sdl2
 	<library>glew
 	<library>freetype2
