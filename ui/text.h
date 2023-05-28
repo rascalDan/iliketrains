@@ -1,8 +1,8 @@
 #pragma once
 
 #include "uiComponent.h"
-#include <GL/glew.h>
 #include <glArrays.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <string_view>
 #include <vector>

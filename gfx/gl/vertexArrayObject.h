@@ -3,7 +3,7 @@
 #include "collections.h"
 #include "gl_traits.h"
 #include "special_members.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 class VertexArrayObject {
 public:

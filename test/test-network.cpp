@@ -4,6 +4,8 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "testMainWindow.h"
+#include "ui/applicationBase.h"
 #include <array>
 #include <collection.h>
 #include <game/network/link.h>
@@ -17,6 +19,9 @@
 #include <stream_support.h>
 #include <utility>
 #include <vector>
+
+BOOST_GLOBAL_FIXTURE(ApplicationBase);
+BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 struct TestLink : public LinkStraight {
 	TestLink(const Node::Ptr & a, const Node::Ptr & b) : TestLink {a, b, (a->pos - b->pos)} { }

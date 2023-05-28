@@ -1,13 +1,13 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <glRef.h>
+#include <glad/gl.h>
 #include <optional>
 #include <string_view>
 
 class Shader {
 public:
-	using ShaderRef = glRef<GLuint, &__glewCreateShader, &__glewDeleteShader>;
+	using ShaderRef = glRef<GLuint, &glCreateShader, &glDeleteShader>;
 	constexpr Shader(const GLchar * text, GLint len, GLuint type) : text {text}, len {len}, type {type} { }
 
 	[[nodiscard]] ShaderRef compile() const;

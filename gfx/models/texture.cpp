@@ -1,11 +1,11 @@
 #include "texture.h"
 #include "glArrays.h"
 #include "tga.h"
-#include <GL/glew.h>
 #include <cache.h>
 #include <fcntl.h>
 #include <filesystem.h>
 #include <gfx/image.h>
+#include <glad/gl.h>
 #include <glm/geometric.hpp>
 #include <resource.h>
 #include <stb/stb_image.h>

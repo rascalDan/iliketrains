@@ -7,7 +7,6 @@ import sequence ;
 import glsl ;
 
 pkg-config.import sdl2 ;
-pkg-config.import glew ;
 pkg-config.import freetype2 ;
 pkg-config.import glib-2.0 ;
 pkg-config.import mxml ;
@@ -58,8 +57,8 @@ always main ;
 run iliketrains : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.* ] ] : : main ;
 
 lib ilt :
-	[ glob-tree *.cpp *.?s *.t?s : application bin test ]
-	[ lib generated : [ glob-tree *.ll *.c ] :
+	[ glob-tree *.cpp *.?s *.t?s : application bin test thirdparty ]
+	[ lib generated : [ glob-tree *.ll *.c : bin thirdparty ] :
 		<include>.
 		<include>lib
 		<link>static
@@ -89,8 +88,9 @@ lib ilt :
 	<toolset>gcc,<variant>debug:<cflags>-Wuseless-cast
 	<include>.
 	<include>lib
+	<library>thirdparty//glad
+	<implicit-dependency>thirdparty//glad
 	<library>sdl2
-	<library>glew
 	<library>freetype2
 	<library>glib-2.0
 	<library>mxml
@@ -100,6 +100,7 @@ lib ilt :
 	: :
 	<include>.
 	<include>lib
+	<implicit-dependency>thirdparty//glad
 	;
 
 build-project test ;

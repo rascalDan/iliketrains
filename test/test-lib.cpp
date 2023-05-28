@@ -4,8 +4,8 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <GL/glew.h>
 #include <glArrays.h>
+#include <glad/gl.h>
 #include <set>
 
 std::set<GLuint> active;

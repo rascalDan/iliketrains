@@ -1,8 +1,8 @@
 #pragma once
 
 #include "shader.h"
-#include <GL/glew.h>
 #include <glRef.h>
+#include <glad/gl.h>
 #include <glm/mat4x4.hpp>
 #include <special_members.h>
 

@@ -1,7 +1,7 @@
 #include "icon.h"
 #include "glArrays.h"
-#include <GL/glew.h>
 #include <gfx/image.h>
+#include <glad/gl.h>
 #include <resource.h>
 #include <stb/stb_image.h>
 

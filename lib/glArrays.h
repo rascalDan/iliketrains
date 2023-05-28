@@ -1,9 +1,9 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <algorithm> // IWYU pragma: keep
 #include <array>
 #include <cstddef>
+#include <glad/gl.h>
 #include <special_members.h>
 
 template<size_t N> class glArraysBase {

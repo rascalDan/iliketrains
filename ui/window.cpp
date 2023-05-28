@@ -1,20 +1,20 @@
 #include "window.h"
 #include "uiComponent.h"
 #include "worldOverlay.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>
 
-Window::GlewInitHelper::GlewInitHelper()
+Window::GLInitHelper::GLInitHelper()
 {
 	[[maybe_unused]] static auto init = []() {
-		if (const auto r = glewInit(); r != GLEW_OK) {
-			throw std::runtime_error {reinterpret_cast<const char *>(glewGetErrorString(r))};
+		if (const auto version = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)); version != 40006) {
+			throw std::runtime_error {std::to_string(version)};
 		}
 		else {
-			return r;
+			return version;
 		}
 	}();
 }
