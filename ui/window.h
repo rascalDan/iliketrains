@@ -31,14 +31,14 @@ public:
 
 protected:
 	virtual void render() const;
-	struct GlewInitHelper {
-		GlewInitHelper();
+	struct GLInitHelper {
+		GLInitHelper();
 	};
 
 	const glm::ivec2 size;
 	SDL_WindowPtr m_window;
 	SDL_GLContextPtr glContext;
-	GlewInitHelper glewinithelper;
+	GLInitHelper glInithelper;
 	Collection<UIComponent> uiComponents;
 	UIShader uiShader;
 };

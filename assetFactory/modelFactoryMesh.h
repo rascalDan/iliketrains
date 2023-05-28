@@ -1,9 +1,9 @@
 #pragma once
 
 #include "modelFactoryMesh_fwd.h"
-#include <GL/glew.h>
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 #include <OpenMesh/Core/Mesh/Traits.hh>
+#include <glad/gl.h>
 #include <glm/geometric.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

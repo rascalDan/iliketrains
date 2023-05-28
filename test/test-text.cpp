@@ -5,12 +5,17 @@
 #include <boost/test/unit_test.hpp>
 #include <stream_support.h>
 
+#include "testMainWindow.h"
+#include "ui/applicationBase.h"
 #include <array>
 #include <glm/glm.hpp>
 #include <span>
 #include <ui/font.h>
 #include <unicode.h>
 #include <vector>
+
+BOOST_GLOBAL_FIXTURE(ApplicationBase);
+BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 BOOST_AUTO_TEST_CASE(utf8_string_view_iter)
 {

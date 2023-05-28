@@ -2,11 +2,11 @@
 #include "glArrays.h"
 #include "ui/icon.h"
 #include "ui/uiComponent.h"
-#include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <array>
 #include <filesystem>
 #include <functional>
+#include <glad/gl.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 

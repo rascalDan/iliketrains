@@ -1,8 +1,8 @@
 #include "texturePacker.h"
 #include "collections.h"
-#include <GL/glew.h>
 #include <algorithm>
 #include <cstdio>
+#include <glad/gl.h>
 #include <glm/common.hpp>
 #include <numeric>
 #include <ostream>
@@ -65,7 +65,7 @@ TexturePacker::pack(Size size) const
 			return {};
 		}
 	}
-	if (GLEW_ARB_texture_non_power_of_two) {
+	if (GL_ARB_texture_non_power_of_two) {
 		// Crop the size back to minimum size
 		size = std::transform_reduce(
 				result.begin(), result.end(), inputImages.begin(), Size {},

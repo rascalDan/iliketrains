@@ -1,6 +1,5 @@
 #include "rail.h"
 #include "network.h"
-#include <GL/glew.h>
 #include <array>
 #include <cmath>
 #include <collection.h>
@@ -8,6 +7,7 @@
 #include <game/network/link.h>
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/models/vertex.h>
+#include <glad/gl.h>
 #include <glm/gtx/transform.hpp>
 #include <initializer_list>
 #include <maths.h>

@@ -6,13 +6,13 @@
 #include "modeHelper.h"
 #include "toolbar.h"
 #include "window.h"
-#include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <collection.h>
 #include <game/gamestate.h>
 #include <game/network/rail.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/renderable.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <utility>

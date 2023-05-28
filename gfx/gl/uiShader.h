@@ -1,8 +1,8 @@
 #pragma once
 
 #include "program.h"
-#include <GL/glew.h>
 #include <cstddef>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <array>
 #include <cache.h>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <glArrays.h>
+#include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <map>
 #include <string_view>

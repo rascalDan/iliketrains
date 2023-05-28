@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <array>
+#include <glad/gl.h>
 #include <glm/common.hpp>
 #include <glm/fwd.hpp>
 

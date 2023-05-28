@@ -7,7 +7,6 @@ import sequence ;
 import glsl ;
 
 pkg-config.import sdl2 ;
-pkg-config.import glew ;
 pkg-config.import freetype2 ;
 pkg-config.import glib-2.0 ;
 pkg-config.import mxml ;
@@ -92,7 +91,6 @@ lib ilt :
 	<library>thirdparty//glad
 	<implicit-dependency>thirdparty//glad
 	<library>sdl2
-	<library>glew
 	<library>freetype2
 	<library>glib-2.0
 	<library>mxml
@@ -102,6 +100,7 @@ lib ilt :
 	: :
 	<include>.
 	<include>lib
+	<implicit-dependency>thirdparty//glad
 	;
 
 build-project test ;
