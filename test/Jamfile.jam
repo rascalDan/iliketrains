@@ -60,6 +60,7 @@ run test-worker.cpp ;
 run test-instancing.cpp : : : <library>test ;
 run test-glContainer.cpp : : : <library>test ;
 run test-pack.cpp : : : <library>test ;
+run test-terrain.cpp : : : <library>test <library>..//OpenMeshCore ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
 explicit perf-assetFactory ;
