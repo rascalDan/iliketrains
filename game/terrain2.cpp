@@ -48,6 +48,32 @@ TerrainMesh::TerrainMesh(const std::filesystem::path & input)
 	update_vertex_normals();
 };
 
+OpenMesh::FaceHandle
+TerrainMesh::findPoint(glm::vec2 p) const
+{
+	return findPoint(p, *faces_begin());
+}
+
+OpenMesh::FaceHandle
+TerrainMesh::findPoint(glm::vec2 p, OpenMesh::FaceHandle f) const
+{
+	ConstFaceVertexIter vertices;
+	while (f.is_valid() && !triangleContainsPoint(p, vertices = cfv_iter(f))) {
+		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
+			f = opposite_face_handle(*next);
+			if (f.is_valid()) {
+				const auto e1 = point(to_vertex_handle(*next));
+				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
+				if ((e2.x - e1.x) * (p.y - e1.y) > (e2.y - e1.y) * (p.x - e1.x)) {
+					break;
+				}
+			}
+			f.reset();
+		}
+	}
+	return f;
+}
+
 bool
 TerrainMesh::triangleContainsPoint(const glm::vec2 p, const glm::vec2 a, const glm::vec2 b, const glm::vec2 c)
 {
@@ -61,6 +87,11 @@ TerrainMesh::triangleContainsPoint(const glm::vec2 p, const glm::vec2 a, const g
 bool
 TerrainMesh::triangleContainsPoint(const glm::vec2 p, FaceHandle face) const
 {
-	auto vertices = cfv_iter(face);
+	return triangleContainsPoint(p, cfv_iter(face));
+}
+
+bool
+TerrainMesh::triangleContainsPoint(const glm::vec2 p, ConstFaceVertexIter vertices) const
+{
 	return triangleContainsPoint(p, point(*vertices++), point(*vertices++), point(*vertices++));
 }
