@@ -65,3 +65,44 @@ BOOST_DATA_TEST_CASE(findPointOnTerrain,
 {
 	BOOST_CHECK_EQUAL(fh, fixedTerrtain.findPoint(p, TerrainMesh::FaceHandle(start)).idx());
 }
+
+using WalkTerrainData = std::tuple<glm::vec2, glm::vec2, std::vector<int>>;
+
+BOOST_DATA_TEST_CASE(walkTerrain,
+		boost::unit_test::data::make<WalkTerrainData>({
+				{{310002, 490003}, {310002, 490003}, {0}},
+				{{310003, 490002}, {310003, 490002}, {1}},
+				{{310002, 490003}, {310003, 490002}, {0, 1}},
+				{{310003, 490002}, {310002, 490003}, {1, 0}},
+				{{310002, 490003}, {310202, 490003}, {0, 1, 2, 3, 4, 5, 6, 7, 8}},
+				{{310202, 490003}, {310002, 490003}, {8, 7, 6, 5, 4, 3, 2, 1, 0}},
+				{{310002, 490003}, {310002, 490203}, {0, 399, 398, 797, 796, 1195, 1194, 1593, 1592}},
+		}),
+		from, to, visits)
+{
+	std::vector<int> visited;
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, [&visited](auto fh) {
+		visited.emplace_back(fh.idx());
+	}));
+	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
+}
+
+BOOST_DATA_TEST_CASE(walkTerrainUntil,
+		boost::unit_test::data::make<WalkTerrainData>({
+				{{310002, 490003}, {310002, 490003}, {0}},
+				{{310003, 490002}, {310003, 490002}, {1}},
+				{{310002, 490003}, {310003, 490002}, {0, 1}},
+				{{310003, 490002}, {310002, 490003}, {1, 0}},
+				{{310002, 490003}, {310202, 490003}, {0, 1, 2, 3, 4}},
+				{{310202, 490003}, {310002, 490003}, {8, 7, 6, 5, 4}},
+				{{310002, 490003}, {310002, 490203}, {0, 399, 398, 797, 796}},
+		}),
+		from, to, visits)
+{
+	std::vector<int> visited;
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walkUntil(from, to, [&visited](auto fh) {
+		visited.emplace_back(fh.idx());
+		return visited.size() >= 5;
+	}));
+	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
+}
