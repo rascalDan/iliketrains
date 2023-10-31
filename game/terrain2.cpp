@@ -54,6 +54,24 @@ TerrainMesh::findPoint(glm::vec2 p) const
 	return findPoint(p, *faces_begin());
 }
 
+bool
+TerrainMesh::locate(const TerrainMesh::PointFace & pointFace, FaceHandle start) const
+{
+	if (pointFace.face.is_valid()) {
+		assert(triangleContainsPoint(pointFace.point, pointFace.face));
+		return true;
+	}
+	else {
+		return (pointFace.face = findPoint(pointFace.point, start)).is_valid();
+	}
+}
+
+bool
+TerrainMesh::locate(const TerrainMesh::PointFace & pointFace) const
+{
+	return locate(pointFace, *faces_begin());
+}
+
 namespace {
 	[[nodiscard]] constexpr inline bool
 	pointLeftOfLine(const glm::vec2 p, const glm::vec2 e1, const glm::vec2 e2)

@@ -18,6 +18,13 @@ class TerrainMesh : public OpenMesh::TriMesh_ArrayKernelT<TerrainTraits> {
 public:
 	explicit TerrainMesh(const std::filesystem::path &);
 
+	struct PointFace {
+		PointFace(const glm::vec2 p) : point {p} { }
+
+		const glm::vec2 point;
+		mutable FaceHandle face {};
+	};
+
 	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
 	[[nodiscard]] FaceHandle findPoint(glm::vec2, FaceHandle start) const;
 
@@ -28,4 +35,7 @@ protected:
 	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const glm::vec2, const glm::vec2, const glm::vec2);
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, ConstFaceVertexIter) const;
+
+	bool locate(const PointFace &) const;
+	bool locate(const PointFace &, FaceHandle start) const;
 };

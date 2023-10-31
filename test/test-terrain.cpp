@@ -46,6 +46,15 @@ BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(locatePointFace)
+{
+	const PointFace pf {{310002, 490003}};
+	BOOST_CHECK(!pf.face.is_valid());
+	BOOST_CHECK(locate(pf));
+	BOOST_CHECK(pf.face.is_valid());
+	BOOST_CHECK_EQUAL(pf.face.idx(), 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
 using FindPointData = std::tuple<glm::vec2, int>;
