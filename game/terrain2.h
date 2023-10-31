@@ -28,8 +28,8 @@ public:
 	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
 	[[nodiscard]] FaceHandle findPoint(glm::vec2, FaceHandle start) const;
 
-	void walk(const glm::vec2 from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
-	void walkUntil(const glm::vec2 from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
+	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
+	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
 
 protected:
 	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const glm::vec2, const glm::vec2, const glm::vec2);

@@ -115,7 +115,7 @@ TerrainMesh::findPoint(glm::vec2 p, OpenMesh::FaceHandle f) const
 }
 
 void
-TerrainMesh::walk(const glm::vec2 from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const
+TerrainMesh::walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const
 {
 	walkUntil(from, to, [&op](const auto & fh) {
 		op(fh);
@@ -124,10 +124,11 @@ TerrainMesh::walk(const glm::vec2 from, const glm::vec2 to, const std::function<
 }
 
 void
-TerrainMesh::walkUntil(const glm::vec2 from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const
+TerrainMesh::walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const
 {
-	auto f = findPoint(from);
-	assert(f.is_valid()); // TODO replace with a boundary search
+	locate(from);
+	assert(from.face.is_valid()); // TODO replace with a boundary search
+	auto f = from.face;
 	FaceHandle previousFace;
 	while (f.is_valid() && !op(f)) {
 		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
@@ -135,7 +136,7 @@ TerrainMesh::walkUntil(const glm::vec2 from, const glm::vec2 to, const std::func
 			if (f.is_valid() && f != previousFace) {
 				const auto e1 = point(to_vertex_handle(*next));
 				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
-				if (linesCross(from, to, e1, e2)) {
+				if (linesCross(from.point, to, e1, e2)) {
 					previousFace = f;
 					break;
 				}

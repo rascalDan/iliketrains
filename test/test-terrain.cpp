@@ -96,6 +96,20 @@ BOOST_DATA_TEST_CASE(walkTerrain,
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
 
+BOOST_DATA_TEST_CASE(walkTerrainSetsFromFace,
+		boost::unit_test::data::make<WalkTerrainData>({
+				{{310002, 490003}, {310002, 490003}, {0}},
+				{{310003, 490002}, {310003, 490002}, {1}},
+				{{310002, 490003}, {310003, 490002}, {0, 1}},
+				{{310003, 490002}, {310002, 490003}, {1, 0}},
+		}),
+		from, to, visits)
+{
+	TerrainMesh::PointFace pf {from};
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) {}));
+	BOOST_CHECK_EQUAL(pf.face.idx(), visits.front());
+}
+
 BOOST_DATA_TEST_CASE(walkTerrainUntil,
 		boost::unit_test::data::make<WalkTerrainData>({
 				{{310002, 490003}, {310002, 490003}, {0}},
