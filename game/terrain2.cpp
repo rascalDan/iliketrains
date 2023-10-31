@@ -54,22 +54,32 @@ TerrainMesh::findPoint(glm::vec2 p) const
 	return findPoint(p, *faces_begin());
 }
 
-bool
-TerrainMesh::locate(const TerrainMesh::PointFace & pointFace, FaceHandle start) const
+TerrainMesh::PointFace::PointFace(const glm::vec2 p, const TerrainMesh * mesh) :
+	PointFace {p, mesh, *mesh->faces_begin()}
 {
-	if (pointFace.face.is_valid()) {
-		assert(triangleContainsPoint(pointFace.point, pointFace.face));
-		return true;
+}
+
+TerrainMesh::PointFace::PointFace(const glm::vec2 p, const TerrainMesh * mesh, FaceHandle start) :
+	PointFace {p, mesh->findPoint(p, start)}
+{
+}
+
+TerrainMesh::FaceHandle
+TerrainMesh::PointFace::face(const TerrainMesh * mesh, FaceHandle start) const
+{
+	if (_face.is_valid()) {
+		assert(mesh->triangleContainsPoint(point, _face));
+		return _face;
 	}
 	else {
-		return (pointFace.face = findPoint(pointFace.point, start)).is_valid();
+		return (_face = mesh->findPoint(point, start));
 	}
 }
 
-bool
-TerrainMesh::locate(const TerrainMesh::PointFace & pointFace) const
+TerrainMesh::FaceHandle
+TerrainMesh::PointFace::face(const TerrainMesh * mesh) const
 {
-	return locate(pointFace, *faces_begin());
+	return face(mesh, *mesh->faces_begin());
 }
 
 namespace {
@@ -126,9 +136,8 @@ TerrainMesh::walk(const PointFace & from, const glm::vec2 to, const std::functio
 void
 TerrainMesh::walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const
 {
-	locate(from);
-	assert(from.face.is_valid()); // TODO replace with a boundary search
-	auto f = from.face;
+	assert(from.face(this).is_valid()); // TODO replace with a boundary search
+	auto f = from.face(this);
 	FaceHandle previousFace;
 	while (f.is_valid() && !op(f)) {
 		for (auto next = cfh_iter(f); next.is_valid(); ++next) {

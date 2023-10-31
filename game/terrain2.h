@@ -19,10 +19,26 @@ public:
 	explicit TerrainMesh(const std::filesystem::path &);
 
 	struct PointFace {
+		// NOLINTNEXTLINE(hicpp-explicit-conversions)
 		PointFace(const glm::vec2 p) : point {p} { }
 
+		PointFace(const glm::vec2 p, FaceHandle face) : point {p}, _face {face} { }
+
+		PointFace(const glm::vec2 p, const TerrainMesh *);
+		PointFace(const glm::vec2 p, const TerrainMesh *, FaceHandle start);
+
 		const glm::vec2 point;
-		mutable FaceHandle face {};
+		[[nodiscard]] FaceHandle face(const TerrainMesh *) const;
+		[[nodiscard]] FaceHandle face(const TerrainMesh *, FaceHandle start) const;
+
+		[[nodiscard]] bool
+		isLocated() const
+		{
+			return _face.is_valid();
+		}
+
+	private:
+		mutable FaceHandle _face {};
 	};
 
 	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
@@ -35,7 +51,4 @@ protected:
 	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const glm::vec2, const glm::vec2, const glm::vec2);
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, ConstFaceVertexIter) const;
-
-	bool locate(const PointFace &) const;
-	bool locate(const PointFace &, FaceHandle start) const;
 };

@@ -49,10 +49,16 @@ BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
 BOOST_AUTO_TEST_CASE(locatePointFace)
 {
 	const PointFace pf {{310002, 490003}};
-	BOOST_CHECK(!pf.face.is_valid());
-	BOOST_CHECK(locate(pf));
-	BOOST_CHECK(pf.face.is_valid());
-	BOOST_CHECK_EQUAL(pf.face.idx(), 0);
+	BOOST_CHECK(!pf.isLocated());
+	BOOST_CHECK(pf.face(this).is_valid());
+	BOOST_CHECK_EQUAL(pf.face(this).idx(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(preLocatePointFace)
+{
+	const PointFace pf {{310002, 490003}, this};
+	BOOST_CHECK(pf.isLocated());
+	BOOST_CHECK_EQUAL(pf.face(this).idx(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
@@ -107,7 +113,7 @@ BOOST_DATA_TEST_CASE(walkTerrainSetsFromFace,
 {
 	TerrainMesh::PointFace pf {from};
 	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) {}));
-	BOOST_CHECK_EQUAL(pf.face.idx(), visits.front());
+	BOOST_CHECK_EQUAL(pf.face(&fixedTerrtain).idx(), visits.front());
 }
 
 BOOST_DATA_TEST_CASE(walkTerrainUntil,
