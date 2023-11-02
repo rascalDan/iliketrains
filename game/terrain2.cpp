@@ -1,5 +1,7 @@
 #include "terrain2.h"
 #include <fstream>
+#include <glm/gtx/intersect.hpp>
+#include <maths.h>
 
 TerrainMesh::TerrainMesh(const std::filesystem::path & input)
 {
@@ -122,6 +124,15 @@ TerrainMesh::findPoint(glm::vec2 p, OpenMesh::FaceHandle f) const
 		}
 	}
 	return f;
+}
+
+glm::vec3
+TerrainMesh::positionAt(const PointFace & p) const
+{
+	glm::vec3 out {};
+	Triangle<3> t {this, fv_range(p.face(this))};
+	glm::intersectLineTriangle(p.point ^ 0.F, up, t[0], t[1], t[2], out);
+	return p.point ^ out[0];
 }
 
 void

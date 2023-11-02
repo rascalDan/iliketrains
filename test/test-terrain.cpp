@@ -1,4 +1,5 @@
 #define BOOST_TEST_MODULE terrain
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <stream_support.h>
@@ -79,6 +80,28 @@ BOOST_DATA_TEST_CASE(findPointOnTerrain,
 		p, fh, start)
 {
 	BOOST_CHECK_EQUAL(fh, fixedTerrtain.findPoint(p, TerrainMesh::FaceHandle(start)).idx());
+}
+
+using FindPositionData = std::tuple<glm::vec2, float>;
+
+BOOST_DATA_TEST_CASE(findPositionAt,
+		boost::unit_test::data::make<FindPositionData>({
+				// corners
+				{{310000, 490000}, 32.8F},
+				{{310050, 490050}, 33.0F},
+				{{310000, 490050}, 32.7F},
+				{{310050, 490000}, 33.2F},
+				{{310750, 490150}, 58.4F},
+				// midpoints
+				{{310025, 490025}, 32.9F},
+				{{310025, 490050}, 32.85F},
+				{{310000, 490025}, 32.75F},
+				// other
+				{{310751, 490152}, 58.326F},
+		}),
+		p, h)
+{
+	BOOST_CHECK_CLOSE_VEC(fixedTerrtain.positionAt(p), p ^ h);
 }
 
 using WalkTerrainData = std::tuple<glm::vec2, glm::vec2, std::vector<int>>;

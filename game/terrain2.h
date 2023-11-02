@@ -58,6 +58,8 @@ public:
 	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
 	[[nodiscard]] FaceHandle findPoint(glm::vec2, FaceHandle start) const;
 
+	[[nodiscard]] glm::vec3 positionAt(const PointFace &) const;
+
 	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
 
