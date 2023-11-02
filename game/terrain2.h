@@ -1,5 +1,6 @@
 #pragma once
 
+#include "collections.h" // IWYU pragma: keep IterableCollection
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
 #include <glm/vec2.hpp>
@@ -39,6 +40,19 @@ public:
 
 	private:
 		mutable FaceHandle _face {};
+	};
+
+	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, glm::vec2::value_type>> {
+		using base = glm::vec<3, glm::vec<Dim, glm::vec2::value_type>>;
+		using base::base;
+
+		template<IterableCollection Range> Triangle(const TerrainMesh * m, Range range)
+		{
+			assert(std::distance(range.begin(), range.end()) == 3);
+			std::transform(range.begin(), range.end(), &base::operator[](0), [m](auto vh) {
+				return m->point(vh);
+			});
+		}
 	};
 
 	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
