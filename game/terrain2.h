@@ -53,6 +53,13 @@ public:
 				return m->point(vh);
 			});
 		}
+
+		glm::vec<Dim, glm::vec2::value_type>
+		operator*(glm::vec2 bari) const
+		{
+			const auto & t {*this};
+			return t[0] + ((t[1] - t[0]) * bari.x) + ((t[2] - t[1]) * bari.y);
+		}
 	};
 
 	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
