@@ -21,9 +21,6 @@ ApplicationBase::ApplicationBase()
 	setGlAttribute(SDL_GL_DEPTH_SIZE, 16);
 	setGlAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	setGlAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	setGlAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	setGlAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	setGlAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 }
 

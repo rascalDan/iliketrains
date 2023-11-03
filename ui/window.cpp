@@ -1,17 +1,15 @@
 #include "window.h"
 #include "uiComponent.h"
-#include "worldOverlay.h"
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <stdexcept>
-#include <tuple>
-#include <type_traits>
 
 Window::GLInitHelper::GLInitHelper()
 {
 	[[maybe_unused]] static auto init = []() {
-		if (const auto version = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)); version != 40006) {
-			throw std::runtime_error {std::to_string(version)};
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+		if (const auto version = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)); version < 30003) {
+			throw std::runtime_error {"Insufficient OpenGL version: " + std::to_string(version)};
 		}
 		else {
 			return version;
