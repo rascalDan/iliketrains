@@ -104,6 +104,18 @@ BOOST_DATA_TEST_CASE(findPositionAt,
 	BOOST_CHECK_CLOSE_VEC(fixedTerrtain.positionAt(p), p ^ h);
 }
 
+using FindRayIntersectData = std::tuple<glm::vec3, glm::vec3, glm::vec3>;
+
+BOOST_DATA_TEST_CASE(findRayIntersect,
+		boost::unit_test::data::make<FindRayIntersectData>({
+				{{310000, 490000, 50}, {1, 1, -2}, {310008.59, 490008.59, 32.834301}},
+				{{310000, 490000, 50}, {1, 1, -1}, {310017.12, 490017.12, 32.868526}},
+		}),
+		p, d, i)
+{
+	BOOST_CHECK_CLOSE_VEC(fixedTerrtain.intersectRay({p, d}).value(), i);
+}
+
 using WalkTerrainData = std::tuple<glm::vec2, glm::vec2, std::vector<int>>;
 
 BOOST_DATA_TEST_CASE(walkTerrain,

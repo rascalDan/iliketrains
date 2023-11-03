@@ -135,6 +135,29 @@ TerrainMesh::positionAt(const PointFace & p) const
 	return p.point ^ out[0];
 }
 
+[[nodiscard]] std::optional<glm::vec3>
+TerrainMesh::intersectRay(const Ray & ray) const
+{
+	return intersectRay(ray, findPoint(ray.start));
+}
+
+[[nodiscard]] std::optional<glm::vec3>
+TerrainMesh::intersectRay(const Ray & ray, FaceHandle face) const
+{
+	std::optional<glm::vec3> out;
+	walkUntil(PointFace {ray.start, face}, ray.start + (ray.direction * 10000.F), [&out, &ray, this](FaceHandle face) {
+		glm::vec2 bari {};
+		float dist {};
+		Triangle<3> t {this, fv_range(face)};
+		if (glm::intersectRayTriangle(ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
+			out = t * bari;
+			return true;
+		}
+		return false;
+	});
+	return out;
+}
+
 void
 TerrainMesh::walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const
 {

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "collections.h" // IWYU pragma: keep IterableCollection
+#include "ray.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
 #include <glm/vec2.hpp>
+#include <optional>
 #include <thirdparty/openmesh/glmcompat.h>
 
 struct TerrainTraits : public OpenMesh::DefaultTraits {
@@ -66,6 +68,8 @@ public:
 	[[nodiscard]] FaceHandle findPoint(glm::vec2, FaceHandle start) const;
 
 	[[nodiscard]] glm::vec3 positionAt(const PointFace &) const;
+	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &) const;
+	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &, FaceHandle start) const;
 
 	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
