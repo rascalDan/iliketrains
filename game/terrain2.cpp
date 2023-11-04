@@ -24,10 +24,15 @@ TerrainMesh::loadFromAsciiGrid(const std::filesystem::path & input)
 	std::vector<VertexHandle> vertices;
 	vertices.reserve(ncols * nrows);
 	TerrainMesh mesh;
+	mesh.lowerExtent = {xllcorner, yllcorner, std::numeric_limits<float>::max()};
+	mesh.upperExtent
+			= {xllcorner + (cellsize * ncols), yllcorner + (cellsize * nrows), std::numeric_limits<float>::min()};
 	for (size_t row = 0; row < nrows; ++row) {
 		for (size_t col = 0; col < ncols; ++col) {
 			float height = 0;
 			f >> height;
+			mesh.upperExtent.z = std::max(mesh.upperExtent.z, height);
+			mesh.lowerExtent.z = std::min(mesh.lowerExtent.z, height);
 			vertices.push_back(mesh.add_vertex({xllcorner + (col * cellsize), yllcorner + (row * cellsize), height}));
 		}
 	}

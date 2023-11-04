@@ -77,8 +77,17 @@ public:
 	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
 
+	[[nodiscard]] auto
+	getExtents() const
+	{
+		return std::tie(lowerExtent, upperExtent);
+	}
+
 protected:
 	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const glm::vec2, const glm::vec2, const glm::vec2);
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, ConstFaceVertexIter) const;
+
+private:
+	glm::vec3 lowerExtent {}, upperExtent {};
 };
