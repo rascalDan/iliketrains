@@ -85,9 +85,15 @@ public:
 	}
 
 protected:
-	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const glm::vec2, const glm::vec2, const glm::vec2);
+	template<glm::length_t Dim>
+	[[nodiscard]] Triangle<Dim>
+	triangle(FaceHandle f) const
+	{
+		return {this, fv_range(f)};
+	}
+
+	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const Triangle<2> &);
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
-	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, ConstFaceVertexIter) const;
 
 private:
 	glm::vec3 lowerExtent {}, upperExtent {};

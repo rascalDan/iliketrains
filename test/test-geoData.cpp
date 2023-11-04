@@ -37,9 +37,8 @@ BOOST_AUTO_TEST_CASE(normalsAllPointUp)
 BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
 {
 	const auto face = face_handle(0);
-	auto vertices = cfv_iter(face);
 
-	BOOST_TEST_CONTEXT(point(*vertices++) << point(*vertices++) << point(*vertices++)) {
+	BOOST_TEST_CONTEXT(GeoData::Triangle<2>(this, fv_range(face))) {
 		BOOST_CHECK(triangleContainsPoint(glm::vec2 {xllcorner, yllcorner}, face));
 		BOOST_CHECK(triangleContainsPoint(glm::vec2 {xllcorner + cellsize, yllcorner + cellsize}, face));
 		BOOST_CHECK(triangleContainsPoint(glm::vec2 {xllcorner, yllcorner + cellsize}, face));

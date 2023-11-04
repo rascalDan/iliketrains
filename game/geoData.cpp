@@ -135,8 +135,7 @@ namespace {
 OpenMesh::FaceHandle
 GeoData::findPoint(glm::vec2 p, OpenMesh::FaceHandle f) const
 {
-	ConstFaceVertexIter vertices;
-	while (f.is_valid() && !triangleContainsPoint(p, vertices = cfv_iter(f))) {
+	while (f.is_valid() && !triangleContainsPoint(p, triangle<2>(f))) {
 		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
 			f = opposite_face_handle(*next);
 			if (f.is_valid()) {
@@ -156,7 +155,7 @@ glm::vec3
 GeoData::positionAt(const PointFace & p) const
 {
 	glm::vec3 out {};
-	Triangle<3> t {this, fv_range(p.face(this))};
+	const auto t = triangle<3>(p.face(this));
 	glm::intersectLineTriangle(p.point ^ 0.F, up, t[0], t[1], t[2], out);
 	return p.point ^ out[0];
 }
@@ -174,7 +173,7 @@ GeoData::intersectRay(const Ray & ray, FaceHandle face) const
 	walkUntil(PointFace {ray.start, face}, ray.start + (ray.direction * 10000.F), [&out, &ray, this](FaceHandle face) {
 		glm::vec2 bari {};
 		float dist {};
-		Triangle<3> t {this, fv_range(face)};
+		const auto t = triangle<3>(face);
 		if (glm::intersectRayTriangle(ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
 			out = t * bari;
 			return true;
@@ -216,23 +215,18 @@ GeoData::walkUntil(const PointFace & from, const glm::vec2 to, const std::functi
 }
 
 bool
-GeoData::triangleContainsPoint(const glm::vec2 p, const glm::vec2 a, const glm::vec2 b, const glm::vec2 c)
+GeoData::triangleContainsPoint(const glm::vec2 p, const Triangle<2> & t)
 {
-	const auto det = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+	const auto mul = [](const glm::vec2 a, const glm::vec2 b, const glm::vec2 c) {
+		return (a.x - b.x) * (c.y - b.y) - (a.y - b.y) * (c.x - b.x);
+	};
+	const auto det = mul(t[1], t[0], t[2]);
 
-	return det * ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x)) >= 0
-			&& det * ((c.x - b.x) * (p.y - b.y) - (c.y - b.y) * (p.x - b.x)) >= 0
-			&& det * ((a.x - c.x) * (p.y - c.y) - (a.y - c.y) * (p.x - c.x)) >= 0;
+	return det * mul(t[1], t[0], p) >= 0 && det * mul(t[2], t[1], p) >= 0 && det * mul(t[0], t[2], p) >= 0;
 }
 
 bool
 GeoData::triangleContainsPoint(const glm::vec2 p, FaceHandle face) const
 {
-	return triangleContainsPoint(p, cfv_iter(face));
-}
-
-bool
-GeoData::triangleContainsPoint(const glm::vec2 p, ConstFaceVertexIter vertices) const
-{
-	return triangleContainsPoint(p, point(*vertices++), point(*vertices++), point(*vertices++));
+	return triangleContainsPoint(p, triangle<2>(face));
 }
