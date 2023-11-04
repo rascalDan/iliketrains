@@ -8,7 +8,7 @@
 
 class TestTerrainMesh : public TerrainMesh {
 public:
-	TestTerrainMesh() : TerrainMesh {FIXTURESDIR "height/SD19.asc"} { }
+	TestTerrainMesh() : TerrainMesh {TerrainMesh::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")} { }
 };
 
 constexpr size_t ncols = 200, nrows = 200, xllcorner = 310000, yllcorner = 490000, cellsize = 50;

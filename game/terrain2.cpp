@@ -3,7 +3,8 @@
 #include <glm/gtx/intersect.hpp>
 #include <maths.h>
 
-TerrainMesh::TerrainMesh(const std::filesystem::path & input)
+TerrainMesh
+TerrainMesh::loadFromAsciiGrid(const std::filesystem::path & input)
 {
 	size_t ncols = 0, nrows = 0, xllcorner = 0, yllcorner = 0, cellsize = 0;
 	std::map<std::string_view, size_t *> properties {
@@ -22,11 +23,12 @@ TerrainMesh::TerrainMesh(const std::filesystem::path & input)
 	}
 	std::vector<VertexHandle> vertices;
 	vertices.reserve(ncols * nrows);
+	TerrainMesh mesh;
 	for (size_t row = 0; row < nrows; ++row) {
 		for (size_t col = 0; col < ncols; ++col) {
 			float height = 0;
 			f >> height;
-			vertices.push_back(add_vertex({xllcorner + (col * cellsize), yllcorner + (row * cellsize), height}));
+			vertices.push_back(mesh.add_vertex({xllcorner + (col * cellsize), yllcorner + (row * cellsize), height}));
 		}
 	}
 	if (!f.good()) {
@@ -34,20 +36,22 @@ TerrainMesh::TerrainMesh(const std::filesystem::path & input)
 	}
 	for (size_t row = 1; row < nrows; ++row) {
 		for (size_t col = 1; col < ncols; ++col) {
-			add_face({
+			mesh.add_face({
 					vertices[ncols * (row - 1) + (col - 1)],
 					vertices[ncols * (row - 0) + (col - 0)],
 					vertices[ncols * (row - 0) + (col - 1)],
 			});
-			add_face({
+			mesh.add_face({
 					vertices[ncols * (row - 1) + (col - 1)],
 					vertices[ncols * (row - 1) + (col - 0)],
 					vertices[ncols * (row - 0) + (col - 0)],
 			});
 		}
 	}
-	update_face_normals();
-	update_vertex_normals();
+	mesh.update_face_normals();
+	mesh.update_vertex_normals();
+
+	return mesh;
 };
 
 OpenMesh::FaceHandle

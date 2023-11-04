@@ -18,8 +18,11 @@ struct TerrainTraits : public OpenMesh::DefaultTraits {
 };
 
 class TerrainMesh : public OpenMesh::TriMesh_ArrayKernelT<TerrainTraits> {
+private:
+	TerrainMesh() = default;
+
 public:
-	explicit TerrainMesh(const std::filesystem::path &);
+	static TerrainMesh loadFromAsciiGrid(const std::filesystem::path &);
 
 	struct PointFace {
 		// NOLINTNEXTLINE(hicpp-explicit-conversions)
