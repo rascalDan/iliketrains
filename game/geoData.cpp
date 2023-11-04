@@ -111,11 +111,15 @@ GeoData::PointFace::face(const GeoData * mesh) const
 }
 
 namespace {
-	[[nodiscard]] constexpr inline bool
-	pointLeftOfLine(const glm::vec2 p, const glm::vec2 e1, const glm::vec2 e2)
+	template<template<typename> typename Op>
+	[[nodiscard]] constexpr inline auto
+	pointLineOp(const glm::vec2 p, const glm::vec2 e1, const glm::vec2 e2)
 	{
-		return (e2.x - e1.x) * (p.y - e1.y) > (e2.y - e1.y) * (p.x - e1.x);
+		return Op {}((e2.x - e1.x) * (p.y - e1.y), (e2.y - e1.y) * (p.x - e1.x));
 	}
+
+	constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
+	constexpr auto pointLeftOfOrOnLine = pointLineOp<std::greater_equal>;
 
 	static_assert(pointLeftOfLine({1, 2}, {1, 1}, {2, 2}));
 	static_assert(pointLeftOfLine({2, 1}, {2, 2}, {1, 1}));
@@ -217,12 +221,8 @@ GeoData::walkUntil(const PointFace & from, const glm::vec2 to, const std::functi
 bool
 GeoData::triangleContainsPoint(const glm::vec2 p, const Triangle<2> & t)
 {
-	const auto mul = [](const glm::vec2 a, const glm::vec2 b, const glm::vec2 c) {
-		return (a.x - b.x) * (c.y - b.y) - (a.y - b.y) * (c.x - b.x);
-	};
-	const auto det = mul(t[1], t[0], t[2]);
-
-	return det * mul(t[1], t[0], p) >= 0 && det * mul(t[2], t[1], p) >= 0 && det * mul(t[0], t[2], p) >= 0;
+	return pointLeftOfOrOnLine(p, t[0], t[1]) && pointLeftOfOrOnLine(p, t[1], t[2])
+			&& pointLeftOfOrOnLine(p, t[2], t[0]);
 }
 
 bool
