@@ -1,8 +1,8 @@
 #include <benchmark/benchmark.h>
-#include <game/terrain2.h>
+#include <game/geoData.h>
 
 namespace {
-	const TerrainMesh tm {FIXTURESDIR "height/SD19.asc"};
+	const GeoData tm {GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")};
 
 	void
 	terrain_findPoint(benchmark::State & state)

@@ -4,11 +4,11 @@
 #include <boost/test/unit_test.hpp>
 #include <stream_support.h>
 
-#include <game/terrain2.h>
+#include <game/geoData.h>
 
-class TestTerrainMesh : public TerrainMesh {
+class TestTerrainMesh : public GeoData {
 public:
-	TestTerrainMesh() : TerrainMesh {TerrainMesh::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")} { }
+	TestTerrainMesh() : GeoData {GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")} { }
 };
 
 constexpr size_t ncols = 200, nrows = 200, xllcorner = 310000, yllcorner = 490000, cellsize = 50;
@@ -82,7 +82,7 @@ BOOST_DATA_TEST_CASE(findPointOnTerrain,
 						{0, 1, 2, 3, 4, 5, 6, 10, 100, 150, 200, 1000, 1234, 17439, 79201, 79200, 79199}),
 		p, fh, start)
 {
-	BOOST_CHECK_EQUAL(fh, fixedTerrtain.findPoint(p, TerrainMesh::FaceHandle(start)).idx());
+	BOOST_CHECK_EQUAL(fh, fixedTerrtain.findPoint(p, GeoData::FaceHandle(start)).idx());
 }
 
 using FindPositionData = std::tuple<glm::vec2, float>;
@@ -149,7 +149,7 @@ BOOST_DATA_TEST_CASE(walkTerrainSetsFromFace,
 		}),
 		from, to, visits)
 {
-	TerrainMesh::PointFace pf {from};
+	GeoData::PointFace pf {from};
 	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) {}));
 	BOOST_CHECK_EQUAL(pf.face(&fixedTerrtain).idx(), visits.front());
 }

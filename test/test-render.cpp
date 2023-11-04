@@ -26,8 +26,7 @@ class TestScene : public SceneProvider {
 	std::shared_ptr<RailVehicle> train1, train2;
 
 	Terrain terrain {[]() {
-		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
-		gd->generateRandom();
+		auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000, 1000}, 1));
 		return gd;
 	}()};
 

@@ -34,11 +34,11 @@ static const int DISPLAY_HEIGHT = 1024;
 class MainApplication : public GameState, public ApplicationBase {
 public:
 	using Windows = Collection<Window>;
+
 	int
 	run()
 	{
-		geoData = std::make_shared<GeoData>(GeoData::Limits {{-120, -120}, {120, 120}}, 10.F);
-		geoData->generateRandom();
+		geoData = std::make_shared<GeoData>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
 
 		Windows windows;
 		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -78,12 +78,12 @@ public:
 			train->orders.create<GoTo>(&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100, -450, 15}));
 			train->currentActivity = train->orders.current()->createActivity();
 
-			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
-			for (float x = 900; x < 1100; x += 3) {
-				for (float y = 900; y < 1100; y += 3) {
-					world.create<Plant>(foliage, Location {geoData->positionAt({-x, -y})});
-				}
-			}
+			// auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
+			// for (float x = 900; x < 1100; x += 3) {
+			// for (float y = 900; y < 1100; y += 3) {
+			// world.create<Plant>(foliage, Location {terrainMesh->positionAt(glm::vec2 {-x, -y})});
+			//}
+			//}
 		}
 
 		auto t_start = std::chrono::high_resolution_clock::now();

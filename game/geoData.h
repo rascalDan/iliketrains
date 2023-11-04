@@ -1,61 +1,94 @@
 #pragma once
 
-#include <array>
+#include "collections.h" // IWYU pragma: keep IterableCollection
+#include "ray.h"
+#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 #include <optional>
-#include <span>
-#include <utility>
-#include <vector>
+#include <thirdparty/openmesh/glmcompat.h>
 
-class Ray;
+struct GeoDataTraits : public OpenMesh::DefaultTraits {
+	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	EdgeAttributes(OpenMesh::Attributes::Status);
+	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	HalfedgeAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	using Point = glm::vec3;
+	using Normal = glm::vec3;
+};
 
-class GeoData {
+class GeoData : public OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits> {
+private:
+	GeoData() = default;
+
 public:
-	struct Node {
-		float height {-1.5F};
-	};
-	using Quad = std::array<glm::vec3, 4>;
+	static GeoData loadFromAsciiGrid(const std::filesystem::path &);
+	static GeoData createFlat(glm::vec2 lower, glm::vec2, float h);
 
-	using Limits = std::pair<glm::ivec2, glm::ivec2>;
+	struct PointFace {
+		// NOLINTNEXTLINE(hicpp-explicit-conversions)
+		PointFace(const glm::vec2 p) : point {p} { }
 
-	explicit GeoData(Limits limit, float scale = 10.F);
+		PointFace(const glm::vec2 p, FaceHandle face) : point {p}, _face {face} { }
 
-	void generateRandom();
-	void loadFromImages(const std::filesystem::path &, float scale);
+		PointFace(const glm::vec2 p, const GeoData *);
+		PointFace(const glm::vec2 p, const GeoData *, FaceHandle start);
 
-	[[nodiscard]] glm::vec3 positionAt(glm::vec2) const;
-	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &) const;
+		const glm::vec2 point;
+		[[nodiscard]] FaceHandle face(const GeoData *) const;
+		[[nodiscard]] FaceHandle face(const GeoData *, FaceHandle start) const;
 
-	[[nodiscard]] unsigned int at(glm::ivec2) const;
-	[[nodiscard]] unsigned int at(int x, int y) const;
-	[[nodiscard]] Quad quad(glm::vec2) const;
-
-	[[nodiscard]] Limits getLimit() const;
-	[[nodiscard]] glm::uvec2 getSize() const;
-	[[nodiscard]] float getScale() const;
-	[[nodiscard]] std::span<const Node> getNodes() const;
-
-	class RayTracer {
-	public:
-		RayTracer(glm::vec2 p0, glm::vec2 p1);
-
-		glm::vec2 next();
+		[[nodiscard]] bool
+		isLocated() const
+		{
+			return _face.is_valid();
+		}
 
 	private:
-		RayTracer(glm::vec2 p0, glm::vec2 p1, glm::vec2 d);
-		RayTracer(glm::vec2 p0, glm::vec2 d, std::pair<float, float>, std::pair<float, float>);
-		static std::pair<float, float> byAxis(glm::vec2 p0, glm::vec2 p1, glm::vec2 d, glm::length_t);
-
-		glm::vec2 p;
-		const glm::vec2 d;
-		float error;
-		glm::vec2 inc;
+		mutable FaceHandle _face {};
 	};
 
+	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, glm::vec2::value_type>> {
+		using base = glm::vec<3, glm::vec<Dim, glm::vec2::value_type>>;
+		using base::base;
+
+		template<IterableCollection Range> Triangle(const GeoData * m, Range range)
+		{
+			assert(std::distance(range.begin(), range.end()) == 3);
+			std::transform(range.begin(), range.end(), &base::operator[](0), [m](auto vh) {
+				return m->point(vh);
+			});
+		}
+
+		glm::vec<Dim, glm::vec2::value_type>
+		operator*(glm::vec2 bari) const
+		{
+			const auto & t {*this};
+			return t[0] + ((t[1] - t[0]) * bari.x) + ((t[2] - t[1]) * bari.y);
+		}
+	};
+
+	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
+	[[nodiscard]] FaceHandle findPoint(glm::vec2, FaceHandle start) const;
+
+	[[nodiscard]] glm::vec3 positionAt(const PointFace &) const;
+	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &) const;
+	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &, FaceHandle start) const;
+
+	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
+	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
+
+	[[nodiscard]] auto
+	getExtents() const
+	{
+		return std::tie(lowerExtent, upperExtent);
+	}
+
 protected:
-	Limits limit {}; // Base grid limits first(x,y) -> second(x,y)
-	glm::uvec2 size {};
-	float scale {1};
-	std::vector<Node> nodes;
+	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const glm::vec2, const glm::vec2, const glm::vec2);
+	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
+	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, ConstFaceVertexIter) const;
+
+private:
+	glm::vec3 lowerExtent {}, upperExtent {};
 };
