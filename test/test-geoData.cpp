@@ -49,26 +49,26 @@ BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
 	}
 }
 
+BOOST_AUTO_TEST_SUITE_END();
+
+static const TestTerrainMesh fixedTerrtain;
+
 BOOST_AUTO_TEST_CASE(locatePointFace)
 {
-	const PointFace pf {{310002, 490003}};
+	const GeoData::PointFace pf {{310002, 490003}};
 	BOOST_CHECK(!pf.isLocated());
-	BOOST_CHECK(pf.face(this).is_valid());
-	BOOST_CHECK_EQUAL(pf.face(this).idx(), 0);
+	BOOST_CHECK(pf.face(&fixedTerrtain).is_valid());
+	BOOST_CHECK_EQUAL(pf.face(&fixedTerrtain).idx(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(preLocatePointFace)
 {
-	const PointFace pf {{310002, 490003}, this};
+	const GeoData::PointFace pf {{310002, 490003}, &fixedTerrtain};
 	BOOST_CHECK(pf.isLocated());
-	BOOST_CHECK_EQUAL(pf.face(this).idx(), 0);
+	BOOST_CHECK_EQUAL(pf.face(&fixedTerrtain).idx(), 0);
 }
 
-BOOST_AUTO_TEST_SUITE_END();
-
 using FindPointData = std::tuple<glm::vec2, int>;
-
-static const TestTerrainMesh fixedTerrtain;
 
 // No boundary cases as these can produce different valid results depending on starting point
 BOOST_DATA_TEST_CASE(findPointOnTerrain,
