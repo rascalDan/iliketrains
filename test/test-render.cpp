@@ -43,16 +43,19 @@ public:
 		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
 		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
 	}
+
 	void
 	content(const SceneShader & shader) const override
 	{
 		terrain.render(shader);
 		brush47rvc->render(shader);
 	}
+
 	void
 	lights(const SceneShader &) const override
 	{
 	}
+
 	void
 	shadows(const ShadowMapper & shadowMapper) const override
 	{
@@ -95,6 +98,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 {
 	SceneRenderer ss {size, output};
 	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+
 	class PointLightScene : public TestScene {
 	public:
 		void
@@ -103,6 +107,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 			r.setAmbientLight({0.2F, 0.2F, 0.2F});
 			r.setDirectionalLight({0.2F, 0.2F, 0.2F}, west + down, *this);
 		}
+
 		void
 		lights(const SceneShader & shader) const override
 		{
@@ -113,6 +118,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 			}
 		}
 	};
+
 	const PointLightScene scene;
 	ss.render(scene);
 	Texture::save(outImage, "/tmp/pointlight.tga");
@@ -122,6 +128,7 @@ BOOST_AUTO_TEST_CASE(spotlight)
 {
 	SceneRenderer ss {size, output};
 	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+
 	class PointLightScene : public TestScene {
 	public:
 		void
@@ -130,6 +137,7 @@ BOOST_AUTO_TEST_CASE(spotlight)
 			r.setAmbientLight({0.2F, 0.2F, 0.2F});
 			r.setDirectionalLight({0.2F, 0.2F, 0.2F}, west + down, *this);
 		}
+
 		void
 		lights(const SceneShader & shader) const override
 		{
@@ -139,6 +147,7 @@ BOOST_AUTO_TEST_CASE(spotlight)
 			shader.spotLight.add({60, 50, 3}, north + east, {1.0, 1.0, 1.0}, 0.0001F, .7F);
 		}
 	};
+
 	const PointLightScene scene;
 	ss.render(scene);
 	Texture::save(outImage, "/tmp/spotlight.tga");

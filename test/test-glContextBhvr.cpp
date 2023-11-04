@@ -11,12 +11,14 @@
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
 
 #define TEST_WINDOW_PARAMS __FILE__, 0, 0, 640, 480, static_cast<Uint32>(SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN)
+
 static void
 CreateProgramTest()
 {
 	const ProgramRef p;
 	BOOST_REQUIRE(p);
 }
+
 BOOST_AUTO_TEST_CASE(windowContextThingsBehaviour1)
 {
 	BOOST_REQUIRE(!glCreateProgram); // Init not called yet

@@ -36,6 +36,7 @@ struct FontTest : public Font {
 BOOST_TEST_DONT_PRINT_LOG_VALUE(Font::CharData);
 
 using TextureSizeTestData = std::tuple<unsigned, unsigned, unsigned>;
+
 BOOST_DATA_TEST_CASE(fontTextureSize, boost::unit_test::data::make<unsigned>({2, 3, 10, 50, 250}), fontHeight)
 {
 	auto isPowerOfTwo = [](auto x) {
@@ -64,6 +65,7 @@ BOOST_AUTO_TEST_CASE(initialize_chardata)
 }
 
 using CharDataTest = std::tuple<decltype(get_codepoint(nullptr)), Font::CharData>;
+
 BOOST_DATA_TEST_CASE(initialize_chardata_A,
 		boost::unit_test::data::make<CharDataTest>({
 				{'A', {0, {34, 35}, {627, 0}, {-1, 35}, 32}},

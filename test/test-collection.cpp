@@ -13,12 +13,14 @@ public:
 	Base() = default;
 	virtual ~Base() = default;
 	DEFAULT_MOVE_COPY(Base);
+
 	virtual bool
 	add()
 	{
 		total += 1;
 		return false;
 	}
+
 	unsigned int total {0};
 };
 

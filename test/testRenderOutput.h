@@ -17,6 +17,7 @@ public:
 	glRenderBuffer depth;
 	glTexture outImage;
 };
+
 template<glm::ivec2 Size> class TestRenderOutputSize : public TestRenderOutput {
 public:
 	TestRenderOutputSize() : TestRenderOutput {Size} { }

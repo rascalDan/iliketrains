@@ -7,6 +7,7 @@ class TestMainWindow : public Window {
 	// in the same way a real main window would always exist.
 public:
 	TestMainWindow();
+
 	void
 	tick(TickDuration) override
 	{

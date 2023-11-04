@@ -36,6 +36,7 @@ static_assert(east.x > 0);
 static_assert(west == -east);
 // (-ve, y, z) is "west"
 static_assert(west.x < 0);
+
 //
 // Therefore, the geographic world exists west -ve to east +ve and from south -ve to north +ve.  Forward shall be
 // considered +ve motion; the "front" of a vehicle shall have a +ve value in y axis.
@@ -110,9 +111,11 @@ const auto rots = boost::unit_test::data::make<std::tuple<glm::vec3, glm::mat4 (
 		{east, rotate_pitch, "pitch"},
 		{north, rotate_roll, "roll"},
 });
+
 BOOST_DATA_TEST_CASE(test_rotations, (angs + random_angs) * rots, angle, ai, axis, ilt_func, name)
 {
 	(void)ai;
+
 	BOOST_TEST_CONTEXT(name) {
 		const auto g {glm::rotate(angle, axis)}, ilt {ilt_func(angle)};
 		for (glm::length_t c = 0; c < 4; c++) {
@@ -130,6 +133,7 @@ BOOST_DATA_TEST_CASE(test_rotations, (angs + random_angs) * rots, angle, ai, axi
 // An arc shall be defined as a centre point, start point and end point. The arc shall progress positively from start to
 // end in a clockwise manner. Arc start shall be the yaw from centre to start, arc end shall be greater than arc start.
 using pos3_to_arc = std::tuple<glm::vec3, glm::vec3, glm::vec3, Arc>;
+
 BOOST_DATA_TEST_CASE(test_create_arc,
 		boost::unit_test::data::make<pos3_to_arc>({
 				{{0, 0, 0}, north, east, {0, half_pi}},
@@ -148,6 +152,7 @@ BOOST_DATA_TEST_CASE(test_create_arc,
 }
 
 using fac = std::tuple<glm::vec2, float, glm::vec2, float, glm::vec2, bool>;
+
 BOOST_DATA_TEST_CASE(test_find_arc_centre,
 		boost::unit_test::data::make<fac>({
 				{{2, 2}, pi, {3, 3}, half_pi, {3, 2}, true},
@@ -178,6 +183,7 @@ struct TestLinkStraight : public LinkStraight {
 };
 
 using StraightsData = std::tuple<glm::vec3, float /*angFor*/, float /* angBack*/>;
+
 BOOST_DATA_TEST_CASE(straight1,
 		boost::unit_test::data::make<StraightsData>({
 				{north, 0, pi},
@@ -210,6 +216,7 @@ struct TestLinkCurve : public LinkCurve {
 };
 
 using CurvesData = std::tuple<glm::vec3 /*e1*/, glm::vec3 /*ctr*/, float /*angFor*/, float /* angBack*/>;
+
 BOOST_DATA_TEST_CASE(curve1,
 		boost::unit_test::data::make<CurvesData>({
 				{north + east, east, 0, -half_pi},

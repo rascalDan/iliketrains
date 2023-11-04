@@ -281,6 +281,7 @@ struct C {
 	int x;
 	float y;
 };
+
 static_assert(std::is_trivially_destructible_v<C>);
 
 BOOST_FIXTURE_TEST_SUITE(c, glContainer<C>)
@@ -307,9 +308,11 @@ struct CC {
 	{
 		++x;
 	}
+
 	int x;
 	float y;
 };
+
 static_assert(!std::is_trivially_destructible_v<CC>);
 
 BOOST_FIXTURE_TEST_SUITE(cc, glContainer<CC>)
