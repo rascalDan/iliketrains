@@ -83,6 +83,8 @@ public:
 	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &) const;
 	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &, HalfedgeHandle start) const;
 
+	[[nodiscard]] HalfedgeHandle findEntry(const glm::vec2 from, const glm::vec2 to) const;
+
 	[[nodiscard]] auto
 	getExtents() const
 	{

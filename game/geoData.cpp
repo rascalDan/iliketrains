@@ -210,8 +210,10 @@ GeoData::walk(const PointFace & from, const glm::vec2 to, const std::function<vo
 void
 GeoData::walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const
 {
-	assert(from.face(this).is_valid()); // TODO replace with a boundary search
 	auto f = from.face(this);
+	if (!f.is_valid()) {
+		f = opposite_face_handle(findEntry(from.point, to));
+	}
 	FaceHandle previousFace;
 	while (f.is_valid() && !op(f)) {
 		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
@@ -241,7 +243,7 @@ GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op, HalfedgeHa
 	assert(is_boundary(start));
 	boundaryWalkUntil(
 			[&op](auto heh) {
-		op(heh);
+				op(heh);
 				return false;
 			},
 			start);
@@ -264,6 +266,22 @@ GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op, Halfe
 			}
 		}
 	}
+}
+
+GeoData::HalfedgeHandle
+GeoData::findEntry(const glm::vec2 from, const glm::vec2 to) const
+{
+	HalfedgeHandle entry;
+	boundaryWalkUntil([this, from, to, &entry](auto he) {
+		const auto e1 = point(to_vertex_handle(he));
+		const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(he)));
+		if (linesCrossLtR(from, to, e1, e2)) {
+			entry = he;
+			return true;
+		}
+		return false;
+	});
+	return entry;
 }
 
 bool
