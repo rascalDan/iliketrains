@@ -25,8 +25,8 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 	vertices.reserve(ncols * nrows);
 	GeoData mesh;
 	mesh.lowerExtent = {xllcorner, yllcorner, std::numeric_limits<float>::max()};
-	mesh.upperExtent
-			= {xllcorner + (cellsize * ncols), yllcorner + (cellsize * nrows), std::numeric_limits<float>::min()};
+	mesh.upperExtent = {xllcorner + (cellsize * (ncols - 1)), yllcorner + (cellsize * (nrows - 1)),
+			std::numeric_limits<float>::min()};
 	for (size_t row = 0; row < nrows; ++row) {
 		for (size_t col = 0; col < ncols; ++col) {
 			float height = 0;

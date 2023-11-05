@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(loadSuccess)
 	BOOST_CHECK_EQUAL(2 * (ncols - 1) * (nrows - 1), n_faces());
 	const auto [lower, upper] = getExtents();
 	BOOST_CHECK_EQUAL(lower, glm::vec3(310000, 490000, -2.6));
-	BOOST_CHECK_EQUAL(upper, glm::vec3(320000, 500000, 571.6));
+	BOOST_CHECK_EQUAL(upper, glm::vec3(319950, 499950, 571.6));
 }
 
 BOOST_AUTO_TEST_CASE(normalsAllPointUp)
