@@ -118,6 +118,16 @@ BOOST_DATA_TEST_CASE(findRayIntersect,
 	BOOST_CHECK_CLOSE_VEC(fixedTerrtain.intersectRay({p, d}).value(), i);
 }
 
+BOOST_AUTO_TEST_CASE(boundaryWalk)
+{
+	size_t count {};
+	fixedTerrtain.boundaryWalk([&count](auto heh) {
+		BOOST_CHECK(fixedTerrtain.is_boundary(heh));
+		count++;
+	});
+	BOOST_CHECK_EQUAL(count, 2 * (ncols + nrows - 2));
+}
+
 using WalkTerrainData = std::tuple<glm::vec2, glm::vec2, std::vector<int>>;
 
 BOOST_DATA_TEST_CASE(walkTerrain,

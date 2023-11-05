@@ -23,9 +23,20 @@ namespace {
 			});
 		}
 	}
+
+	void
+	terrain_walkBoundary(benchmark::State & state)
+	{
+		for (auto _ : state) {
+			tm.boundaryWalk([](auto heh) {
+				benchmark::DoNotOptimize(heh);
+			});
+		}
+	}
 }
 
 BENCHMARK(terrain_findPoint);
 BENCHMARK(terrain_walk);
+BENCHMARK(terrain_walkBoundary);
 
 BENCHMARK_MAIN();

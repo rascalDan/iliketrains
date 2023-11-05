@@ -218,6 +218,43 @@ GeoData::walkUntil(const PointFace & from, const glm::vec2 to, const std::functi
 	}
 }
 
+void
+GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op) const
+{
+	boundaryWalk(op, findBoundaryStart());
+}
+
+void
+GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op, HalfedgeHandle start) const
+{
+	assert(is_boundary(start));
+	boundaryWalkUntil(
+			[&op](auto heh) {
+		op(heh);
+				return false;
+			},
+			start);
+}
+
+void
+GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op) const
+{
+	boundaryWalkUntil(op, findBoundaryStart());
+}
+
+void
+GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op, HalfedgeHandle start) const
+{
+	assert(is_boundary(start));
+	if (!op(start)) {
+		for (auto heh = next_halfedge_handle(start); heh != start; heh = next_halfedge_handle(heh)) {
+			if (op(heh)) {
+				break;
+			}
+		}
+	}
+}
+
 bool
 GeoData::triangleContainsPoint(const glm::vec2 p, const Triangle<2> & t)
 {
@@ -229,4 +266,12 @@ bool
 GeoData::triangleContainsPoint(const glm::vec2 p, FaceHandle face) const
 {
 	return triangleContainsPoint(p, triangle<2>(face));
+}
+
+GeoData::HalfedgeHandle
+GeoData::findBoundaryStart() const
+{
+	return *std::find_if(halfedges_begin(), halfedges_end(), [this](const auto heh) {
+		return is_boundary(heh);
+	});
 }

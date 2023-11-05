@@ -78,6 +78,11 @@ public:
 	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
 
+	void boundaryWalk(const std::function<void(HalfedgeHandle)> &) const;
+	void boundaryWalk(const std::function<void(HalfedgeHandle)> &, HalfedgeHandle start) const;
+	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &) const;
+	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &, HalfedgeHandle start) const;
+
 	[[nodiscard]] auto
 	getExtents() const
 	{
@@ -94,6 +99,7 @@ protected:
 
 	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const Triangle<2> &);
 	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
+	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 
 private:
 	glm::vec3 lowerExtent {}, upperExtent {};
