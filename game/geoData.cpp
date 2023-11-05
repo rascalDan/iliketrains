@@ -129,11 +129,22 @@ namespace {
 	[[nodiscard]] constexpr inline bool
 	linesCross(const glm::vec2 a1, const glm::vec2 a2, const glm::vec2 b1, const glm::vec2 b2)
 	{
+		return (pointLeftOfLine(a2, b1, b2) == pointLeftOfLine(a1, b2, b1))
+				&& (pointLeftOfLine(b1, a1, a2) == pointLeftOfLine(b2, a2, a1));
+	}
+
+	static_assert(linesCross({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+	static_assert(linesCross({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+	[[nodiscard]] constexpr inline bool
+	linesCrossLtR(const glm::vec2 a1, const glm::vec2 a2, const glm::vec2 b1, const glm::vec2 b2)
+	{
 		return pointLeftOfLine(a2, b1, b2) && pointLeftOfLine(a1, b2, b1) && pointLeftOfLine(b1, a1, a2)
 				&& pointLeftOfLine(b2, a2, a1);
 	}
 
-	static_assert(linesCross({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+	static_assert(linesCrossLtR({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+	static_assert(!linesCrossLtR({2, 2}, {1, 1}, {1, 2}, {2, 1}));
 }
 
 OpenMesh::FaceHandle
@@ -208,7 +219,7 @@ GeoData::walkUntil(const PointFace & from, const glm::vec2 to, const std::functi
 			if (f.is_valid() && f != previousFace) {
 				const auto e1 = point(to_vertex_handle(*next));
 				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
-				if (linesCross(from.point, to, e1, e2)) {
+				if (linesCrossLtR(from.point, to, e1, e2)) {
 					previousFace = f;
 					break;
 				}
