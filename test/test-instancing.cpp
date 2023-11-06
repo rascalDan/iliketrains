@@ -163,6 +163,7 @@ BOOST_DATA_TEST_CASE(shuffle_random, boost::unit_test::data::xrange(0, 10), x)
 				iused.emplace(index[i]);
 			}
 		}
+
 		BOOST_TEST_CONTEXT(index) {
 			BOOST_REQUIRE_EQUAL(iused.size(), size());
 			if (!iused.empty()) {

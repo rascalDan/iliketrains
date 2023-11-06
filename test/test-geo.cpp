@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_CASE(get_height_at)
 
 using TestRayTracerData = std::tuple<glm::vec2, glm::vec2, glm::vec2::value_type, std::vector<glm::vec2>>;
 BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+
 BOOST_DATA_TEST_CASE(raytracer,
 		boost::unit_test::data::make<TestRayTracerData>({
 				{{1, 2}, {4, 5}, 4,
@@ -145,6 +146,7 @@ BOOST_DATA_TEST_CASE(raytracer,
 
 using TestRayData = std::tuple<glm::vec3, glm::vec3, glm::vec3>;
 BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+
 BOOST_DATA_TEST_CASE(intersect_ray,
 		boost::unit_test::data::make<TestRayData>({
 				{{-1, -1, 1.0}, {1, 1, 0}, {0, 0, 1}},
@@ -169,6 +171,7 @@ BOOST_DATA_TEST_CASE(intersect_ray,
 	nodes[at(1, 1)].height = 4;
 
 	const auto intersect = intersectRay({start, glm::normalize(dir)});
+
 	BOOST_CHECK_IF(has_intersect, intersect) {
 		BOOST_CHECK_CLOSE_VEC(*intersect, pos);
 	}
@@ -178,6 +181,7 @@ auto xs = boost::unit_test::data::xrange(-20.F, 0.F, 0.6F), ys = boost::unit_tes
 auto targetsx = boost::unit_test::data::xrange(0.2F, 4.9F, 1.3F),
 	 targetsy = boost::unit_test::data::xrange(0.3F, 4.9F, 1.3F);
 BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+
 BOOST_DATA_TEST_CASE(intersect_ray_many, xs * ys * targetsx * targetsy, x, y, targetx, targety)
 {
 	// at(x,y) is index based
@@ -189,8 +193,10 @@ BOOST_DATA_TEST_CASE(intersect_ray_many, xs * ys * targetsx * targetsy, x, y, ta
 	const glm::vec3 start {x, y, 10};
 	const auto target {this->positionAt({targetx, targety})};
 	const Ray ray {start, glm::normalize(target - start)};
+
 	BOOST_TEST_CONTEXT(ray) {
 		const auto intersect = intersectRay(ray);
+
 		BOOST_CHECK_IF(has_intersect, intersect) {
 			BOOST_CHECK_CLOSE_VEC(*intersect, target);
 		}
@@ -198,6 +204,7 @@ BOOST_DATA_TEST_CASE(intersect_ray_many, xs * ys * targetsx * targetsy, x, y, ta
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+
 BOOST_DATA_TEST_CASE(intersect_ray_miss,
 		boost::unit_test::data::make<Ray>({
 				{{3, 3, 5}, {-1, -1, 0}},

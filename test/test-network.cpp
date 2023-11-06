@@ -25,8 +25,11 @@ BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 struct TestLink : public LinkStraight {
 	TestLink(const Node::Ptr & a, const Node::Ptr & b) : TestLink {a, b, (a->pos - b->pos)} { }
+
 	TestLink(Node::Ptr a, Node::Ptr b, glm::vec2 l) : Link {{std::move(a), 0}, {std::move(b), pi}, glm::length(l)} { }
+
 	TestLink(Node::Ptr a, Node::Ptr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
+
 	using StraightLink = TestLink;
 	using CurveLink = TestLink;
 };

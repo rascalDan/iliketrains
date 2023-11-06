@@ -15,6 +15,7 @@ public:
 	struct Node {
 		float height {-1.5F};
 	};
+
 	using Quad = std::array<glm::vec3, 4>;
 
 	using Limits = std::pair<glm::ivec2, glm::ivec2>;

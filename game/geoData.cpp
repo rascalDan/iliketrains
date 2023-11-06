@@ -100,6 +100,7 @@ GeoData::positionAt(const glm::vec2 wcoord) const
 }
 
 GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1) : RayTracer {p0, p1, glm::abs(p1)} { }
+
 GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1, glm::vec2 d) :
 	RayTracer {p0, d, byAxis(p0, p1, d, 0), byAxis(p0, p1, d, 1)}
 {

@@ -13,6 +13,7 @@ public:
 	{
 		return viewProjection;
 	}
+
 	[[nodiscard]] Ray unProject(const glm::vec2 &) const;
 
 	void
@@ -21,11 +22,13 @@ public:
 		position = p;
 		updateView();
 	}
+
 	void
 	setForward(const glm::vec3 & f)
 	{
 		setForward(f, upFromForward(f));
 	}
+
 	void
 	setForward(const glm::vec3 & f, const glm::vec3 & u)
 	{
@@ -33,28 +36,33 @@ public:
 		up = u;
 		updateView();
 	}
+
 	void
 	setView(const glm::vec3 & p, const glm::vec3 & f)
 	{
 		position = p;
 		setForward(f);
 	}
+
 	void
 	setView(const glm::vec3 & p, const glm::vec3 & f, const glm::vec3 & u)
 	{
 		position = p;
 		setView(f, u);
 	}
+
 	void
 	lookAt(const glm::vec3 & target)
 	{
 		setForward(glm::normalize(target - position));
 	}
+
 	[[nodiscard]] auto
 	getForward() const
 	{
 		return forward;
 	}
+
 	[[nodiscard]] auto
 	getPosition() const
 	{

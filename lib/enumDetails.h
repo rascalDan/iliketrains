@@ -26,11 +26,13 @@ template<typename E> struct EnumTypeDetails : EnumDetailsBase {
 protected:
 #endif
 	constexpr static std::string_view SEARCH_TYPE {"E = "};
+
 	constexpr static auto
 	typeraw()
 	{
 		return std::string_view {__PRETTY_FUNCTION__};
 	};
+
 	constexpr static auto typeNameStart {typeraw().find(SEARCH_TYPE) + SEARCH_TYPE.length()};
 	constexpr static auto typeNameEnd {typeraw().find_first_of("];", typeNameStart)};
 	constexpr static auto typeNameLen {typeNameEnd - typeNameStart};
@@ -47,11 +49,13 @@ template<auto value> struct EnumValueDetails : public EnumTypeDetails<decltype(v
 private:
 #endif
 	using T = EnumTypeDetails<decltype(value)>;
+
 	constexpr static auto
 	raw()
 	{
 		return std::string_view {__PRETTY_FUNCTION__};
 	};
+
 	constexpr static auto nameStart {raw().find_last_of(": ") + 1};
 	constexpr static auto nameEnd {raw().find_first_of("];", nameStart)};
 	constexpr static auto nameLen {nameEnd - nameStart};
@@ -84,12 +88,14 @@ private:
 		return std::array {EnumValueDetails<static_cast<E>(n)>::valid...};
 #pragma GCC diagnostic pop
 	}
+
 	template<auto... n>
 	constexpr static auto
 	get_values(std::integer_sequence<int, n...>)
 	{
 		return std::array {EnumValueDetails<static_cast<E>(n)>::raw_value...};
 	}
+
 	template<auto... n>
 	constexpr static auto
 	get_valueNames(std::integer_sequence<int, n...>)

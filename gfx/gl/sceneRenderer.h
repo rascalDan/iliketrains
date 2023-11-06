@@ -27,11 +27,13 @@ private:
 	glFrameBuffer gBuffer;
 	glTexture gPosition, gNormal, gAlbedoSpec, gIllumination;
 	glRenderBuffer depth;
+
 	class DeferredLightProgram : public Program {
 	public:
 		using Program::Program;
 		using Program::use;
 	};
+
 	class DirectionalLightProgram : public Program {
 	public:
 		DirectionalLightProgram();

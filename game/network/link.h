@@ -71,6 +71,7 @@ public:
 	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 	[[nodiscard]] bool intersectRay(const Ray &) const override;
 };
+
 LinkStraight::~LinkStraight() = default;
 
 class LinkCurve : public virtual Link {
@@ -87,4 +88,5 @@ public:
 	float radius;
 	Arc arc;
 };
+
 LinkCurve::~LinkCurve() = default;

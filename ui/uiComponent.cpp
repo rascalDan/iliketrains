@@ -20,6 +20,7 @@ UIComponent::Position::operator&(const glm::vec2 & pos) const
 {
 	return (pos.x >= origin.x && pos.y >= origin.y && pos.x < origin.x + size.x && pos.y < origin.y + size.y);
 }
+
 bool
 UIComponent::Position::operator&(const SDL_MouseButtonEvent & pos) const
 {

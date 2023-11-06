@@ -61,6 +61,7 @@ Style::persist(Persistence::PersistenceStore & store)
 	struct ColourParser : public Persistence::SelectionV<ColourAlpha> {
 		using Persistence::SelectionV<ColourAlpha>::SelectionV;
 		using Persistence::SelectionV<ColourAlpha>::setValue;
+
 		void
 		setValue(std::string && str) override
 		{

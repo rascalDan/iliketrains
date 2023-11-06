@@ -16,12 +16,14 @@ public:
 
 		Position position;
 		Size size;
+
 		bool
 		operator<(const Area & other) const
 		{
 			return area(size) < area(other.size);
 		}
 	};
+
 	using Image = Size;
 	using Space = Area;
 	using Positions = std::vector<Position>;

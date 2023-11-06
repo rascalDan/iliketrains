@@ -18,6 +18,7 @@ struct Arc;
 // A piece of rail track
 class RailLinkStraight;
 class RailLinkCurve;
+
 class RailLink : public virtual Link, public Renderable {
 public:
 	RailLink() = default;
@@ -36,6 +37,7 @@ protected:
 
 	Mesh::Ptr mesh;
 };
+
 RailLink::~RailLink() = default;
 
 class RailLinkStraight : public RailLink, public LinkStraight {

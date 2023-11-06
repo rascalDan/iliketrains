@@ -4,6 +4,7 @@
 union SDL_Event;
 
 enum ModeSecondClick { Unset, Reset, NoAction };
+
 template<typename Target, ModeSecondClick msc = ModeSecondClick::Unset> class Mode {
 public:
 	explicit Mode(Target & t) : target {t} { }

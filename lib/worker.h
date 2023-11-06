@@ -16,6 +16,7 @@ public:
 	class WorkItem {
 	protected:
 		WorkItem(Worker * worker) : worker {worker} { }
+
 		virtual ~WorkItem() = default;
 		NO_MOVE(WorkItem);
 		NO_COPY(WorkItem);
@@ -25,6 +26,7 @@ public:
 		{
 			worker->assist();
 		}
+
 		Worker * worker;
 
 	public:
@@ -57,6 +59,7 @@ public:
 	{
 		return instance.addWorkImpl(std::forward<Params>(params)...);
 	}
+
 	template<typename T> using WorkPtrT = std::shared_ptr<WorkItemT<T>>;
 
 private:

@@ -34,6 +34,7 @@ static const int DISPLAY_HEIGHT = 1024;
 class MainApplication : public GameState, public ApplicationBase {
 public:
 	using Windows = Collection<Window>;
+
 	int
 	run()
 	{

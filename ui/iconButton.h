@@ -10,6 +10,7 @@ class UIShader;
 union SDL_Event;
 
 static const constexpr glm::vec2 ICON_SIZE {32.F, 32.F};
+
 class IconButton : public UIComponent {
 public:
 	IconButton(const std::string & icon, glm::vec2 position, UIEvent click);

@@ -13,9 +13,11 @@ public:
 	class [[nodiscard]] InstanceProxy {
 	public:
 		InstanceProxy(InstanceVertices * iv, std::size_t idx) : instances {iv}, index {idx} { }
+
 		InstanceProxy(InstanceProxy && other) : instances {std::exchange(other.instances, nullptr)}, index {other.index}
 		{
 		}
+
 		NO_COPY(InstanceProxy);
 
 		~InstanceProxy()
@@ -35,6 +37,7 @@ public:
 			index = other.index;
 			return *this;
 		}
+
 		template<typename U>
 		T &
 		operator=(U && v)
@@ -42,40 +45,46 @@ public:
 			return instances->lookup(index) = std::forward<U>(v);
 		}
 
-		[[nodiscard]]
-		operator T &()
+		[[nodiscard]] operator T &()
 		{
 			return instances->lookup(index);
 		}
+
 		[[nodiscard]] operator const T &() const
 		{
 			return instances->lookup(index);
 		}
+
 		[[nodiscard]] T *
 		get()
 		{
 			return &instances->lookup(index);
 		}
+
 		[[nodiscard]] const T *
 		get() const
 		{
 			return &instances->lookup(index);
 		}
+
 		[[nodiscard]] T *
 		operator->()
 		{
 			return get();
 		}
+
 		[[nodiscard]] const T *
 		operator->() const
 		{
 			return get();
 		}
+
 		[[nodiscard]] T &
 		operator*()
 		{
 			return instances->lookup(index);
 		}
+
 		[[nodiscard]] const T &
 		operator*() const
 		{

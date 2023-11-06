@@ -177,12 +177,14 @@ find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd)
 			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
 }
 
-float operator"" _mph(const long double v)
+float
+operator"" _mph(const long double v)
 {
 	return static_cast<float>(mph_to_ms(v));
 }
 
-float operator"" _kph(const long double v)
+float
+operator"" _kph(const long double v)
 {
 	return static_cast<float>(kph_to_ms(v));
 }

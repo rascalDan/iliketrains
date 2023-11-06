@@ -31,6 +31,7 @@ public:
 
 protected:
 	virtual void render() const;
+
 	struct GLInitHelper {
 		GLInitHelper();
 	};

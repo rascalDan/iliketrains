@@ -139,11 +139,13 @@ GLuint
 TextureAtlas::add(glm::ivec2 position, glm::ivec2 size, void * data, TextureOptions to)
 {
 	glTextureSubImage2D(m_texture, 0, position.x, position.y, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
 	struct Material {
 		glm::vec<2, uint16_t> position, size;
 		TextureOptions::MapMode wrapU;
 		TextureOptions::MapMode wrapV;
 	} material {position, size, to.wrapU, to.wrapV};
+
 	static_assert(sizeof(Material) <= 32);
 	glTextureSubImage2D(m_atlas, 0, 0, static_cast<GLsizei>(used), 2, 1, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, &material);
 	return ++used;

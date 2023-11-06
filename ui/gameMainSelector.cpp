@@ -15,6 +15,7 @@
 #include <vector>
 
 GameMainSelector::GameMainSelector(const Camera * c, glm::vec2 size) : UIComponent {{{}, size}}, camera {c} { }
+
 constexpr glm::vec2 TargetPos {5, 45};
 
 void

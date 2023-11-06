@@ -9,6 +9,7 @@
 #include <set>
 
 std::set<GLuint> active;
+
 void
 generator(GLsizei n, GLuint * out)
 {

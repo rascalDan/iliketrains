@@ -48,6 +48,7 @@ GameMainWindow::render() const
 	SceneRenderer::render(*this);
 	Window::render();
 }
+
 void
 GameMainWindow::content(const SceneShader & shader) const
 {
@@ -59,17 +60,20 @@ GameMainWindow::content(const SceneShader & shader) const
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
 	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
 }
+
 void
 GameMainWindow::environment(const SceneShader & s, const SceneRenderer & r) const
 {
 	// default for now
 	SceneProvider::environment(s, r);
 }
+
 void
 GameMainWindow::lights(const SceneShader & shader) const
 {
 	gameState->world.apply<Renderable>(&Renderable::lights, shader);
 }
+
 void
 GameMainWindow::shadows(const ShadowMapper & shadowMapper) const
 {

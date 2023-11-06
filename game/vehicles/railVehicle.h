@@ -25,4 +25,5 @@ public:
 	BLocation location;
 	std::array<BLocation, 2> bogies;
 };
+
 using RailVehiclePtr = std::unique_ptr<RailVehicle>;

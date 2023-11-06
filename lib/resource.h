@@ -16,5 +16,6 @@ public:
 		Resource::setBasePath(RESDIR);
 	}
 };
+
 BOOST_GLOBAL_FIXTURE(SetResourcePath);
 #endif

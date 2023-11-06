@@ -94,11 +94,13 @@ struct DefinitionsInserter {
 	{
 		return out.maps++;
 	};
+
 	auto
 	operator*()
 	{
 		return std::tie(out.projections[out.maps], out.regions[out.maps]);
 	}
+
 	ShadowMapper::Definitions & out;
 };
 
@@ -161,12 +163,14 @@ ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const C
 }
 
 ShadowMapper::FixedPoint::FixedPoint(const Shader & vs) : Program {vs}, viewProjectionLoc {*this, "viewProjection"} { }
+
 void
 ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	use();
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 }
+
 void
 ShadowMapper::FixedPoint::use() const
 {
@@ -177,12 +181,14 @@ ShadowMapper::DynamicPoint::DynamicPoint() :
 	Program {shadowDynamicPoint_vs}, viewProjectionLoc {*this, "viewProjection"}, modelLoc {*this, "model"}
 {
 }
+
 void
 ShadowMapper::DynamicPoint::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 }
+
 void
 ShadowMapper::DynamicPoint::use(const Location & location) const
 {
@@ -191,6 +197,7 @@ ShadowMapper::DynamicPoint::use(const Location & location) const
 	const auto model = glm::translate(location.pos) * rotate_ypr(location.rot);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 }
+
 void
 ShadowMapper::DynamicPoint::setModel(const Location & location) const
 {

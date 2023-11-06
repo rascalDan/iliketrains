@@ -93,17 +93,20 @@ namespace Persistence {
 	{
 		strm.put(ch);
 	}
+
 	static inline void
 	wrh(std::ostream & strm, char ch)
 	{
 		using namespace std::literals;
 		strm << R"(\u)"sv << std::setw(4) << std::hex << static_cast<int>(ch) << std::setw(1);
 	}
+
 	static inline void
 	wre(std::ostream & strm, char e)
 	{
 		strm << '\\' << e;
 	}
+
 	template<char E>
 	static inline void
 	wre(std::ostream & strm, char)

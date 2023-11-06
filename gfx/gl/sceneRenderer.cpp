@@ -13,6 +13,7 @@ static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
 		{1, 1, 1, 1},
 		{1, -1, 1, 0},
 }};
+
 SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
 	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}

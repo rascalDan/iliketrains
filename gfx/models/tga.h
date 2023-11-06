@@ -11,4 +11,5 @@ struct TGAHead {
 	uint8_t pixelDepth {};
 	uint8_t descriptor {};
 };
+
 static_assert(sizeof(TGAHead) == 18);

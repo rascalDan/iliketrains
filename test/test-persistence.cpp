@@ -26,6 +26,7 @@ struct JPP {
 			BOOST_REQUIRE(to);
 			return to;
 		}
+
 		// Presumably BOOST_TEST_CONTEXT is implemented as an if (...) { }
 		throw std::logic_error("We shouldn't ever get here, but apparently we can!");
 	}
@@ -213,6 +214,7 @@ auto const TEST_STRINGS_DECODE_ONLY = boost::unit_test::data::make<svs>({
 		{R"J("\u056b ARMENIAN SMALL LETTER INI")J", "ի ARMENIAN SMALL LETTER INI"},
 		{R"J("\u0833 SAMARITAN PUNCTUATION BAU")J", "࠳ SAMARITAN PUNCTUATION BAU"},
 });
+
 BOOST_DATA_TEST_CASE(load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, exp)
 {
 	std::stringstream str {in};
@@ -220,6 +222,7 @@ BOOST_DATA_TEST_CASE(load_strings, TEST_STRINGS + TEST_STRINGS_DECODE_ONLY, in, 
 }
 
 using cpstr = std::tuple<unsigned long, std::string_view>;
+
 BOOST_DATA_TEST_CASE(utf8_decode,
 		boost::unit_test::data::make<cpstr>({
 				{9, "\t"},
@@ -296,6 +299,7 @@ BOOST_AUTO_TEST_CASE(get_default_id)
 {
 	SubObject2 so;
 	const auto id {so.getId()};
+
 	BOOST_TEST_CONTEXT(id) {
 		auto ptr = std::stoul(id, nullptr, 16);
 		BOOST_CHECK_EQUAL(ptr, reinterpret_cast<decltype(ptr)>(&so));

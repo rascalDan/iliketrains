@@ -55,6 +55,7 @@ public:
 
 protected:
 	explicit wrapped_ptr(Obj * o) : obj {o} { }
+
 	Obj * obj;
 };
 

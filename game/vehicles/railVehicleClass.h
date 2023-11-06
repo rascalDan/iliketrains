@@ -41,4 +41,5 @@ private:
 	glVertexArray instanceVAO;
 	std::array<glVertexArray, 2> instancesBogiesVAO;
 };
+
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;

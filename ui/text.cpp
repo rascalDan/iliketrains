@@ -12,6 +12,7 @@
 #include <utility>
 
 const std::filesystem::path font {"/usr/share/fonts/hack/Hack-Regular.ttf"};
+
 Text::Text(std::string_view s, Position pos, glm::vec3 c) : UIComponent {pos}, colour {c}
 {
 	for (const auto & textureQuads :

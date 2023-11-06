@@ -11,22 +11,27 @@ public:
 	{
 		glBindVertexArray(arrayObject);
 	}
+
 	~VertexArrayObject()
 	{
 		glBindVertexArray(0);
 	}
+
 	NO_MOVE(VertexArrayObject);
 	NO_COPY(VertexArrayObject);
 
 	template<typename m, typename T> struct MP {
 		constexpr MP(m T::*p) : P {p} { }
+
 		operator void *() const
 		{
 			return &(static_cast<T *>(nullptr)->*P);
 		}
+
 		m T::*P;
 		using value_type = m;
 	};
+
 	template<typename m, typename T> MP(m T::*) -> MP<m, T>;
 
 	template<typename VertexT, MP... attribs>

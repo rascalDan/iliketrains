@@ -24,44 +24,52 @@ BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 const std::filesystem::path TMP {"/tmp"};
+
 class FactoryFixture : public TestRenderOutputSize<glm::ivec2 {2048, 1024}>, public SceneProvider {
 public:
 	FactoryFixture() : sceneRenderer {size, output} { }
+
 	~FactoryFixture()
 	{
 		auto outpath = (TMP / boost::unit_test::framework::current_test_case().full_name()).replace_extension(".tga");
 		std::filesystem::create_directories(outpath.parent_path());
 		Texture::save(outImage, outpath.c_str());
 	}
+
 	void
 	content(const SceneShader & shader) const override
 	{
 		shader.basic.use(Location {{0, 0, 0}, {0, 0, 0}});
 		objects.apply(&Renderable::render, shader);
 	}
+
 	void
 	lights(const SceneShader & shader) const override
 	{
 		shader.pointLight.add({-3, 1, 5}, {1, 1, 1}, .1F);
 	}
+
 	void
 	environment(const SceneShader &, const SceneRenderer & sceneRenderer) const override
 	{
 		sceneRenderer.setAmbientLight({.4, .4, .4});
 		sceneRenderer.setDirectionalLight({.6, .6, .6}, east + south + south + down, *this);
 	}
+
 	void
 	shadows(const ShadowMapper & mapper) const override
 	{
 		mapper.dynamicPoint.use(Location {{0, 0, 0}, {0, 0, 0}});
 		objects.apply(&Renderable::shadows, mapper);
 	}
+
 	void
 	render(float dist = 10.f)
 	{
 		sceneRenderer.camera.setView({-dist, dist * 1.2f, dist * 1.2f}, south + east + down);
 		sceneRenderer.render(*this);
 	}
+
 	Collection<const Renderable> objects;
 
 private:
@@ -69,6 +77,7 @@ private:
 };
 
 BOOST_FIXTURE_TEST_SUITE(m, FactoryFixture);
+
 BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/brush47.xml");
@@ -115,6 +124,7 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 
 	render(5);
 }
+
 BOOST_AUTO_TEST_SUITE_END();
 
 BOOST_AUTO_TEST_CASE(loadall)
@@ -125,6 +135,7 @@ BOOST_AUTO_TEST_CASE(loadall)
 }
 
 template<typename T> using InOut = std::tuple<T, T>;
+
 BOOST_DATA_TEST_CASE(normalizeColourName,
 		boost::unit_test::data::make<InOut<std::string>>({
 				{"", ""},

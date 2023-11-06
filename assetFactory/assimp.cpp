@@ -30,6 +30,7 @@ operator!(const aiVector3t<T> & v)
 	}
 
 using SceneCPtr = std::shared_ptr<const aiScene>;
+
 class AssImpNode : public Shape {
 public:
 	AssImpNode(SceneCPtr scene, const aiNode * node) : scene(std::move(scene)), node(node) { }

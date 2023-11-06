@@ -35,6 +35,7 @@ Use::createMesh(ModelFactoryMesh & mesh, float levelOfDetailFactor) const
 struct Lookup : public Persistence::SelectionV<Shape::CPtr> {
 	using Persistence::SelectionV<Shape::CPtr>::SelectionV;
 	using Persistence::SelectionV<Shape::CPtr>::setValue;
+
 	void
 	setValue(std::string && str) override
 	{
