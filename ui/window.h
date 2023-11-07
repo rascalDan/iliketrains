@@ -36,7 +36,7 @@ protected:
 		GLInitHelper();
 	};
 
-	const glm::ivec2 size;
+	const ScreenAbsCoord size;
 	SDL_WindowPtr m_window;
 	SDL_GLContextPtr glContext;
 	GLInitHelper glInithelper;

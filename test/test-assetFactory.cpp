@@ -183,14 +183,15 @@ BOOST_AUTO_TEST_CASE(texturePacker_many, *boost::unit_test::timeout(5))
 {
 	std::vector<TexturePacker::Image> images(256);
 	std::fill(images.begin(), images.end(), TexturePacker::Image {32, 32});
-	const auto totalSize = std::accumulate(images.begin(), images.end(), 0U, [](auto t, const auto & i) {
+	const auto totalSize = std::accumulate(images.begin(), images.end(), 0, [](auto t, const auto & i) {
 		return t + TexturePacker::area(i);
 	});
 	TexturePacker tp {images};
 	BOOST_CHECK_EQUAL(TexturePacker::Size(32, 32), tp.minSize());
 	const auto result = tp.pack();
 	BOOST_CHECK_EQUAL(result.first.size(), images.size());
-	BOOST_CHECK_GE(TexturePacker::area(result.second), TexturePacker::area(images.front()) * images.size());
+	BOOST_CHECK_GE(TexturePacker::area(result.second),
+			TexturePacker::area(images.front()) * static_cast<GLsizei>(images.size()));
 	BOOST_CHECK_EQUAL(totalSize, TexturePacker::area(result.second));
 }
 

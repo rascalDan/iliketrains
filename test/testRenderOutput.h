@@ -1,24 +1,25 @@
 #pragma once
 
+#include "config/types.h"
 #include "glArrays.h"
 #include <glm/vec2.hpp>
 #include <special_members.h>
 
 class TestRenderOutput {
 public:
-	TestRenderOutput(glm::ivec2 size = {640, 480});
+	explicit TestRenderOutput(TextureAbsCoord size = {640, 480});
 	virtual ~TestRenderOutput() = default;
 
 	NO_MOVE(TestRenderOutput);
 	NO_COPY(TestRenderOutput);
 
-	const glm::ivec2 size;
+	const TextureAbsCoord size;
 	glFrameBuffer output;
 	glRenderBuffer depth;
 	glTexture outImage;
 };
 
-template<glm::ivec2 Size> class TestRenderOutputSize : public TestRenderOutput {
+template<TextureAbsCoord Size> class TestRenderOutputSize : public TestRenderOutput {
 public:
 	TestRenderOutputSize() : TestRenderOutput {Size} { }
 };

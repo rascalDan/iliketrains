@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "program.h"
 #include <cstddef>
 #include <glad/gl.h>
@@ -33,7 +34,7 @@ private:
 	class TextProgram : public UIProgram {
 	public:
 		explicit TextProgram(const glm::mat4 & vp);
-		void use(const glm::vec3 & colour) const;
+		void use(const RGB & colour) const;
 
 	private:
 		RequiredUniformLocation colorLoc;

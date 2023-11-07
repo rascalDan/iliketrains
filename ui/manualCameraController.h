@@ -11,7 +11,7 @@ class Camera;
 
 class ManualCameraController : public CameraController, public UIComponent {
 public:
-	explicit ManualCameraController(glm::vec2 f) : UIComponent {{}}, focus {f} { }
+	explicit ManualCameraController(Position2D f) : UIComponent {{}}, focus {f} { }
 
 	bool handleInput(const SDL_Event & e, const Position &) override;
 	void render(const UIShader &, const Position & parentPos) const override;
@@ -20,7 +20,7 @@ public:
 
 private:
 	bool ctrl {false}, mrb {false};
-	glm::vec2 focus;
+	Position2D focus;
 	float direction {quarter_pi};
 	float dist {40}, pitch {quarter_pi};
 };

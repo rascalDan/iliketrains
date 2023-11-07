@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "program.h"
 #include <glArrays.h>
 
@@ -52,7 +53,7 @@ class SceneShader {
 	public:
 		PointLightShader();
 
-		void add(const glm::vec3 & position, const glm::vec3 & colour, const float kq) const;
+		void add(const Position3D & position, const RGB & colour, const float kq) const;
 
 	private:
 		UniformLocation colourLoc;
@@ -65,7 +66,7 @@ class SceneShader {
 	public:
 		SpotLightShader();
 
-		void add(const glm::vec3 & position, const glm::vec3 & direction, const glm::vec3 & colour, const float kq,
+		void add(const Position3D & position, const Direction3D & direction, const RGB & colour, const float kq,
 				const float arc) const;
 
 	private:

@@ -5,7 +5,7 @@
 #include <maths.h>
 #include <ray.h>
 
-Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
+Camera::Camera(Position3D pos, Angle fov, Angle aspect, Distance zNear, Distance zFar) :
 	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar},
 	projection {glm::perspective(fov, aspect, zNear, zFar)},
 	viewProjection {projection * glm::lookAt(position, position + forward, up)},
@@ -14,7 +14,7 @@ Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) 
 }
 
 Ray
-Camera::unProject(const glm::vec2 & mouse) const
+Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
 	const auto mouseProjection = glm::lookAt(::origin, forward, up);

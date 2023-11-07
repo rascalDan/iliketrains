@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include <array>
 #include <filesystem>
 #include <glm/glm.hpp>
@@ -16,47 +17,47 @@ public:
 		float height {-1.5F};
 	};
 
-	using Quad = std::array<glm::vec3, 4>;
+	using Quad = std::array<Position3D, 4>;
 
-	using Limits = std::pair<glm::ivec2, glm::ivec2>;
+	using Limits = std::pair<glm::vec<2, int>, glm::vec<2, int>>;
 
 	explicit GeoData(Limits limit, float scale = 10.F);
 
 	void generateRandom();
 	void loadFromImages(const std::filesystem::path &, float scale);
 
-	[[nodiscard]] glm::vec3 positionAt(glm::vec2) const;
-	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &) const;
+	[[nodiscard]] Position3D positionAt(Position2D) const;
+	[[nodiscard]] std::optional<Position3D> intersectRay(const Ray &) const;
 
-	[[nodiscard]] unsigned int at(glm::ivec2) const;
+	[[nodiscard]] unsigned int at(glm::vec<2, int>) const;
 	[[nodiscard]] unsigned int at(int x, int y) const;
-	[[nodiscard]] Quad quad(glm::vec2) const;
+	[[nodiscard]] Quad quad(Position2D) const;
 
 	[[nodiscard]] Limits getLimit() const;
-	[[nodiscard]] glm::uvec2 getSize() const;
+	[[nodiscard]] glm::vec<2, unsigned int> getSize() const;
 	[[nodiscard]] float getScale() const;
 	[[nodiscard]] std::span<const Node> getNodes() const;
 
 	class RayTracer {
 	public:
-		RayTracer(glm::vec2 p0, glm::vec2 p1);
+		RayTracer(Position2D p0, Position2D p1);
 
-		glm::vec2 next();
+		Position2D next();
 
 	private:
-		RayTracer(glm::vec2 p0, glm::vec2 p1, glm::vec2 d);
-		RayTracer(glm::vec2 p0, glm::vec2 d, std::pair<float, float>, std::pair<float, float>);
-		static std::pair<float, float> byAxis(glm::vec2 p0, glm::vec2 p1, glm::vec2 d, glm::length_t);
+		RayTracer(Position2D p0, Position2D p1, Position2D d);
+		RayTracer(Position2D p0, Position2D d, std::pair<float, float>, std::pair<float, float>);
+		static std::pair<float, float> byAxis(Position2D p0, Position2D p1, Position2D d, glm::length_t);
 
-		glm::vec2 p;
-		const glm::vec2 d;
+		Position2D p;
+		const Position2D d;
 		float error;
-		glm::vec2 inc;
+		Position2D inc;
 	};
 
 protected:
 	Limits limit {}; // Base grid limits first(x,y) -> second(x,y)
-	glm::uvec2 size {};
+	glm::vec<2, unsigned> size {};
 	float scale {1};
 	std::vector<Node> nodes;
 };

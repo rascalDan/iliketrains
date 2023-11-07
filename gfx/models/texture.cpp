@@ -1,4 +1,5 @@
 #include "texture.h"
+#include "config/types.h"
 #include "glArrays.h"
 #include "tga.h"
 #include <cache.h>

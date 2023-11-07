@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "lib/glArrays.h"
 #include "program.h"
 #include <glm/vec2.hpp>
@@ -11,7 +12,7 @@ class Camera;
 
 class ShadowMapper {
 public:
-	explicit ShadowMapper(const glm::ivec2 & size);
+	explicit ShadowMapper(const TextureAbsCoord & size);
 
 	static constexpr std::size_t SHADOW_BANDS {4};
 
@@ -21,7 +22,7 @@ public:
 		size_t maps {};
 	};
 
-	[[nodiscard]] Definitions update(const SceneProvider &, const glm::vec3 & direction, const Camera &) const;
+	[[nodiscard]] Definitions update(const SceneProvider &, const Direction3D & direction, const Camera &) const;
 
 	class FixedPoint : public Program {
 	public:
@@ -55,9 +56,9 @@ public:
 	}
 
 private:
-	[[nodiscard]] static std::vector<std::array<glm::vec3, 4>> getBandViewExtents(
+	[[nodiscard]] static std::vector<std::array<Position3D, 4>> getBandViewExtents(
 			const Camera &, const glm::mat4 & lightView);
 	glFrameBuffer depthMapFBO;
 	glTexture depthMap;
-	glm::ivec2 size;
+	TextureAbsCoord size;
 };

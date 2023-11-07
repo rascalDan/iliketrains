@@ -26,7 +26,6 @@
 #include <ui/applicationBase.h>
 #include <ui/gameMainWindow.h>
 #include <ui/window.h>
-#include <vector>
 
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
@@ -49,10 +48,10 @@ public:
 
 		{
 			auto rl = world.create<RailLinks>();
-			const glm::vec3 j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
+			const Position3D j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
 					n {-600, -500, 32}, o {-500, -800, 30}, p {-600, -900, 25}, q {-1025, -1175, 10},
 					r {-925, -1075, 10};
-			const glm::vec3 s {-1100, -500, 15}, t {-1100, -450, 15}, u {-1000, -400, 15};
+			const Position3D s {-1100, -500, 15}, t {-1100, -450, 15}, u {-1000, -400, 15};
 			auto l3 = rl->addLinksBetween(j, k);
 			rl->addLinksBetween(k, l);
 			rl->addLinksBetween(l, m);

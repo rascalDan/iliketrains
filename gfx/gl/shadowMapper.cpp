@@ -15,7 +15,7 @@
 #include <tuple>
 #include <vector>
 
-ShadowMapper::ShadowMapper(const glm::ivec2 & s) :
+ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	fixedPoint {shadowFixedPoint_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
 {
 	glBindTexture(GL_TEXTURE_2D, depthMap);
