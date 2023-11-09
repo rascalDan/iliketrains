@@ -104,14 +104,14 @@ struct DefinitionsInserter {
 	ShadowMapper::Definitions & out;
 };
 
-std::vector<std::array<glm::vec3, 4>>
+std::vector<std::array<Position3D, 4>>
 ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightView)
 {
-	std::vector<std::array<glm::vec3, 4>> bandViewExtents;
+	std::vector<std::array<Position3D, 4>> bandViewExtents;
 	for (const auto dist : shadowBands) {
 		const auto extents = camera.extentsAtDist(dist);
-		bandViewExtents.emplace_back(extents * [&lightView](const auto & e) -> glm::vec3 {
-			return lightView * glm::vec4(glm::vec3 {e}, 1);
+		bandViewExtents.emplace_back(extents * [&lightView](const auto & e) -> Position3D {
+			return lightView * glm::vec4(Position3D {e}, 1);
 		});
 		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist * 0.99F](const glm::vec4 & e) {
 				return e.w > targetDist;
@@ -123,7 +123,7 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 }
 
 ShadowMapper::Definitions
-ShadowMapper::update(const SceneProvider & scene, const glm::vec3 & dir, const Camera & camera) const
+ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const Camera & camera) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);

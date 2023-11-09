@@ -18,7 +18,7 @@
 template class NetworkOf<RailLink>;
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
-constexpr glm::vec3 RAIL_HEIGHT {0, 0, .25F};
+constexpr Size3D RAIL_HEIGHT {0, 0, .25F};
 
 RailLinks::RailLinks() : NetworkOf<RailLink> {"rails.jpg"} { }
 
@@ -28,7 +28,7 @@ RailLinks::tick(TickDuration)
 }
 
 std::shared_ptr<RailLink>
-RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
+RailLinks::addLinksBetween(Position3D start, Position3D end)
 {
 	auto node1ins = newNodeAt(start), node2ins = newNodeAt(end);
 	if (node1ins.second == NodeIs::NotInNetwork && node2ins.second == NodeIs::NotInNetwork) {
@@ -45,7 +45,7 @@ RailLinks::addLinksBetween(glm::vec3 start, glm::vec3 end)
 	if (dir == vector_yaw(end - start)) {
 		return addLink<RailLinkStraight>(start, end);
 	}
-	const glm::vec2 flatStart {!start}, flatEnd {!end};
+	const Position2D flatStart {!start}, flatEnd {!end};
 	if (node2ins.second == NodeIs::InNetwork) {
 		auto midheight = [&](auto mid) {
 			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
@@ -100,7 +100,7 @@ RailLink::render(const SceneShader &) const
 	mesh->Draw();
 }
 
-constexpr const std::array<std::pair<glm::vec3, float>, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
+constexpr const std::array<std::pair<Position3D, float>, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
 		//   ___________
 		// _/           \_
 		//  left to right
@@ -122,7 +122,7 @@ RailLinkStraight::RailLinkStraight(const Node::Ptr & a, const Node::Ptr & b) : R
 {
 }
 
-RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const glm::vec3 & diff) :
+RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const Position3D & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
 {
 	if (glGenVertexArrays) {
@@ -133,20 +133,20 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const glm::vec3 & d
 		for (auto ei : {1U, 0U}) {
 			const auto trans {glm::translate(ends[ei].node->pos) * e};
 			for (const auto & rcs : railCrossSection) {
-				const glm::vec3 m {(trans * glm::vec4 {rcs.first, 1})};
-				vertices.emplace_back(m, glm::vec2 {rcs.second, len * static_cast<float>(ei)}, up);
+				const Position3D m {(trans * glm::vec4 {rcs.first, 1})};
+				vertices.emplace_back(m, Position2D {rcs.second, len * static_cast<float>(ei)}, up);
 			}
 		}
 		mesh = defaultMesh(vertices);
 	}
 }
 
-RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, glm::vec2 c) :
+RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position2D c) :
 	RailLinkCurve(a, b, c ^ a->pos.z, {!c, a->pos, b->pos})
 {
 }
 
-RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, glm::vec3 c, const Arc arc) :
+RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position3D c, const Arc arc) :
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			(glm::length(a->pos - c)) * arc_length(arc)),
 	LinkCurve {c, glm::length(ends[0].node->pos - c), arc}
@@ -156,25 +156,25 @@ RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, glm::vec3
 		const auto & e1p {ends[1].node->pos};
 		const auto slength = round_sleepers(length / 2.F);
 		const auto segs = std::round(15.F * slength / std::pow(radius, 0.7F));
-		const auto step {glm::vec3 {arc_length(arc), e1p.z - e0p.z, slength} / segs};
+		const auto step {Position3D {arc_length(arc), e1p.z - e0p.z, slength} / segs};
 		const auto trans {glm::translate(centreBase)};
 
 		auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
 		std::vector<Vertex> vertices;
 		vertices.reserve(segCount * railCrossSection.size());
-		for (glm::vec3 swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
+		for (Position3D swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
 			const auto t {
-					trans * glm::rotate(half_pi - swing.x, up) * glm::translate(glm::vec3 {radius, 0.F, swing.y})};
+					trans * glm::rotate(half_pi - swing.x, up) * glm::translate(Position3D {radius, 0.F, swing.y})};
 			for (const auto & rcs : railCrossSection) {
-				const glm::vec3 m {(t * glm::vec4 {rcs.first, 1})};
-				vertices.emplace_back(m, glm::vec2 {rcs.second, swing.z}, up);
+				const Position3D m {(t * glm::vec4 {rcs.first, 1})};
+				vertices.emplace_back(m, Position2D {rcs.second, swing.z}, up);
 			}
 		}
 		mesh = defaultMesh(vertices);
 	}
 }
 
-glm::vec3
+Position3D
 RailLink::vehiclePositionOffset() const
 {
 	return RAIL_HEIGHT;

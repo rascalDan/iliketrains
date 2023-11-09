@@ -8,6 +8,7 @@
 #include <game/selectable.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/gl/camera.h>
+#include <math.h>
 #include <optional>
 #include <span>
 #include <stream_support.h>
@@ -16,7 +17,7 @@
 
 GameMainSelector::GameMainSelector(const Camera * c, ScreenAbsCoord size) : UIComponent {{{}, size}}, camera {c} { }
 
-constexpr glm::vec2 TargetPos {5, 45};
+constexpr ScreenAbsCoord TargetPos {5, 45};
 
 void
 GameMainSelector::render(const UIShader & shader, const Position & parentPos) const
@@ -41,7 +42,7 @@ bool
 GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 {
 	const auto getRay = [this](const auto & e) {
-		const auto mouse = glm::vec2 {e.x, e.y} / position.size;
+		const auto mouse = ScreenRelCoord {e.x, e.y} / position.size;
 		return camera->unProject(mouse);
 	};
 	if (target) {
@@ -72,8 +73,8 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 void
 GameMainSelector::defaultClick(const Ray & ray)
 {
-	glm::vec2 baryPos {};
-	float distance;
+	Position2D baryPos {};
+	float distance {};
 
 	if (const auto selected
 			= gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, &baryPos, &distance);

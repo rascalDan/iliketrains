@@ -14,8 +14,8 @@
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
 	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)}, location {&LV::body, *this},
 	bogies {{
-			{&LV::front, *this, glm::vec3 {0, rvClass->wheelBase / 2.F, 0}},
-			{&LV::back, *this, glm::vec3 {0, -rvClass->wheelBase / 2.F, 0}},
+			{&LV::front, *this, Position3D {0, rvClass->wheelBase / 2.F, 0}},
+			{&LV::back, *this, Position3D {0, -rvClass->wheelBase / 2.F, 0}},
 	}}
 {
 }
@@ -32,13 +32,13 @@ RailVehicle::move(const Train * t, float & trailBy)
 }
 
 bool
-RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance) const
+RailVehicle::intersectRay(const Ray & ray, Position2D * baryPos, float * distance) const
 {
 	constexpr const auto X = 1.35F;
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3.9F;
 	const auto moveBy = location.getTransform();
-	const std::array<glm::vec3, 8> cornerVertices {{
+	const std::array<Position3D, 8> cornerVertices {{
 			moveBy * glm::vec4 {-X, Y, 0, 1}, //  LFB
 			moveBy * glm::vec4 {X, Y, 0, 1}, //   RFB
 			moveBy * glm::vec4 {-X, Y, Z, 1}, //  LFT
@@ -48,7 +48,7 @@ RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance
 			moveBy * glm::vec4 {-X, -Y, Z, 1}, // LBT
 			moveBy * glm::vec4 {X, -Y, Z, 1}, //  RBT
 	}};
-	static constexpr const std::array<glm::uvec3, 10> triangles {{
+	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front
 			{0, 1, 2},
 			{1, 2, 3},
@@ -66,7 +66,7 @@ RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance
 			{3, 6, 7},
 	}};
 	return std::any_of(
-			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &distance](const glm::uvec3 idx) {
+			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &distance](const auto & idx) {
 				return glm::intersectRayTriangle(ray.start, ray.direction, cornerVertices[idx[0]],
 						cornerVertices[idx[1]], cornerVertices[idx[2]], *baryPos, *distance);
 			});

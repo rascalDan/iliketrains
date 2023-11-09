@@ -81,25 +81,25 @@ void
 SceneShader::WaterProgram::use(float waveCycle) const
 {
 	Program::use();
-	glm::vec3 waves {waveCycle, 0.F, 0.F};
+	Position3D waves {waveCycle, 0.F, 0.F};
 	glUniform3fv(waveLoc, 1, glm::value_ptr(waves));
 }
 
 SceneShader::PointLightShader::PointLightShader() :
 	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"}
 {
-	VertexArrayObject {va}.addAttribs<glm::vec3>(b);
+	VertexArrayObject {va}.addAttribs<Position3D>(b);
 }
 
 void
-SceneShader::PointLightShader::add(const glm::vec3 & position, const glm::vec3 & colour, const float kq) const
+SceneShader::PointLightShader::add(const Position3D & position, const RGB & colour, const float kq) const
 {
 	Program::use();
 	glBindVertexArray(va);
 	glBindBuffer(GL_ARRAY_BUFFER, b);
 	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
 	glUniform1f(kqLoc, kq);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), glm::value_ptr(position), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }
 
@@ -107,12 +107,12 @@ SceneShader::SpotLightShader::SpotLightShader() :
 	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, directionLoc {*this, "v_direction"},
 	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}
 {
-	using v3pair = std::pair<glm::vec3, glm::vec3>;
+	using v3pair = std::pair<Position3D, Direction3D>;
 	VertexArrayObject {va}.addAttribs<v3pair, &v3pair::first, &v3pair::second>(b);
 }
 
 void
-SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & direction, const glm::vec3 & colour,
+SceneShader::SpotLightShader::add(const Position3D & position, const Direction3D & direction, const RGB & colour,
 		const float kq, const float arc) const
 {
 	Program::use();
@@ -122,6 +122,6 @@ SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & 
 	glUniform3fv(directionLoc, 1, glm::value_ptr(direction));
 	glUniform1f(kqLoc, kq);
 	glUniform1f(arcLoc, arc);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), glm::value_ptr(position), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }

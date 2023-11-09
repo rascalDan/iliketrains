@@ -3,7 +3,7 @@
 #include "maths.h"
 #include <glm/gtx/transform.hpp>
 
-BufferedLocation::BufferedLocation(glm::vec3 p, glm::vec3 r) : BufferedLocation {Location {p, r}} { }
+BufferedLocation::BufferedLocation(Position3D p, Rotation3D r) : BufferedLocation {Location {p, r}} { }
 
 BufferedLocation::BufferedLocation(const Location & l) : loc {l} { }
 
@@ -20,20 +20,20 @@ BufferedLocation::operator=(const Location & l)
 	return *this;
 }
 
-glm::vec3
+Position3D
 BufferedLocation::position() const
 {
 	return loc.pos;
 }
 
-glm::vec3
+Position3D
 BufferedLocation::rotation() const
 {
 	return loc.rot;
 }
 
 void
-BufferedLocation::setPosition(glm::vec3 p, bool update)
+BufferedLocation::setPosition(Position3D p, bool update)
 {
 	loc.pos = p;
 	if (update) {
@@ -42,7 +42,7 @@ BufferedLocation::setPosition(glm::vec3 p, bool update)
 }
 
 void
-BufferedLocation::setRotation(glm::vec3 r, bool update)
+BufferedLocation::setRotation(Position3D r, bool update)
 {
 	loc.rot = r;
 	if (update) {
@@ -51,7 +51,7 @@ BufferedLocation::setRotation(glm::vec3 r, bool update)
 }
 
 void
-BufferedLocation::setLocation(glm::vec3 p, glm::vec3 r)
+BufferedLocation::setLocation(Position3D p, Rotation3D r)
 {
 	loc.pos = p;
 	loc.rot = r;

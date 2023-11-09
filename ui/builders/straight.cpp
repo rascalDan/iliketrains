@@ -47,7 +47,7 @@ BuilderStraight::click(Network * network, const GeoData * geoData, const SDL_Mou
 }
 
 void
-BuilderStraight::create(Network * network, glm::vec3 p1, glm::vec3 p2) const
+BuilderStraight::create(Network * network, Position3D p1, Position3D p2) const
 {
 	network->addStraight(p1, p2);
 }

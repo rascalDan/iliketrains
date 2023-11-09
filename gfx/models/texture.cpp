@@ -61,10 +61,10 @@ Texture::bind(GLenum unit) const
 	glBindTexture(type, m_texture);
 }
 
-glm::ivec2
+TextureAbsCoord
 Texture::getSize(const glTexture & texture)
 {
-	glm::ivec2 size;
+	TextureAbsCoord size;
 	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_WIDTH, &size.x);
 	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_HEIGHT, &size.y);
 	return size;
@@ -137,7 +137,7 @@ TextureAtlas::bind(GLenum unit) const
 }
 
 GLuint
-TextureAtlas::add(glm::ivec2 position, glm::ivec2 size, void * data, TextureOptions to)
+TextureAtlas::add(TextureAbsCoord position, TextureAbsCoord size, void * data, TextureOptions to)
 {
 	glTextureSubImage2D(m_texture, 0, position.x, position.y, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
 

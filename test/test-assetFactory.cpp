@@ -25,7 +25,7 @@ BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 const std::filesystem::path TMP {"/tmp"};
 
-class FactoryFixture : public TestRenderOutputSize<glm::ivec2 {2048, 1024}>, public SceneProvider {
+class FactoryFixture : public TestRenderOutputSize<TextureAbsCoord {2048, 1024}>, public SceneProvider {
 public:
 	FactoryFixture() : sceneRenderer {size, output} { }
 

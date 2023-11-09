@@ -2,6 +2,7 @@
 #include <collections.h>
 #include <glm/gtx/intersect.hpp> // IWYU pragma: keep
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
+#include <math.h>
 #include <maths.h>
 #include <ray.h>
 
@@ -28,8 +29,8 @@ Camera::updateView()
 	inverseViewProjection = glm::inverse(viewProjection);
 }
 
-glm::vec3
-Camera::upFromForward(const glm::vec3 & forward)
+Direction3D
+Camera::upFromForward(const Direction3D & forward)
 {
 	const auto right = glm::cross(forward, ::down);
 	return glm::cross(forward, right);
@@ -38,11 +39,11 @@ Camera::upFromForward(const glm::vec3 & forward)
 std::array<glm::vec4, 4>
 Camera::extentsAtDist(const float dist) const
 {
-	const auto clampToSeaFloor = [this, dist](const glm::vec3 & target) {
+	const auto clampToSeaFloor = [this, dist](const Position3D & target) {
 		if (target.z < -1.5F) {
 			const auto vec = glm::normalize(target - position);
-			constexpr glm::vec3 seafloor {0, 0, -1.5F};
-			float outdist;
+			constexpr Position3D seafloor {0, 0, -1.5F};
+			float outdist {};
 			if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
 				return (vec * outdist + position) ^ outdist;
 			}

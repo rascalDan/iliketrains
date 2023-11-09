@@ -97,7 +97,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 }
 
 void
-SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
+SceneRenderer::setAmbientLight(const RGB & colour) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClearColor(colour.r, colour.g, colour.b, 1.0F);
@@ -105,8 +105,7 @@ SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
 }
 
 void
-SceneRenderer::setDirectionalLight(
-		const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider & scene) const
+SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
 		const auto lvp = shadowMapper.update(scene, direction, camera);
@@ -135,7 +134,7 @@ SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 }
 
 void
-SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c, const glm::vec3 & d,
+SceneRenderer::DirectionalLightProgram::setDirectionalLight(const RGB & c, const Direction3D & d,
 		const std::span<const glm::mat4x4> lvp, const std::span<const glm::vec4> shadowMapRegions,
 		std::size_t maps) const
 {
