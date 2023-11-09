@@ -35,7 +35,7 @@ SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
 }
 
 void
-SceneShader::setViewPort(const glm::ivec4 & viewPort) const
+SceneShader::setViewPort(const ViewPort & viewPort) const
 {
 	for (const auto & prog : std::array<const SceneProgram *, 7> {
 				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
@@ -51,7 +51,7 @@ SceneShader::SceneProgram::setViewProjection(const glm::mat4 & viewProjection) c
 }
 
 void
-SceneShader::SceneProgram::setViewPort(const glm::ivec4 & viewPort) const
+SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 {
 	if (viewPortLoc >= 0) {
 		glUseProgram(*this);

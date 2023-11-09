@@ -135,7 +135,7 @@ SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 
 void
 SceneRenderer::DirectionalLightProgram::setDirectionalLight(const RGB & c, const Direction3D & d,
-		const std::span<const glm::mat4x4> lvp, const std::span<const glm::vec4> shadowMapRegions,
+		const std::span<const glm::mat4x4> lvp, const std::span<const TextureRelRegion> shadowMapRegions,
 		std::size_t maps) const
 {
 	glUniform3fv(colourLoc, 1, glm::value_ptr(c));

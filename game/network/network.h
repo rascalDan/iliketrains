@@ -16,7 +16,7 @@ class Texture;
 class SceneShader;
 class Ray;
 
-template<size_t... n> using GenDef = std::tuple<glm::vec<n, float>...>;
+template<size_t... n> using GenDef = std::tuple<glm::vec<n, Distance>...>;
 using GenCurveDef = GenDef<3, 3, 2>;
 
 class Network {

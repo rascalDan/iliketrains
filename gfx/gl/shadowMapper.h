@@ -18,7 +18,7 @@ public:
 
 	struct Definitions {
 		std::array<glm::mat4x4, SHADOW_BANDS> projections {};
-		std::array<glm::vec4, SHADOW_BANDS> regions {};
+		std::array<TextureRelRegion, SHADOW_BANDS> regions {};
 		size_t maps {};
 	};
 

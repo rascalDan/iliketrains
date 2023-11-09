@@ -24,7 +24,7 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	static constexpr glm::vec4 border {std::numeric_limits<float>::infinity()};
+	static constexpr RGBA border {std::numeric_limits<RGBA::value_type>::infinity()};
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(border));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -37,7 +37,7 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-constexpr std::array<std::array<glm::ivec4, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS> viewports {{
+constexpr std::array<std::array<TextureAbsRegion, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS> viewports {{
 		{{
 				{31, 31, 0, 0}, // full
 		}},
@@ -57,27 +57,28 @@ constexpr std::array<std::array<glm::ivec4, ShadowMapper::SHADOW_BANDS>, ShadowM
 				{1, 1, 1, 1}, // upper right
 		}},
 }};
-constexpr std::array<std::array<glm::vec4, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS> shadowMapRegions {{
-		{{
-				{0.5F, 0.5F, 0.5F, 0.5F}, // full
-		}},
-		{{
-				{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
-				{0.5F, 0.25F, 0.5F, 0.75F}, // upper half
-		}},
-		{{
-				{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
-				{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
-				{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
-		}},
+constexpr std::array<std::array<TextureAbsRegion, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS>
+		shadowMapRegions {{
+				{{
+						{0.5F, 0.5F, 0.5F, 0.5F}, // full
+				}},
+				{{
+						{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
+						{0.5F, 0.25F, 0.5F, 0.75F}, // upper half
+				}},
+				{{
+						{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
+						{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
+						{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
+				}},
 
-		{{
-				{0.25F, 0.25F, 0.25F, 0.25F}, // lower left
-				{0.25F, 0.25F, 0.75F, 0.25F}, // lower right
-				{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
-				{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
-		}},
-}};
+				{{
+						{0.25F, 0.25F, 0.25F, 0.25F}, // lower left
+						{0.25F, 0.25F, 0.75F, 0.25F}, // lower right
+						{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
+						{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
+				}},
+		}};
 constexpr std::array<float, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
 		1.F,
 		250.F,

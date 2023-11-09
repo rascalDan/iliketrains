@@ -16,7 +16,7 @@ class SceneShader {
 		}
 
 		void setViewProjection(const glm::mat4 &) const;
-		void setViewPort(const glm::ivec4 &) const;
+		void setViewPort(const ViewPort &) const;
 
 	private:
 		RequiredUniformLocation viewProjectionLoc;
@@ -88,5 +88,5 @@ public:
 	SpotLightShader spotLight;
 
 	void setViewProjection(const glm::mat4 & viewProjection) const;
-	void setViewPort(const glm::ivec4 & viewPort) const;
+	void setViewPort(const ViewPort & viewPort) const;
 };

@@ -40,7 +40,7 @@ private:
 		using Program::use;
 
 		void setDirectionalLight(const RGB &, const Direction3D &, const std::span<const glm::mat4x4>,
-				const std::span<const glm::vec4>, std::size_t maps) const;
+				const std::span<const TextureRelRegion>, std::size_t maps) const;
 
 	private:
 		RequiredUniformLocation directionLoc, colourLoc, lightViewProjectionLoc, lightViewProjectionCountLoc,

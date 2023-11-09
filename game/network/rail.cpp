@@ -133,7 +133,7 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const Position3D & 
 		for (auto ei : {1U, 0U}) {
 			const auto trans {glm::translate(ends[ei].node->pos) * e};
 			for (const auto & rcs : railCrossSection) {
-				const Position3D m {(trans * glm::vec4 {rcs.first, 1})};
+				const Position3D m {(trans * (rcs.first ^ 1))};
 				vertices.emplace_back(m, Position2D {rcs.second, len * static_cast<float>(ei)}, up);
 			}
 		}
@@ -166,7 +166,7 @@ RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position3
 			const auto t {
 					trans * glm::rotate(half_pi - swing.x, up) * glm::translate(Position3D {radius, 0.F, swing.y})};
 			for (const auto & rcs : railCrossSection) {
-				const Position3D m {(t * glm::vec4 {rcs.first, 1})};
+				const Position3D m {(t * (rcs.first ^ 1))};
 				vertices.emplace_back(m, Position2D {rcs.second, swing.z}, up);
 			}
 		}
