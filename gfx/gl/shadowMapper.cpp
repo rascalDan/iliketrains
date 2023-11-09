@@ -57,7 +57,7 @@ constexpr std::array<std::array<TextureAbsRegion, ShadowMapper::SHADOW_BANDS>, S
 				{1, 1, 1, 1}, // upper right
 		}},
 }};
-constexpr std::array<std::array<TextureAbsRegion, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS>
+constexpr std::array<std::array<TextureRelRegion, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS>
 		shadowMapRegions {{
 				{{
 						{0.5F, 0.5F, 0.5F, 0.5F}, // full
