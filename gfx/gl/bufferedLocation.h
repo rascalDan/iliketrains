@@ -23,6 +23,7 @@ public:
 	void setLocation(Position3D, Rotation3D);
 
 	[[nodiscard]] glm::mat4 getTransform() const;
+	[[nodiscard]] glm::mat4 getRotationTransform() const;
 
 private:
 	virtual void updateBuffer() = 0;

@@ -63,3 +63,9 @@ BufferedLocation::getTransform() const
 {
 	return loc.getTransform();
 }
+
+glm::mat4
+BufferedLocation::getRotationTransform() const
+{
+	return loc.getRotationTransform();
+}
