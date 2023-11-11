@@ -1,6 +1,5 @@
 #include "bufferedLocation.h"
 #include "location.h"
-#include "maths.h"
 #include <glm/gtx/transform.hpp>
 
 BufferedLocation::BufferedLocation(Position3D p, Rotation3D r) : BufferedLocation {Location {p, r}} { }
@@ -68,4 +67,10 @@ glm::mat4
 BufferedLocation::getRotationTransform() const
 {
 	return loc.getRotationTransform();
+}
+
+void
+BufferedLocationUpdater::updateBuffer() const
+{
+	onUpdate(this);
 }

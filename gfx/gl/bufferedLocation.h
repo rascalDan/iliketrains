@@ -4,7 +4,7 @@
 #include <functional>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
-#include <tuple>
+#include <utility>
 
 class BufferedLocation {
 public:
@@ -26,16 +26,16 @@ public:
 	[[nodiscard]] glm::mat4 getRotationTransform() const;
 
 private:
-	virtual void updateBuffer() = 0;
+	virtual void updateBuffer() const = 0;
 
 	Location loc;
 };
 
-template<typename... Target> class BufferedLocationT : public BufferedLocation {
+class BufferedLocationUpdater : public BufferedLocation {
 public:
 	template<typename... LocationArgs>
-	BufferedLocationT(Target &&... target, LocationArgs &&... t) :
-		BufferedLocation {std::forward<LocationArgs>(t)...}, target {std::forward<Target>(target)...}
+	BufferedLocationUpdater(std::function<void(const BufferedLocation *)> onUpdate, LocationArgs &&... t) :
+		BufferedLocation {std::forward<LocationArgs>(t)...}, onUpdate {std::move(onUpdate)}
 	{
 		updateBuffer();
 	}
@@ -43,11 +43,7 @@ public:
 	using BufferedLocation::operator=;
 
 private:
-	void
-	updateBuffer() override
-	{
-		std::apply(std::invoke<const Target &...>, target) = getTransform();
-	}
+	void updateBuffer() const override;
 
-	std::tuple<Target...> target;
+	std::function<void(const BufferedLocation *)> onUpdate;
 };

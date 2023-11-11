@@ -12,10 +12,19 @@
 #include <ray.h>
 
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
-	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)}, location {&LV::body, *this},
+	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)},
+	location {[this](const BufferedLocation * l) {
+		this->get()->body = l->getTransform();
+	}},
 	bogies {{
-			{&LV::front, *this, Position3D {0, rvClass->wheelBase / 2.F, 0}},
-			{&LV::back, *this, Position3D {0, -rvClass->wheelBase / 2.F, 0}},
+			{[this](const BufferedLocation * l) {
+				 this->get()->front = l->getTransform();
+			 },
+					Position3D {0, rvClass->wheelBase / 2.F, 0}},
+			{[this](const BufferedLocation * l) {
+				 this->get()->back = l->getTransform();
+			 },
+					Position3D {0, -rvClass->wheelBase / 2.F, 0}},
 	}}
 {
 }
