@@ -26,11 +26,11 @@ SceneShader::SceneShader() :
 }
 
 void
-SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
+SceneShader::setViewProjection(const Position3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	for (const auto & prog : std::array<const SceneProgram *, 7> {
 				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
-		prog->setViewProjection(viewProjection);
+		prog->setViewProjection(viewPoint, viewProjection);
 	}
 }
 
@@ -44,10 +44,11 @@ SceneShader::setViewPort(const ViewPort & viewPort) const
 }
 
 void
-SceneShader::SceneProgram::setViewProjection(const glm::mat4 & viewProjection) const
+SceneShader::SceneProgram::setViewProjection(const Position3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
+	glUniform3fv(viewPointLoc, 1, glm::value_ptr(viewPoint));
 }
 
 void
@@ -86,7 +87,8 @@ SceneShader::WaterProgram::use(float waveCycle) const
 }
 
 SceneShader::PointLightShader::PointLightShader() :
-	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"}
+	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"},
+	viewPointLoc {*this, "viewPoint"}
 {
 	VertexArrayObject {va}.addAttribs<Position3D>(b);
 }
@@ -105,7 +107,8 @@ SceneShader::PointLightShader::add(const Position3D & position, const RGB & colo
 
 SceneShader::SpotLightShader::SpotLightShader() :
 	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, directionLoc {*this, "v_direction"},
-	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}
+	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}, viewPointLoc {*this, "viewPoint"}
+
 {
 	using v3pair = std::pair<Position3D, Direction3D>;
 	VertexArrayObject {va}.addAttribs<v3pair, &v3pair::first, &v3pair::second>(b);

@@ -19,6 +19,7 @@ const vec3[] cube = vec3[]( // http://www.cs.umd.edu/gvil/papers/av_ts.pdf
 		vec3(1, 1, -1) // Back-top-right
 );
 uniform mat4 viewProjection;
+uniform vec3 viewPoint;
 
 in vec3 centre[];
 in float size[];

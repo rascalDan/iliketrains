@@ -8,10 +8,9 @@
 
 Camera::Camera(Position3D pos, Angle fov, Angle aspect, Distance zNear, Distance zFar) :
 	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar},
-	projection {glm::perspective(fov, aspect, zNear, zFar)},
-	viewProjection {projection * glm::lookAt(position, position + forward, up)},
-	inverseViewProjection {glm::inverse(viewProjection)}
+	projection {glm::perspective(fov, aspect, zNear, zFar)}, viewProjection {}, inverseViewProjection {}
 {
+	updateView();
 }
 
 Ray
@@ -25,8 +24,8 @@ Camera::unProject(const ScreenRelCoord & mouse) const
 void
 Camera::updateView()
 {
-	viewProjection = projection * glm::lookAt(position, position + forward, up);
-	inverseViewProjection = glm::inverse(viewProjection);
+	viewProjection = projection * glm::lookAt(origin, forward, up);
+	inverseViewProjection = glm::inverse(projection * glm::lookAt(position, position + forward, up));
 }
 
 Direction3D

@@ -24,5 +24,5 @@ main()
 	Colour = colour;
 	Material = getMaterialDetail(material);
 
-	gl_Position = viewProjection * worldPos;
+	gl_Position = viewProjection * vec4(FragPos - viewPoint + modelPos, 1);
 }

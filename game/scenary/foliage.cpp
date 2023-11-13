@@ -15,7 +15,8 @@ void
 Foliage::postLoad()
 {
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO).addAttribs<glm::mat4>(instances.bufferName(), 1);
+	bodyMesh->configureVAO(instanceVAO)
+			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
 }
 
 void
