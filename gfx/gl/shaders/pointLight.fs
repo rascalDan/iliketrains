@@ -26,5 +26,5 @@ main()
 	if (normalDot < 0) {
 		discard;
 	}
-	FragColor = (colour * normalDot) / (1 + (kq * pow(lightDist, 2)));
+	FragColor = (colour * normalDot) / (1 + (kq * pow(lightDist / 1000.0, 2)));
 }

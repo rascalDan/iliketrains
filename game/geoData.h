@@ -14,7 +14,7 @@ class Ray;
 class GeoData {
 public:
 	struct Node {
-		float height {-1.5F};
+		float height {-1500.F};
 	};
 
 	using Quad = std::array<Position3D, 4>;

@@ -30,7 +30,7 @@ FactoryMesh::createMesh() const
 				const auto & point = mesh.point(vertex);
 				const auto & normal = useVertexNormals ? mesh.property(mesh.vertex_normals_pph(), vertex)
 													   : mesh.property(mesh.face_normals_pph(), face);
-				Vertex outVertex {point, textureUV, normal, colour, material};
+				Vertex outVertex {point * 1000.F, textureUV, normal, colour, material};
 				if (const auto existingItr = std::find(vertices.rbegin(), vertices.rend(), outVertex);
 						existingItr != vertices.rend()) {
 					faceIndices.push_back(static_cast<unsigned int>(std::distance(existingItr, vertices.rend()) - 1));

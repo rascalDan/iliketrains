@@ -80,11 +80,11 @@ constexpr std::array<std::array<TextureRelRegion, ShadowMapper::SHADOW_BANDS>, S
 				}},
 		}};
 constexpr std::array<float, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
-		1.F,
-		250.F,
-		750.F,
-		2500.F,
-		10000.F,
+		1000.F,
+		250000.F,
+		750000.F,
+		2500000.F,
+		10000000.F,
 };
 static_assert(viewports.size() == shadowMapRegions.size());
 static_assert(shadowBands.size() == shadowMapRegions.size() + 1);

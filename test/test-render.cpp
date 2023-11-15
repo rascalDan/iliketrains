@@ -26,7 +26,7 @@ class TestScene : public SceneProvider {
 	std::shared_ptr<RailVehicle> train1, train2;
 
 	Terrain terrain {[]() {
-		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}});
+		auto gd = std::make_shared<GeoData>(GeoData::Limits {{0, 0}, {100, 100}}, 10000);
 		gd->generateRandom();
 		return gd;
 	}()};
@@ -35,11 +35,11 @@ public:
 	TestScene()
 	{
 		train1 = std::make_shared<RailVehicle>(brush47rvc);
-		train1->location.setPosition({52, 50, 2});
+		train1->location.setPosition({52000, 50000, 2000});
 		train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
 		train1->bogies.back().setPosition(train1->bogies.back().position() + train1->location.position());
 		train2 = std::make_shared<RailVehicle>(brush47rvc);
-		train2->location.setPosition({52, 30, 2});
+		train2->location.setPosition({52000, 30000, 2000});
 		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
 		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
 	}
@@ -88,7 +88,7 @@ BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);
 BOOST_AUTO_TEST_CASE(basic)
 {
 	SceneRenderer ss {size, output};
-	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+	ss.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	const TestScene scene;
 	ss.render(scene);
 	Texture::save(outImage, "/tmp/basic.tga");
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(basic)
 BOOST_AUTO_TEST_CASE(pointlight)
 {
 	SceneRenderer ss {size, output};
-	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+	ss.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 
 	class PointLightScene : public TestScene {
 	public:
@@ -111,9 +111,9 @@ BOOST_AUTO_TEST_CASE(pointlight)
 		void
 		lights(const SceneShader & shader) const override
 		{
-			for (int x = 50; x < 100; x += 20) {
-				for (int y = 50; y < 2000; y += 20) {
-					shader.pointLight.add({x, y, 4}, {1.0, 1.0, 1.0}, 0.1F);
+			for (int x = 50000; x < 100000; x += 20000) {
+				for (int y = 50000; y < 2000000; y += 20000) {
+					shader.pointLight.add({x, y, 4000}, {1.0, 1.0, 1.0}, 0.1F);
 				}
 			}
 		}
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(pointlight)
 BOOST_AUTO_TEST_CASE(spotlight)
 {
 	SceneRenderer ss {size, output};
-	ss.camera.setView({-10, -10, 60}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+	ss.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 
 	class PointLightScene : public TestScene {
 	public:
@@ -141,10 +141,10 @@ BOOST_AUTO_TEST_CASE(spotlight)
 		void
 		lights(const SceneShader & shader) const override
 		{
-			shader.spotLight.add({50, 50, 15}, down, {1.0, 1.0, 1.0}, 0.01F, 1);
-			shader.spotLight.add({51, 59.5, 1}, north, {1.0, 1.0, 1.0}, 0.001F, .5);
-			shader.spotLight.add({53, 59.5, 1}, north, {1.0, 1.0, 1.0}, 0.001F, .5);
-			shader.spotLight.add({60, 50, 3}, north + east, {1.0, 1.0, 1.0}, 0.0001F, .7F);
+			shader.spotLight.add({50000, 50000, 15000}, down, {1.0, 1.0, 1.0}, 0.01F, 1);
+			shader.spotLight.add({51000, 59500, 1000}, north, {1.0, 1.0, 1.0}, 0.001F, .5);
+			shader.spotLight.add({53000, 59500, 1000}, north, {1.0, 1.0, 1.0}, 0.001F, .5);
+			shader.spotLight.add({60000, 50000, 3000}, north + east, {1.0, 1.0, 1.0}, 0.0001F, .7F);
 		}
 	};
 

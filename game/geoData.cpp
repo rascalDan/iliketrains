@@ -31,7 +31,7 @@ GeoData::generateRandom()
 	std::uniform_int_distribution<> rxpos(limit.first.x + 2, limit.second.x - 2),
 			rypos(limit.first.y + 2, limit.second.y - 2);
 	std::uniform_int_distribution<> rsize(10, 30);
-	std::uniform_real_distribution<float> rheight(1, 3);
+	std::uniform_real_distribution<float> rheight(1000, 3000);
 	for (int h = 0; h < 500;) {
 		const glm::ivec2 hpos {rxpos(gen), rypos(gen)};
 		const glm::ivec2 hsize {rsize(gen), rsize(gen)};

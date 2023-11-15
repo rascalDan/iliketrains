@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(initialize)
 	BOOST_CHECK_EQUAL(size, glm::uvec2(41, 46));
 	BOOST_CHECK_EQUAL(nodes.size(), 1886);
 	BOOST_CHECK(std::all_of(nodes.begin(), nodes.end(), [](const auto & n) {
-		return n.height == -1.5F;
+		return n.height == -1500.F;
 	}));
 }
 
@@ -63,12 +63,12 @@ BOOST_AUTO_TEST_CASE(gen_random)
 	}));
 	// Still an island
 	for (int x = limit.first.x; x <= limit.second.x; x += 1) {
-		BOOST_CHECK_EQUAL(nodes[at(x, limit.first.y)].height, -1.5F);
-		BOOST_CHECK_EQUAL(nodes[at(x, limit.second.y)].height, -1.5F);
+		BOOST_CHECK_EQUAL(nodes[at(x, limit.first.y)].height, -1500.F);
+		BOOST_CHECK_EQUAL(nodes[at(x, limit.second.y)].height, -1500.F);
 	}
 	for (int y = limit.first.y; y <= limit.second.y; y += 1) {
-		BOOST_CHECK_EQUAL(nodes[at(limit.first.x, y)].height, -1.5F);
-		BOOST_CHECK_EQUAL(nodes[at(limit.second.x, y)].height, -1.5F);
+		BOOST_CHECK_EQUAL(nodes[at(limit.first.x, y)].height, -1500.F);
+		BOOST_CHECK_EQUAL(nodes[at(limit.second.x, y)].height, -1500.F);
 	}
 }
 

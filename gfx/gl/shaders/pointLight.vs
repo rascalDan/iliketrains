@@ -13,6 +13,6 @@ void
 main()
 {
 	centre = position;
-	size = (8 * sqrt(max(max(colour.r, colour.g), colour.b))) / sqrt(kq);
+	size = (8000 * sqrt(max(max(colour.r, colour.g), colour.b))) / sqrt(kq);
 	gl_Position = vec4(centre - viewPoint, 0);
 }

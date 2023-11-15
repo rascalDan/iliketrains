@@ -18,7 +18,7 @@
 template class NetworkOf<RailLink>;
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
-constexpr Size3D RAIL_HEIGHT {0, 0, .25F};
+constexpr Size3D RAIL_HEIGHT {0, 0, 250.F};
 
 RailLinks::RailLinks() : NetworkOf<RailLink> {"rails.jpg"} { }
 
@@ -104,11 +104,11 @@ constexpr const std::array<std::pair<Position3D, float>, RAIL_CROSSSECTION_VERTI
 		//   ___________
 		// _/           \_
 		//  left to right
-		{{-1.9F, 0.F, 0.F}, 0.F},
-		{{-.608F, 0.F, RAIL_HEIGHT.z}, 0.34F},
-		{{0, 0.F, RAIL_HEIGHT.z * .7F}, 0.5F},
-		{{.608F, 0.F, RAIL_HEIGHT.z}, 0.66F},
-		{{1.9F, 0.F, 0.F}, 1.F},
+		{{-1900.F, 0.F, 0.F}, 0.F},
+		{{-608.F, 0.F, RAIL_HEIGHT.z}, .34F},
+		{{0, 0.F, RAIL_HEIGHT.z * .7F}, .5F},
+		{{608.F, 0.F, RAIL_HEIGHT.z}, .66F},
+		{{1900.F, 0.F, 0.F}, 1.F},
 }};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
 
@@ -128,7 +128,7 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const Position3D & 
 	if (glGenVertexArrays) {
 		std::vector<Vertex> vertices;
 		vertices.reserve(2 * railCrossSection.size());
-		const auto len = round_sleepers(length / 2.F);
+		const auto len = round_sleepers(length / 2000.F);
 		const auto e {flat_orientation(diff)};
 		for (auto ei : {1U, 0U}) {
 			const auto trans {glm::translate(ends[ei].node->pos) * e};
@@ -155,8 +155,8 @@ RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position3
 		const auto & e0p {ends[0].node->pos};
 		const auto & e1p {ends[1].node->pos};
 		const auto slength = round_sleepers(length / 2.F);
-		const auto segs = std::round(15.F * slength / std::pow(radius, 0.7F));
-		const auto step {Position3D {arc_length(arc), e1p.z - e0p.z, slength} / segs};
+		const auto segs = std::round(slength / std::pow(radius, 0.7F));
+		const auto step {Position3D {arc_length(arc), e1p.z - e0p.z, slength / 1000.F} / segs};
 		const auto trans {glm::translate(centreBase)};
 
 		auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;

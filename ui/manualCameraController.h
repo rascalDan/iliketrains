@@ -22,5 +22,5 @@ private:
 	bool ctrl {false}, mrb {false};
 	Position2D focus;
 	float direction {quarter_pi};
-	float dist {40}, pitch {quarter_pi};
+	float dist {4000}, pitch {quarter_pi};
 };

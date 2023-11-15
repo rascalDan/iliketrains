@@ -59,12 +59,12 @@ ManualCameraController::handleInput(const SDL_Event & e, const Position &)
 					pitch = std::clamp(pitch - 0.01F * static_cast<float>(e.motion.yrel), 0.1F, half_pi);
 				}
 				else {
-					focus += rotate_flat(-direction) * Position2D {-e.motion.xrel, e.motion.yrel};
+					focus += rotate_flat(-direction) * (Position2D {-e.motion.xrel, e.motion.yrel} * dist / 2.0F);
 				}
 			}
 			return true;
 		case SDL_MOUSEWHEEL:
-			dist = std::clamp(dist - static_cast<float>(e.wheel.y) * 4.F, 5.F, 200.F);
+			dist = std::clamp(dist - static_cast<float>(e.wheel.y) * 400.F, 5.F, 200000.F);
 			break;
 	}
 	return false;

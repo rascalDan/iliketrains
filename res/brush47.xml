@@ -61,7 +61,7 @@
   <textureFragment id="roofSideWithVents" path="rail/roofSideWithVents.png"/>
   <textureFragment id="roofTopWithVents" path="rail/roofTopWithVents.png"/>
   <textureFragment id="cabWindowFront" path="rail/cabWindowFront.png"/>
-  <asset p.typeid="RailVehicleClass" id="brush-47" name="Brush 47" length="19.38" wheelBase="15.70" maxSpeed="42.4688">
+  <asset p.typeid="RailVehicleClass" id="brush-47" name="Brush 47" length="19380" wheelBase="15700" maxSpeed="42468.8">
     <bodyMesh id="body" size="2.69,19.38,3.9">
       <use type="cuboid" position="0,0,1.2" scale="2.69,19.38,0.3" colour="goldenrod">
         <face id="bottom" colour="#2c3539"/>

@@ -46,9 +46,9 @@ RailVehicle::move(const Train * t, float & trailBy)
 bool
 RailVehicle::intersectRay(const Ray & ray, Position2D * baryPos, float * distance) const
 {
-	constexpr const auto X = 1.35F;
+	constexpr const auto X = 1350.F;
 	const auto Y = this->rvClass->length / 2.F;
-	constexpr const auto Z = 3.9F;
+	constexpr const auto Z = 3900.F;
 	const auto moveBy = location.getTransform();
 	const std::array<Position3D, 8> cornerVertices {{
 			moveBy * glm::vec4 {-X, Y, 0, 1}, //  LFB

@@ -31,7 +31,7 @@ public:
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {Window::size, 0}
 {
-	uiComponents.create<ManualCameraController>(Position2D {-1150, -1150});
+	uiComponents.create<ManualCameraController>(Position2D {-1150000, -1150000});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
 	uiComponents.create<GameMainToolbar>(gms.get());
 }
