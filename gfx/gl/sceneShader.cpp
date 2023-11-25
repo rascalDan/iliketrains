@@ -60,13 +60,16 @@ SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 	}
 }
 
-SceneShader::BasicProgram::BasicProgram() : SceneProgram {dynamicPoint_vs, material_fs}, modelLoc {*this, "model"} { }
+SceneShader::BasicProgram::BasicProgram() :
+	SceneProgram {dynamicPoint_vs, material_fs}, modelLoc {*this, "model"}, modelPosLoc {*this, "modelPos"}
+{
+}
 
 void
 SceneShader::BasicProgram::setModel(Location const & location) const
 {
-	const auto model {glm::translate(location.pos) * rotate_ypr(location.rot)};
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rotate_ypr(location.rot)));
+	glUniform3fv(modelPosLoc, 1, glm::value_ptr(location.pos));
 }
 
 void

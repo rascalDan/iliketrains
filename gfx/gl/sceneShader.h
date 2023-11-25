@@ -32,6 +32,7 @@ class SceneShader {
 
 	private:
 		RequiredUniformLocation modelLoc;
+		RequiredUniformLocation modelPosLoc;
 	};
 
 	class AbsolutePosProgram : public SceneProgram {
