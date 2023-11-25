@@ -44,6 +44,7 @@ public:
 	private:
 		RequiredUniformLocation viewProjectionLoc;
 		RequiredUniformLocation modelLoc;
+		RequiredUniformLocation modelPosLoc;
 	};
 
 	FixedPoint fixedPoint, dynamicPointInst;

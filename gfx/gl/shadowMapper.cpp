@@ -179,7 +179,8 @@ ShadowMapper::FixedPoint::use() const
 }
 
 ShadowMapper::DynamicPoint::DynamicPoint() :
-	Program {shadowDynamicPoint_vs}, viewProjectionLoc {*this, "viewProjection"}, modelLoc {*this, "model"}
+	Program {shadowDynamicPoint_vs}, viewProjectionLoc {*this, "viewProjection"}, modelLoc {*this, "model"},
+	modelPosLoc {*this, "modelPos"}
 {
 }
 
@@ -195,13 +196,11 @@ ShadowMapper::DynamicPoint::use(const Location & location) const
 {
 	glUseProgram(*this);
 	setModel(location);
-	const auto model = glm::translate(location.pos) * rotate_ypr(location.rot);
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 }
 
 void
 ShadowMapper::DynamicPoint::setModel(const Location & location) const
 {
-	const auto model = glm::translate(location.pos) * rotate_ypr(location.rot);
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rotate_ypr(location.rot)));
+	glUniform3fv(modelPosLoc, 1, glm::value_ptr(location.pos));
 }
