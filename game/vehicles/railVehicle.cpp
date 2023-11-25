@@ -38,9 +38,9 @@ RailVehicle::move(const Train * t, float & trailBy)
 	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};
 	const auto & b1Pos = bogies[0] = t->getBogiePosition(t->linkDist, trailBy += overhang);
 	const auto & b2Pos = bogies[1] = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase);
-	const auto diff = glm::normalize(b2Pos.position() - b1Pos.position());
-	location.setLocation((b1Pos.position() + b2Pos.position()) / 2.F, {vector_pitch(diff), vector_yaw(diff), 0});
-	trailBy += 0.6F + overhang;
+	const auto diff = glm::normalize(RelativePosition3D(b2Pos.position() - b1Pos.position()));
+	location.setLocation((b1Pos.position() + b2Pos.position()) / 2, {vector_pitch(diff), vector_yaw(diff), 0});
+	trailBy += 600.F + overhang;
 }
 
 bool
@@ -51,14 +51,14 @@ RailVehicle::intersectRay(const Ray & ray, Position2D * baryPos, float * distanc
 	constexpr const auto Z = 3900.F;
 	const auto moveBy = location.getRotationTransform();
 	const std::array<Position3D, 8> cornerVertices {{
-			location.position() + (moveBy * glm::vec4 {-X, Y, 0, 1}).xyz(), //  LFB
-			location.position() + (moveBy * glm::vec4 {X, Y, 0, 1}).xyz(), //   RFB
-			location.position() + (moveBy * glm::vec4 {-X, Y, Z, 1}).xyz(), //  LFT
-			location.position() + (moveBy * glm::vec4 {X, Y, Z, 1}).xyz(), //   RFT
-			location.position() + (moveBy * glm::vec4 {-X, -Y, 0, 1}).xyz(), // LBB
-			location.position() + (moveBy * glm::vec4 {X, -Y, 0, 1}).xyz(), //  RBB
-			location.position() + (moveBy * glm::vec4 {-X, -Y, Z, 1}).xyz(), // LBT
-			location.position() + (moveBy * glm::vec4 {X, -Y, Z, 1}).xyz(), //  RBT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, Y, 0, 1}).xyz(), //  LFB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, Y, 0, 1}).xyz(), //   RFB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, Y, Z, 1}).xyz(), //  LFT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, Y, Z, 1}).xyz(), //   RFT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, -Y, 0, 1}).xyz(), // LBB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, -Y, 0, 1}).xyz(), //  RBB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, -Y, Z, 1}).xyz(), // LBT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, -Y, Z, 1}).xyz(), //  RBT
 	}};
 	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front

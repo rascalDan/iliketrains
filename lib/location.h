@@ -6,11 +6,11 @@
 class Location {
 public:
 #ifndef __cpp_aggregate_paren_init
-	explicit Location(Position3D pos = {}, Rotation3D rot = {}) : pos {pos}, rot {rot} { }
+	explicit Location(GlobalPosition3D pos = {}, Rotation3D rot = {}) : pos {pos}, rot {rot} { }
 #endif
 
 	[[nodiscard]] glm::mat4 getRotationTransform() const;
 
-	Position3D pos;
+	GlobalPosition3D pos;
 	Rotation3D rot;
 };

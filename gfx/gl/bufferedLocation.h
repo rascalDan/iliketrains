@@ -8,7 +8,7 @@
 
 class BufferedLocation {
 public:
-	BufferedLocation(Position3D = {}, Rotation3D = {});
+	BufferedLocation(GlobalPosition3D = {}, Rotation3D = {});
 	BufferedLocation(const Location &);
 	virtual ~BufferedLocation() = default;
 
@@ -16,11 +16,11 @@ public:
 
 	operator const Location &() const;
 
-	[[nodiscard]] Position3D position() const;
+	[[nodiscard]] GlobalPosition3D position() const;
 	[[nodiscard]] Rotation3D rotation() const;
-	void setPosition(Position3D, bool update = true);
+	void setPosition(GlobalPosition3D, bool update = true);
 	void setRotation(Rotation3D, bool update = true);
-	void setLocation(Position3D, Rotation3D);
+	void setLocation(GlobalPosition3D, Rotation3D);
 
 	[[nodiscard]] glm::mat4 getRotationTransform() const;
 

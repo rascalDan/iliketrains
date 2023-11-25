@@ -73,7 +73,7 @@ GeoData::loadFromImages(const std::filesystem::path & fileName, float scale_)
 }
 
 GeoData::Quad
-GeoData::quad(glm::vec2 wcoord) const
+GeoData::quad(Position2D wcoord) const
 {
 	constexpr static const std::array<glm::vec2, 4> corners {{{0, 0}, {0, 1}, {1, 0}, {1, 1}}};
 	return transform_array(transform_array(corners,
@@ -154,7 +154,7 @@ GeoData::intersectRay(const Ray & ray) const
 		try {
 			const auto point = quad(n);
 			for (auto offset : {0U, 1U}) {
-				glm::vec2 bary;
+				BaryPosition bary;
 				float distance;
 				if (glm::intersectRayTriangle(ray.start, ray.direction, point[offset], point[offset + 1],
 							point[offset + 2], bary, distance)) {

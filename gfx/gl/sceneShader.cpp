@@ -69,7 +69,7 @@ void
 SceneShader::BasicProgram::setModel(Location const & location) const
 {
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rotate_ypr(location.rot)));
-	glUniform3fv(modelPosLoc, 1, glm::value_ptr(location.pos));
+	glUniform3iv(modelPosLoc, 1, glm::value_ptr(location.pos));
 }
 
 void

@@ -3,10 +3,14 @@
 #include "glad/gl.h"
 #include <glm/geometric.hpp>
 
-using Distance = float;
+using Distance = float; // deprecate
+using RelativeDistance = float;
+using GlobalDistance = int32_t;
 using Angle = float;
 
-template<glm::length_t D> using Position = glm::vec<D, Distance>;
+template<glm::length_t D> using Position = glm::vec<D, Distance>; // deprecate
+template<glm::length_t D> using RelativePosition = glm::vec<D, RelativeDistance>;
+template<glm::length_t D> using GlobalPosition = glm::vec<D, GlobalDistance>;
 template<glm::length_t D> using Size = glm::vec<D, Distance>;
 template<glm::length_t D> using Scale = glm::vec<D, float>;
 template<glm::length_t D> using Direction = glm::vec<D, float>;
@@ -14,8 +18,15 @@ template<glm::length_t D> using Normal = Direction<D>;
 template<glm::length_t D> using Rotation = glm::vec<D, Angle>;
 template<glm::length_t Channels> using Colour = glm::vec<Channels, float>;
 
-using Position2D = Position<2>;
-using Position3D = Position<3>;
+using Position2D = Position<2>; // deprecate
+using Position3D = Position<3>; // deprecate
+using BaryPosition = glm::vec<2, float>;
+using RelativePosition2D = RelativePosition<2>;
+using RelativePosition3D = RelativePosition<3>;
+using RelativePosition4D = RelativePosition<4>;
+using GlobalPosition2D = GlobalPosition<2>;
+using GlobalPosition3D = GlobalPosition<3>;
+using GlobalPosition4D = GlobalPosition<4>;
 using Size2D = Size<2>;
 using Size3D = Size<3>;
 using Scale2D = Scale<2>;

@@ -2,7 +2,7 @@
 #include "location.h"
 #include <glm/gtx/transform.hpp>
 
-BufferedLocation::BufferedLocation(Position3D p, Rotation3D r) : BufferedLocation {Location {p, r}} { }
+BufferedLocation::BufferedLocation(GlobalPosition3D p, Rotation3D r) : BufferedLocation {Location {p, r}} { }
 
 BufferedLocation::BufferedLocation(const Location & l) : loc {l} { }
 
@@ -19,7 +19,7 @@ BufferedLocation::operator=(const Location & l)
 	return *this;
 }
 
-Position3D
+GlobalPosition3D
 BufferedLocation::position() const
 {
 	return loc.pos;
@@ -32,7 +32,7 @@ BufferedLocation::rotation() const
 }
 
 void
-BufferedLocation::setPosition(Position3D p, bool update)
+BufferedLocation::setPosition(GlobalPosition3D p, bool update)
 {
 	loc.pos = p;
 	if (update) {
@@ -50,7 +50,7 @@ BufferedLocation::setRotation(Position3D r, bool update)
 }
 
 void
-BufferedLocation::setLocation(Position3D p, Rotation3D r)
+BufferedLocation::setLocation(GlobalPosition3D p, Rotation3D r)
 {
 	loc.pos = p;
 	loc.rot = r;

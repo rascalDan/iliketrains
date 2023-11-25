@@ -20,7 +20,7 @@ public:
 
 	struct LocationVertex {
 		glm::mat4 body, front, back;
-		Position3D bodyPos, frontPos, backPos;
+		GlobalPosition3D bodyPos, frontPos, backPos;
 	};
 
 	std::array<Mesh::Ptr, 2> bogies;
