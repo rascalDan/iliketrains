@@ -58,12 +58,6 @@ BufferedLocation::setLocation(Position3D p, Rotation3D r)
 }
 
 glm::mat4
-BufferedLocation::getTransform() const
-{
-	return loc.getTransform();
-}
-
-glm::mat4
 BufferedLocation::getRotationTransform() const
 {
 	return loc.getRotationTransform();
