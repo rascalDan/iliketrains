@@ -80,8 +80,8 @@ public:
 			train->currentActivity = train->orders.current()->createActivity();
 
 			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
-			for (float x = 900000; x < 1100000; x += 3000) {
-				for (float y = 900000; y < 1100000; y += 3000) {
+			for (float x = 900000; x < 1100000; x += 5000) {
+				for (float y = 900000; y < 1100000; y += 5000) {
 					world.create<Plant>(foliage, Location {geoData->positionAt({-x, -y})});
 				}
 			}
