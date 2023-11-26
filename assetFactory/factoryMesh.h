@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "gfx/models/mesh.h"
 #include "stdTypeDefs.h"
 #include "use.h"
@@ -9,7 +10,7 @@ public:
 	Mesh::Ptr createMesh() const;
 
 	std::string id;
-	glm::vec3 size;
+	Size3D size;
 	Use::Collection uses;
 
 private:

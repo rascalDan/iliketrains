@@ -14,9 +14,7 @@ TexturePacker::TexturePacker(std::span<const Image> in) :
 	std::sort(sortedIndexes.rbegin(), sortedIndexes.rend(), [this](const auto a, const auto b) {
 		return area(inputImages[a]) < area(inputImages[b]);
 	});
-	int mts;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mts);
-	maxTextureSize = static_cast<unsigned int>(mts);
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 }
 
 TexturePacker::Result

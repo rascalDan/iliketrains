@@ -4,11 +4,11 @@
 #include <functional>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
-#include <tuple>
+#include <utility>
 
 class BufferedLocation {
 public:
-	BufferedLocation(glm::vec3 = {}, glm::vec3 = {});
+	BufferedLocation(GlobalPosition3D = {}, Rotation3D = {});
 	BufferedLocation(const Location &);
 	virtual ~BufferedLocation() = default;
 
@@ -16,25 +16,25 @@ public:
 
 	operator const Location &() const;
 
-	glm::vec3 position() const;
-	glm::vec3 rotation() const;
-	void setPosition(glm::vec3, bool update = true);
-	void setRotation(glm::vec3, bool update = true);
-	void setLocation(glm::vec3, glm::vec3);
+	[[nodiscard]] GlobalPosition3D position() const;
+	[[nodiscard]] Rotation3D rotation() const;
+	void setPosition(GlobalPosition3D, bool update = true);
+	void setRotation(Rotation3D, bool update = true);
+	void setLocation(GlobalPosition3D, Rotation3D);
 
-	glm::mat4 getTransform() const;
+	[[nodiscard]] glm::mat4 getRotationTransform() const;
 
 private:
-	virtual void updateBuffer() = 0;
+	virtual void updateBuffer() const = 0;
 
 	Location loc;
 };
 
-template<typename... Target> class BufferedLocationT : public BufferedLocation {
+class BufferedLocationUpdater : public BufferedLocation {
 public:
 	template<typename... LocationArgs>
-	BufferedLocationT(Target &&... target, LocationArgs &&... t) :
-		BufferedLocation {std::forward<LocationArgs>(t)...}, target {std::forward<Target>(target)...}
+	BufferedLocationUpdater(std::function<void(const BufferedLocation *)> onUpdate, LocationArgs &&... t) :
+		BufferedLocation {std::forward<LocationArgs>(t)...}, onUpdate {std::move(onUpdate)}
 	{
 		updateBuffer();
 	}
@@ -42,11 +42,7 @@ public:
 	using BufferedLocation::operator=;
 
 private:
-	void
-	updateBuffer() override
-	{
-		std::apply(std::invoke<const Target &...>, target) = getTransform();
-	}
+	void updateBuffer() const override;
 
-	std::tuple<Target...> target;
+	std::function<void(const BufferedLocation *)> onUpdate;
 };

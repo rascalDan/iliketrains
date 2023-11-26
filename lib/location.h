@@ -1,14 +1,16 @@
 #pragma once
 
+#include "config/types.h"
 #include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
 
 class Location {
 public:
-	explicit Location(glm::vec3 pos = {}, glm::vec3 rot = {}) : pos {pos}, rot {rot} { }
+#ifndef __cpp_aggregate_paren_init
+	explicit Location(GlobalPosition3D pos = {}, Rotation3D rot = {}) : pos {pos}, rot {rot} { }
+#endif
 
-	glm::mat4 getTransform() const;
+	[[nodiscard]] glm::mat4 getRotationTransform() const;
 
-	glm::vec3 pos;
-	glm::vec3 rot;
+	GlobalPosition3D pos;
+	Rotation3D rot;
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
@@ -9,7 +10,7 @@
 struct Arc : public std::pair<float, float> {
 	using std::pair<float, float>::pair;
 
-	Arc(const glm::vec3 & centre3, const glm::vec3 & e0p, const glm::vec3 & e1p);
+	Arc(const Position3D & centre3, const Position3D & e0p, const Position3D & e1p);
 
 	float
 	operator[](unsigned int i) const
@@ -18,19 +19,19 @@ struct Arc : public std::pair<float, float> {
 	}
 };
 
-constexpr const glm::vec3 origin {0, 0, 0};
-constexpr const glm::vec3 up {0, 0, 1};
-constexpr const glm::vec3 down {0, 0, -1};
-constexpr const glm::vec3 north {0, 1, 0};
-constexpr const glm::vec3 south {0, -1, 0};
-constexpr const glm::vec3 east {1, 0, 0};
-constexpr const glm::vec3 west {-1, 0, 0};
+constexpr const Position3D origin {0, 0, 0};
+constexpr const Position3D up {0, 0, 1};
+constexpr const Position3D down {0, 0, -1};
+constexpr const Position3D north {0, 1, 0};
+constexpr const Position3D south {0, -1, 0};
+constexpr const Position3D east {1, 0, 0};
+constexpr const Position3D west {-1, 0, 0};
 constexpr auto half_pi {glm::half_pi<float>()};
 constexpr auto quarter_pi {half_pi / 2};
 constexpr auto pi {glm::pi<float>()};
 constexpr auto two_pi {glm::two_pi<float>()};
 
-glm::mat4 flat_orientation(const glm::vec3 & diff);
+glm::mat4 flat_orientation(const Rotation3D & diff);
 
 // C++ wrapper for C's sincosf, but with references, not pointers
 inline auto
@@ -39,10 +40,10 @@ sincosf(float a, float & s, float & c)
 	return sincosf(a, &s, &c);
 }
 
-inline glm::vec2
+inline Rotation2D
 sincosf(float a)
 {
-	glm::vec2 sc;
+	Rotation2D sc;
 	sincosf(a, sc.x, sc.y);
 	return sc;
 }
@@ -51,11 +52,11 @@ glm::mat2 rotate_flat(float);
 glm::mat4 rotate_roll(float);
 glm::mat4 rotate_yaw(float);
 glm::mat4 rotate_pitch(float);
-glm::mat4 rotate_yp(glm::vec2);
-glm::mat4 rotate_ypr(glm::vec3);
+glm::mat4 rotate_yp(Rotation2D);
+glm::mat4 rotate_ypr(Rotation3D);
 
-float vector_yaw(const glm::vec3 & diff);
-float vector_pitch(const glm::vec3 & diff);
+float vector_yaw(const Direction3D & diff);
+float vector_pitch(const Direction3D & diff);
 
 float round_frac(const float & v, const float & frac);
 
@@ -87,26 +88,26 @@ perspective_divide(glm::vec<4, T, Q> v)
 	return v / v.w;
 }
 
-constexpr inline glm::vec2
-operator!(const glm::vec3 & v)
+constexpr inline Position2D
+operator!(const Position3D & v)
 {
 	return {v.x, v.y};
 }
 
-constexpr inline glm::vec3
-operator^(const glm::vec2 & v, float z)
+constexpr inline Position3D
+operator^(const Position2D & v, float z)
 {
 	return {v.x, v.y, z};
 }
 
 constexpr inline glm::vec4
-operator^(const glm::vec3 & v, float w)
+operator^(const Position3D & v, float w)
 {
 	return {v.x, v.y, v.z, w};
 }
 
-constexpr inline glm::vec3
-operator!(const glm::vec2 & v)
+constexpr inline Position3D
+operator!(const Position2D & v)
 {
 	return v ^ 0.F;
 }
@@ -125,15 +126,15 @@ operator||(const glm::vec<L, T, Q> v1, const T v2)
 	return {v1, v2};
 }
 
-inline glm::vec3
-operator%(const glm::vec3 & p, const glm::mat4 & mutation)
+inline Position3D
+operator%(const Position3D & p, const glm::mat4 & mutation)
 {
 	const auto p2 = mutation * (p ^ 1);
 	return p2 / p2.w;
 }
 
-inline glm::vec3
-operator%=(glm::vec3 & p, const glm::mat4 & mutation)
+inline Position3D
+operator%=(Position3D & p, const glm::mat4 & mutation)
 {
 	return p = p % mutation;
 }
@@ -146,10 +147,10 @@ arc_length(const Arc & arc)
 
 float normalize(float ang);
 
-std::pair<glm::vec2, bool> find_arc_centre(glm::vec2 start, float entrys, glm::vec2 end, float entrye);
-std::pair<glm::vec2, bool> find_arc_centre(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd);
-std::pair<float, float> find_arcs_radius(glm::vec2 start, float entrys, glm::vec2 end, float entrye);
-float find_arcs_radius(glm::vec2 start, glm::vec2 ad, glm::vec2 end, glm::vec2 bd);
+std::pair<Position2D, bool> find_arc_centre(Position2D start, float entrys, Position2D end, float entrye);
+std::pair<Position2D, bool> find_arc_centre(Position2D start, Position2D ad, Position2D end, Position2D bd);
+std::pair<float, float> find_arcs_radius(Position2D start, float entrys, Position2D end, float entrye);
+float find_arcs_radius(Position2D start, Position2D ad, Position2D end, Position2D bd);
 
 template<typename T>
 auto

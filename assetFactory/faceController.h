@@ -18,12 +18,14 @@ public:
 	private:
 		friend Persistence::SelectionPtrBase<std::unique_ptr<Split>>;
 		bool persist(Persistence::PersistenceStore & store) override;
+
 		std::string
 		getId() const override
 		{
 			return {};
 		};
 	};
+
 	using FaceControllers = std::map<std::string, std::unique_ptr<FaceController>>;
 	using Splits = std::map<std::string, std::unique_ptr<Split>>;
 
@@ -38,6 +40,7 @@ public:
 private:
 	friend Persistence::SelectionPtrBase<std::unique_ptr<FaceController>>;
 	bool persist(Persistence::PersistenceStore & store) override;
+
 	std::string
 	getId() const override
 	{

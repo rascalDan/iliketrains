@@ -13,8 +13,9 @@ static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
 		{1, 1, 1, 1},
 		{1, -1, 1, 0},
 }};
-SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
-	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
+
+SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
+	camera {{-1250000.0F, -1250000.0F, 35.0F}, quarter_pi, ratio(s), 100.F, 10000000.0F}, size {s}, output {o},
 	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
@@ -51,7 +52,7 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 void
 SceneRenderer::render(const SceneProvider & scene) const
 {
-	shader.setViewProjection(camera.getViewProjection());
+	shader.setViewProjection(camera.getPosition(), camera.getViewProjection());
 	glViewport(0, 0, size.x, size.y);
 
 	// Geometry pass
@@ -96,7 +97,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 }
 
 void
-SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
+SceneRenderer::setAmbientLight(const RGB & colour) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glClearColor(colour.r, colour.g, colour.b, 1.0F);
@@ -104,8 +105,7 @@ SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
 }
 
 void
-SceneRenderer::setDirectionalLight(
-		const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider & scene) const
+SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
 		const auto lvp = shadowMapper.update(scene, direction, camera);
@@ -134,8 +134,8 @@ SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 }
 
 void
-SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c, const glm::vec3 & d,
-		const std::span<const glm::mat4x4> lvp, const std::span<const glm::vec4> shadowMapRegions,
+SceneRenderer::DirectionalLightProgram::setDirectionalLight(const RGB & c, const Direction3D & d,
+		const std::span<const glm::mat4x4> lvp, const std::span<const TextureRelRegion> shadowMapRegions,
 		std::size_t maps) const
 {
 	glUniform3fv(colourLoc, 1, glm::value_ptr(c));

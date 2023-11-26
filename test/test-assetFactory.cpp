@@ -25,7 +25,7 @@ BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 const std::filesystem::path TMP {"/tmp"};
 
-class FactoryFixture : public TestRenderOutputSize<glm::ivec2 {2048, 1024}>, public SceneProvider {
+class FactoryFixture : public TestRenderOutputSize<TextureAbsCoord {2048, 1024}>, public SceneProvider {
 public:
 	FactoryFixture() : sceneRenderer {size, output} { }
 
@@ -64,7 +64,7 @@ public:
 	}
 
 	void
-	render(float dist = 10.f)
+	render(float dist)
 	{
 		sceneRenderer.camera.setView({-dist, dist * 1.2f, dist * 1.2f}, south + east + down);
 		sceneRenderer.render(*this);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 	auto railVehicle = std::make_shared<RailVehicle>(brush47rvc);
 	objects.objects.push_back(brush47rvc);
 
-	render();
+	render(10000);
 }
 
 BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
@@ -116,13 +116,13 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
 	BOOST_REQUIRE(tree_01_1_f);
 
-	auto plant1 = std::make_shared<Plant>(tree_01_1_f, Location {{-2, 2, 0}, {0, 0, 0}});
-	auto plant2 = std::make_shared<Plant>(tree_01_1_f, Location {{3, -4, 0}, {0, 1, 0}});
-	auto plant3 = std::make_shared<Plant>(tree_01_1_f, Location {{-2, -4, 0}, {0, 2, 0}});
-	auto plant4 = std::make_shared<Plant>(tree_01_1_f, Location {{3, 2, 0}, {0, 3, 0}});
+	auto plant1 = std::make_shared<Plant>(tree_01_1_f, Location {{-2000, 2000, 0}, {0, 0, 0}});
+	auto plant2 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, -4000, 0}, {0, 1, 0}});
+	auto plant3 = std::make_shared<Plant>(tree_01_1_f, Location {{-2000, -4000, 0}, {0, 2, 0}});
+	auto plant4 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, 2000, 0}, {0, 3, 0}});
 	objects.objects.push_back(tree_01_1_f);
 
-	render(5);
+	render(6000);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
@@ -183,14 +183,15 @@ BOOST_AUTO_TEST_CASE(texturePacker_many, *boost::unit_test::timeout(5))
 {
 	std::vector<TexturePacker::Image> images(256);
 	std::fill(images.begin(), images.end(), TexturePacker::Image {32, 32});
-	const auto totalSize = std::accumulate(images.begin(), images.end(), 0U, [](auto t, const auto & i) {
+	const auto totalSize = std::accumulate(images.begin(), images.end(), 0, [](auto t, const auto & i) {
 		return t + TexturePacker::area(i);
 	});
 	TexturePacker tp {images};
 	BOOST_CHECK_EQUAL(TexturePacker::Size(32, 32), tp.minSize());
 	const auto result = tp.pack();
 	BOOST_CHECK_EQUAL(result.first.size(), images.size());
-	BOOST_CHECK_GE(TexturePacker::area(result.second), TexturePacker::area(images.front()) * images.size());
+	BOOST_CHECK_GE(TexturePacker::area(result.second),
+			TexturePacker::area(images.front()) * static_cast<GLsizei>(images.size()));
 	BOOST_CHECK_EQUAL(totalSize, TexturePacker::area(result.second));
 }
 

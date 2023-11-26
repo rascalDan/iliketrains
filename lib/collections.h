@@ -149,11 +149,14 @@ template<typename T> struct pair_range {
 	{
 		return pair.first;
 	}
+
 	constexpr auto &
 	end() const noexcept
 	{
 		return pair.second;
 	}
+
 	const std::pair<T, T> & pair;
 };
+
 template<typename T> pair_range(std::pair<T, T>) -> pair_range<T>;

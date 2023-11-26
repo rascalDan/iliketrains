@@ -18,6 +18,7 @@ public:
 		bool operator&(const SDL_MouseButtonEvent &) const;
 		bool operator&(const glm::vec2 &) const;
 	};
+
 	explicit UIComponent(Position);
 	virtual ~UIComponent() = default;
 

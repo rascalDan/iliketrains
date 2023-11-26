@@ -16,10 +16,12 @@ public:
 
 	template<typename T> class Of;
 };
+
 using ActivityPtr = std::unique_ptr<Activity>;
 
 template<typename T>
 concept ActivityConcept = std::is_base_of_v<Activity, T>;
+
 template<ActivityConcept AC> class Can {
 public:
 	Can() = default;

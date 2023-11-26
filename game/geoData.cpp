@@ -21,16 +21,20 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 		f >> *properties.at(property);
 		properties.erase(property);
 	}
+	xllcorner *= 1000;
+	yllcorner *= 1000;
+	cellsize *= 1000;
 	std::vector<VertexHandle> vertices;
 	vertices.reserve(ncols * nrows);
 	GeoData mesh;
-	mesh.lowerExtent = {xllcorner, yllcorner, std::numeric_limits<float>::max()};
+	mesh.lowerExtent = {xllcorner, yllcorner, std::numeric_limits<GlobalDistance>::max()};
 	mesh.upperExtent = {xllcorner + (cellsize * (ncols - 1)), yllcorner + (cellsize * (nrows - 1)),
-			std::numeric_limits<float>::min()};
+			std::numeric_limits<GlobalDistance>::min()};
 	for (size_t row = 0; row < nrows; ++row) {
 		for (size_t col = 0; col < ncols; ++col) {
-			float height = 0;
-			f >> height;
+			float heightf = 0;
+			f >> heightf;
+			const auto height = static_cast<GlobalDistance>(std::round(heightf * 1000.F));
 			mesh.upperExtent.z = std::max(mesh.upperExtent.z, height);
 			mesh.lowerExtent.z = std::min(mesh.lowerExtent.z, height);
 			vertices.push_back(mesh.add_vertex({xllcorner + (col * cellsize), yllcorner + (row * cellsize), height}));
@@ -60,12 +64,12 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 };
 
 GeoData
-GeoData::createFlat(glm::vec2 lower, glm::vec2 upper, float h)
+GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistance h)
 {
 	GeoData mesh;
 
-	mesh.lowerExtent = lower ^ h;
-	mesh.upperExtent = upper ^ h;
+	mesh.lowerExtent = {lower, h};
+	mesh.upperExtent = {upper, h};
 
 	const auto ll = mesh.add_vertex({lower.x, lower.y, h}), lu = mesh.add_vertex({lower.x, upper.y, h}),
 			   ul = mesh.add_vertex({upper.x, lower.y, h}), uu = mesh.add_vertex({upper.x, upper.y, h});
@@ -80,14 +84,17 @@ GeoData::createFlat(glm::vec2 lower, glm::vec2 upper, float h)
 }
 
 OpenMesh::FaceHandle
-GeoData::findPoint(glm::vec2 p) const
+GeoData::findPoint(GlobalPosition2D p) const
 {
 	return findPoint(p, *faces_begin());
 }
 
-GeoData::PointFace::PointFace(const glm::vec2 p, const GeoData * mesh) : PointFace {p, mesh, *mesh->faces_begin()} { }
+GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh) :
+	PointFace {p, mesh, *mesh->faces_begin()}
+{
+}
 
-GeoData::PointFace::PointFace(const glm::vec2 p, const GeoData * mesh, FaceHandle start) :
+GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh, FaceHandle start) :
 	PointFace {p, mesh->findPoint(p, start)}
 {
 }
@@ -113,9 +120,9 @@ GeoData::PointFace::face(const GeoData * mesh) const
 namespace {
 	template<template<typename> typename Op>
 	[[nodiscard]] constexpr inline auto
-	pointLineOp(const glm::vec2 p, const glm::vec2 e1, const glm::vec2 e2)
+	pointLineOp(const GlobalPosition2D p, const GlobalPosition2D e1, const GlobalPosition2D e2)
 	{
-		return Op {}((e2.x - e1.x) * (p.y - e1.y), (e2.y - e1.y) * (p.x - e1.x));
+		return Op {}(int64_t(e2.x - e1.x) * int64_t(p.y - e1.y), int64_t(e2.y - e1.y) * int64_t(p.x - e1.x));
 	}
 
 	constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
@@ -125,9 +132,13 @@ namespace {
 	static_assert(pointLeftOfLine({2, 1}, {2, 2}, {1, 1}));
 	static_assert(pointLeftOfLine({2, 2}, {1, 2}, {2, 1}));
 	static_assert(pointLeftOfLine({1, 1}, {2, 1}, {1, 2}));
+	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490000000}, {310050000, 490050000}));
+	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310050000, 490050000}, {310000000, 490050000}));
+	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490050000}, {310000000, 490000000}));
 
 	[[nodiscard]] constexpr inline bool
-	linesCross(const glm::vec2 a1, const glm::vec2 a2, const glm::vec2 b1, const glm::vec2 b2)
+	linesCross(
+			const GlobalPosition2D a1, const GlobalPosition2D a2, const GlobalPosition2D b1, const GlobalPosition2D b2)
 	{
 		return (pointLeftOfLine(a2, b1, b2) == pointLeftOfLine(a1, b2, b1))
 				&& (pointLeftOfLine(b1, a1, a2) == pointLeftOfLine(b2, a2, a1));
@@ -137,7 +148,8 @@ namespace {
 	static_assert(linesCross({2, 2}, {1, 1}, {1, 2}, {2, 1}));
 
 	[[nodiscard]] constexpr inline bool
-	linesCrossLtR(const glm::vec2 a1, const glm::vec2 a2, const glm::vec2 b1, const glm::vec2 b2)
+	linesCrossLtR(
+			const GlobalPosition2D a1, const GlobalPosition2D a2, const GlobalPosition2D b1, const GlobalPosition2D b2)
 	{
 		return pointLeftOfLine(a2, b1, b2) && pointLeftOfLine(a1, b2, b1) && pointLeftOfLine(b1, a1, a2)
 				&& pointLeftOfLine(b2, a2, a1);
@@ -148,7 +160,7 @@ namespace {
 }
 
 OpenMesh::FaceHandle
-GeoData::findPoint(glm::vec2 p, OpenMesh::FaceHandle f) const
+GeoData::findPoint(GlobalPosition2D p, OpenMesh::FaceHandle f) const
 {
 	while (f.is_valid() && !triangleContainsPoint(p, triangle<2>(f))) {
 		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
@@ -166,30 +178,31 @@ GeoData::findPoint(glm::vec2 p, OpenMesh::FaceHandle f) const
 	return f;
 }
 
-glm::vec3
+GlobalPosition3D
 GeoData::positionAt(const PointFace & p) const
 {
-	glm::vec3 out {};
+	RelativePosition3D out {};
 	const auto t = triangle<3>(p.face(this));
-	glm::intersectLineTriangle(p.point ^ 0.F, up, t[0], t[1], t[2], out);
-	return p.point ^ out[0];
+	glm::intersectLineTriangle<RelativePosition3D>({p.point, 0}, up, t[0], t[1], t[2], out);
+	return {p.point, out[0]};
 }
 
-[[nodiscard]] std::optional<glm::vec3>
+[[nodiscard]] std::optional<GlobalPosition3D>
 GeoData::intersectRay(const Ray & ray) const
 {
 	return intersectRay(ray, findPoint(ray.start));
 }
 
-[[nodiscard]] std::optional<glm::vec3>
+[[nodiscard]] std::optional<GlobalPosition3D>
 GeoData::intersectRay(const Ray & ray, FaceHandle face) const
 {
-	std::optional<glm::vec3> out;
+	std::optional<GlobalPosition3D> out;
 	walkUntil(PointFace {ray.start, face}, ray.start + (ray.direction * 10000.F), [&out, &ray, this](FaceHandle face) {
-		glm::vec2 bari {};
+		BaryPosition bari {};
 		float dist {};
 		const auto t = triangle<3>(face);
-		if (glm::intersectRayTriangle(ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
+		if (glm::intersectRayTriangle<RelativePosition3D::value_type, glm::defaultp>(
+					ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
 			out = t * bari;
 			return true;
 		}
@@ -199,7 +212,7 @@ GeoData::intersectRay(const Ray & ray, FaceHandle face) const
 }
 
 void
-GeoData::walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const
+GeoData::walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const
 {
 	walkUntil(from, to, [&op](const auto & fh) {
 		op(fh);
@@ -208,7 +221,7 @@ GeoData::walk(const PointFace & from, const glm::vec2 to, const std::function<vo
 }
 
 void
-GeoData::walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const
+GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const
 {
 	auto f = from.face(this);
 	if (!f.is_valid()) {
@@ -269,7 +282,7 @@ GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op, Halfe
 }
 
 GeoData::HalfedgeHandle
-GeoData::findEntry(const glm::vec2 from, const glm::vec2 to) const
+GeoData::findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const
 {
 	HalfedgeHandle entry;
 	boundaryWalkUntil([this, from, to, &entry](auto he) {
@@ -285,14 +298,14 @@ GeoData::findEntry(const glm::vec2 from, const glm::vec2 to) const
 }
 
 bool
-GeoData::triangleContainsPoint(const glm::vec2 p, const Triangle<2> & t)
+GeoData::triangleContainsPoint(const GlobalPosition2D p, const Triangle<2> & t)
 {
 	return pointLeftOfOrOnLine(p, t[0], t[1]) && pointLeftOfOrOnLine(p, t[1], t[2])
 			&& pointLeftOfOrOnLine(p, t[2], t[0]);
 }
 
 bool
-GeoData::triangleContainsPoint(const glm::vec2 p, FaceHandle face) const
+GeoData::triangleContainsPoint(const GlobalPosition2D p, FaceHandle face) const
 {
 	return triangleContainsPoint(p, triangle<2>(face));
 }

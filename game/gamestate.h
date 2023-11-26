@@ -19,4 +19,5 @@ public:
 	std::shared_ptr<GeoData> geoData;
 	AssetFactory::Assets assets;
 };
+
 extern GameState * gameState;

@@ -25,6 +25,7 @@ private:
 		glVertexArray vao;
 		glBuffer vbo;
 	};
+
 	std::vector<Model> models;
 	glm::vec3 colour;
 };

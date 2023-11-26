@@ -2,13 +2,13 @@
 #include <algorithm>
 
 Ray
-Ray::fromPoints(glm::vec3 start, glm::vec3 p)
+Ray::fromPoints(Position3D start, Position3D p)
 {
 	return {start, glm::normalize(p - start)};
 }
 
 float
-Ray::distanceToLine(const glm::vec3 & p1, const glm::vec3 & e1) const
+Ray::distanceToLine(const Position3D & p1, const Position3D & e1) const
 {
 	// https://en.wikipedia.org/wiki/Skew_lines
 	const auto diff = p1 - e1;
@@ -25,10 +25,10 @@ Ray::distanceToLine(const glm::vec3 & p1, const glm::vec3 & e1) const
 }
 
 bool
-Ray::passesCloseToEdges(const std::span<const glm::vec3> positions, float distance) const
+Ray::passesCloseToEdges(const std::span<const Position3D> positions, float distance) const
 {
 	return std::adjacent_find(positions.begin(), positions.end(),
-				   [this, distance](const glm::vec3 & a, const glm::vec3 & b) {
+				   [this, distance](const Position3D & a, const Position3D & b) {
 					   return distanceToLine(a, b) <= distance;
 				   })
 			!= positions.end();

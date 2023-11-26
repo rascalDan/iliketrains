@@ -1,6 +1,7 @@
 #pragma once
 
 #include "collections.h" // IWYU pragma: keep IterableCollection
+#include "config/types.h"
 #include "ray.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
@@ -13,8 +14,8 @@ struct GeoDataTraits : public OpenMesh::DefaultTraits {
 	EdgeAttributes(OpenMesh::Attributes::Status);
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
 	HalfedgeAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
-	using Point = glm::vec3;
-	using Normal = glm::vec3;
+	using Point = GlobalPosition3D;
+	using Normal = Normal3D;
 };
 
 class GeoData : public OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits> {
@@ -23,18 +24,18 @@ private:
 
 public:
 	static GeoData loadFromAsciiGrid(const std::filesystem::path &);
-	static GeoData createFlat(glm::vec2 lower, glm::vec2, float h);
+	static GeoData createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistance h);
 
 	struct PointFace {
 		// NOLINTNEXTLINE(hicpp-explicit-conversions)
-		PointFace(const glm::vec2 p) : point {p} { }
+		PointFace(const GlobalPosition2D p) : point {p} { }
 
-		PointFace(const glm::vec2 p, FaceHandle face) : point {p}, _face {face} { }
+		PointFace(const GlobalPosition2D p, FaceHandle face) : point {p}, _face {face} { }
 
-		PointFace(const glm::vec2 p, const GeoData *);
-		PointFace(const glm::vec2 p, const GeoData *, FaceHandle start);
+		PointFace(const GlobalPosition2D p, const GeoData *);
+		PointFace(const GlobalPosition2D p, const GeoData *, FaceHandle start);
 
-		const glm::vec2 point;
+		const GlobalPosition2D point;
 		[[nodiscard]] FaceHandle face(const GeoData *) const;
 		[[nodiscard]] FaceHandle face(const GeoData *, FaceHandle start) const;
 
@@ -48,8 +49,8 @@ public:
 		mutable FaceHandle _face {};
 	};
 
-	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, glm::vec2::value_type>> {
-		using base = glm::vec<3, glm::vec<Dim, glm::vec2::value_type>>;
+	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, GlobalDistance>> {
+		using base = glm::vec<3, glm::vec<Dim, GlobalDistance>>;
 		using base::base;
 
 		template<IterableCollection Range> Triangle(const GeoData * m, Range range)
@@ -60,30 +61,31 @@ public:
 			});
 		}
 
-		glm::vec<Dim, glm::vec2::value_type>
-		operator*(glm::vec2 bari) const
+		glm::vec<Dim, GlobalDistance>
+		operator*(BaryPosition bari) const
 		{
 			const auto & t {*this};
-			return t[0] + ((t[1] - t[0]) * bari.x) + ((t[2] - t[1]) * bari.y);
+			return t[0] + GlobalPosition<Dim>(RelativePosition<Dim>(t[1] - t[0]) * bari.x)
+					+ GlobalPosition<Dim>(RelativePosition<Dim>(t[2] - t[1]) * bari.y);
 		}
 	};
 
-	[[nodiscard]] FaceHandle findPoint(glm::vec2) const;
-	[[nodiscard]] FaceHandle findPoint(glm::vec2, FaceHandle start) const;
+	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D) const;
+	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D, FaceHandle start) const;
 
-	[[nodiscard]] glm::vec3 positionAt(const PointFace &) const;
-	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &) const;
-	[[nodiscard]] std::optional<glm::vec3> intersectRay(const Ray &, FaceHandle start) const;
+	[[nodiscard]] GlobalPosition3D positionAt(const PointFace &) const;
+	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray &) const;
+	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray &, FaceHandle start) const;
 
-	void walk(const PointFace & from, const glm::vec2 to, const std::function<void(FaceHandle)> & op) const;
-	void walkUntil(const PointFace & from, const glm::vec2 to, const std::function<bool(FaceHandle)> & op) const;
+	void walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const;
+	void walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const;
 
 	void boundaryWalk(const std::function<void(HalfedgeHandle)> &) const;
 	void boundaryWalk(const std::function<void(HalfedgeHandle)> &, HalfedgeHandle start) const;
 	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &) const;
 	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &, HalfedgeHandle start) const;
 
-	[[nodiscard]] HalfedgeHandle findEntry(const glm::vec2 from, const glm::vec2 to) const;
+	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
 
 	[[nodiscard]] auto
 	getExtents() const
@@ -99,10 +101,10 @@ protected:
 		return {this, fv_range(f)};
 	}
 
-	[[nodiscard]] static bool triangleContainsPoint(const glm::vec2, const Triangle<2> &);
-	[[nodiscard]] bool triangleContainsPoint(const glm::vec2, FaceHandle) const;
+	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
+	[[nodiscard]] bool triangleContainsPoint(const GlobalPosition2D, FaceHandle) const;
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 
 private:
-	glm::vec3 lowerExtent {}, upperExtent {};
+	GlobalPosition3D lowerExtent {}, upperExtent {};
 };

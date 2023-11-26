@@ -31,8 +31,8 @@ public:
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {Window::size, 0}
 {
-	uiComponents.create<ManualCameraController>(glm::vec2 {315000, 495000});
-	auto gms = uiComponents.create<GameMainSelector>(&camera, glm::vec2 {w, h});
+	uiComponents.create<ManualCameraController>(glm::vec2 {315'000'000, 495'000'000});
+	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
 	uiComponents.create<GameMainToolbar>(gms.get());
 }
 
@@ -48,6 +48,7 @@ GameMainWindow::render() const
 	SceneRenderer::render(*this);
 	Window::render();
 }
+
 void
 GameMainWindow::content(const SceneShader & shader) const
 {
@@ -59,17 +60,20 @@ GameMainWindow::content(const SceneShader & shader) const
 	gameState->world.apply<Renderable>(&Renderable::render, shader);
 	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
 }
+
 void
 GameMainWindow::environment(const SceneShader & s, const SceneRenderer & r) const
 {
 	// default for now
 	SceneProvider::environment(s, r);
 }
+
 void
 GameMainWindow::lights(const SceneShader & shader) const
 {
 	gameState->world.apply<Renderable>(&Renderable::lights, shader);
 }
+
 void
 GameMainWindow::shadows(const ShadowMapper & shadowMapper) const
 {

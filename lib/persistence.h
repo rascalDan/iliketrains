@@ -153,6 +153,7 @@ namespace Persistence {
 	};
 
 	struct Persistable;
+
 	struct PersistenceStore {
 		using SelectionFactory = std::function<SelectionPtr()>;
 		PersistenceStore() = default;
@@ -163,6 +164,7 @@ namespace Persistence {
 
 		enum class NameAction { Push, HandleAndContinue, Ignore };
 		using NameActionSelection = std::pair<NameAction, SelectionPtr>;
+
 		template<typename Helper, typename T>
 		[[nodiscard]] inline bool
 		persistValue(const std::string_view key, T & value)
@@ -267,6 +269,7 @@ namespace Persistence {
 	template<glm::length_t L, typename T, glm::qualifier Q>
 	struct SelectionT<glm::vec<L, T, Q>> : public SelectionT<std::span<T>> {
 		SelectionT(glm::vec<L, T, Q> & v) : SelectionT<std::span<T>> {spn}, spn {&v[0], L} { }
+
 		std::span<T> spn;
 	};
 
@@ -316,6 +319,7 @@ namespace Persistence {
 		MapByMember(Map & m) : Persistence::SelectionT<Type> {s}, map {m} { }
 
 		using Persistence::SelectionT<Type>::SelectionT;
+
 		void
 		endObject(Persistence::Stack & stk) override
 		{
@@ -332,7 +336,9 @@ namespace Persistence {
 	template<typename Container, typename Type = typename Container::value_type>
 	struct Appender : public Persistence::SelectionT<Type> {
 		Appender(Container & c) : Persistence::SelectionT<Type> {s}, container {c} { }
+
 		using Persistence::SelectionT<Type>::SelectionT;
+
 		void
 		endObject(Persistence::Stack & stk) override
 		{
@@ -407,6 +413,7 @@ namespace Persistence {
 		{
 			return std::dynamic_pointer_cast<T>(Persistence::ParseBase::sharedObjects.lock()->at(k));
 		}
+
 		template<typename... T>
 		static auto
 		emplaceShared(T &&... v)
@@ -421,6 +428,7 @@ namespace Persistence {
 		inline static thread_local SharedObjectsWPtr sharedObjects;
 		SharedObjectsPtr sharedObjectsInstance;
 	};
+
 	// TODO Move these
 	using SeenSharedObjects = std::map<void *, std::string>;
 	inline SeenSharedObjects seenSharedObjects;
@@ -428,6 +436,7 @@ namespace Persistence {
 	template<typename Ptr> struct SelectionPtrBase : public SelectionV<Ptr> {
 		static constexpr auto shared = std::is_copy_assignable_v<Ptr>;
 		using T = typename Ptr::element_type;
+
 		struct SelectionObj : public SelectionV<Ptr> {
 			struct MakeObjectByTypeName : public SelectionV<Ptr> {
 				using SelectionV<Ptr>::SelectionV;

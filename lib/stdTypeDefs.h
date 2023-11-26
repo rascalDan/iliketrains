@@ -6,18 +6,22 @@
 template<typename T> struct AnyPtr {
 	// cppcheck-suppress noExplicitConstructor
 	AnyPtr(T * p) : ptr {p} { }
+
 	// cppcheck-suppress noExplicitConstructor
 	template<typename S> AnyPtr(const S & p) : ptr {p.get()} { }
+
 	auto
 	get() const
 	{
 		return ptr;
 	}
+
 	auto
 	operator->() const
 	{
 		return ptr;
 	}
+
 	auto &
 	operator*() const
 	{

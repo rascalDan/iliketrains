@@ -14,6 +14,7 @@
 #include <unicode.h>
 #include <util.h>
 #include <utility>
+
 // IWYU pragma: no_forward_declare FT_LibraryRec_
 
 std::string

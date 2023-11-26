@@ -9,6 +9,7 @@
 template<typename I, typename Direction> class basic_glContainer_iterator {
 public:
 	explicit basic_glContainer_iterator(I * i) : i {i} { }
+
 	template<typename OtherI>
 	basic_glContainer_iterator(const basic_glContainer_iterator<OtherI, Direction> & other) : i {&*other}
 	{
@@ -20,17 +21,20 @@ public:
 		i = Direction {}(i, 1);
 		return *this;
 	}
+
 	auto
 	operator++(int) noexcept
 	{
 		return basic_glContainer_iterator<I, Direction> {std::exchange(i, Direction {}(i, 1))};
 	}
+
 	auto &
 	operator--() noexcept
 	{
 		i = Direction {}(i, -1);
 		return *this;
 	}
+
 	auto
 	operator--(int) noexcept
 	{
@@ -76,6 +80,7 @@ public:
 	{
 		return this->i == other.i;
 	}
+
 	[[nodiscard]] bool
 	operator!=(const basic_glContainer_iterator & other) const noexcept
 	{
@@ -87,6 +92,7 @@ public:
 	{
 		return i;
 	}
+
 	[[nodiscard]] auto &
 	operator*() const noexcept
 	{

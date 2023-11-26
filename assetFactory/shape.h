@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "modelFactoryMesh_fwd.h"
 #include "stdTypeDefs.h"
 #include <OpenMesh/Core/Mesh/Handles.hh>
@@ -21,5 +22,5 @@ public:
 	virtual CreatedFaces createMesh(ModelFactoryMesh &, float levelOfDetailFactor) const = 0;
 
 	static std::vector<OpenMesh::VertexHandle> addToMesh(
-			ModelFactoryMesh & mesh, const std::span<const glm::vec3> vertices);
+			ModelFactoryMesh & mesh, const std::span<const Position3D> vertices);
 };

@@ -17,12 +17,12 @@ class Ray;
 // it has location
 class Node : public StdTypeDefs<Node> {
 public:
-	explicit Node(glm::vec3 p) noexcept : pos(p) {};
+	explicit Node(Position3D p) noexcept : pos(p) {};
 	virtual ~Node() noexcept = default;
 	NO_COPY(Node);
 	NO_MOVE(Node);
 
-	glm::vec3 pos;
+	Position3D pos;
 };
 
 // Generic network link
@@ -51,14 +51,14 @@ public:
 	float length;
 
 protected:
-	[[nodiscard]] virtual glm::vec3
+	[[nodiscard]] virtual Position3D
 	vehiclePositionOffset() const
 	{
 		return {};
 	}
 };
 
-bool operator<(const glm::vec3 & a, const glm::vec3 & b);
+bool operator<(const Position3D & a, const Position3D & b);
 bool operator<(const Node & a, const Node & b);
 
 class LinkStraight : public virtual Link {
@@ -71,20 +71,22 @@ public:
 	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 	[[nodiscard]] bool intersectRay(const Ray &) const override;
 };
+
 LinkStraight::~LinkStraight() = default;
 
 class LinkCurve : public virtual Link {
 public:
 	inline ~LinkCurve() override = 0;
-	LinkCurve(glm::vec3, float, Arc);
+	LinkCurve(Position3D, float, Arc);
 	NO_COPY(LinkCurve);
 	NO_MOVE(LinkCurve);
 
 	[[nodiscard]] Location positionAt(float dist, unsigned char start) const override;
 	[[nodiscard]] bool intersectRay(const Ray &) const override;
 
-	glm::vec3 centreBase;
+	Position3D centreBase;
 	float radius;
 	Arc arc;
 };
+
 LinkCurve::~LinkCurve() = default;

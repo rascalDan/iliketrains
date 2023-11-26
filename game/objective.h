@@ -10,6 +10,7 @@ class Orders;
 class Objective {
 public:
 	explicit Objective(Orders * os) : orders(os) { }
+
 	DEFAULT_MOVE_COPY(Objective);
 	virtual ~Objective() = default;
 
@@ -19,4 +20,5 @@ public:
 
 	Orders * orders;
 };
+
 using ObjectivePtr = std::unique_ptr<Objective>;

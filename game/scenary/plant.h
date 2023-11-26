@@ -7,7 +7,7 @@ class Location;
 
 class Plant : public WorldObject {
 	std::shared_ptr<const Foliage> type;
-	InstanceVertices<glm::mat4>::InstanceProxy location;
+	InstanceVertices<Foliage::LocationVertex>::InstanceProxy location;
 
 	void
 	tick(TickDuration) override

@@ -16,6 +16,7 @@ UIComponentPlacer::next(glm::vec2 size)
 	max = std::max(max, size[1 - axis]);
 	return n;
 }
+
 glm::vec2
 UIComponentPlacer::getLimit() const
 {

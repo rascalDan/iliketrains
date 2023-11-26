@@ -196,12 +196,12 @@ BOOST_DATA_TEST_CASE(straight1,
 	const TestLinkStraight l(v);
 	{
 		const auto p = l.positionAt(0, 0);
-		BOOST_CHECK_EQUAL(p.pos, origin);
+		BOOST_CHECK_EQUAL(p.pos, GlobalPosition3D {origin});
 		BOOST_CHECK_EQUAL(p.rot, glm::vec3(0, angFor, 0));
 	}
 	{
 		const auto p = l.positionAt(0, 1);
-		BOOST_CHECK_EQUAL(p.pos, v);
+		BOOST_CHECK_EQUAL(p.pos, GlobalPosition3D {v});
 		BOOST_CHECK_EQUAL(p.rot, glm::vec3(0, angBack, 0));
 	}
 }
@@ -231,12 +231,12 @@ BOOST_DATA_TEST_CASE(curve1,
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
-			BOOST_CHECK_CLOSE_VEC(p.pos, origin);
+			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, origin);
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angFor, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
-			BOOST_CHECK_CLOSE_VEC(p.pos, e1);
+			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, e1);
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBack, 0));
 		}
 	}
@@ -247,13 +247,13 @@ BOOST_DATA_TEST_CASE(curve1,
 		{
 			const auto p = l.positionAt(0, 0);
 			const auto angForReversed = normalize(vector_yaw(origin - e1) * 2 - angFor);
-			BOOST_CHECK_CLOSE_VEC(p.pos, e1);
+			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, e1);
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angForReversed, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
 			const auto angBackReversed = normalize(vector_yaw(e1 - origin) * 2 - angBack);
-			BOOST_CHECK_CLOSE_VEC(p.pos, origin);
+			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, origin);
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBackReversed, 0));
 		}
 	}

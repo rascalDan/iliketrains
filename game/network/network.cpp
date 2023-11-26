@@ -14,13 +14,13 @@
 Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(tn)} { }
 
 Node::Ptr
-Network::nodeAt(glm::vec3 pos)
+Network::nodeAt(Position3D pos)
 {
 	return newNodeAt(pos).first;
 }
 
 Network::NodeInsertion
-Network::newNodeAt(glm::vec3 pos)
+Network::newNodeAt(Position3D pos)
 {
 	if (auto [n, i] = candidateNodeAt(pos); i == NodeIs::NotInNetwork) {
 		return {*nodes.insert(std::move(n)).first, i};
@@ -31,7 +31,7 @@ Network::newNodeAt(glm::vec3 pos)
 }
 
 Node::Ptr
-Network::findNodeAt(glm::vec3 pos) const
+Network::findNodeAt(Position3D pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
 		return *n;
@@ -40,7 +40,7 @@ Network::findNodeAt(glm::vec3 pos) const
 }
 
 Network::NodeInsertion
-Network::candidateNodeAt(glm::vec3 pos) const
+Network::candidateNodeAt(Position3D pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
 		return {*n, NodeIs::InNetwork};
@@ -54,7 +54,7 @@ Network::intersectRayNodes(const Ray & ray) const
 	// Click within 2m of a node
 	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
 				[&ray](const Node::Ptr & node) {
-					glm::vec3 ipos, inorm;
+					Position3D ipos, inorm;
 					return glm::intersectRaySphere(ray.start, ray.direction, node->pos, 2.F, ipos, inorm);
 				});
 			node != nodes.end()) {
@@ -79,7 +79,7 @@ Network::joinLinks(const Link::Ptr & l, const Link::Ptr & ol)
 }
 
 Link::Nexts
-Network::routeFromTo(const Link::End & start, glm::vec3 dest) const
+Network::routeFromTo(const Link::End & start, Position3D dest) const
 {
 	auto destNode {findNodeAt(dest)};
 	if (!destNode) {
@@ -95,7 +95,7 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest) const
 }
 
 GenCurveDef
-Network::genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float startDir)
+Network::genCurveDef(const Position3D & start, const Position3D & end, float startDir)
 {
 	const auto diff {end - start};
 	const auto vy {vector_yaw(diff)};
@@ -111,11 +111,11 @@ Network::genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float start
 }
 
 std::pair<GenCurveDef, GenCurveDef>
-Network::genCurveDef(const glm::vec3 & start, const glm::vec3 & end, float startDir, float endDir)
+Network::genCurveDef(const Position3D & start, const Position3D & end, float startDir, float endDir)
 {
 	startDir += pi;
 	endDir += pi;
-	const glm::vec2 flatStart {!start}, flatEnd {!end};
+	const Position2D flatStart {!start}, flatEnd {!end};
 	auto midheight = [&](auto mid) {
 		const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
 		return start.z + ((end.z - start.z) * (sm / (sm + em)));

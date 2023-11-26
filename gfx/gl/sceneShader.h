@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "program.h"
 #include <glArrays.h>
 
@@ -10,15 +11,16 @@ class SceneShader {
 	public:
 		template<typename... S>
 		inline explicit SceneProgram(const S &... srcs) :
-			Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}, viewPortLoc {*this, "viewPort"}
+			Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}, viewPointLoc {*this, "viewPoint"},
+			viewPortLoc {*this, "viewPort"}
 		{
 		}
 
-		void setViewProjection(const glm::mat4 &) const;
-		void setViewPort(const glm::ivec4 &) const;
+		void setViewProjection(const Position3D &, const glm::mat4 &) const;
+		void setViewPort(const ViewPort &) const;
 
 	private:
-		RequiredUniformLocation viewProjectionLoc;
+		RequiredUniformLocation viewProjectionLoc, viewPointLoc;
 		UniformLocation viewPortLoc;
 	};
 
@@ -30,6 +32,7 @@ class SceneShader {
 
 	private:
 		RequiredUniformLocation modelLoc;
+		RequiredUniformLocation modelPosLoc;
 	};
 
 	class AbsolutePosProgram : public SceneProgram {
@@ -52,11 +55,12 @@ class SceneShader {
 	public:
 		PointLightShader();
 
-		void add(const glm::vec3 & position, const glm::vec3 & colour, const float kq) const;
+		void add(const Position3D & position, const RGB & colour, const float kq) const;
 
 	private:
 		UniformLocation colourLoc;
 		UniformLocation kqLoc;
+		UniformLocation viewPointLoc;
 		glVertexArray va;
 		glBuffer b;
 	};
@@ -65,7 +69,7 @@ class SceneShader {
 	public:
 		SpotLightShader();
 
-		void add(const glm::vec3 & position, const glm::vec3 & direction, const glm::vec3 & colour, const float kq,
+		void add(const Position3D & position, const Direction3D & direction, const RGB & colour, const float kq,
 				const float arc) const;
 
 	private:
@@ -73,6 +77,7 @@ class SceneShader {
 		UniformLocation colourLoc;
 		UniformLocation kqLoc;
 		UniformLocation arcLoc;
+		UniformLocation viewPointLoc;
 		glVertexArray va;
 		glBuffer b;
 	};
@@ -86,6 +91,6 @@ public:
 	PointLightShader pointLight;
 	SpotLightShader spotLight;
 
-	void setViewProjection(const glm::mat4 & viewProjection) const;
-	void setViewPort(const glm::ivec4 & viewPort) const;
+	void setViewProjection(const Position3D & viewPoint, const glm::mat4 & viewProjection) const;
+	void setViewPort(const ViewPort & viewPort) const;
 };

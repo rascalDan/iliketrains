@@ -15,7 +15,8 @@ public:
 	CUSTOM_MOVE(glArraysBase);
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)
-	inline operator GLuint() const
+	inline
+	operator GLuint() const
 	{
 		static_assert(N == 1, "Implicit cast only if N == 1");
 		return ids.front();

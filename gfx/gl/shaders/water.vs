@@ -4,17 +4,18 @@ include(`meshIn.glsl')
 include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
+uniform vec3 viewPoint;
 uniform vec3 waves;
 
 void
 main()
 {
-	vec4 wpos = vec4(position.x + cos(waves.x), position.y + cos(waves.x * waves.y / 2),
-			cos(waves.x + position.x + (position.y / 8)) * .3, 1.0);
+	vec3 wpos = vec3(position.x + (cos(waves.x) * 1000.0), position.y + (cos(waves.x * waves.y / 2) * 1000.0),
+			cos(waves.x + (position.x / 1000.0) + (position.y * 125.0)) * 300.0);
 
 	FragPos = vec3(wpos.xy, position.z);
 	TexCoords = texCoord;
 	Normal = normal;
 
-	gl_Position = viewProjection * wpos;
+	gl_Position = viewProjection * vec4(wpos - viewPoint, 1.0);
 }

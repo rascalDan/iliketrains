@@ -9,8 +9,8 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 	const auto step = two_pi / static_cast<float>(P);
 
 	// Generate 2D circumference points
-	std::vector<glm::vec2> circumference(P);
-	std::generate(circumference.begin(), circumference.end(), [a = 0.f, step]() mutable {
+	std::vector<Position2D> circumference(P);
+	std::generate(circumference.begin(), circumference.end(), [a = 0.F, step]() mutable {
 		return sincosf(a += step) * .5F;
 	});
 
@@ -19,7 +19,7 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 		// Generate bottom face vertices
 		std::vector<OpenMesh::VertexHandle> bottom(P);
 		std::transform(circumference.begin(), circumference.end(), bottom.begin(), [&mesh](const auto & xy) {
-			return mesh.add_vertex(xy ^ 0.f);
+			return mesh.add_vertex(xy ^ 0.F);
 		});
 		surface.insert(mesh.add_namedFace("bottom", bottom));
 	}

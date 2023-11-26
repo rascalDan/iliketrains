@@ -31,11 +31,12 @@ public:
 
 protected:
 	virtual void render() const;
+
 	struct GLInitHelper {
 		GLInitHelper();
 	};
 
-	const glm::ivec2 size;
+	const ScreenAbsCoord size;
 	SDL_WindowPtr m_window;
 	SDL_GLContextPtr glContext;
 	GLInitHelper glInithelper;

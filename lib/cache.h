@@ -35,4 +35,5 @@ public:
 private:
 	std::map<Key, Ptr, std::less<>> cached;
 };
+
 // IWYU pragma: no_forward_declare Cache

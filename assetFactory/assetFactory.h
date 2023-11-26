@@ -15,10 +15,9 @@ public:
 	using Assets = std::map<std::string, Asset::Ptr, std::less<>>;
 	using AssImps = std::map<std::string, AssImp::Ptr, std::less<>>;
 	using TextureFragments = std::map<std::string, TextureFragment::Ptr, std::less<>>;
-	using Colour = glm::vec3;
-	using ColourAlpha = glm::vec4;
+	using Colour = RGB;
+	using ColourAlpha = RGBA;
 	using Colours = std::map<std::string, Colour, std::less<>>;
-	using TextureFragmentCoords = std::array<glm::vec2, 4>;
 
 	AssetFactory();
 	[[nodiscard]] static std::shared_ptr<AssetFactory> loadXML(const std::filesystem::path &);

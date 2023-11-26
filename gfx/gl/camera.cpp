@@ -2,19 +2,19 @@
 #include <collections.h>
 #include <glm/gtx/intersect.hpp> // IWYU pragma: keep
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
+#include <math.h>
 #include <maths.h>
 #include <ray.h>
 
-Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
+Camera::Camera(Position3D pos, Angle fov, Angle aspect, Distance zNear, Distance zFar) :
 	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar},
-	projection {glm::perspective(fov, aspect, zNear, zFar)},
-	viewProjection {projection * glm::lookAt(position, position + forward, up)},
-	inverseViewProjection {glm::inverse(viewProjection)}
+	projection {glm::perspective(fov, aspect, zNear, zFar)}, viewProjection {}, inverseViewProjection {}
 {
+	updateView();
 }
 
 Ray
-Camera::unProject(const glm::vec2 & mouse) const
+Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
 	const auto mouseProjection = glm::lookAt(::origin, forward, up);
@@ -24,12 +24,12 @@ Camera::unProject(const glm::vec2 & mouse) const
 void
 Camera::updateView()
 {
-	viewProjection = projection * glm::lookAt(position, position + forward, up);
-	inverseViewProjection = glm::inverse(viewProjection);
+	viewProjection = projection * glm::lookAt(origin, forward, up);
+	inverseViewProjection = glm::inverse(projection * glm::lookAt(position, position + forward, up));
 }
 
-glm::vec3
-Camera::upFromForward(const glm::vec3 & forward)
+Direction3D
+Camera::upFromForward(const Direction3D & forward)
 {
 	const auto right = glm::cross(forward, ::down);
 	return glm::cross(forward, right);
@@ -38,11 +38,11 @@ Camera::upFromForward(const glm::vec3 & forward)
 std::array<glm::vec4, 4>
 Camera::extentsAtDist(const float dist) const
 {
-	const auto clampToSeaFloor = [this, dist](const glm::vec3 & target) {
+	const auto clampToSeaFloor = [this, dist](const Position3D & target) {
 		if (target.z < -1.5F) {
 			const auto vec = glm::normalize(target - position);
-			constexpr glm::vec3 seafloor {0, 0, -1.5F};
-			float outdist;
+			constexpr Position3D seafloor {0, 0, -1.5F};
+			float outdist {};
 			if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
 				return (vec * outdist + position) ^ outdist;
 			}

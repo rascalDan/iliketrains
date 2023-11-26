@@ -9,6 +9,7 @@
 class Location;
 
 using ProgramRef = glRef<GLuint, &glCreateProgram, &glDeleteProgram>;
+
 class Program {
 public:
 	template<typename... S> explicit Program(const S &... srcs)
@@ -16,12 +17,14 @@ public:
 		(glAttachShader(m_program, srcs.compile()), ...);
 		linkAndValidate();
 	}
+
 	virtual ~Program() = default;
 	DEFAULT_MOVE_NO_COPY(Program);
 
 	class UniformLocation {
 	public:
 		UniformLocation(GLuint prog, const char * name);
+
 		// NOLINTNEXTLINE(hicpp-explicit-conversions)
 		operator auto() const
 		{

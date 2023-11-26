@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include "modelFactoryMesh_fwd.h"
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 #include <glad/gl.h>
@@ -13,10 +14,10 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	EdgeAttributes(OpenMesh::Attributes::Status);
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
 	HalfedgeAttributes(OpenMesh::Attributes::TexCoord2D);
-	using Point = glm::vec3;
-	using Normal = glm::vec3;
-	using Color = glm::vec4;
-	using TexCoord2D = glm::vec2;
+	using Point = Position3D;
+	using Normal = Normal3D;
+	using Color = RGBA;
+	using TexCoord2D = TextureRelCoord;
 };
 
 struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTraits> {

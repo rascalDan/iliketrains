@@ -10,6 +10,7 @@ namespace Persistence {
 	private:
 		template<typename T> struct Root : public Persistable {
 			T t {};
+
 			bool
 			persist(PersistenceStore & store)
 			{

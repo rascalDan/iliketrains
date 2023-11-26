@@ -18,6 +18,7 @@ public:
 private:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<Object>>;
 	bool persist(Persistence::PersistenceStore & store) override;
+
 	std::string
 	getId() const override
 	{

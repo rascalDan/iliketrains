@@ -31,6 +31,7 @@ public:
 		glm::ivec2 bearing;
 		long advance;
 	};
+
 	struct FontTexture {
 		glTexture texture;
 		unsigned int used;

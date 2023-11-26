@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDL_events.h"
+#include "config/types.h"
 #include "special_members.h"
 #include "uiComponent.h"
 #include "worldOverlay.h"
@@ -26,7 +27,7 @@ public:
 		virtual void render(const SceneShader &) const;
 	};
 
-	GameMainSelector(const Camera * c, glm::vec2 size);
+	GameMainSelector(const Camera * c, ScreenAbsCoord size);
 
 	void render(const UIShader & shader, const Position & pos) const override;
 	void render(const SceneShader & shader) const override;

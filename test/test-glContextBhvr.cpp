@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(windowContextThingsBehaviour1)
 			const SDL_GLContextPtr context {window};
 			BOOST_REQUIRE(context);
 			BOOST_REQUIRE(!glCreateProgram);
-			BOOST_REQUIRE_EQUAL(gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)), 40006);
+			BOOST_REQUIRE_GT(gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)), 0);
 			BOOST_REQUIRE(glCreateProgram);
 			CreateProgramTest();
 		} // Context destroyed

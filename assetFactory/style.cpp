@@ -33,10 +33,10 @@ Style::applyStyle(
 			const auto material = mf->getMaterialIndex(texture);
 			mesh.property(mesh.materialFaceProperty, face) = material;
 			static constexpr std::array<ModelFactoryTraits::TexCoord2D, 4> coords {{
-					{0.f, 0.f},
-					{1.f, 0.f},
-					{1.f, 1.f},
-					{0.f, 1.f},
+					{0.F, 0.F},
+					{1.F, 0.F},
+					{1.F, 1.F},
+					{0.F, 1.F},
 			}};
 			auto coord = coords.begin();
 			// Wild assumption that face is a quad and the texture should apply linearly
@@ -58,9 +58,10 @@ Style::getColour(const StyleStack & parents)
 bool
 Style::persist(Persistence::PersistenceStore & store)
 {
-	struct ColourParser : public Persistence::SelectionV<ColourAlpha> {
-		using Persistence::SelectionV<ColourAlpha>::SelectionV;
-		using Persistence::SelectionV<ColourAlpha>::setValue;
+	struct ColourParser : public Persistence::SelectionV<RGBA> {
+		using Persistence::SelectionV<RGBA>::SelectionV;
+		using Persistence::SelectionV<RGBA>::setValue;
+
 		void
 		setValue(std::string && str) override
 		{

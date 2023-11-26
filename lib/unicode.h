@@ -50,6 +50,7 @@ struct utf8_string_view {
 	constexpr utf8_string_view(const Str & str) : begin_ {str.data()}, end_ {str.data() + str.length()}
 	{
 	}
+
 	// cppcheck-suppress noExplicitConstructor; NOLINTNEXTLINE(hicpp-explicit-conversions)
 	constexpr utf8_string_view(const char * const str) : utf8_string_view {std::string_view {str}} { }
 
@@ -70,6 +71,7 @@ struct utf8_string_view {
 private:
 	const char *begin_, *end_;
 };
+
 template<> struct std::iterator_traits<utf8_string_view::iter> {
 	using difference_type = size_t;
 	using value_type = uint32_t;
