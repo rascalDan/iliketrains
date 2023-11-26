@@ -78,12 +78,12 @@ public:
 					&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100000, -450000, 15000}));
 			train->currentActivity = train->orders.current()->createActivity();
 
-			// auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
-			// for (float x = 900000; x < 1100000; x += 5000) {
-			// for (float y = 900000; y < 1100000; y += 5000) {
-			// world.create<Plant>(foliage, Location {geoData->positionAt({{-x, -y}})});
-			//}
-			//}
+			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
+			for (auto x = 311000000; x < 311830000; x += 5000) {
+				for (auto y = 491100000; y < 491130000; y += 5000) {
+					world.create<Plant>(foliage, Location {geoData->positionAt({{x, y}})});
+				}
+			}
 		}
 
 		auto t_start = std::chrono::high_resolution_clock::now();
