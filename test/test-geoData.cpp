@@ -26,11 +26,6 @@ BOOST_AUTO_TEST_CASE(loadSuccess)
 
 BOOST_AUTO_TEST_CASE(normalsAllPointUp)
 {
-	BOOST_CHECK_EQUAL(std::count_if(faces_begin(), faces_end(),
-							  [this](auto && vh) {
-								  return normal(vh).z > 0;
-							  }),
-			n_faces());
 	BOOST_CHECK_EQUAL(std::count_if(vertices_begin(), vertices_end(),
 							  [this](auto && vh) {
 								  return normal(vh).z > 0;

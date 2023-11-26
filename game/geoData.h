@@ -10,10 +10,10 @@
 #include <thirdparty/openmesh/glmcompat.h>
 
 struct GeoDataTraits : public OpenMesh::DefaultTraits {
-	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	FaceAttributes(OpenMesh::Attributes::Status);
 	EdgeAttributes(OpenMesh::Attributes::Status);
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
-	HalfedgeAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
+	HalfedgeAttributes(OpenMesh::Attributes::Status);
 	using Point = GlobalPosition3D;
 	using Normal = Normal3D;
 };
@@ -104,6 +104,8 @@ protected:
 	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
 	[[nodiscard]] bool triangleContainsPoint(const GlobalPosition2D, FaceHandle) const;
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
+
+	void update_vertex_normals_only();
 
 private:
 	GlobalPosition3D lowerExtent {}, upperExtent {};

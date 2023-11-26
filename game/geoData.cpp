@@ -57,8 +57,7 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 			});
 		}
 	}
-	mesh.update_face_normals();
-	mesh.update_vertex_normals();
+	mesh.update_vertex_normals_only();
 
 	return mesh;
 };
@@ -77,8 +76,7 @@ GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistan
 	mesh.add_face(ll, uu, lu);
 	mesh.add_face(ll, ul, uu);
 
-	mesh.update_face_normals();
-	mesh.update_vertex_normals();
+	mesh.update_vertex_normals_only();
 
 	return mesh;
 }
@@ -316,4 +314,14 @@ GeoData::findBoundaryStart() const
 	return *std::find_if(halfedges_begin(), halfedges_end(), [this](const auto heh) {
 		return is_boundary(heh);
 	});
+}
+
+void
+GeoData::update_vertex_normals_only()
+{
+	for (auto vh : all_vertices()) {
+		Normal3D n;
+		calc_vertex_normal_correct(vh, n);
+		this->set_normal(vh, glm::normalize(n));
+	}
 }
