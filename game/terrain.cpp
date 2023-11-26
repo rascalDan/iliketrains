@@ -35,8 +35,8 @@ Terrain::generateMeshes()
 	std::transform(geoData->vertices_begin(), geoData->vertices_end(), std::back_inserter(vertices),
 			[this, &vertexIndex](const GeoData::VertexHandle v) {
 				vertexIndex.emplace(v, vertexIndex.size());
-				const glm::vec3 p = geoData->point(v);
-				return Vertex {p, p / 10.F, geoData->normal(v)};
+				const auto p = geoData->point(v);
+				return Vertex {p, p / 10000, geoData->normal(v)};
 			});
 	std::for_each(
 			geoData->faces_begin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
