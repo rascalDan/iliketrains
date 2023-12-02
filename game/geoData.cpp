@@ -232,7 +232,11 @@ GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, const std:
 {
 	auto f = from.face(this);
 	if (!f.is_valid()) {
-		f = opposite_face_handle(findEntry(from.point, to));
+		const auto entryEdge = findEntry(from.point, to);
+		if (!entryEdge.is_valid()) {
+			return;
+		}
+		f = opposite_face_handle(entryEdge);
 	}
 	FaceHandle previousFace;
 	while (f.is_valid() && !op(f)) {
