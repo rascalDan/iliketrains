@@ -202,17 +202,19 @@ GeoData::intersectRay(const Ray & ray) const
 GeoData::intersectRay(const Ray & ray, FaceHandle face) const
 {
 	std::optional<GlobalPosition3D> out;
-	walkUntil(PointFace {ray.start, face}, ray.start + (ray.direction * 10000.F), [&out, &ray, this](FaceHandle face) {
-		BaryPosition bari {};
-		float dist {};
-		const auto t = triangle<3>(face);
-		if (glm::intersectRayTriangle<RelativePosition3D::value_type, glm::defaultp>(
-					ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
-			out = t * bari;
-			return true;
-		}
-		return false;
-	});
+	walkUntil(PointFace {ray.start, face},
+			ray.start.xy() + (ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
+			[&out, &ray, this](FaceHandle face) {
+				BaryPosition bari {};
+				float dist {};
+				const auto t = triangle<3>(face);
+				if (glm::intersectRayTriangle<RelativePosition3D::value_type, glm::defaultp>(
+							ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
+					out = t * bari;
+					return true;
+				}
+				return false;
+			});
 	return out;
 }
 
