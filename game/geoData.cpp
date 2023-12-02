@@ -155,6 +155,16 @@ namespace {
 
 	static_assert(linesCrossLtR({1, 1}, {2, 2}, {1, 2}, {2, 1}));
 	static_assert(!linesCrossLtR({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+	constexpr GlobalPosition3D
+	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
+	{
+		const glm::vec<3, int64_t> a = t[1] - t[0], b = t[2] - t[0];
+		const auto n = crossInt(a, b);
+		return {point, ((n.x * t[0].x) + (n.y * t[0].y) + (n.z * t[0].z) - (n.x * point.x) - (n.y * point.y)) / n.z};
+	}
+
+	static_assert(positionOnTriangle({7, -2}, {{1, 2, 3}, {1, 0, 1}, {-2, 1, 0}}) == GlobalPosition3D {7, -2, 3});
 }
 
 OpenMesh::FaceHandle
@@ -179,10 +189,7 @@ GeoData::findPoint(GlobalPosition2D p, OpenMesh::FaceHandle f) const
 GlobalPosition3D
 GeoData::positionAt(const PointFace & p) const
 {
-	RelativePosition3D out {};
-	const auto t = triangle<3>(p.face(this));
-	glm::intersectLineTriangle<RelativePosition3D>({p.point, 0}, up, t[0], t[1], t[2], out);
-	return {p.point, out[0]};
+	return positionOnTriangle(p.point, triangle<3>(p.face(this)));
 }
 
 [[nodiscard]] std::optional<GlobalPosition3D>
