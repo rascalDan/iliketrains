@@ -186,3 +186,16 @@ BOOST_DATA_TEST_CASE(walkTerrainUntil,
 	}));
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
+
+using FindEntiesData = std::tuple<GlobalPosition2D, GlobalPosition2D, int>;
+
+BOOST_DATA_TEST_CASE(findEntries,
+		boost::unit_test::data::make<FindEntiesData>({
+				{{307739360, 494851616}, {314056992, 500079744}, 160667},
+				{{308597952, 498417056}, {315154144, 504671456}, 233623},
+				{{302690592, 502270912}, {311585184, 497868064}, 207311},
+		}),
+		from, to, heh)
+{
+	BOOST_CHECK_EQUAL(fixedTerrtain.findEntry(from, to).idx(), heh);
+}
