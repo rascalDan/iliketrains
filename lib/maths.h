@@ -67,6 +67,17 @@ sq(T v)
 	return v * v;
 }
 
+template<std::integral T, glm::qualifier Q>
+inline constexpr glm::vec<3, T, Q>
+crossInt(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
+{
+	return {
+			(a.y * b.z) - (a.z * b.y),
+			(a.z * b.x) - (a.x * b.z),
+			(a.x * b.y) - (a.y * b.x),
+	};
+}
+
 template<typename R = float, typename Ta, typename Tb>
 inline constexpr auto
 ratio(Ta a, Tb b)
