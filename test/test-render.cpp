@@ -93,6 +93,43 @@ BOOST_AUTO_TEST_CASE(basic)
 	Texture::save(outImage, "/tmp/basic.tga");
 }
 
+BOOST_AUTO_TEST_CASE(terrain)
+{
+	SceneRenderer ss {size, output};
+	ss.camera.setView({310000000, 490000000, 600000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+
+	class TestTerrain : public SceneProvider {
+		Terrain terrain {std::make_shared<GeoData>(GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc"))};
+
+		void
+		content(const SceneShader & shader) const override
+		{
+			terrain.render(shader);
+		}
+
+		void
+		environment(const SceneShader &, const SceneRenderer & sr) const override
+		{
+			sr.setAmbientLight({0.1, 0.1, 0.1});
+			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+		}
+
+		void
+		lights(const SceneShader &) const override
+		{
+		}
+
+		void
+		shadows(const ShadowMapper & shadowMapper) const override
+		{
+			terrain.shadows(shadowMapper);
+		}
+	};
+
+	ss.render(TestTerrain {});
+	Texture::save(outImage, "/tmp/terrain.tga");
+}
+
 BOOST_AUTO_TEST_CASE(pointlight)
 {
 	SceneRenderer ss {size, output};
