@@ -66,7 +66,7 @@ RailVehicleClass::shadows(const ShadowMapper & mapper) const
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		mapper.dynamicPointInst.use();
 		bodyMesh->DrawInstanced(instanceVAO, count);
-		bogies.front()->DrawInstanced(instanceVAO, count);
-		bogies.back()->DrawInstanced(instanceVAO, count);
+		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
+		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
 	}
 }
