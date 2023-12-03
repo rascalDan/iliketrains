@@ -16,7 +16,7 @@ class SceneShader {
 		{
 		}
 
-		void setViewProjection(const Position3D &, const glm::mat4 &) const;
+		void setViewProjection(const GlobalPosition3D &, const glm::mat4 &) const;
 		void setViewPort(const ViewPort &) const;
 
 	private:
@@ -91,6 +91,6 @@ public:
 	PointLightShader pointLight;
 	SpotLightShader spotLight;
 
-	void setViewProjection(const Position3D & viewPoint, const glm::mat4 & viewProjection) const;
+	void setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const;
 	void setViewPort(const ViewPort & viewPort) const;
 };

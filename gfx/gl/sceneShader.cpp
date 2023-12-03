@@ -26,7 +26,7 @@ SceneShader::SceneShader() :
 }
 
 void
-SceneShader::setViewProjection(const Position3D & viewPoint, const glm::mat4 & viewProjection) const
+SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	for (const auto & prog : std::array<const SceneProgram *, 7> {
 				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
@@ -44,11 +44,11 @@ SceneShader::setViewPort(const ViewPort & viewPort) const
 }
 
 void
-SceneShader::SceneProgram::setViewProjection(const Position3D & viewPoint, const glm::mat4 & viewProjection) const
+SceneShader::SceneProgram::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
-	glUniform3fv(viewPointLoc, 1, glm::value_ptr(viewPoint));
+	glUniform3iv(viewPointLoc, 1, glm::value_ptr(viewPoint));
 }
 
 void

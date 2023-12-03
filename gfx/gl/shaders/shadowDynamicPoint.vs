@@ -3,7 +3,7 @@
 include(`meshIn.glsl')
 
 uniform mat4 viewProjection;
-uniform vec3 viewPoint;
+uniform ivec3 viewPoint;
 uniform mat4 model;
 uniform ivec3 modelPos;
 

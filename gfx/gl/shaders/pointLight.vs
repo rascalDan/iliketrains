@@ -4,7 +4,7 @@ layout(location = 0) in vec3 position;
 
 uniform vec3 colour;
 uniform float kq;
-uniform vec3 viewPoint;
+uniform ivec3 viewPoint;
 
 out vec3 centre;
 out float size;

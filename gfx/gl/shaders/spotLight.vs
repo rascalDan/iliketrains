@@ -6,7 +6,7 @@ uniform vec3 v_direction;
 uniform vec3 colour;
 uniform float kq;
 uniform float arc;
-uniform vec3 viewPoint;
+uniform ivec3 viewPoint;
 
 out vec3 position;
 out vec3 direction;

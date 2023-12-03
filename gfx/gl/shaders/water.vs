@@ -4,7 +4,7 @@ include(`meshIn.glsl')
 include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
-uniform vec3 viewPoint;
+uniform ivec3 viewPoint;
 uniform vec3 waves;
 
 void
