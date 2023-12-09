@@ -15,6 +15,16 @@ std::unique_ptr<char, decltype(&free)> uasprintf(const char * fmt, ...) __attrib
 		} \
 	}
 
+#define BOOST_CHECK_CLOSE_VECI(a_, b_) \
+	{ \
+		const auto a {a_}, b {b_}; \
+		BOOST_TEST_CONTEXT("BOOST_CHECK_CLOSE_VEC(" << std::setprecision(8) << a << ", " << b << ")") { \
+			BOOST_CHECK_LE(std::abs(a.x - b.x), 1); \
+			BOOST_CHECK_LE(std::abs(a.y - b.y), 1); \
+			BOOST_CHECK_LE(std::abs(a.z - b.z), 1); \
+		} \
+	}
+
 #define BOOST_CHECK_BETWEEN(a_, b_, c_) \
 	{ \
 		const auto a {a_}, b {b_}, c {c_}; \

@@ -236,8 +236,8 @@ BOOST_DATA_TEST_CASE(curve1,
 		}
 		{
 			const auto p = l.positionAt(0, 1);
-			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, e1);
-			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBack, 0));
+			BOOST_CHECK_CLOSE_VECI(RelativePosition3D {p.pos}, e1);
+			BOOST_CHECK_CLOSE_VECI(p.rot, glm::vec3(0, angBack, 0));
 		}
 	}
 
@@ -247,8 +247,8 @@ BOOST_DATA_TEST_CASE(curve1,
 		{
 			const auto p = l.positionAt(0, 0);
 			const auto angForReversed = normalize(vector_yaw(origin - e1) * 2 - angFor);
-			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, e1);
-			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angForReversed, 0));
+			BOOST_CHECK_CLOSE_VECI(RelativePosition3D {p.pos}, e1);
+			BOOST_CHECK_CLOSE_VECI(p.rot, glm::vec3(0, angForReversed, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
