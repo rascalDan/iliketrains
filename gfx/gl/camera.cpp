@@ -41,9 +41,9 @@ Camera::extentsAtDist(const GlobalDistance dist) const
 	const auto clampToSeaFloor = [this, dist](GlobalPosition3D target) -> GlobalPosition4D {
 		target += position;
 		if (target.z < -1500) {
-			const auto diff = (target - position);
-			const auto something = (-1500 - position.z) / diff.z;
-			return {position + diff * something, dist};
+			const auto diff = target - position;
+			const auto limit = -1500 - position.z;
+			return {position + (limit * diff) / diff.z, (limit * dist) / diff.z};
 		}
 		return {target, dist};
 	};

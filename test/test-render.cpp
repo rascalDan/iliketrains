@@ -82,6 +82,18 @@ BOOST_DATA_TEST_CASE(cam,
 	BOOST_CHECK_CLOSE_VECI(e[3], pos + GlobalPosition4D(dist, dist, dist, dist));
 }
 
+BOOST_AUTO_TEST_CASE(camSeaFloor)
+{
+	const Camera cam {{100, 200, 300}, half_pi, 1.F, 100, 2000};
+
+	const auto e = cam.extentsAtDist(2000);
+
+	BOOST_CHECK_CLOSE_VECI(e[0], GlobalPosition4D(-1700, 2000, -1500, 1800));
+	BOOST_CHECK_CLOSE_VECI(e[1], GlobalPosition4D(-1900, 2200, 2300, 2000));
+	BOOST_CHECK_CLOSE_VECI(e[2], GlobalPosition4D(1900, 2000, -1500, 1800));
+	BOOST_CHECK_CLOSE_VECI(e[3], GlobalPosition4D(2100, 2200, 2300, 2000));
+}
+
 BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);
 
 BOOST_AUTO_TEST_CASE(basic)
