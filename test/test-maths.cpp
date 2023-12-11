@@ -261,7 +261,7 @@ BOOST_DATA_TEST_CASE(curve1,
 
 BOOST_AUTO_TEST_CASE(camera_clicks)
 {
-	Camera camera {::origin, ::half_pi, 1.25F, .1F, 10000.F};
+	Camera camera {::origin, ::half_pi, 1.25F, 1000, 10000000};
 	constexpr float centre {0.5F}, right {0.9F}, left {0.1F}, top {1.F}, bottom {0.F};
 	camera.setForward(::north);
 	BOOST_CHECK_EQUAL(camera.unProject({centre, centre}).start, ::origin);

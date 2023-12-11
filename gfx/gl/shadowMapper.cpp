@@ -79,12 +79,12 @@ constexpr std::array<std::array<TextureRelRegion, ShadowMapper::SHADOW_BANDS>, S
 						{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
 				}},
 		}};
-constexpr std::array<float, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
-		1000.F,
-		250000.F,
-		750000.F,
-		2500000.F,
-		10000000.F,
+constexpr std::array<GlobalDistance, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
+		1000,
+		250000,
+		750000,
+		2500000,
+		10000000,
 };
 static_assert(viewports.size() == shadowMapRegions.size());
 static_assert(shadowBands.size() == shadowMapRegions.size() + 1);
@@ -114,7 +114,7 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 		bandViewExtents.emplace_back(extents * [&lightView](const auto & e) -> Position3D {
 			return lightView * glm::vec4(Position3D {e}, 1);
 		});
-		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist * 0.99F](const glm::vec4 & e) {
+		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist - 1](const auto & e) {
 				return e.w > targetDist;
 			})) {
 			break;
@@ -130,8 +130,8 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	const auto lightView = glm::lookAt(camera.getPosition(), camera.getPosition() + dir, up);
 	const auto lightViewDir = glm::lookAt(origin, dir, up);
+	const auto lightView = lightViewDir * glm::translate(RelativePosition3D {-camera.getPosition()});
 	const auto lightViewPoint = camera.getPosition();
 	const auto bandViewExtents = getBandViewExtents(camera, lightView);
 

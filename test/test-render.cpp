@@ -67,19 +67,19 @@ BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
 BOOST_DATA_TEST_CASE(cam,
-		boost::unit_test::data::xrange(0.5F, 30.F, 1.3F) * boost::unit_test::data::xrange(0.5F, 10.F, 0.3F)
-				* boost::unit_test::data::xrange(50.F, 500.F, 70.F),
+		boost::unit_test::data::xrange(500, 30000, 1300) * boost::unit_test::data::xrange(500, 10000, 300)
+				* boost::unit_test::data::xrange(50000, 500000, 70000),
 		dist, near, far)
 {
-	static constexpr glm::vec4 pos {-10, -10, 60, 0};
+	static constexpr GlobalPosition4D pos {-10, -10, 60000, 0};
 	const Camera cam {pos, half_pi, 1.F, near, far};
 
 	const auto e = cam.extentsAtDist(dist);
 
-	BOOST_CHECK_CLOSE_VEC(e[0], pos + glm::vec4(-dist, dist, -dist, dist));
-	BOOST_CHECK_CLOSE_VEC(e[1], pos + glm::vec4(-dist, dist, dist, dist));
-	BOOST_CHECK_CLOSE_VEC(e[2], pos + glm::vec4(dist, dist, -dist, dist));
-	BOOST_CHECK_CLOSE_VEC(e[3], pos + glm::vec4(dist, dist, dist, dist));
+	BOOST_CHECK_CLOSE_VECI(e[0], pos + GlobalPosition4D(-dist, dist, -dist, dist));
+	BOOST_CHECK_CLOSE_VECI(e[1], pos + GlobalPosition4D(-dist, dist, dist, dist));
+	BOOST_CHECK_CLOSE_VECI(e[2], pos + GlobalPosition4D(dist, dist, -dist, dist));
+	BOOST_CHECK_CLOSE_VECI(e[3], pos + GlobalPosition4D(dist, dist, dist, dist));
 }
 
 BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);

@@ -7,7 +7,7 @@
 
 class Camera {
 public:
-	Camera(Position3D, Angle fov, Angle aspect, Distance zNear, Distance zFar);
+	Camera(GlobalPosition3D, Angle fov, Angle aspect, GlobalDistance zNear, GlobalDistance zFar);
 
 	[[nodiscard]] glm::mat4
 	getViewProjection() const
@@ -18,7 +18,7 @@ public:
 	[[nodiscard]] Ray unProject(const ScreenRelCoord &) const;
 
 	void
-	setPosition(const Position3D & p)
+	setPosition(const GlobalPosition3D & p)
 	{
 		position = p;
 		updateView();
@@ -39,23 +39,23 @@ public:
 	}
 
 	void
-	setView(const Position3D & p, const Direction3D & f)
+	setView(const GlobalPosition3D & p, const Direction3D & f)
 	{
 		position = p;
 		setForward(f);
 	}
 
 	void
-	setView(const Position3D & p, const Direction3D & f, const Direction3D & u)
+	setView(const GlobalPosition3D & p, const Direction3D & f, const Direction3D & u)
 	{
 		position = p;
 		setView(f, u);
 	}
 
 	void
-	lookAt(const Position3D & target)
+	lookAt(const GlobalPosition3D & target)
 	{
-		setForward(glm::normalize(target - position));
+		setForward(glm::normalize(RelativePosition3D(target - position)));
 	}
 
 	[[nodiscard]] auto
@@ -70,18 +70,18 @@ public:
 		return position;
 	}
 
-	[[nodiscard]] std::array<glm::vec4, 4> extentsAtDist(float) const;
+	[[nodiscard]] std::array<GlobalPosition4D, 4> extentsAtDist(GlobalDistance) const;
 
 	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
 
 private:
 	void updateView();
 
-	Position3D position;
+	GlobalPosition3D position;
 	Direction3D forward;
 	Direction3D up;
 
-	float near, far;
+	GlobalDistance near, far;
 	glm::mat4 projection;
 	glm::mat4 viewProjection, inverseViewProjection;
 };
