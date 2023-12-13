@@ -98,11 +98,27 @@ BOOST_FIXTURE_TEST_SUITE(w, TestRenderOutput);
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-	SceneRenderer ss {size, output};
+	class TestSceneRenderer : public SceneRenderer {
+		using SceneRenderer::SceneRenderer;
+
+	public:
+		void
+		saveBuffers(const std::filesystem::path & prefix) const
+		{
+			std::filesystem::create_directories(prefix);
+			Texture::save(gAlbedoSpec, (prefix / "albedo.tga").c_str());
+			Texture::save(gPosition, (prefix / "position.tga").c_str());
+			Texture::saveNormal(gNormal, (prefix / "normal.tga").c_str());
+			Texture::save(gIllumination, (prefix / "illumination.tga").c_str());
+		}
+	};
+
+	TestSceneRenderer ss {size, output};
 	ss.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	const TestScene scene;
 	ss.render(scene);
-	Texture::save(outImage, "/tmp/basic.tga");
+	ss.saveBuffers("/tmp/basic");
+	Texture::save(outImage, "/tmp/basic/final.tga");
 }
 
 BOOST_AUTO_TEST_CASE(terrain)

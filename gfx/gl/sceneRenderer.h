@@ -19,7 +19,7 @@ public:
 
 	Camera camera;
 
-private:
+protected:
 	void renderQuad() const;
 
 	ScreenAbsCoord size;
