@@ -22,25 +22,25 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	const auto configuregdata
-			= [this](const GLuint data, const std::initializer_list<GLint> formats, const GLenum attachment) {
-				  glBindTexture(GL_TEXTURE_2D, data);
-				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				  for (const auto format : formats) {
-					  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGB, GL_BYTE, nullptr);
+	const auto configuregdata = [this](const GLuint data, const std::initializer_list<GLint> iformats,
+										const GLenum format, const GLenum attachment) {
+		glBindTexture(GL_TEXTURE_2D, data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		for (const auto iformat : iformats) {
+			glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
 
-					  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
-					  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-						  return format;
-					  }
-				  }
-				  throw std::runtime_error("Framebuffer could not be completed!");
-			  };
-	configuregdata(gPosition, {GL_RGB32F}, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_COLOR_ATTACHMENT2);
-	configuregdata(gIllumination, {GL_RGB8}, GL_COLOR_ATTACHMENT3);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+				return iformat;
+			}
+		}
+		throw std::runtime_error("Framebuffer could not be completed!");
+	};
+	configuregdata(gPosition, {GL_RGB32F}, GL_RGB, GL_COLOR_ATTACHMENT0);
+	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
+	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT2);
+	configuregdata(gIllumination, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT3);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
