@@ -104,6 +104,12 @@ Texture::save(const glTexture & texture, const char * path)
 }
 
 void
+Texture::savePosition(const glTexture & texture, const char * path)
+{
+	save(texture, GL_BGR_INTEGER, GL_UNSIGNED_BYTE, 3, path, 2);
+}
+
+void
 Texture::saveDepth(const glTexture & texture, const char * path)
 {
 	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 1, path, 3);

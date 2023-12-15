@@ -40,6 +40,7 @@ public:
 	static void save(const glTexture &, const char * path);
 	static void saveDepth(const glTexture &, const char * path);
 	static void saveNormal(const glTexture &, const char * path);
+	static void savePosition(const glTexture &, const char * path);
 
 protected:
 	static void save(const glTexture &, GLenum, GLenum, uint8_t channels, const char * path, uint8_t tgaFormat);
