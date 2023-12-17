@@ -120,7 +120,8 @@ namespace {
 	[[nodiscard]] constexpr inline auto
 	pointLineOp(const GlobalPosition2D p, const GlobalPosition2D e1, const GlobalPosition2D e2)
 	{
-		return Op {}(int64_t(e2.x - e1.x) * int64_t(p.y - e1.y), int64_t(e2.y - e1.y) * int64_t(p.x - e1.x));
+		return Op {}(CalcDistance(e2.x - e1.x) * CalcDistance(p.y - e1.y),
+				CalcDistance(e2.y - e1.y) * CalcDistance(p.x - e1.x));
 	}
 
 	constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
@@ -159,7 +160,7 @@ namespace {
 	constexpr GlobalPosition3D
 	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
 	{
-		const glm::vec<3, int64_t> a = t[1] - t[0], b = t[2] - t[0];
+		const CalcPosition3D a = t[1] - t[0], b = t[2] - t[0];
 		const auto n = crossInt(a, b);
 		return {point, ((n.x * t[0].x) + (n.y * t[0].y) + (n.z * t[0].z) - (n.x * point.x) - (n.y * point.y)) / n.z};
 	}
