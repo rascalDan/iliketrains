@@ -39,12 +39,12 @@ protected:
 		DirectionalLightProgram();
 		using Program::use;
 
-		void setDirectionalLight(const RGB &, const Direction3D &, const std::span<const glm::mat4x4>,
-				const std::span<const TextureRelRegion>, std::size_t maps) const;
+		void setDirectionalLight(const RGB &, const Direction3D &, const GlobalPosition3D &,
+				const std::span<const glm::mat4x4>, const std::span<const TextureRelRegion>, std::size_t maps) const;
 
 	private:
-		RequiredUniformLocation directionLoc, colourLoc, lightViewProjectionLoc, lightViewProjectionCountLoc,
-				lightViewShadowMapRegionLoc;
+		RequiredUniformLocation directionLoc, colourLoc, lightPointLoc, lightViewProjectionLoc,
+				lightViewProjectionCountLoc, lightViewShadowMapRegionLoc;
 	};
 
 	DeferredLightProgram lighting;

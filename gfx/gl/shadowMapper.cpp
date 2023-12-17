@@ -106,14 +106,15 @@ struct DefinitionsInserter {
 };
 
 std::vector<std::array<Position3D, 4>>
-ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightView)
+ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightViewDir)
 {
 	std::vector<std::array<Position3D, 4>> bandViewExtents;
 	for (const auto dist : shadowBands) {
 		const auto extents = camera.extentsAtDist(dist);
-		bandViewExtents.emplace_back(extents * [&lightView](const auto & e) -> Position3D {
-			return lightView * glm::vec4(Position3D {e}, 1);
-		});
+		bandViewExtents.emplace_back(
+				extents * [&lightViewDir, cameraPos = camera.getPosition()](const auto & e) -> Position3D {
+					return lightViewDir * RelativePosition4D(e.xyz() - cameraPos, 1);
+				});
 		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist - 1](const auto & e) {
 				return e.w > targetDist;
 			})) {
@@ -131,14 +132,13 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	glCullFace(GL_FRONT);
 
 	const auto lightViewDir = glm::lookAt(origin, dir, up);
-	const auto lightView = lightViewDir * glm::translate(RelativePosition3D {-camera.getPosition()});
 	const auto lightViewPoint = camera.getPosition();
-	const auto bandViewExtents = getBandViewExtents(camera, lightView);
+	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
 
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			DefinitionsInserter {out},
-			[&scene, this, &lightView, bands = bandViewExtents.size() - 2, &out, &lightViewPoint, &lightViewDir](
+			[&scene, this, bands = bandViewExtents.size() - 2, &out, &lightViewPoint, &lightViewDir](
 					const auto & near, const auto & far) {
 				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
 					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
@@ -158,7 +158,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 				glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
 				scene.shadows(*this);
 
-				return std::make_pair(lightProjection * lightView, shadowMapRegions[bands][out.maps]);
+				return std::make_pair(lightViewDirProjection, shadowMapRegions[bands][out.maps]);
 			});
 
 	glCullFace(GL_BACK);

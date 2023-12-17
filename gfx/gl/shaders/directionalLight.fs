@@ -13,6 +13,7 @@ layout(binding = 2) uniform sampler2D shadowMap;
 
 uniform vec3 lightDirection;
 uniform vec3 lightColour;
+uniform ivec3 lightPoint;
 uniform mat4 lightViewProjection[MAX_MAPS];
 uniform vec4 shadowMapRegion[MAX_MAPS];
 uniform uint lightViewProjectionCount;
@@ -27,10 +28,10 @@ insideShadowCube(vec3 v)
 }
 
 float
-isShaded(ivec3 Position)
+isShaded(vec4 Position)
 {
 	for (uint m = 0u; m < lightViewProjectionCount; m++) {
-		vec3 PositionInLightSpace = (lightViewProjection[m] * vec4(Position, 1.0f)).xyz;
+		const vec3 PositionInLightSpace = (lightViewProjection[m] * Position).xyz;
 		const float inside = insideShadowCube(PositionInLightSpace);
 		if (inside > 0) {
 			const float lightSpaceDepth
@@ -44,7 +45,7 @@ isShaded(ivec3 Position)
 void
 main()
 {
-	const ivec3 Position = texture(gPosition, TexCoords).xyz;
+	const vec4 Position = vec4(texture(gPosition, TexCoords).xyz - lightPoint, 1);
 	const vec3 Normal = texture(gNormal, TexCoords).rgb;
 	const float shaded = isShaded(Position);
 	FragColor = (1 - shaded) * max(dot(-lightDirection, Normal) * lightColour, 0);
