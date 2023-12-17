@@ -24,7 +24,7 @@ protected:
 
 	ScreenAbsCoord size;
 	GLuint output;
-	glFrameBuffer gBuffer;
+	glFrameBuffer gBuffer, gBufferIll;
 	glTexture gPosition, gNormal, gAlbedoSpec, gIllumination;
 	glRenderBuffer depth;
 

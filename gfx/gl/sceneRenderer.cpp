@@ -21,7 +21,6 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 	shader.setViewPort({0, 0, size.x, size.y});
 	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	const auto configuregdata = [this](const GLuint data, const std::initializer_list<GLint> iformats,
 										const GLenum format, const GLenum attachment) {
 		glBindTexture(GL_TEXTURE_2D, data);
@@ -37,14 +36,22 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 		}
 		throw std::runtime_error("Framebuffer could not be completed!");
 	};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	configuregdata(gPosition, {GL_RGB32F}, GL_RGB, GL_COLOR_ATTACHMENT0);
 	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
 	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT2);
-	configuregdata(gIllumination, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT3);
+	constexpr std::array<unsigned int, 3> attachments {
+			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	glDrawBuffers(attachments.size(), attachments.data());
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
+	configuregdata(gIllumination, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 }
@@ -57,9 +64,6 @@ SceneRenderer::render(const SceneProvider & scene) const
 
 	// Geometry pass
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	static constexpr std::array<unsigned int, 3> attachments {
-			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-	glDrawBuffers(attachments.size(), attachments.data());
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -70,7 +74,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	scene.content(shader);
 
 	// Illumination pass
-	glDrawBuffer(GL_COLOR_ATTACHMENT3);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -99,7 +103,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 void
 SceneRenderer::setAmbientLight(const RGB & colour) const
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 	glClearColor(colour.r, colour.g, colour.b, 1.0F);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -109,7 +113,7 @@ SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direc
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
 		const auto lvp = shadowMapper.update(scene, direction, camera);
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
 		dirLight.setDirectionalLight(colour, direction, lvp.projections, lvp.regions, lvp.maps);
