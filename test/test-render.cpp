@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(basic)
 		{
 			std::filesystem::create_directories(prefix);
 			Texture::save(gAlbedoSpec, (prefix / "albedo.tga").c_str());
-			Texture::save(gPosition, (prefix / "position.tga").c_str());
+			Texture::savePosition(gPosition, (prefix / "position.tga").c_str());
 			Texture::saveNormal(gNormal, (prefix / "normal.tga").c_str());
 			Texture::save(gIllumination, (prefix / "illumination.tga").c_str());
 		}

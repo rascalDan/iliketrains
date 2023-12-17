@@ -7,7 +7,7 @@ out vec3 FragColor;
 
 in vec2 TexCoords;
 
-layout(binding = 0) uniform sampler2D gPosition;
+layout(binding = 0) uniform isampler2D gPosition;
 layout(binding = 1) uniform sampler2D gNormal;
 layout(binding = 2) uniform sampler2D shadowMap;
 
@@ -27,7 +27,7 @@ insideShadowCube(vec3 v)
 }
 
 float
-isShaded(vec3 Position)
+isShaded(ivec3 Position)
 {
 	for (uint m = 0u; m < lightViewProjectionCount; m++) {
 		vec3 PositionInLightSpace = (lightViewProjection[m] * vec4(Position, 1.0f)).xyz;
@@ -44,7 +44,7 @@ isShaded(vec3 Position)
 void
 main()
 {
-	const vec3 Position = texture(gPosition, TexCoords).xyz;
+	const ivec3 Position = texture(gPosition, TexCoords).xyz;
 	const vec3 Normal = texture(gNormal, TexCoords).rgb;
 	const float shaded = isShaded(Position);
 	FragColor = (1 - shaded) * max(dot(-lightDirection, Normal) * lightColour, 0);

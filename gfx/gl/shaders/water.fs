@@ -10,7 +10,7 @@ uniform vec3 waves;
 void
 main()
 {
-	gPosition = vec4(FragPos, 1);
+	gPosition = ivec4(FragPos, 1);
 	gNormal = vec4(Normal, 1);
 	gAlbedoSpec = texture(texture0, TexCoords);
 	gAlbedoSpec.a *= clamp(-FragPos.z * .0007, .1, 1.0);

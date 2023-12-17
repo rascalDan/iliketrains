@@ -60,7 +60,7 @@ main()
 		}
 	}
 
-	gPosition = vec4(FragPos, 1);
+	gPosition = ivec4(FragPos, 1);
 	gNormal = vec4(Normal, 1);
 	gAlbedoSpec = vec4(color, 1);
 }

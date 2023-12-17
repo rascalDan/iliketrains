@@ -38,7 +38,7 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 	};
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	configuregdata(gPosition, {GL_RGB32F}, GL_RGB, GL_COLOR_ATTACHMENT0);
+	configuregdata(gPosition, {GL_RGB32I}, GL_RGB_INTEGER, GL_COLOR_ATTACHMENT0);
 	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
 	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT2);
 	constexpr std::array<unsigned int, 3> attachments {
