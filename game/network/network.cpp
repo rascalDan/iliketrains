@@ -100,7 +100,7 @@ Network::genCurveDef(const Position3D & start, const Position3D & end, float sta
 	const auto diff {end - start};
 	const auto vy {vector_yaw(diff)};
 	const auto dir = pi + startDir;
-	const auto flatStart {!start}, flatEnd {!end};
+	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	const auto n2ed {(vy * 2) - dir - pi};
 	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};
 
@@ -115,7 +115,7 @@ Network::genCurveDef(const Position3D & start, const Position3D & end, float sta
 {
 	startDir += pi;
 	endDir += pi;
-	const Position2D flatStart {!start}, flatEnd {!end};
+	const Position2D flatStart {start.xy()}, flatEnd {end.xy()};
 	auto midheight = [&](auto mid) {
 		const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
 		return start.z + ((end.z - start.z) * (sm / (sm + em)));

@@ -99,12 +99,6 @@ perspective_divide(glm::vec<4, T, Q> v)
 	return v / v.w;
 }
 
-constexpr inline Position2D
-operator!(const Position3D & v)
-{
-	return {v.x, v.y};
-}
-
 constexpr inline Position3D
 operator^(const Position2D & v, float z)
 {
@@ -115,12 +109,6 @@ constexpr inline glm::vec4
 operator^(const Position3D & v, float w)
 {
 	return {v.x, v.y, v.z, w};
-}
-
-constexpr inline Position3D
-operator!(const Position2D & v)
-{
-	return v ^ 0.F;
 }
 
 template<glm::length_t L1, glm::length_t L2, typename T, glm::qualifier Q>

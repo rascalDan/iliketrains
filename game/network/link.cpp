@@ -46,7 +46,7 @@ LinkCurve::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
 	const auto as {std::make_pair(arc[start], arc[1 - start])};
 	const auto ang {as.first + ((as.second - as.first) * frac)};
-	const auto relPos {!sincosf(ang) * radius};
+	const auto relPos {sincosf(ang) ^ 0.F * radius};
 	const auto relClimb {vehiclePositionOffset()
 			+ Position3D {0, 0, es.first->pos.z - centreBase.z + ((es.second->pos.z - es.first->pos.z) * frac)}};
 	const auto pitch {vector_pitch({0, 0, (es.second->pos.z - es.first->pos.z) / length})};

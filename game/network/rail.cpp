@@ -45,7 +45,7 @@ RailLinks::addLinksBetween(Position3D start, Position3D end)
 	if (dir == vector_yaw(end - start)) {
 		return addLink<RailLinkStraight>(start, end);
 	}
-	const Position2D flatStart {!start}, flatEnd {!end};
+	const Position2D flatStart {start.xy()}, flatEnd {end.xy()};
 	if (node2ins.second == NodeIs::InNetwork) {
 		auto midheight = [&](auto mid) {
 			const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
@@ -142,7 +142,7 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const Position3D & 
 }
 
 RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position2D c) :
-	RailLinkCurve(a, b, c ^ a->pos.z, {!c, a->pos, b->pos})
+	RailLinkCurve(a, b, c ^ a->pos.z, {c ^ 0.F, a->pos, b->pos})
 {
 }
 

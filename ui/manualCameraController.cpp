@@ -79,5 +79,5 @@ void
 ManualCameraController::updateCamera(Camera * camera) const
 {
 	const auto forward = glm::normalize(sincosf(direction) ^ -sin(pitch));
-	camera->setView(!focus - forward * 3.F * std::pow(dist, 1.3F), forward);
+	camera->setView((focus ^ 0.F) - forward * 3.F * std::pow(dist, 1.3F), forward);
 }
