@@ -171,7 +171,8 @@ BOOST_DATA_TEST_CASE(test_find_arc_centre,
 
 BOOST_AUTO_TEST_CASE(test_find_arcs_radius)
 {
-	BOOST_CHECK_CLOSE(find_arcs_radius({10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
+	BOOST_CHECK_CLOSE(
+			find_arcs_radius(RelativePosition2D {10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
 }
 
 struct TestLinkStraight : public LinkStraight {

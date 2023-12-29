@@ -5,15 +5,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <numeric>
+#include <stdexcept>
 #include <utility>
 
 struct Arc : public std::pair<float, float> {
 	using std::pair<float, float>::pair;
 
-	Arc(const Position3D & centre3, const Position3D & e0p, const Position3D & e1p);
+	template<typename T, glm::qualifier Q>
+	Arc(const glm::vec<3, T, Q> & centre3, const glm::vec<3, T, Q> & e0p, const glm::vec<3, T, Q> & e1p);
 
-	float
-	operator[](unsigned int i) const
+	auto
+	operator[](bool i) const
 	{
 		return i ? second : first;
 	}
@@ -136,16 +138,84 @@ arc_length(const Arc & arc)
 
 float normalize(float ang);
 
-std::pair<Position2D, bool> find_arc_centre(Position2D start, float entrys, Position2D end, float entrye);
-std::pair<Position2D, bool> find_arc_centre(Position2D start, Position2D ad, Position2D end, Position2D bd);
-std::pair<float, float> find_arcs_radius(Position2D start, float entrys, Position2D end, float entrye);
-float find_arcs_radius(Position2D start, Position2D ad, Position2D end, Position2D bd);
+template<typename T, glm::qualifier Q>
+std::pair<glm::vec<2, T, Q>, bool>
+find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> end, Rotation2D endDir)
+{
+	const auto det = endDir.x * startDir.y - endDir.y * startDir.x;
+	if (det != 0) { // near parallel line will yield noisy results
+		const auto d = end - start;
+		const auto u = (d.y * endDir.x - d.x * endDir.y) / det;
+		return {start + startDir * u, u < 0};
+	}
+	throw std::runtime_error("no intersection");
+}
+
+template<typename T, glm::qualifier Q>
+std::pair<glm::vec<2, T, Q>, bool>
+find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
+{
+	if (start == end) {
+		return {start, false};
+	}
+	return find_arc_centre(start, sincosf(entrys + half_pi), end, sincosf(entrye - half_pi));
+}
+
+template<typename T, glm::qualifier Q>
+Angle
+find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, Rotation2D bd)
+{
+	using std::sqrt;
+
+	// Calculates path across both arcs along the normals... pythagorean theorem... for some known radius r
+	// (2r)^2 = ((m + (X*r)) - (o + (Z*r)))^2 + ((n + (Y*r)) - (p + (W*r)))^2
+	// According to symbolabs.com equation tool, that solves for r to give:
+	// r=(-2 m X+2 X o+2 m Z-2 o Z-2 n Y+2 Y p+2 n W-2 p W-sqrt((2 m X-2 X o-2 m Z+2 o Z+2 n Y-2 Y p-2 n W+2 p W)^(2)-4
+	// (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y W+W^(2)-4) (m^(2)-2 m o+o^(2)+n^(2)-2 n p+p^(2))))/(2 (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y
+	// W+W^(2)-4))
+
+	// These exist cos limitations of online formula rearrangement, and I'm OK with that.
+	const auto &m {start.x}, &n {start.y}, &o {end.x}, &p {end.y};
+	const auto &X {ad.x}, &Y {ad.y}, &Z {bd.x}, &W {bd.y};
+
+	return (2 * m * X - 2 * X * o - 2 * m * Z + 2 * o * Z + 2 * n * Y - 2 * Y * p - 2 * n * W + 2 * p * W
+				   - sqrt(sq(-2 * m * X + 2 * X * o + 2 * m * Z - 2 * o * Z - 2 * n * Y + 2 * Y * p + 2 * n * W
+								  - 2 * p * W)
+						   - (4 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4)
+								   * (sq(m) - 2 * m * o + sq(o) + sq(n) - 2 * n * p + sq(p)))))
+			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
+}
+
+template<typename T, glm::qualifier Q>
+std::pair<Angle, Angle>
+find_arcs_radius(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
+{
+	const auto getrad = [&](auto leftOrRight) {
+		return find_arcs_radius(start, sincosf(entrys + leftOrRight), end, sincosf(entrye + leftOrRight));
+	};
+	return {getrad(-half_pi), getrad(half_pi)};
+}
 
 template<typename T>
 auto
 midpoint(const std::pair<T, T> & v)
 {
 	return std::midpoint(v.first, v.second);
+}
+
+template<typename T, glm::qualifier Q>
+Arc::Arc(const glm::vec<3, T, Q> & centre3, const glm::vec<3, T, Q> & e0p, const glm::vec<3, T, Q> & e1p) :
+	Arc([&]() -> Arc {
+		const auto diffa = e0p - centre3;
+		const auto diffb = e1p - centre3;
+		const auto anga = vector_yaw(diffa);
+		const auto angb = [&diffb, &anga]() {
+			const auto angb = vector_yaw(diffb);
+			return (angb < anga) ? angb + two_pi : angb;
+		}();
+		return {anga, angb};
+	}())
+{
 }
 
 // Conversions
