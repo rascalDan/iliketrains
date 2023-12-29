@@ -9,7 +9,7 @@ glm::mat4
 flat_orientation(const Direction3D & diff)
 {
 	static const auto oneeighty {glm::rotate(pi, up)};
-	const auto flatdiff {glm::normalize(diff.xy() ^ 0.F)};
+	const auto flatdiff {glm::normalize(diff.xy() || 0.F)};
 	auto e {glm::orientation(flatdiff, north)};
 	// Handle if diff is exactly opposite to north
 	return (std::isnan(e[0][0])) ? oneeighty : e;

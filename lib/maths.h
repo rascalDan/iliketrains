@@ -99,18 +99,6 @@ perspective_divide(glm::vec<4, T, Q> v)
 	return v / v.w;
 }
 
-constexpr inline Position3D
-operator^(const Position2D & v, float z)
-{
-	return {v.x, v.y, z};
-}
-
-constexpr inline glm::vec4
-operator^(const Position3D & v, float w)
-{
-	return {v.x, v.y, v.z, w};
-}
-
 template<glm::length_t L1, glm::length_t L2, typename T, glm::qualifier Q>
 inline constexpr glm::vec<L1 + L2, T, Q>
 operator||(const glm::vec<L1, T, Q> v1, const glm::vec<L2, T, Q> v2)
@@ -125,15 +113,17 @@ operator||(const glm::vec<L, T, Q> v1, const T v2)
 	return {v1, v2};
 }
 
-inline Position3D
-operator%(const Position3D & p, const glm::mat4 & mutation)
+template<glm::length_t L, typename T, glm::qualifier Q>
+inline constexpr glm::vec<L, T, Q>
+operator%(const glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
-	const auto p2 = mutation * (p ^ 1);
+	const auto p2 = mutation * (p || T(1));
 	return p2 / p2.w;
 }
 
-inline Position3D
-operator%=(Position3D & p, const glm::mat4 & mutation)
+template<glm::length_t L, typename T, glm::qualifier Q>
+inline constexpr glm::vec<L, T, Q>
+operator%=(glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
 	return p = p % mutation;
 }

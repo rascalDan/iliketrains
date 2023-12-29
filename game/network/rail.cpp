@@ -57,7 +57,7 @@ RailLinks::addLinksBetween(Position3D start, Position3D end)
 			const auto c1 = flatStart + sincosf(dir + half_pi) * radius;
 			const auto c2 = flatEnd + sincosf(dir2 + half_pi) * radius;
 			const auto mid = (c1 + c2) / 2.F;
-			const auto midh = mid ^ midheight(mid);
+			const auto midh = mid || midheight(mid);
 			addLink<RailLinkCurve>(start, midh, c1);
 			return addLink<RailLinkCurve>(end, midh, c2);
 		}
@@ -66,7 +66,7 @@ RailLinks::addLinksBetween(Position3D start, Position3D end)
 			const auto c1 = flatStart + sincosf(dir - half_pi) * radius;
 			const auto c2 = flatEnd + sincosf(dir2 - half_pi) * radius;
 			const auto mid = (c1 + c2) / 2.F;
-			const auto midh = mid ^ midheight(mid);
+			const auto midh = mid || midheight(mid);
 			addLink<RailLinkCurve>(midh, start, c1);
 			return addLink<RailLinkCurve>(midh, end, c2);
 		}
@@ -133,7 +133,7 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const Position3D & 
 		for (auto ei : {1U, 0U}) {
 			const auto trans {glm::translate(ends[ei].node->pos) * e};
 			for (const auto & rcs : railCrossSection) {
-				const Position3D m {(trans * (rcs.first ^ 1))};
+				const Position3D m {(trans * (rcs.first || 1.F))};
 				vertices.emplace_back(m, Position2D {rcs.second, len * static_cast<float>(ei)}, up);
 			}
 		}
@@ -142,7 +142,7 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const Position3D & 
 }
 
 RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position2D c) :
-	RailLinkCurve(a, b, c ^ a->pos.z, {c ^ 0.F, a->pos, b->pos})
+	RailLinkCurve(a, b, c || a->pos.z, {c || 0.F, a->pos, b->pos})
 {
 }
 
@@ -166,7 +166,7 @@ RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, Position3
 			const auto t {
 					trans * glm::rotate(half_pi - swing.x, up) * glm::translate(Position3D {radius, 0.F, swing.y})};
 			for (const auto & rcs : railCrossSection) {
-				const Position3D m {(t * (rcs.first ^ 1))};
+				const Position3D m {(t * (rcs.first || 1.F))};
 				vertices.emplace_back(m, Position2D {rcs.second, swing.z}, up);
 			}
 		}

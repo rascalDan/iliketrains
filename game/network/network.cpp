@@ -125,7 +125,7 @@ Network::genCurveDef(const Position3D & start, const Position3D & end, float sta
 		const auto c1 = flatStart + sincosf(startDir + half_pi) * radius;
 		const auto c2 = flatEnd + sincosf(endDir + half_pi) * radius;
 		const auto mid = (c1 + c2) / 2.F;
-		const auto midh = mid ^ midheight(mid);
+		const auto midh = mid || midheight(mid);
 		return {{start, midh, c1}, {end, midh, c2}};
 	}
 	else {
@@ -133,7 +133,7 @@ Network::genCurveDef(const Position3D & start, const Position3D & end, float sta
 		const auto c1 = flatStart + sincosf(startDir - half_pi) * radius;
 		const auto c2 = flatEnd + sincosf(endDir - half_pi) * radius;
 		const auto mid = (c1 + c2) / 2.F;
-		const auto midh = mid ^ midheight(mid);
+		const auto midh = mid || midheight(mid);
 		return {{midh, start, c1}, {midh, end, c2}};
 	}
 }

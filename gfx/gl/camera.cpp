@@ -18,7 +18,7 @@ Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
 	const auto mouseProjection = glm::lookAt(::origin, forward, up);
-	return {position, glm::normalize(glm::unProject(mouse ^ 1, mouseProjection, projection, screen))};
+	return {position, glm::normalize(glm::unProject(mouse || 1.F, mouseProjection, projection, screen))};
 }
 
 void
