@@ -8,11 +8,10 @@
 struct Mutation {
 	using Matrix = glm::mat4;
 
-	Matrix getMatrix() const;
-	Matrix getDeformationMatrix() const;
-	Matrix getLocationMatrix() const;
-
-	float relativeLevelOfDetail() const;
+	[[nodiscard]] Matrix getMatrix() const;
+	[[nodiscard]] Matrix getDeformationMatrix() const;
+	[[nodiscard]] Matrix getLocationMatrix() const;
+	[[nodiscard]] float relativeLevelOfDetail() const;
 
 	Position3D position {};
 	Rotation3D rotation {};
