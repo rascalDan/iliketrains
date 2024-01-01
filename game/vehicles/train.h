@@ -10,8 +10,6 @@
 #include <collection.h>
 #include <glm/glm.hpp>
 #include <location.h>
-#include <memory>
-#include <vector>
 
 class SceneShader;
 class ShadowMapper;
@@ -27,7 +25,7 @@ public:
 		return objects.front()->location;
 	}
 
-	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition *, float *) const override;
+	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition &, RelativeDistance &) const override;
 
 	void tick(TickDuration elapsed) override;
 	void doActivity(Go *, TickDuration) override;

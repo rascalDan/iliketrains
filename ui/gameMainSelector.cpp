@@ -73,11 +73,10 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 void
 GameMainSelector::defaultClick(const Ray & ray)
 {
-	Position2D baryPos {};
-	float distance {};
+	BaryPosition baryPos {};
+	RelativeDistance distance {};
 
-	if (const auto selected
-			= gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, &baryPos, &distance);
+	if (const auto selected = gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, baryPos, distance);
 			selected != gameState->world.end()) {
 		const auto & ref = *selected.base()->get();
 		clicked = typeid(ref).name();

@@ -6,7 +6,6 @@
 #include <game/selectable.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <utility>
 
 class Ray;
 class Train;
@@ -17,7 +16,7 @@ public:
 
 	void move(const Train *, float & trailBy);
 
-	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition *, float *) const override;
+	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition &, RelativeDistance &) const override;
 
 	RailVehicleClassPtr rvClass;
 	using LV = RailVehicleClass::LocationVertex;

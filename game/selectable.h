@@ -12,5 +12,5 @@ public:
 	virtual ~Selectable() = default;
 	DEFAULT_MOVE_COPY(Selectable);
 
-	[[nodiscard]] virtual bool intersectRay(const Ray &, Position2D *, float *) const = 0;
+	[[nodiscard]] virtual bool intersectRay(const Ray &, BaryPosition &, RelativeDistance &) const = 0;
 };
