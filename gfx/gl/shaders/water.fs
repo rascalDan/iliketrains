@@ -5,7 +5,6 @@ include(`materialInterface.glsl')
 include(`materialOut.glsl')
 
 uniform sampler2D texture0;
-uniform vec3 waves;
 
 void
 main()

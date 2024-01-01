@@ -5,13 +5,13 @@ include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
 uniform ivec3 viewPoint;
-uniform vec3 waves;
+uniform float waves;
 
 void
 main()
 {
-	vec3 wpos = vec3(position.x + (cos(waves.x) * 1000.0), position.y + (cos(waves.x * waves.y / 2) * 1000.0),
-			cos(waves.x + (position.x / 1000.0) + (position.y * 125.0)) * 300.0);
+	vec3 wpos = vec3(position.x + (cos(waves) * 1000.0), position.y + (cos(waves * 0 / 2) * 1000.0),
+			cos(waves + (position.x / 1000000.0) + (position.y / 8000.0)) * 300.0);
 
 	FragPos = vec3(wpos.xy, position.z);
 	TexCoords = texCoord;

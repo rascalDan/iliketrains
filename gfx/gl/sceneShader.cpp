@@ -85,8 +85,7 @@ void
 SceneShader::WaterProgram::use(float waveCycle) const
 {
 	Program::use();
-	Position3D waves {waveCycle, 0.F, 0.F};
-	glUniform3fv(waveLoc, 1, glm::value_ptr(waves));
+	glUniform1f(waveLoc, waveCycle);
 }
 
 SceneShader::PointLightShader::PointLightShader() :
