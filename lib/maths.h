@@ -21,13 +21,12 @@ struct Arc : public std::pair<float, float> {
 	}
 };
 
-constexpr const Position3D origin {0, 0, 0};
-constexpr const Position3D up {0, 0, 1};
-constexpr const Position3D down {0, 0, -1};
-constexpr const Position3D north {0, 1, 0};
-constexpr const Position3D south {0, -1, 0};
-constexpr const Position3D east {1, 0, 0};
-constexpr const Position3D west {-1, 0, 0};
+constexpr const RelativePosition3D up {0, 0, 1};
+constexpr const RelativePosition3D down {0, 0, -1};
+constexpr const RelativePosition3D north {0, 1, 0};
+constexpr const RelativePosition3D south {0, -1, 0};
+constexpr const RelativePosition3D east {1, 0, 0};
+constexpr const RelativePosition3D west {-1, 0, 0};
 constexpr auto half_pi {glm::half_pi<float>()};
 constexpr auto quarter_pi {half_pi / 2};
 constexpr auto pi {glm::pi<float>()};

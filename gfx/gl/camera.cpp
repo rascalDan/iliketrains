@@ -17,14 +17,14 @@ Ray
 Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
-	const auto mouseProjection = glm::lookAt(::origin, forward, up);
+	const auto mouseProjection = glm::lookAt({}, forward, up);
 	return {position, glm::normalize(glm::unProject(mouse || 1.F, mouseProjection, projection, screen))};
 }
 
 void
 Camera::updateView()
 {
-	viewProjection = projection * glm::lookAt(origin, forward, up);
+	viewProjection = projection * glm::lookAt({}, forward, up);
 	inverseViewProjection = glm::inverse(viewProjection);
 }
 

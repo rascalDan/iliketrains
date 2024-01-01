@@ -17,7 +17,7 @@ public:
 
 	void move(const Train *, float & trailBy);
 
-	[[nodiscard]] bool intersectRay(const Ray &, Position2D *, float *) const override;
+	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition *, float *) const override;
 
 	RailVehicleClassPtr rvClass;
 	using LV = RailVehicleClass::LocationVertex;

@@ -130,7 +130,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	const auto lightViewDir = glm::lookAt(origin, dir, up);
+	const auto lightViewDir = glm::lookAt({}, dir, up);
 	const auto lightViewPoint = camera.getPosition();
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
 

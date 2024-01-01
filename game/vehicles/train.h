@@ -27,7 +27,7 @@ public:
 		return objects.front()->location;
 	}
 
-	[[nodiscard]] bool intersectRay(const Ray &, Position2D *, float *) const override;
+	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition *, float *) const override;
 
 	void tick(TickDuration elapsed) override;
 	void doActivity(Go *, TickDuration) override;

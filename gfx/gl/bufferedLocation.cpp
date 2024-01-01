@@ -25,7 +25,7 @@ BufferedLocation::position() const
 	return loc.pos;
 }
 
-Position3D
+Rotation3D
 BufferedLocation::rotation() const
 {
 	return loc.rot;
@@ -41,7 +41,7 @@ BufferedLocation::setPosition(GlobalPosition3D p, bool update)
 }
 
 void
-BufferedLocation::setRotation(Position3D r, bool update)
+BufferedLocation::setRotation(Rotation3D r, bool update)
 {
 	loc.rot = r;
 	if (update) {

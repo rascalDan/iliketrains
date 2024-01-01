@@ -20,7 +20,7 @@ Train::getBogiePosition(float linkDist, float dist) const
 }
 
 bool
-Train::intersectRay(const Ray & ray, Position2D * baryPos, float * distance) const
+Train::intersectRay(const Ray & ray, BaryPosition * baryPos, float * distance) const
 {
 	return applyOne(&RailVehicle::intersectRay, ray, baryPos, distance) != end();
 }

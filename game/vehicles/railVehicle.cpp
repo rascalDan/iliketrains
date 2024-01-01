@@ -44,7 +44,7 @@ RailVehicle::move(const Train * t, float & trailBy)
 }
 
 bool
-RailVehicle::intersectRay(const Ray & ray, Position2D * baryPos, float * distance) const
+RailVehicle::intersectRay(const Ray & ray, BaryPosition * baryPos, float * distance) const
 {
 	constexpr const auto X = 1350.F;
 	const auto Y = this->rvClass->length / 2.F;

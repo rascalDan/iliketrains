@@ -6,16 +6,17 @@
 class Vertex {
 public:
 #ifndef __cpp_aggregate_paren_init
-	constexpr Vertex(Position3D pos, TextureRelCoord texCoord, Normal3D normal, RGBA colour = {}, GLuint material = 0) :
-		pos {std::move(pos)}, texCoord {std::move(texCoord)}, normal {std::move(normal)}, colour {std::move(colour)},
-		material {material}
+	constexpr Vertex(
+			RelativePosition3D pos, TextureRelCoord texCoord, Normal3D normal, RGBA colour = {}, GLuint material = 0) :
+		pos {std::move(pos)},
+		texCoord {std::move(texCoord)}, normal {std::move(normal)}, colour {std::move(colour)}, material {material}
 	{
 	}
 #endif
 
 	bool operator==(const Vertex &) const = default;
 
-	Position3D pos {};
+	RelativePosition3D pos {};
 	TextureRelCoord texCoord {};
 	Normal3D normal {};
 	RGBA colour {};
