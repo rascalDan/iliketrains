@@ -9,7 +9,7 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
 	const auto step = two_pi / static_cast<float>(P);
 
 	// Generate 2D circumference points
-	std::vector<Position2D> circumference(P);
+	std::vector<RelativePosition2D> circumference(P);
 	std::generate(circumference.begin(), circumference.end(), [a = 0.F, step]() mutable {
 		return sincosf(a += step) * .5F;
 	});

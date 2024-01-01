@@ -4,7 +4,7 @@
 Plane::CreatedFaces
 Plane::createMesh(ModelFactoryMesh & mesh, float) const
 {
-	static constexpr std::array<Position3D, 4> VERTICES {{
+	static constexpr std::array<RelativePosition3D, 4> VERTICES {{
 			{n, n, z},
 			{y, n, z},
 			{y, y, z},

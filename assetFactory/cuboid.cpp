@@ -4,7 +4,7 @@
 Cuboid::CreatedFaces
 Cuboid::createMesh(ModelFactoryMesh & mesh, float) const
 {
-	static constexpr std::array<Position3D, 8> VERTICES {{
+	static constexpr std::array<RelativePosition3D, 8> VERTICES {{
 			// bottom
 			{n, n, z},
 			{n, y, z},

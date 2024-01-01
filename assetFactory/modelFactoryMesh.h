@@ -14,7 +14,7 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	EdgeAttributes(OpenMesh::Attributes::Status);
 	VertexAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status);
 	HalfedgeAttributes(OpenMesh::Attributes::TexCoord2D);
-	using Point = Position3D;
+	using Point = RelativePosition3D;
 	using Normal = Normal3D;
 	using Color = RGBA;
 	using TexCoord2D = TextureRelCoord;

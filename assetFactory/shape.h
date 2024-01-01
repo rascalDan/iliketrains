@@ -22,5 +22,5 @@ public:
 	virtual CreatedFaces createMesh(ModelFactoryMesh &, float levelOfDetailFactor) const = 0;
 
 	static std::vector<OpenMesh::VertexHandle> addToMesh(
-			ModelFactoryMesh & mesh, const std::span<const Position3D> vertices);
+			ModelFactoryMesh & mesh, const std::span<const RelativePosition3D> vertices);
 };

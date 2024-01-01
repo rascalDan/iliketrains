@@ -11,9 +11,10 @@ struct Mutation {
 	[[nodiscard]] Matrix getMatrix() const;
 	[[nodiscard]] Matrix getDeformationMatrix() const;
 	[[nodiscard]] Matrix getLocationMatrix() const;
+
 	[[nodiscard]] float relativeLevelOfDetail() const;
 
-	Position3D position {};
+	RelativePosition3D position {};
 	Rotation3D rotation {};
 	Scale3D scale {1};
 
