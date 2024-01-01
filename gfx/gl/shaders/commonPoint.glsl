@@ -16,13 +16,11 @@ getMaterialDetail(uint midx)
 void
 main()
 {
-	vec4 worldPos = model * vec4(position, 1.0);
-
-	FragPos = worldPos.xyz;
+	FragPos = (model * vec4(position, 1.0)).xyz + modelPos;
 	TexCoords = texCoord;
 	Normal = (model * vec4(normal, 0.0)).xyz;
 	Colour = colour;
 	Material = getMaterialDetail(material);
 
-	gl_Position = viewProjection * worldPos;
+	gl_Position = viewProjection * vec4(FragPos - viewPoint, 1);
 }

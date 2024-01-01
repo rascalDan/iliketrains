@@ -11,9 +11,9 @@ const vec3 rock = vec3(.2, .2, .1);
 const vec3 sand = vec3(.76, .7, .5);
 const vec3 snow = vec3(.97, .97, .99);
 
-const float beachline = .5;
-const float snowline_low = 28;
-const float snowline_high = 30;
+const float beachline = 500;
+const float snowline_low = 28000;
+const float snowline_high = 30000;
 
 const float slope_min = .99;
 const float slope_mid = .95;
@@ -60,7 +60,7 @@ main()
 		}
 	}
 
-	gPosition = vec4(FragPos, 1);
+	gPosition = ivec4(FragPos, 1);
 	gNormal = vec4(Normal, 1);
 	gAlbedoSpec = vec4(color, 1);
 }

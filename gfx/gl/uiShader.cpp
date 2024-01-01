@@ -23,7 +23,7 @@ UIShader::UIShader(size_t width, size_t height) :
 UIShader::UIShader(const glm::mat4 & viewProjection) : icon {viewProjection}, text {viewProjection} { }
 
 void
-UIShader::TextProgram::use(const glm::vec3 & colour) const
+UIShader::TextProgram::use(const RGB & colour) const
 {
 	Program::use();
 	glUniform3fv(colorLoc, 1, glm::value_ptr(colour));

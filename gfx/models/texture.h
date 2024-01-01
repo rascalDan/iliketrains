@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include <cache.h>
 #include <filesystem>
 #include <glArrays.h>
@@ -39,10 +40,11 @@ public:
 	static void save(const glTexture &, const char * path);
 	static void saveDepth(const glTexture &, const char * path);
 	static void saveNormal(const glTexture &, const char * path);
+	static void savePosition(const glTexture &, const char * path);
 
 protected:
 	static void save(const glTexture &, GLenum, GLenum, uint8_t channels, const char * path, uint8_t tgaFormat);
-	static glm::ivec2 getSize(const glTexture &);
+	static TextureAbsCoord getSize(const glTexture &);
 
 	glTexture m_texture;
 	GLenum type;
@@ -53,7 +55,7 @@ public:
 	TextureAtlas(GLsizei width, GLsizei height, GLuint count);
 
 	void bind(GLenum unit = GL_TEXTURE0) const override;
-	GLuint add(glm::ivec2 position, glm::ivec2 size, void * data, TextureOptions = {});
+	GLuint add(TextureAbsCoord position, TextureAbsCoord size, void * data, TextureOptions = {});
 
 private:
 	glTexture m_atlas;

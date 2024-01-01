@@ -8,7 +8,7 @@ LinkHistory::add(const Link::WPtr & l, unsigned char d)
 	links.insert(links.begin(), {l, d});
 	const auto lp = l.lock();
 	totalLen += lp->length;
-	while (totalLen >= 1000.F && !links.empty()) {
+	while (totalLen >= 1000000.F && !links.empty()) {
 		totalLen -= links.back().first.lock()->length;
 		links.pop_back();
 	}

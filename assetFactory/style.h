@@ -10,9 +10,7 @@
 class Style {
 public:
 	using StyleStack = std::vector<const Style *>;
-	using Colour = glm::vec3;
-	using ColourAlpha = glm::vec4;
-	using EffectiveColour = std::optional<std::reference_wrapper<const ColourAlpha>>;
+	using EffectiveColour = std::optional<std::reference_wrapper<const RGBA>>;
 
 	void applyStyle(ModelFactoryMesh &, const StyleStack & parents, const Shape::CreatedFaces &) const;
 	void applyStyle(ModelFactoryMesh &, const StyleStack & parents, const ModelFactoryMesh::FaceHandle &) const;
@@ -30,7 +28,7 @@ public:
 
 	static EffectiveColour getColour(const StyleStack & parents);
 
-	ColourAlpha colour {};
+	RGBA colour {};
 	std::optional<bool> smooth;
 	std::string texture;
 	std::string textureRotation; // Multiples of 90deg, no int/enum support

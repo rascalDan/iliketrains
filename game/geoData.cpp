@@ -1,215 +1,341 @@
 #include "geoData.h"
-#include "gfx/image.h"
-#include <algorithm>
-#include <array>
-#include <cmath>
-#include <cstddef>
+#include <fstream>
 #include <glm/gtx/intersect.hpp>
-#include <initializer_list>
-#include <limits>
 #include <maths.h>
-#include <random>
-#include <ray.h>
-#include <stb/stb_image.h>
-#include <stdexcept>
-#include <util.h>
 
-GeoData::GeoData(Limits l, float s) :
-	limit {std::move(l)}, size {(limit.second - limit.first) + 1}, scale {s}, nodes {[this]() {
-		return (static_cast<std::size_t>(size.x * size.y));
-	}()}
+GeoData
+GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
+{
+	size_t ncols = 0, nrows = 0, xllcorner = 0, yllcorner = 0, cellsize = 0;
+	std::map<std::string_view, size_t *> properties {
+			{"ncols", &ncols},
+			{"nrows", &nrows},
+			{"xllcorner", &xllcorner},
+			{"yllcorner", &yllcorner},
+			{"cellsize", &cellsize},
+	};
+	std::ifstream f {input};
+	while (!properties.empty()) {
+		std::string property;
+		f >> property;
+		f >> *properties.at(property);
+		properties.erase(property);
+	}
+	xllcorner *= 1000;
+	yllcorner *= 1000;
+	cellsize *= 1000;
+	std::vector<VertexHandle> vertices;
+	vertices.reserve(ncols * nrows);
+	GeoData mesh;
+	mesh.lowerExtent = {xllcorner, yllcorner, std::numeric_limits<GlobalDistance>::max()};
+	mesh.upperExtent = {xllcorner + (cellsize * (ncols - 1)), yllcorner + (cellsize * (nrows - 1)),
+			std::numeric_limits<GlobalDistance>::min()};
+	for (size_t row = 0; row < nrows; ++row) {
+		for (size_t col = 0; col < ncols; ++col) {
+			float heightf = 0;
+			f >> heightf;
+			const auto height = static_cast<GlobalDistance>(std::round(heightf * 1000.F));
+			mesh.upperExtent.z = std::max(mesh.upperExtent.z, height);
+			mesh.lowerExtent.z = std::min(mesh.lowerExtent.z, height);
+			vertices.push_back(mesh.add_vertex({xllcorner + (col * cellsize), yllcorner + (row * cellsize), height}));
+		}
+	}
+	if (!f.good()) {
+		throw std::runtime_error("Couldn't read terrain file");
+	}
+	for (size_t row = 1; row < nrows; ++row) {
+		for (size_t col = 1; col < ncols; ++col) {
+			mesh.add_face({
+					vertices[ncols * (row - 1) + (col - 1)],
+					vertices[ncols * (row - 0) + (col - 0)],
+					vertices[ncols * (row - 0) + (col - 1)],
+			});
+			mesh.add_face({
+					vertices[ncols * (row - 1) + (col - 1)],
+					vertices[ncols * (row - 1) + (col - 0)],
+					vertices[ncols * (row - 0) + (col - 0)],
+			});
+		}
+	}
+	mesh.update_vertex_normals_only();
+
+	return mesh;
+};
+
+GeoData
+GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistance h)
+{
+	GeoData mesh;
+
+	mesh.lowerExtent = {lower, h};
+	mesh.upperExtent = {upper, h};
+
+	const auto ll = mesh.add_vertex({lower.x, lower.y, h}), lu = mesh.add_vertex({lower.x, upper.y, h}),
+			   ul = mesh.add_vertex({upper.x, lower.y, h}), uu = mesh.add_vertex({upper.x, upper.y, h});
+
+	mesh.add_face(ll, uu, lu);
+	mesh.add_face(ll, ul, uu);
+
+	mesh.update_vertex_normals_only();
+
+	return mesh;
+}
+
+OpenMesh::FaceHandle
+GeoData::findPoint(GlobalPosition2D p) const
+{
+	return findPoint(p, *faces_begin());
+}
+
+GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh) :
+	PointFace {p, mesh, *mesh->faces_begin()}
 {
 }
 
-void
-GeoData::generateRandom()
+GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh, FaceHandle start) :
+	PointFace {p, mesh->findPoint(p, start)}
 {
-	// We acknowledge this is terrible :)
+}
 
-	// Add hills
-	std::mt19937 gen(std::random_device {}());
-	std::uniform_int_distribution<> rxpos(limit.first.x + 2, limit.second.x - 2),
-			rypos(limit.first.y + 2, limit.second.y - 2);
-	std::uniform_int_distribution<> rsize(10, 30);
-	std::uniform_real_distribution<float> rheight(1, 3);
-	for (int h = 0; h < 500;) {
-		const glm::ivec2 hpos {rxpos(gen), rypos(gen)};
-		const glm::ivec2 hsize {rsize(gen), rsize(gen)};
-		if (const auto lim1 = hpos - hsize; lim1.x > limit.first.x && lim1.y > limit.first.y) {
-			if (const auto lim2 = hpos + hsize; lim2.x < limit.second.x && lim2.y < limit.second.y) {
-				const auto height = rheight(gen);
-				const glm::ivec2 hsizesqrd {hsize.x * hsize.x, hsize.y * hsize.y};
-				for (auto y = lim1.y; y < lim2.y; y += 1) {
-					for (auto x = lim1.x; x < lim2.x; x += 1) {
-						const auto dist {hpos - glm::ivec2 {x, y}};
-						const glm::ivec2 distsqrd {dist.x * dist.x, dist.y * dist.y};
-						const auto out {ratio(sq(x - hpos.x), sq(hsize.x)) + ratio(sq(y - hpos.y), sq(hsize.y))};
-						if (out <= 1.0F) {
-							auto & node {nodes[at({x, y})]};
-							const auto m {1.F / (7.F * out - 8.F) + 1.F};
-							node.height += height * m;
-						}
-					}
-				}
-				h += 1;
-			}
-		}
+GeoData::FaceHandle
+GeoData::PointFace::face(const GeoData * mesh, FaceHandle start) const
+{
+	if (_face.is_valid()) {
+		assert(mesh->triangleContainsPoint(point, _face));
+		return _face;
+	}
+	else {
+		return (_face = mesh->findPoint(point, start));
 	}
 }
 
-void
-GeoData::loadFromImages(const std::filesystem::path & fileName, float scale_)
+GeoData::FaceHandle
+GeoData::PointFace::face(const GeoData * mesh) const
 {
-	const Image map {fileName.c_str(), STBI_grey};
-	size = {map.width, map.height};
-	limit = {{0, 0}, size - glm::uvec2 {1, 1}};
-	const auto points {size.x * size.y};
-	scale = scale_;
-	nodes.resize(points);
+	return face(mesh, *mesh->faces_begin());
+}
 
-	std::transform(map.data.data(), map.data.data() + points, nodes.begin(), [](auto d) {
-		return Node {(d * 0.1F) - 1.5F};
+namespace {
+	template<template<typename> typename Op>
+	[[nodiscard]] constexpr inline auto
+	pointLineOp(const GlobalPosition2D p, const GlobalPosition2D e1, const GlobalPosition2D e2)
+	{
+		return Op {}(CalcDistance(e2.x - e1.x) * CalcDistance(p.y - e1.y),
+				CalcDistance(e2.y - e1.y) * CalcDistance(p.x - e1.x));
+	}
+
+	constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
+	constexpr auto pointLeftOfOrOnLine = pointLineOp<std::greater_equal>;
+
+	static_assert(pointLeftOfLine({1, 2}, {1, 1}, {2, 2}));
+	static_assert(pointLeftOfLine({2, 1}, {2, 2}, {1, 1}));
+	static_assert(pointLeftOfLine({2, 2}, {1, 2}, {2, 1}));
+	static_assert(pointLeftOfLine({1, 1}, {2, 1}, {1, 2}));
+	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490000000}, {310050000, 490050000}));
+	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310050000, 490050000}, {310000000, 490050000}));
+	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490050000}, {310000000, 490000000}));
+
+	[[nodiscard]] constexpr inline bool
+	linesCross(
+			const GlobalPosition2D a1, const GlobalPosition2D a2, const GlobalPosition2D b1, const GlobalPosition2D b2)
+	{
+		return (pointLeftOfLine(a2, b1, b2) == pointLeftOfLine(a1, b2, b1))
+				&& (pointLeftOfLine(b1, a1, a2) == pointLeftOfLine(b2, a2, a1));
+	}
+
+	static_assert(linesCross({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+	static_assert(linesCross({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+	[[nodiscard]] constexpr inline bool
+	linesCrossLtR(
+			const GlobalPosition2D a1, const GlobalPosition2D a2, const GlobalPosition2D b1, const GlobalPosition2D b2)
+	{
+		return pointLeftOfLine(a2, b1, b2) && pointLeftOfLine(a1, b2, b1) && pointLeftOfLine(b1, a1, a2)
+				&& pointLeftOfLine(b2, a2, a1);
+	}
+
+	static_assert(linesCrossLtR({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+	static_assert(!linesCrossLtR({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+	constexpr GlobalPosition3D
+	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
+	{
+		const CalcPosition3D a = t[1] - t[0], b = t[2] - t[0];
+		const auto n = crossInt(a, b);
+		return {point, ((n.x * t[0].x) + (n.y * t[0].y) + (n.z * t[0].z) - (n.x * point.x) - (n.y * point.y)) / n.z};
+	}
+
+	static_assert(positionOnTriangle({7, -2}, {{1, 2, 3}, {1, 0, 1}, {-2, 1, 0}}) == GlobalPosition3D {7, -2, 3});
+}
+
+OpenMesh::FaceHandle
+GeoData::findPoint(GlobalPosition2D p, OpenMesh::FaceHandle f) const
+{
+	while (f.is_valid() && !triangleContainsPoint(p, triangle<2>(f))) {
+		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
+			f = opposite_face_handle(*next);
+			if (f.is_valid()) {
+				const auto e1 = point(to_vertex_handle(*next));
+				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
+				if (pointLeftOfLine(p, e1, e2)) {
+					break;
+				}
+			}
+			f.reset();
+		}
+	}
+	return f;
+}
+
+GlobalPosition3D
+GeoData::positionAt(const PointFace & p) const
+{
+	return positionOnTriangle(p.point, triangle<3>(p.face(this)));
+}
+
+[[nodiscard]] std::optional<GlobalPosition3D>
+GeoData::intersectRay(const Ray & ray) const
+{
+	return intersectRay(ray, findPoint(ray.start));
+}
+
+[[nodiscard]] std::optional<GlobalPosition3D>
+GeoData::intersectRay(const Ray & ray, FaceHandle face) const
+{
+	std::optional<GlobalPosition3D> out;
+	walkUntil(PointFace {ray.start, face},
+			ray.start.xy() + (ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
+			[&out, &ray, this](FaceHandle face) {
+				BaryPosition bari {};
+				float dist {};
+				const auto t = triangle<3>(face);
+				if (glm::intersectRayTriangle<RelativePosition3D::value_type, glm::defaultp>(
+							ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
+					out = t * bari;
+					return true;
+				}
+				return false;
+			});
+	return out;
+}
+
+void
+GeoData::walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const
+{
+	walkUntil(from, to, [&op](const auto & fh) {
+		op(fh);
+		return false;
 	});
 }
 
-GeoData::Quad
-GeoData::quad(glm::vec2 wcoord) const
+void
+GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const
 {
-	constexpr static const std::array<glm::vec2, 4> corners {{{0, 0}, {0, 1}, {1, 0}, {1, 1}}};
-	return transform_array(transform_array(corners,
-								   [coord = (wcoord / scale)](const auto c) {
-									   return glm::vec2 {std::floor(coord.x), std::floor(coord.y)} + c;
-								   }),
-			[this](const auto c) {
-				return (c * scale) || nodes[at(c)].height;
-			});
-}
-
-glm::vec3
-GeoData::positionAt(const glm::vec2 wcoord) const
-{
-	const auto point {quad(wcoord)};
-	const glm::vec2 frac = (wcoord - !point.front()) / scale;
-	auto edge = [&point, &frac](auto offset) {
-		return point[offset].z + ((point[offset + 2].z - point[offset].z) * frac.x);
-	};
-	const auto heightFloor = edge(0U), heightCeil = edge(1U),
-			   heightMid = heightFloor + ((heightCeil - heightFloor) * frac.y);
-
-	return wcoord || heightMid;
-}
-
-GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1) : RayTracer {p0, p1, glm::abs(p1)} { }
-
-GeoData::RayTracer::RayTracer(glm::vec2 p0, glm::vec2 p1, glm::vec2 d) :
-	RayTracer {p0, d, byAxis(p0, p1, d, 0), byAxis(p0, p1, d, 1)}
-{
-}
-
-GeoData::RayTracer::RayTracer(
-		glm::vec2 p0, glm::vec2 d_, std::pair<float, float> xdata, std::pair<float, float> ydata) :
-	p {glm::floor(p0)},
-	d {d_}, error {xdata.second - ydata.second}, inc {xdata.first, ydata.first}
-{
-}
-
-std::pair<float, float>
-GeoData::RayTracer::byAxis(glm::vec2 p0, glm::vec2 p1, glm::vec2 d, glm::length_t axis)
-{
-	using Limits = std::numeric_limits<typename glm::vec2::value_type>;
-	static_assert(Limits::has_infinity);
-	if (d[axis] == 0) {
-		return {0, Limits::infinity()};
+	auto f = from.face(this);
+	if (!f.is_valid()) {
+		const auto entryEdge = findEntry(from.point, to);
+		if (!entryEdge.is_valid()) {
+			return;
+		}
+		f = opposite_face_handle(entryEdge);
 	}
-	else if (p1[axis] > 0) {
-		return {1, (std::floor(p0[axis]) + 1.F - p0[axis]) * d[1 - axis]};
-	}
-	else {
-		return {-1, (p0[axis] - std::floor(p0[axis])) * d[1 - axis]};
-	}
-}
-
-glm::vec2
-GeoData::RayTracer::next()
-{
-	const glm::vec2 cur {p};
-
-	static constexpr const glm::vec2 m {1, -1};
-	const int axis = (error > 0) ? 1 : 0;
-	p[axis] += inc[axis];
-	error += d[1 - axis] * m[axis];
-
-	return cur;
-}
-
-std::optional<glm::vec3>
-GeoData::intersectRay(const Ray & ray) const
-{
-	if (glm::length(!ray.direction) <= 0) {
-		return {};
-	}
-	RayTracer rt {ray.start / scale, ray.direction};
-	while (true) {
-		const auto n {rt.next() * scale};
-		try {
-			const auto point = quad(n);
-			for (auto offset : {0U, 1U}) {
-				glm::vec2 bary;
-				float distance;
-				if (glm::intersectRayTriangle(ray.start, ray.direction, point[offset], point[offset + 1],
-							point[offset + 2], bary, distance)) {
-					return point[offset] + ((point[offset + 1] - point[offset]) * bary[0])
-							+ ((point[offset + 2] - point[offset]) * bary[1]);
+	FaceHandle previousFace;
+	while (f.is_valid() && !op(f)) {
+		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
+			f = opposite_face_handle(*next);
+			if (f.is_valid() && f != previousFace) {
+				const auto e1 = point(to_vertex_handle(*next));
+				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
+				if (linesCrossLtR(from.point, to, e1, e2)) {
+					previousFace = f;
+					break;
 				}
 			}
+			f.reset();
 		}
-		catch (std::range_error &) {
-			const auto rel = n / !ray.direction;
-			if (rel.x > 0 && rel.y > 0) {
-				return {};
+	}
+}
+
+void
+GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op) const
+{
+	boundaryWalk(op, findBoundaryStart());
+}
+
+void
+GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op, HalfedgeHandle start) const
+{
+	assert(is_boundary(start));
+	boundaryWalkUntil(
+			[&op](auto heh) {
+				op(heh);
+				return false;
+			},
+			start);
+}
+
+void
+GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op) const
+{
+	boundaryWalkUntil(op, findBoundaryStart());
+}
+
+void
+GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op, HalfedgeHandle start) const
+{
+	assert(is_boundary(start));
+	if (!op(start)) {
+		for (auto heh = next_halfedge_handle(start); heh != start; heh = next_halfedge_handle(heh)) {
+			if (op(heh)) {
+				break;
 			}
 		}
 	}
-
-	return {};
 }
 
-unsigned int
-GeoData::at(glm::ivec2 coord) const
+GeoData::HalfedgeHandle
+GeoData::findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const
 {
-	if (coord.x < limit.first.x || coord.x > limit.second.x || coord.y < limit.first.y || coord.y > limit.second.y) {
-		throw std::range_error {"Coordinates outside GeoData limits"};
+	HalfedgeHandle entry;
+	boundaryWalkUntil([this, from, to, &entry](auto he) {
+		const auto e1 = point(to_vertex_handle(he));
+		const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(he)));
+		if (linesCrossLtR(from, to, e1, e2)) {
+			entry = he;
+			return true;
+		}
+		return false;
+	});
+	return entry;
+}
+
+bool
+GeoData::triangleContainsPoint(const GlobalPosition2D p, const Triangle<2> & t)
+{
+	return pointLeftOfOrOnLine(p, t[0], t[1]) && pointLeftOfOrOnLine(p, t[1], t[2])
+			&& pointLeftOfOrOnLine(p, t[2], t[0]);
+}
+
+bool
+GeoData::triangleContainsPoint(const GlobalPosition2D p, FaceHandle face) const
+{
+	return triangleContainsPoint(p, triangle<2>(face));
+}
+
+GeoData::HalfedgeHandle
+GeoData::findBoundaryStart() const
+{
+	return *std::find_if(halfedges_begin(), halfedges_end(), [this](const auto heh) {
+		return is_boundary(heh);
+	});
+}
+
+void
+GeoData::update_vertex_normals_only()
+{
+	for (auto vh : all_vertices()) {
+		Normal3D n;
+		calc_vertex_normal_correct(vh, n);
+		this->set_normal(vh, glm::normalize(n));
 	}
-	const glm::uvec2 offset = coord - limit.first;
-	return offset.x + (offset.y * size.x);
-}
-
-unsigned int
-GeoData::at(int x, int y) const
-{
-	return at({x, y});
-}
-
-GeoData::Limits
-GeoData::getLimit() const
-{
-	return limit;
-}
-
-float
-GeoData::getScale() const
-{
-	return scale;
-}
-
-glm::uvec2
-GeoData::getSize() const
-{
-	return size;
-}
-
-std::span<const GeoData::Node>
-GeoData::getNodes() const
-{
-	return nodes;
 }

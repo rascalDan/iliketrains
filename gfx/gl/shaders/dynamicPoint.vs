@@ -5,6 +5,8 @@ include(`meshIn.glsl')
 include(`materialInterface.glsl')
 
 uniform mat4 viewProjection;
+uniform ivec3 viewPoint;
 uniform mat4 model;
+uniform ivec3 modelPos;
 
 include(`commonPoint.glsl')

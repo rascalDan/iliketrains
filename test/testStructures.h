@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/types.h"
 #include <persistence.h>
 
 struct AbsObject : public Persistence::Persistable {
@@ -31,9 +32,9 @@ struct TestObject : public Persistence::Persistable {
 	float flt {};
 	std::string str {};
 	bool bl {};
-	glm::vec3 pos {};
+	Position3D pos {};
 	std::vector<float> flts;
-	std::vector<glm::vec3> poss;
+	std::vector<Position3D> poss;
 	std::vector<std::vector<std::vector<std::string>>> nest;
 	std::unique_ptr<TestObject> ptr;
 	std::unique_ptr<AbsObject> aptr;

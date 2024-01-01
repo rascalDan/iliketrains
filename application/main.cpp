@@ -26,7 +26,6 @@
 #include <ui/applicationBase.h>
 #include <ui/gameMainWindow.h>
 #include <ui/window.h>
-#include <vector>
 
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
@@ -38,8 +37,7 @@ public:
 	int
 	run()
 	{
-		geoData = std::make_shared<GeoData>(GeoData::Limits {{-120, -120}, {120, 120}}, 10.F);
-		geoData->generateRandom();
+		geoData = std::make_shared<GeoData>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
 
 		Windows windows;
 		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -49,10 +47,11 @@ public:
 
 		{
 			auto rl = world.create<RailLinks>();
-			const glm::vec3 j {-1120, -1100, 3}, k {-1100, -1000, 15}, l {-1000, -800, 20}, m {-900, -600, 30},
-					n {-600, -500, 32}, o {-500, -800, 30}, p {-600, -900, 25}, q {-1025, -1175, 10},
-					r {-925, -1075, 10};
-			const glm::vec3 s {-1100, -500, 15}, t {-1100, -450, 15}, u {-1000, -400, 15};
+			const GlobalPosition3D j {-1120000, -1100000, 3000}, k {-1100000, -1000000, 15000},
+					l {-1000000, -800000, 20000}, m {-900000, -600000, 30000}, n {-600000, -500000, 32000},
+					o {-500000, -800000, 30000}, p {-600000, -900000, 25000}, q {-1025000, -1175000, 10000},
+					r {-925000, -1075000, 10000}, s {-1100000, -500000, 15000}, t {-1100000, -450000, 15000},
+					u {-1000000, -400000, 15000};
 			auto l3 = rl->addLinksBetween(j, k);
 			rl->addLinksBetween(k, l);
 			rl->addLinksBetween(l, m);
@@ -76,13 +75,14 @@ public:
 				train->create<RailVehicle>(b47);
 			}
 			train->orders.removeAll();
-			train->orders.create<GoTo>(&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100, -450, 15}));
+			train->orders.create<GoTo>(
+					&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100000, -450000, 15000}));
 			train->currentActivity = train->orders.current()->createActivity();
 
 			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
-			for (float x = 900; x < 1100; x += 3) {
-				for (float y = 900; y < 1100; y += 3) {
-					world.create<Plant>(foliage, Location {geoData->positionAt({-x, -y})});
+			for (auto x = 311000000; x < 311830000; x += 5000) {
+				for (auto y = 491100000; y < 491130000; y += 5000) {
+					world.create<Plant>(foliage, Location {geoData->positionAt({{x, y}})});
 				}
 			}
 		}

@@ -171,12 +171,13 @@ BOOST_DATA_TEST_CASE(test_find_arc_centre,
 
 BOOST_AUTO_TEST_CASE(test_find_arcs_radius)
 {
-	BOOST_CHECK_CLOSE(find_arcs_radius({10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
+	BOOST_CHECK_CLOSE(
+			find_arcs_radius(RelativePosition2D {10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
 }
 
 struct TestLinkStraight : public LinkStraight {
 	explicit TestLinkStraight(glm::vec3 v) :
-		Link {{std::make_shared<Node>(origin), vector_yaw(v)}, {std::make_shared<Node>(v), vector_yaw(-v)},
+		Link {{std::make_shared<Node>(Position3D {}), vector_yaw(v)}, {std::make_shared<Node>(v), vector_yaw(-v)},
 				glm::length(v)}
 	{
 	}
@@ -196,12 +197,12 @@ BOOST_DATA_TEST_CASE(straight1,
 	const TestLinkStraight l(v);
 	{
 		const auto p = l.positionAt(0, 0);
-		BOOST_CHECK_EQUAL(p.pos, origin);
+		BOOST_CHECK_EQUAL(p.pos, GlobalPosition3D {});
 		BOOST_CHECK_EQUAL(p.rot, glm::vec3(0, angFor, 0));
 	}
 	{
 		const auto p = l.positionAt(0, 1);
-		BOOST_CHECK_EQUAL(p.pos, v);
+		BOOST_CHECK_EQUAL(p.pos, GlobalPosition3D {v});
 		BOOST_CHECK_EQUAL(p.rot, glm::vec3(0, angBack, 0));
 	}
 }
@@ -227,33 +228,33 @@ BOOST_DATA_TEST_CASE(curve1,
 		e1, ctr, angFor, angBack)
 {
 	{ // One-way...
-		const TestLinkCurve l(origin, e1, ctr);
+		const TestLinkCurve l({}, e1, ctr);
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
-			BOOST_CHECK_CLOSE_VEC(p.pos, origin);
+			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, RelativePosition3D {});
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angFor, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
-			BOOST_CHECK_CLOSE_VEC(p.pos, e1);
-			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBack, 0));
+			BOOST_CHECK_CLOSE_VECI(RelativePosition3D {p.pos}, e1);
+			BOOST_CHECK_CLOSE_VECI(p.rot, glm::vec3(0, angBack, 0));
 		}
 	}
 
 	{ // The other way...
-		const TestLinkCurve l(e1, origin, ctr);
+		const TestLinkCurve l(e1, {}, ctr);
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
-			const auto angForReversed = normalize(vector_yaw(origin - e1) * 2 - angFor);
-			BOOST_CHECK_CLOSE_VEC(p.pos, e1);
-			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angForReversed, 0));
+			const auto angForReversed = normalize(vector_yaw(-e1) * 2 - angFor);
+			BOOST_CHECK_CLOSE_VECI(RelativePosition3D {p.pos}, e1);
+			BOOST_CHECK_CLOSE_VECI(p.rot, glm::vec3(0, angForReversed, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
-			const auto angBackReversed = normalize(vector_yaw(e1 - origin) * 2 - angBack);
-			BOOST_CHECK_CLOSE_VEC(p.pos, origin);
+			const auto angBackReversed = normalize(vector_yaw(e1) * 2 - angBack);
+			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, Position3D {});
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBackReversed, 0));
 		}
 	}
@@ -261,10 +262,10 @@ BOOST_DATA_TEST_CASE(curve1,
 
 BOOST_AUTO_TEST_CASE(camera_clicks)
 {
-	Camera camera {::origin, ::half_pi, 1.25F, .1F, 10000.F};
+	Camera camera {{}, ::half_pi, 1.25F, 1000, 10000000};
 	constexpr float centre {0.5F}, right {0.9F}, left {0.1F}, top {1.F}, bottom {0.F};
 	camera.setForward(::north);
-	BOOST_CHECK_EQUAL(camera.unProject({centre, centre}).start, ::origin);
+	BOOST_CHECK_EQUAL(camera.unProject({centre, centre}).start, RelativePosition3D {});
 	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, ::north);
 	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}).direction, glm::normalize(::north + ::west));
 	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}).direction, glm::normalize(::north + ::east));

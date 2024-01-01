@@ -1,55 +1,55 @@
 #include "camera.h"
 #include <collections.h>
-#include <glm/gtx/intersect.hpp> // IWYU pragma: keep
-#include <glm/gtx/transform.hpp> // IWYU pragma: keep
+#include <glm/gtx/transform.hpp>
 #include <maths.h>
 #include <ray.h>
 
-Camera::Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar) :
+Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance zNear, GlobalDistance zFar) :
 	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar},
-	projection {glm::perspective(fov, aspect, zNear, zFar)},
-	viewProjection {projection * glm::lookAt(position, position + forward, up)},
-	inverseViewProjection {glm::inverse(viewProjection)}
+	projection {
+			glm::perspective(fov, aspect, static_cast<RelativeDistance>(zNear), static_cast<RelativeDistance>(zFar))},
+	viewProjection {}, inverseViewProjection {}
 {
+	updateView();
 }
 
 Ray
-Camera::unProject(const glm::vec2 & mouse) const
+Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
-	const auto mouseProjection = glm::lookAt(::origin, forward, up);
-	return {position, glm::normalize(glm::unProject(mouse ^ 1, mouseProjection, projection, screen))};
+	const auto mouseProjection = glm::lookAt({}, forward, up);
+	return {position, glm::normalize(glm::unProject(mouse || 1.F, mouseProjection, projection, screen))};
 }
 
 void
 Camera::updateView()
 {
-	viewProjection = projection * glm::lookAt(position, position + forward, up);
+	viewProjection = projection * glm::lookAt({}, forward, up);
 	inverseViewProjection = glm::inverse(viewProjection);
 }
 
-glm::vec3
-Camera::upFromForward(const glm::vec3 & forward)
+Direction3D
+Camera::upFromForward(const Direction3D & forward)
 {
 	const auto right = glm::cross(forward, ::down);
 	return glm::cross(forward, right);
 }
 
-std::array<glm::vec4, 4>
-Camera::extentsAtDist(const float dist) const
+std::array<GlobalPosition4D, 4>
+Camera::extentsAtDist(const GlobalDistance dist) const
 {
-	const auto clampToSeaFloor = [this, dist](const glm::vec3 & target) {
-		if (target.z < -1.5F) {
-			const auto vec = glm::normalize(target - position);
-			constexpr glm::vec3 seafloor {0, 0, -1.5F};
-			float outdist;
-			if (glm::intersectRayPlane(position, vec, seafloor, ::up, outdist)) {
-				return (vec * outdist + position) ^ outdist;
-			}
+	const auto clampToSeaFloor = [this, dist](GlobalPosition3D target) -> GlobalPosition4D {
+		target += position;
+		if (target.z < -1500) {
+			const CalcPosition3D diff = target - position;
+			const CalcDistance limit = -1500 - position.z;
+			return {position + GlobalPosition3D((limit * diff) / diff.z), (limit * dist) / diff.z};
 		}
-		return target ^ dist;
+		return {target, dist};
 	};
-	const auto depth = -(2.F * (dist - near) * far) / (dist * (near - far)) - 1.F;
+	const auto depth = -(2.F * (static_cast<float>(dist - near)) * static_cast<float>(far))
+					/ (static_cast<float>(dist) * (static_cast<float>(near - far)))
+			- 1.F;
 	static constexpr const std::array extents {-1.F, 1.F};
 	static constexpr const auto cartesianExtents = extents * extents;
 	return cartesianExtents * [&depth, this, &clampToSeaFloor](const auto & extent) {

@@ -35,13 +35,15 @@ void
 RailVehicleClass::postLoad()
 {
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO).addAttribs<LocationVertex, &LocationVertex::body>(instances.bufferName(), 1);
+	bodyMesh->configureVAO(instanceVAO)
+			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(instances.bufferName(), 1);
 	bogies.front()
 			->configureVAO(instancesBogiesVAO.front())
-			.addAttribs<LocationVertex, &LocationVertex::front>(instances.bufferName(), 1);
+			.addAttribs<LocationVertex, &LocationVertex::front, &LocationVertex::frontPos>(instances.bufferName(), 1);
 	bogies.back()
 			->configureVAO(instancesBogiesVAO.back())
-			.addAttribs<LocationVertex, &LocationVertex::back>(instances.bufferName(), 1);
+			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(instances.bufferName(), 1);
+	static_assert(sizeof(LocationVertex) == 228UL);
 }
 
 void
@@ -64,7 +66,7 @@ RailVehicleClass::shadows(const ShadowMapper & mapper) const
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		mapper.dynamicPointInst.use();
 		bodyMesh->DrawInstanced(instanceVAO, count);
-		bogies.front()->DrawInstanced(instanceVAO, count);
-		bogies.back()->DrawInstanced(instanceVAO, count);
+		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
+		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
 	}
 }

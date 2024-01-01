@@ -1,4 +1,5 @@
 #include "texture.h"
+#include "config/types.h"
 #include "glArrays.h"
 #include "tga.h"
 #include <cache.h>
@@ -60,10 +61,10 @@ Texture::bind(GLenum unit) const
 	glBindTexture(type, m_texture);
 }
 
-glm::ivec2
+TextureAbsCoord
 Texture::getSize(const glTexture & texture)
 {
-	glm::ivec2 size;
+	TextureAbsCoord size;
 	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_WIDTH, &size.x);
 	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_HEIGHT, &size.y);
 	return size;
@@ -103,6 +104,12 @@ Texture::save(const glTexture & texture, const char * path)
 }
 
 void
+Texture::savePosition(const glTexture & texture, const char * path)
+{
+	save(texture, GL_BGR_INTEGER, GL_UNSIGNED_BYTE, 3, path, 2);
+}
+
+void
 Texture::saveDepth(const glTexture & texture, const char * path)
 {
 	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 1, path, 3);
@@ -136,7 +143,7 @@ TextureAtlas::bind(GLenum unit) const
 }
 
 GLuint
-TextureAtlas::add(glm::ivec2 position, glm::ivec2 size, void * data, TextureOptions to)
+TextureAtlas::add(TextureAbsCoord position, TextureAbsCoord size, void * data, TextureOptions to)
 {
 	glTextureSubImage2D(m_texture, 0, position.x, position.y, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
 

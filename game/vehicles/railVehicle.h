@@ -17,13 +17,12 @@ public:
 
 	void move(const Train *, float & trailBy);
 
-	[[nodiscard]] bool intersectRay(const Ray &, glm::vec2 *, float *) const override;
+	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition *, float *) const override;
 
 	RailVehicleClassPtr rvClass;
 	using LV = RailVehicleClass::LocationVertex;
-	using BLocation = BufferedLocationT<glm::mat4 LV::*, RailVehicleClass::Instance &>;
-	BLocation location;
-	std::array<BLocation, 2> bogies;
+	BufferedLocationUpdater location;
+	std::array<BufferedLocationUpdater, 2> bogies;
 };
 
 using RailVehiclePtr = std::unique_ptr<RailVehicle>;

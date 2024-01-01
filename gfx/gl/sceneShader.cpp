@@ -26,16 +26,16 @@ SceneShader::SceneShader() :
 }
 
 void
-SceneShader::setViewProjection(const glm::mat4 & viewProjection) const
+SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	for (const auto & prog : std::array<const SceneProgram *, 7> {
 				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
-		prog->setViewProjection(viewProjection);
+		prog->setViewProjection(viewPoint, viewProjection);
 	}
 }
 
 void
-SceneShader::setViewPort(const glm::ivec4 & viewPort) const
+SceneShader::setViewPort(const ViewPort & viewPort) const
 {
 	for (const auto & prog : std::array<const SceneProgram *, 7> {
 				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
@@ -44,14 +44,15 @@ SceneShader::setViewPort(const glm::ivec4 & viewPort) const
 }
 
 void
-SceneShader::SceneProgram::setViewProjection(const glm::mat4 & viewProjection) const
+SceneShader::SceneProgram::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
+	glUniform3iv(viewPointLoc, 1, glm::value_ptr(viewPoint));
 }
 
 void
-SceneShader::SceneProgram::setViewPort(const glm::ivec4 & viewPort) const
+SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 {
 	if (viewPortLoc >= 0) {
 		glUseProgram(*this);
@@ -59,13 +60,16 @@ SceneShader::SceneProgram::setViewPort(const glm::ivec4 & viewPort) const
 	}
 }
 
-SceneShader::BasicProgram::BasicProgram() : SceneProgram {dynamicPoint_vs, material_fs}, modelLoc {*this, "model"} { }
+SceneShader::BasicProgram::BasicProgram() :
+	SceneProgram {dynamicPoint_vs, material_fs}, modelLoc {*this, "model"}, modelPosLoc {*this, "modelPos"}
+{
+}
 
 void
 SceneShader::BasicProgram::setModel(Location const & location) const
 {
-	const auto model {glm::translate(location.pos) * rotate_ypr(location.rot)};
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(rotate_ypr(location.rot)));
+	glUniform3iv(modelPosLoc, 1, glm::value_ptr(location.pos));
 }
 
 void
@@ -81,38 +85,39 @@ void
 SceneShader::WaterProgram::use(float waveCycle) const
 {
 	Program::use();
-	glm::vec3 waves {waveCycle, 0.F, 0.F};
-	glUniform3fv(waveLoc, 1, glm::value_ptr(waves));
+	glUniform1f(waveLoc, waveCycle);
 }
 
 SceneShader::PointLightShader::PointLightShader() :
-	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"}
+	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"},
+	viewPointLoc {*this, "viewPoint"}
 {
-	VertexArrayObject {va}.addAttribs<glm::vec3>(b);
+	VertexArrayObject {va}.addAttribs<Position3D>(b);
 }
 
 void
-SceneShader::PointLightShader::add(const glm::vec3 & position, const glm::vec3 & colour, const float kq) const
+SceneShader::PointLightShader::add(const Position3D & position, const RGB & colour, const float kq) const
 {
 	Program::use();
 	glBindVertexArray(va);
 	glBindBuffer(GL_ARRAY_BUFFER, b);
 	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
 	glUniform1f(kqLoc, kq);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), glm::value_ptr(position), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }
 
 SceneShader::SpotLightShader::SpotLightShader() :
 	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, directionLoc {*this, "v_direction"},
-	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}
+	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}, viewPointLoc {*this, "viewPoint"}
+
 {
-	using v3pair = std::pair<glm::vec3, glm::vec3>;
+	using v3pair = std::pair<Position3D, Direction3D>;
 	VertexArrayObject {va}.addAttribs<v3pair, &v3pair::first, &v3pair::second>(b);
 }
 
 void
-SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & direction, const glm::vec3 & colour,
+SceneShader::SpotLightShader::add(const Position3D & position, const Direction3D & direction, const RGB & colour,
 		const float kq, const float arc) const
 {
 	Program::use();
@@ -122,6 +127,6 @@ SceneShader::SpotLightShader::add(const glm::vec3 & position, const glm::vec3 & 
 	glUniform3fv(directionLoc, 1, glm::value_ptr(direction));
 	glUniform1f(kqLoc, kq);
 	glUniform1f(arcLoc, arc);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), glm::value_ptr(position), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }

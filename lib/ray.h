@@ -1,17 +1,20 @@
 #pragma once
 
+#include "config/types.h"
 #include <glm/glm.hpp>
 #include <span>
 
 class Ray {
 public:
-	Ray(glm::vec3 start, glm::vec3 direction) : start {start}, direction {direction} { }
+#ifndef __cpp_aggregate_paren_init
+	Ray(Position3D start, Direction3D direction) : start {start}, direction {direction} { }
+#endif
 
-	static Ray fromPoints(glm::vec3, glm::vec3);
+	static Ray fromPoints(Position3D, Position3D);
 
-	glm::vec3 start;
-	glm::vec3 direction;
+	Position3D start;
+	Direction3D direction;
 
-	float distanceToLine(const glm::vec3 & a, const glm::vec3 & b) const;
-	bool passesCloseToEdges(const std::span<const glm::vec3> positions, float distance) const;
+	[[nodiscard]] float distanceToLine(const Position3D & a, const Position3D & b) const;
+	[[nodiscard]] bool passesCloseToEdges(const std::span<const Position3D> positions, float distance) const;
 };

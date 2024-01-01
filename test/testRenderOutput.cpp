@@ -1,7 +1,7 @@
 #include "testRenderOutput.h"
 #include <stdexcept>
 
-TestRenderOutput::TestRenderOutput(glm::ivec2 s) : size {s}
+TestRenderOutput::TestRenderOutput(TextureAbsCoord s) : size {s}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 	const auto configuregdata

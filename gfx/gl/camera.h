@@ -1,12 +1,13 @@
 #pragma once
 
+#include "config/types.h"
 #include <glm/glm.hpp>
 #include <maths.h>
 #include <ray.h>
 
 class Camera {
 public:
-	Camera(glm::vec3 pos, float fov, float aspect, float zNear, float zFar);
+	Camera(GlobalPosition3D, Angle fov, Angle aspect, GlobalDistance zNear, GlobalDistance zFar);
 
 	[[nodiscard]] glm::mat4
 	getViewProjection() const
@@ -14,23 +15,23 @@ public:
 		return viewProjection;
 	}
 
-	[[nodiscard]] Ray unProject(const glm::vec2 &) const;
+	[[nodiscard]] Ray unProject(const ScreenRelCoord &) const;
 
 	void
-	setPosition(const glm::vec3 & p)
+	setPosition(const GlobalPosition3D & p)
 	{
 		position = p;
 		updateView();
 	}
 
 	void
-	setForward(const glm::vec3 & f)
+	setForward(const Direction3D & f)
 	{
 		setForward(f, upFromForward(f));
 	}
 
 	void
-	setForward(const glm::vec3 & f, const glm::vec3 & u)
+	setForward(const Direction3D & f, const Direction3D & u)
 	{
 		forward = f;
 		up = u;
@@ -38,23 +39,23 @@ public:
 	}
 
 	void
-	setView(const glm::vec3 & p, const glm::vec3 & f)
+	setView(const GlobalPosition3D & p, const Direction3D & f)
 	{
 		position = p;
 		setForward(f);
 	}
 
 	void
-	setView(const glm::vec3 & p, const glm::vec3 & f, const glm::vec3 & u)
+	setView(const GlobalPosition3D & p, const Direction3D & f, const Direction3D & u)
 	{
 		position = p;
 		setView(f, u);
 	}
 
 	void
-	lookAt(const glm::vec3 & target)
+	lookAt(const GlobalPosition3D & target)
 	{
-		setForward(glm::normalize(target - position));
+		setForward(glm::normalize(RelativePosition3D(target - position)));
 	}
 
 	[[nodiscard]] auto
@@ -69,18 +70,18 @@ public:
 		return position;
 	}
 
-	[[nodiscard]] std::array<glm::vec4, 4> extentsAtDist(float) const;
+	[[nodiscard]] std::array<GlobalPosition4D, 4> extentsAtDist(GlobalDistance) const;
 
-	[[nodiscard]] static glm::vec3 upFromForward(const glm::vec3 & forward);
+	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
 
 private:
 	void updateView();
 
-	glm::vec3 position;
-	glm::vec3 forward;
-	glm::vec3 up;
+	GlobalPosition3D position;
+	Direction3D forward;
+	Direction3D up;
 
-	float near, far;
+	GlobalDistance near, far;
 	glm::mat4 projection;
 	glm::mat4 viewProjection, inverseViewProjection;
 };

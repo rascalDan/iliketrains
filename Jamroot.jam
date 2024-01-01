@@ -101,6 +101,7 @@ lib ilt :
 	<include>.
 	<include>lib
 	<implicit-dependency>thirdparty//glad
+	<library>OpenMeshCore
 	;
 
 build-project test ;

@@ -11,20 +11,20 @@
 
 class SceneRenderer {
 public:
-	explicit SceneRenderer(glm::ivec2 size, GLuint output);
+	explicit SceneRenderer(ScreenAbsCoord size, GLuint output);
 
 	void render(const SceneProvider &) const;
-	void setAmbientLight(const glm::vec3 & colour) const;
-	void setDirectionalLight(const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider &) const;
+	void setAmbientLight(const RGB & colour) const;
+	void setDirectionalLight(const RGB & colour, const Direction3D & direction, const SceneProvider &) const;
 
 	Camera camera;
 
-private:
+protected:
 	void renderQuad() const;
 
-	glm::ivec2 size;
+	ScreenAbsCoord size;
 	GLuint output;
-	glFrameBuffer gBuffer;
+	glFrameBuffer gBuffer, gBufferIll;
 	glTexture gPosition, gNormal, gAlbedoSpec, gIllumination;
 	glRenderBuffer depth;
 
@@ -39,12 +39,12 @@ private:
 		DirectionalLightProgram();
 		using Program::use;
 
-		void setDirectionalLight(const glm::vec3 &, const glm::vec3 &, const std::span<const glm::mat4x4>,
-				const std::span<const glm::vec4>, std::size_t maps) const;
+		void setDirectionalLight(const RGB &, const Direction3D &, const GlobalPosition3D &,
+				const std::span<const glm::mat4x4>, const std::span<const TextureRelRegion>, std::size_t maps) const;
 
 	private:
-		RequiredUniformLocation directionLoc, colourLoc, lightViewProjectionLoc, lightViewProjectionCountLoc,
-				lightViewShadowMapRegionLoc;
+		RequiredUniformLocation directionLoc, colourLoc, lightPointLoc, lightViewProjectionLoc,
+				lightViewProjectionCountLoc, lightViewShadowMapRegionLoc;
 	};
 
 	DeferredLightProgram lighting;

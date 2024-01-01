@@ -2,7 +2,6 @@
 #include "game/geoData.h"
 #include "gfx/models/texture.h"
 #include <algorithm>
-#include <array>
 #include <cache.h>
 #include <cstddef>
 #include <filesystem>
@@ -18,8 +17,8 @@
 #include <utility>
 #include <vector>
 
-Terrain::Terrain(std::shared_ptr<GeoData> gd) :
-	geoData {std::move(gd)}, grass {Texture::cachedTexture.get("grass.png")},
+Terrain::Terrain(std::shared_ptr<GeoData> tm) :
+	geoData {std::move(tm)}, grass {Texture::cachedTexture.get("grass.png")},
 	water {Texture::cachedTexture.get("water.png")}
 {
 	generateMeshes();
@@ -29,51 +28,23 @@ void
 Terrain::generateMeshes()
 {
 	std::vector<unsigned int> indices;
-	const auto isize = geoData->getSize() - glm::uvec2 {1, 1};
-	indices.reserve(static_cast<std::size_t>(isize.x * isize.y) * 6);
-
-	const auto limit = geoData->getLimit();
-	//  Indices
-	constexpr std::array<glm::ivec2, 6> indices_offsets {{
-			{0, 0},
-			{1, 0},
-			{1, 1},
-			{0, 0},
-			{1, 1},
-			{0, 1},
-	}};
-	for (auto y = limit.first.y; y < limit.second.y; y += 1) {
-		for (auto x = limit.first.x; x < limit.second.x; x += 1) {
-			std::transform(indices_offsets.begin(), indices_offsets.end(), std::back_inserter(indices),
-					[this, x, y](const auto off) {
-						return geoData->at(x + off.x, y + off.y);
-					});
-		}
-	}
-
-	const auto nodes = geoData->getNodes();
-	const auto scale = geoData->getScale();
+	indices.reserve(geoData->n_faces() * 3);
 	std::vector<Vertex> vertices;
-	vertices.reserve(nodes.size());
-	// Positions
-	for (auto y = limit.first.y; y <= limit.second.y; y += 1) {
-		for (auto x = limit.first.x; x <= limit.second.x; x += 1) {
-			const glm::vec2 xy {x, y};
-			vertices.emplace_back((xy * scale) ^ nodes[geoData->at(x, y)].height, xy, ::up);
-		}
-	}
-	// Normals
-	const glm::uvec2 size = geoData->getSize();
-	for (auto y = limit.first.y + 1; y < limit.second.y; y += 1) {
-		for (auto x = limit.first.x + 1; x < limit.second.x; x += 1) {
-			const auto n {geoData->at(x, y)};
-			const auto a = vertices[n - 1].pos;
-			const auto b = vertices[n - size.x].pos;
-			const auto c = vertices[n + 1].pos;
-			const auto d = vertices[n + size.x].pos;
-			vertices[n].normal = -glm::normalize(glm::cross(b - d, a - c));
-		}
-	}
+	vertices.reserve(geoData->n_vertices());
+	std::map<GeoData::VertexHandle, size_t> vertexIndex;
+	std::transform(geoData->vertices_begin(), geoData->vertices_end(), std::back_inserter(vertices),
+			[this, &vertexIndex](const GeoData::VertexHandle v) {
+				vertexIndex.emplace(v, vertexIndex.size());
+				const auto p = geoData->point(v);
+				return Vertex {p, p / 10000, geoData->normal(v)};
+			});
+	std::for_each(
+			geoData->faces_begin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
+				std::transform(geoData->fv_begin(f), geoData->fv_end(f), std::back_inserter(indices),
+						[&vertexIndex](const GeoData::VertexHandle v) {
+							return vertexIndex[v];
+						});
+			});
 	meshes.create<Mesh>(vertices, indices);
 }
 

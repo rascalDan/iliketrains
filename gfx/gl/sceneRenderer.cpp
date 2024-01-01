@@ -14,37 +14,44 @@ static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
 		{1, -1, 1, 0},
 }};
 
-SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
-	camera {{-1250.0F, -1250.0F, 35.0F}, quarter_pi, ratio(s), 0.1F, 10000.0F}, size {s}, output {o},
+SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
+	camera {{-1250000, -1250000, 35.0F}, quarter_pi, ratio(s), 100, 10000000}, size {s}, output {o},
 	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
 	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	const auto configuregdata
-			= [this](const GLuint data, const std::initializer_list<GLint> formats, const GLenum attachment) {
-				  glBindTexture(GL_TEXTURE_2D, data);
-				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				  for (const auto format : formats) {
-					  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGB, GL_BYTE, nullptr);
+	const auto configuregdata = [this](const GLuint data, const std::initializer_list<GLint> iformats,
+										const GLenum format, const GLenum attachment) {
+		glBindTexture(GL_TEXTURE_2D, data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		for (const auto iformat : iformats) {
+			glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
 
-					  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
-					  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-						  return format;
-					  }
-				  }
-				  throw std::runtime_error("Framebuffer could not be completed!");
-			  };
-	configuregdata(gPosition, {GL_RGB32F}, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_COLOR_ATTACHMENT2);
-	configuregdata(gIllumination, {GL_RGB8}, GL_COLOR_ATTACHMENT3);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+				return iformat;
+			}
+		}
+		throw std::runtime_error("Framebuffer could not be completed!");
+	};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	configuregdata(gPosition, {GL_RGB32I}, GL_RGB_INTEGER, GL_COLOR_ATTACHMENT0);
+	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
+	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT2);
+	constexpr std::array<unsigned int, 3> attachments {
+			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	glDrawBuffers(attachments.size(), attachments.data());
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
+	configuregdata(gIllumination, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 }
@@ -52,14 +59,11 @@ SceneRenderer::SceneRenderer(glm::ivec2 s, GLuint o) :
 void
 SceneRenderer::render(const SceneProvider & scene) const
 {
-	shader.setViewProjection(camera.getViewProjection());
+	shader.setViewProjection(camera.getPosition(), camera.getViewProjection());
 	glViewport(0, 0, size.x, size.y);
 
 	// Geometry pass
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	static constexpr std::array<unsigned int, 3> attachments {
-			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-	glDrawBuffers(attachments.size(), attachments.data());
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -70,7 +74,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	scene.content(shader);
 
 	// Illumination pass
-	glDrawBuffer(GL_COLOR_ATTACHMENT3);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -97,23 +101,22 @@ SceneRenderer::render(const SceneProvider & scene) const
 }
 
 void
-SceneRenderer::setAmbientLight(const glm::vec3 & colour) const
+SceneRenderer::setAmbientLight(const RGB & colour) const
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 	glClearColor(colour.r, colour.g, colour.b, 1.0F);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void
-SceneRenderer::setDirectionalLight(
-		const glm::vec3 & colour, const glm::vec3 & direction, const SceneProvider & scene) const
+SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
 		const auto lvp = shadowMapper.update(scene, direction, camera);
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
-		dirLight.setDirectionalLight(colour, direction, lvp.projections, lvp.regions, lvp.maps);
+		dirLight.setDirectionalLight(colour, direction, camera.getPosition(), lvp.projections, lvp.regions, lvp.maps);
 		renderQuad();
 	}
 }
@@ -128,20 +131,22 @@ SceneRenderer::renderQuad() const
 
 SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 	Program {lighting_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
-	colourLoc {*this, "lightColour"}, lightViewProjectionLoc {*this, "lightViewProjection"},
+	colourLoc {*this, "lightColour"}, lightPointLoc {*this, "lightPoint"},
+	lightViewProjectionLoc {*this, "lightViewProjection"},
 	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"},
 	lightViewShadowMapRegionLoc {*this, "shadowMapRegion"}
 {
 }
 
 void
-SceneRenderer::DirectionalLightProgram::setDirectionalLight(const glm::vec3 & c, const glm::vec3 & d,
-		const std::span<const glm::mat4x4> lvp, const std::span<const glm::vec4> shadowMapRegions,
-		std::size_t maps) const
+SceneRenderer::DirectionalLightProgram::setDirectionalLight(const RGB & c, const Direction3D & d,
+		const GlobalPosition3D & p, const std::span<const glm::mat4x4> lvp,
+		const std::span<const TextureRelRegion> shadowMapRegions, std::size_t maps) const
 {
 	glUniform3fv(colourLoc, 1, glm::value_ptr(c));
 	const auto nd = glm::normalize(d);
 	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
+	glUniform3iv(lightPointLoc, 1, glm::value_ptr(p));
 	glUniform1ui(lightViewProjectionCountLoc, static_cast<GLuint>(maps));
 	glUniformMatrix4fv(lightViewProjectionLoc, static_cast<GLsizei>(maps), GL_FALSE, glm::value_ptr(lvp.front()));
 	glUniform4fv(lightViewShadowMapRegionLoc, static_cast<GLsizei>(maps), glm::value_ptr(shadowMapRegions.front()));

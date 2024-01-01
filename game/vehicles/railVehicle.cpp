@@ -12,10 +12,22 @@
 #include <ray.h>
 
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
-	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)}, location {&LV::body, *this},
+	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)},
+	location {[this](const BufferedLocation * l) {
+		this->get()->body = l->getRotationTransform();
+		this->get()->bodyPos = l->position();
+	}},
 	bogies {{
-			{&LV::front, *this, glm::vec3 {0, rvClass->wheelBase / 2.F, 0}},
-			{&LV::back, *this, glm::vec3 {0, -rvClass->wheelBase / 2.F, 0}},
+			{[this](const BufferedLocation * l) {
+				 this->get()->front = l->getRotationTransform();
+				 this->get()->frontPos = l->position();
+			 },
+					Position3D {0, rvClass->wheelBase / 2.F, 0}},
+			{[this](const BufferedLocation * l) {
+				 this->get()->back = l->getRotationTransform();
+				 this->get()->backPos = l->position();
+			 },
+					Position3D {0, -rvClass->wheelBase / 2.F, 0}},
 	}}
 {
 }
@@ -26,29 +38,29 @@ RailVehicle::move(const Train * t, float & trailBy)
 	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};
 	const auto & b1Pos = bogies[0] = t->getBogiePosition(t->linkDist, trailBy += overhang);
 	const auto & b2Pos = bogies[1] = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase);
-	const auto diff = glm::normalize(b2Pos.position() - b1Pos.position());
-	location.setLocation((b1Pos.position() + b2Pos.position()) / 2.F, {vector_pitch(diff), vector_yaw(diff), 0});
-	trailBy += 0.6F + overhang;
+	const auto diff = glm::normalize(RelativePosition3D(b2Pos.position() - b1Pos.position()));
+	location.setLocation((b1Pos.position() + b2Pos.position()) / 2, {vector_pitch(diff), vector_yaw(diff), 0});
+	trailBy += 600.F + overhang;
 }
 
 bool
-RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance) const
+RailVehicle::intersectRay(const Ray & ray, BaryPosition * baryPos, float * distance) const
 {
-	constexpr const auto X = 1.35F;
+	constexpr const auto X = 1350.F;
 	const auto Y = this->rvClass->length / 2.F;
-	constexpr const auto Z = 3.9F;
-	const auto moveBy = location.getTransform();
-	const std::array<glm::vec3, 8> cornerVertices {{
-			moveBy * glm::vec4 {-X, Y, 0, 1}, //  LFB
-			moveBy * glm::vec4 {X, Y, 0, 1}, //   RFB
-			moveBy * glm::vec4 {-X, Y, Z, 1}, //  LFT
-			moveBy * glm::vec4 {X, Y, Z, 1}, //   RFT
-			moveBy * glm::vec4 {-X, -Y, 0, 1}, // LBB
-			moveBy * glm::vec4 {X, -Y, 0, 1}, //  RBB
-			moveBy * glm::vec4 {-X, -Y, Z, 1}, // LBT
-			moveBy * glm::vec4 {X, -Y, Z, 1}, //  RBT
+	constexpr const auto Z = 3900.F;
+	const auto moveBy = location.getRotationTransform();
+	const std::array<Position3D, 8> cornerVertices {{
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, Y, 0, 1}).xyz(), //  LFB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, Y, 0, 1}).xyz(), //   RFB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, Y, Z, 1}).xyz(), //  LFT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, Y, Z, 1}).xyz(), //   RFT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, -Y, 0, 1}).xyz(), // LBB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, -Y, 0, 1}).xyz(), //  RBB
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, -Y, Z, 1}).xyz(), // LBT
+			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, -Y, Z, 1}).xyz(), //  RBT
 	}};
-	static constexpr const std::array<glm::uvec3, 10> triangles {{
+	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front
 			{0, 1, 2},
 			{1, 2, 3},
@@ -66,7 +78,7 @@ RailVehicle::intersectRay(const Ray & ray, glm::vec2 * baryPos, float * distance
 			{3, 6, 7},
 	}};
 	return std::any_of(
-			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &distance](const glm::uvec3 idx) {
+			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &distance](const auto & idx) {
 				return glm::intersectRayTriangle(ray.start, ray.direction, cornerVertices[idx[0]],
 						cornerVertices[idx[1]], cornerVertices[idx[2]], *baryPos, *distance);
 			});
