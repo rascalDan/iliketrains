@@ -59,7 +59,8 @@ ManualCameraController::handleInput(const SDL_Event & e, const Position &)
 					pitch = std::clamp(pitch - 0.01F * static_cast<float>(e.motion.yrel), 0.1F, half_pi);
 				}
 				else {
-					focus += rotate_flat(-direction) * (Position2D {-e.motion.xrel, e.motion.yrel} * dist / 2.0F);
+					focus += rotate_flat(-direction)
+							* (RelativePosition2D {-e.motion.xrel, e.motion.yrel} * dist / 2.0F);
 				}
 			}
 			return true;
@@ -79,5 +80,5 @@ void
 ManualCameraController::updateCamera(Camera * camera) const
 {
 	const auto forward = glm::normalize(sincosf(direction) || -sin(pitch));
-	camera->setView((focus || 0.F) - forward * 3.F * std::pow(dist, 1.3F), forward);
+	camera->setView((focus || 0) - GlobalPosition3D(forward * 3.F * std::pow(dist, 1.3F)), forward);
 }
