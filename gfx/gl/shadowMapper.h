@@ -57,7 +57,7 @@ public:
 	}
 
 private:
-	[[nodiscard]] static std::vector<std::array<Position3D, 4>> getBandViewExtents(
+	[[nodiscard]] static std::vector<std::array<RelativePosition3D, 4>> getBandViewExtents(
 			const Camera &, const glm::mat4 & lightView);
 	glFrameBuffer depthMapFBO;
 	glTexture depthMap;

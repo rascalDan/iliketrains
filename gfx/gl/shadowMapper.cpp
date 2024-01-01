@@ -105,16 +105,15 @@ struct DefinitionsInserter {
 	ShadowMapper::Definitions & out;
 };
 
-std::vector<std::array<Position3D, 4>>
+std::vector<std::array<RelativePosition3D, 4>>
 ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightViewDir)
 {
-	std::vector<std::array<Position3D, 4>> bandViewExtents;
+	std::vector<std::array<RelativePosition3D, 4>> bandViewExtents;
 	for (const auto dist : shadowBands) {
 		const auto extents = camera.extentsAtDist(dist);
-		bandViewExtents.emplace_back(
-				extents * [&lightViewDir, cameraPos = camera.getPosition()](const auto & e) -> Position3D {
-					return lightViewDir * RelativePosition4D(e.xyz() - cameraPos, 1);
-				});
+		bandViewExtents.emplace_back(extents * [&lightViewDir, cameraPos = camera.getPosition()](const auto & e) {
+			return glm::mat3(lightViewDir) * (e.xyz() - cameraPos);
+		});
 		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist - 1](const auto & e) {
 				return e.w > targetDist;
 			})) {
