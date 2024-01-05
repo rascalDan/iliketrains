@@ -11,7 +11,7 @@
 
 class FaceController : public Mutation, public Style, public Persistence::Persistable {
 public:
-	class Split : public Persistable, public GeometricPlane {
+	class Split : public Persistable, public GeometricPlaneT<RelativePosition3D> {
 	public:
 		std::string id;
 

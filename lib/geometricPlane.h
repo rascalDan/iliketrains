@@ -9,17 +9,23 @@
 
 class GeometricPlane {
 public:
-	struct DistAndPosition {
-		float dist;
-		Position3D position;
-	};
 	enum class PlaneRelation { Above, Below, On };
 
-	Position3D origin;
+	static bool isIntersect(PlaneRelation a, PlaneRelation b);
+};
+
+template<typename PositionType> class GeometricPlaneT : public GeometricPlane {
+public:
+	struct DistAndPosition {
+		PositionType::value_type dist;
+		PositionType position;
+	};
+
+	PositionType origin;
 	Normal3D normal;
 
 	[[nodiscard]] inline PlaneRelation
-	getRelation(Position3D point) const
+	getRelation(PositionType point) const
 	{
 		const auto d = glm::dot(normal, point - origin);
 		return d < 0.F ? PlaneRelation::Below : d > 0.F ? PlaneRelation::Above : PlaneRelation::On;
@@ -33,12 +39,5 @@ public:
 			return {};
 		}
 		return DistAndPosition {dist, ray.start + (ray.direction * dist)};
-	}
-
-	inline static bool
-	isIntersect(PlaneRelation a, PlaneRelation b)
-	{
-		return ((a == PlaneRelation::Above && b == PlaneRelation::Below)
-				|| (a == PlaneRelation::Below && b == PlaneRelation::Above));
 	}
 };
