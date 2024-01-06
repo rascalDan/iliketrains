@@ -3,12 +3,12 @@
 #include "train.h"
 #include <algorithm>
 #include <array>
+#include <basicShapes.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/intersect.hpp>
 #include <glm/gtx/transform.hpp>
 #include <location.h>
 #include <maths.h>
-#include <memory>
 #include <ray.h>
 
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
@@ -50,16 +50,10 @@ RailVehicle::intersectRay(const Ray & ray, BaryPosition & baryPos, RelativeDista
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3900.F;
 	const glm::mat3 moveBy = location.getRotationTransform();
-	const std::array<Position3D, 8> cornerVertices {{
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, Y, 0}), //  LFB
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, Y, 0}), //   RFB
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, Y, Z}), //  LFT
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, Y, Z}), //   RFT
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, -Y, 0}), // LBB
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, -Y, 0}), //  RBB
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, -Y, Z}), // LBT
-			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, -Y, Z}), //  RBT
-	}};
+	const auto cornerVertices
+			= cuboidCorners(-X, X, -Y, Y, 0.F, Z) * [&moveBy, this](const auto & corner) -> Position3D {
+		return location.position() + GlobalPosition3D(moveBy * corner);
+	};
 	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front
 			{0, 1, 2},
