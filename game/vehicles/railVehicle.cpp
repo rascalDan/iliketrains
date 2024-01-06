@@ -49,16 +49,16 @@ RailVehicle::intersectRay(const Ray & ray, BaryPosition & baryPos, RelativeDista
 	constexpr const auto X = 1350.F;
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3900.F;
-	const auto moveBy = location.getRotationTransform();
+	const glm::mat3 moveBy = location.getRotationTransform();
 	const std::array<Position3D, 8> cornerVertices {{
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, Y, 0, 1}).xyz(), //  LFB
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, Y, 0, 1}).xyz(), //   RFB
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, Y, Z, 1}).xyz(), //  LFT
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, Y, Z, 1}).xyz(), //   RFT
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, -Y, 0, 1}).xyz(), // LBB
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, -Y, 0, 1}).xyz(), //  RBB
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {-X, -Y, Z, 1}).xyz(), // LBT
-			location.position() + GlobalPosition3D(moveBy * glm::vec4 {X, -Y, Z, 1}).xyz(), //  RBT
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, Y, 0}), //  LFB
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, Y, 0}), //   RFB
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, Y, Z}), //  LFT
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, Y, Z}), //   RFT
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, -Y, 0}), // LBB
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, -Y, 0}), //  RBB
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {-X, -Y, Z}), // LBT
+			location.position() + GlobalPosition3D(moveBy * glm::vec3 {X, -Y, Z}), //  RBT
 	}};
 	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front
