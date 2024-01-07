@@ -26,32 +26,32 @@ public:
 	virtual ~Network() = default;
 	DEFAULT_MOVE_NO_COPY(Network);
 
-	[[nodiscard]] Node::Ptr findNodeAt(Position3D) const;
-	[[nodiscard]] Node::Ptr nodeAt(Position3D);
+	[[nodiscard]] Node::Ptr findNodeAt(GlobalPosition3D) const;
+	[[nodiscard]] Node::Ptr nodeAt(GlobalPosition3D);
 	enum class NodeIs { InNetwork, NotInNetwork };
 	using NodeInsertion = std::pair<Node::Ptr, NodeIs>;
-	[[nodiscard]] NodeInsertion newNodeAt(Position3D);
-	[[nodiscard]] NodeInsertion candidateNodeAt(Position3D) const;
+	[[nodiscard]] NodeInsertion newNodeAt(GlobalPosition3D);
+	[[nodiscard]] NodeInsertion candidateNodeAt(GlobalPosition3D) const;
 	[[nodiscard]] virtual Link::Ptr intersectRayLinks(const Ray<GlobalPosition3D> &) const = 0;
 	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray<GlobalPosition3D> &) const;
 
-	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, Position3D) const;
+	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, GlobalPosition3D) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &) const;
 
-	virtual Link::CCollection candidateStraight(Position3D, Position3D) = 0;
-	virtual Link::CCollection candidateJoins(Position3D, Position3D) = 0;
-	virtual Link::CCollection candidateExtend(Position3D, Position3D) = 0;
-	virtual Link::CCollection addStraight(Position3D, Position3D) = 0;
-	virtual Link::CCollection addJoins(Position3D, Position3D) = 0;
-	virtual Link::CCollection addExtend(Position3D, Position3D) = 0;
+	virtual Link::CCollection candidateStraight(GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection addStraight(GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection addJoins(GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection addExtend(GlobalPosition3D, GlobalPosition3D) = 0;
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
 protected:
 	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
-	static GenCurveDef genCurveDef(const Position3D & start, const Position3D & end, float startDir);
+	static GenCurveDef genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir);
 	static std::pair<GenCurveDef, GenCurveDef> genCurveDef(
-			const Position3D & start, const Position3D & end, float startDir, float endDir);
+			const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir);
 
 	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;
@@ -71,7 +71,7 @@ protected:
 public:
 	template<typename L, typename... Params>
 	std::shared_ptr<L>
-	candidateLink(Position3D a, Position3D b, Params &&... params)
+	candidateLink(GlobalPosition3D a, GlobalPosition3D b, Params &&... params)
 		requires std::is_base_of_v<T, L>
 	{
 		const auto node1 = candidateNodeAt(a).first, node2 = candidateNodeAt(b).first;
@@ -80,7 +80,7 @@ public:
 
 	template<typename L, typename... Params>
 	std::shared_ptr<L>
-	addLink(Position3D a, Position3D b, Params &&... params)
+	addLink(GlobalPosition3D a, GlobalPosition3D b, Params &&... params)
 		requires std::is_base_of_v<T, L>
 	{
 		const auto node1 = nodeAt(a), node2 = nodeAt(b);
@@ -89,12 +89,12 @@ public:
 		return l;
 	}
 
-	Link::CCollection candidateStraight(Position3D n1, Position3D n2) override;
-	Link::CCollection candidateJoins(Position3D, Position3D) override;
-	Link::CCollection candidateExtend(Position3D, Position3D) override;
-	Link::CCollection addStraight(Position3D n1, Position3D n2) override;
-	Link::CCollection addJoins(Position3D, Position3D) override;
-	Link::CCollection addExtend(Position3D, Position3D) override;
+	Link::CCollection candidateStraight(GlobalPosition3D n1, GlobalPosition3D n2) override;
+	Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) override;
+	Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) override;
+	Link::CCollection addStraight(GlobalPosition3D n1, GlobalPosition3D n2) override;
+	Link::CCollection addJoins(GlobalPosition3D, GlobalPosition3D) override;
+	Link::CCollection addExtend(GlobalPosition3D, GlobalPosition3D) override;
 
 	[[nodiscard]] float findNodeDirection(Node::AnyCPtr) const override;
 

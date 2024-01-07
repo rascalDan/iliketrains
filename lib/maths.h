@@ -157,9 +157,9 @@ find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> 
 {
 	const auto det = endDir.x * startDir.y - endDir.y * startDir.x;
 	if (det != 0) { // near parallel line will yield noisy results
-		const auto d = end - start;
+		const glm::vec<2, RelativeDistance, Q> d = end - start;
 		const auto u = (d.y * endDir.x - d.x * endDir.y) / det;
-		return {start + startDir * u, u < 0};
+		return {start + glm::vec<2, T, Q>(startDir * u), u < 0};
 	}
 	throw std::runtime_error("no intersection");
 }
@@ -186,16 +186,16 @@ find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, 
 	// r=(-2 m X+2 X o+2 m Z-2 o Z-2 n Y+2 Y p+2 n W-2 p W-sqrt((2 m X-2 X o-2 m Z+2 o Z+2 n Y-2 Y p-2 n W+2 p W)^(2)-4
 	// (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y W+W^(2)-4) (m^(2)-2 m o+o^(2)+n^(2)-2 n p+p^(2))))/(2 (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y
 	// W+W^(2)-4))
+	// Locally simplified to work relative, removing one half of the problem and operating on relative positions.
 
 	// These exist cos limitations of online formula rearrangement, and I'm OK with that.
-	const auto &m {start.x}, &n {start.y}, &o {end.x}, &p {end.y};
+	const RelativePosition2D diff {end - start};
+	const auto &o {diff.x}, &p {diff.y};
 	const auto &X {ad.x}, &Y {ad.y}, &Z {bd.x}, &W {bd.y};
 
-	return (2 * m * X - 2 * X * o - 2 * m * Z + 2 * o * Z + 2 * n * Y - 2 * Y * p - 2 * n * W + 2 * p * W
-				   - sqrt(sq(-2 * m * X + 2 * X * o + 2 * m * Z - 2 * o * Z - 2 * n * Y + 2 * Y * p + 2 * n * W
-								  - 2 * p * W)
-						   - (4 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4)
-								   * (sq(m) - 2 * m * o + sq(o) + sq(n) - 2 * n * p + sq(p)))))
+	return (-2 * X * o + 2 * o * Z - 2 * Y * p + 2 * p * W
+				   - sqrt(sq(2 * X * o - 2 * o * Z + 2 * Y * p - 2 * p * W)
+						   - (4 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4) * (sq(o) + sq(p)))))
 			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
 }
 

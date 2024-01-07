@@ -21,7 +21,7 @@ public:
 	void render(const SceneShader &) const override;
 	void render(const UIShader & shader, const UIComponent::Position & pos) const override;
 
-	using NetworkClickPos = std::variant<Position3D, Node::Ptr>;
+	using NetworkClickPos = std::variant<GlobalPosition3D, Node::Ptr>;
 
 	class Builder {
 	public:

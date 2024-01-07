@@ -54,16 +54,16 @@ NetworkOf<T>::findNodeDirection(Node::AnyCPtr n) const
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::candidateStraight(Position3D n1, Position3D n2)
+NetworkOf<T>::candidateStraight(GlobalPosition3D n1, GlobalPosition3D n2)
 {
 	return {candidateLink<typename T::StraightLink>(n1, n2)};
 }
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::candidateJoins(Position3D start, Position3D end)
+NetworkOf<T>::candidateJoins(GlobalPosition3D start, GlobalPosition3D end)
 {
-	if (glm::distance(start, end) < 2.F) {
+	if (glm::length(RelativePosition3D(start - end)) < 2000.F) {
 		return {};
 	}
 	const auto defs = genCurveDef(
@@ -75,7 +75,7 @@ NetworkOf<T>::candidateJoins(Position3D start, Position3D end)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::candidateExtend(Position3D start, Position3D end)
+NetworkOf<T>::candidateExtend(GlobalPosition3D start, GlobalPosition3D end)
 {
 	const auto [cstart, cend, centre] = genCurveDef(start, end, findNodeDirection(candidateNodeAt(start).first));
 	return {candidateLink<typename T::CurveLink>(cstart, cend, centre)};
@@ -83,16 +83,16 @@ NetworkOf<T>::candidateExtend(Position3D start, Position3D end)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::addStraight(Position3D n1, Position3D n2)
+NetworkOf<T>::addStraight(GlobalPosition3D n1, GlobalPosition3D n2)
 {
 	return {addLink<typename T::StraightLink>(n1, n2)};
 }
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::addJoins(Position3D start, Position3D end)
+NetworkOf<T>::addJoins(GlobalPosition3D start, GlobalPosition3D end)
 {
-	if (glm::distance(start, end) < 2.F) {
+	if (glm::length(RelativePosition3D(start - end)) < 2000.F) {
 		return {};
 	}
 	const auto defs = genCurveDef(start, end, findNodeDirection(nodeAt(start)), findNodeDirection(nodeAt(end)));
@@ -103,7 +103,7 @@ NetworkOf<T>::addJoins(Position3D start, Position3D end)
 
 template<typename T>
 Link::CCollection
-NetworkOf<T>::addExtend(Position3D start, Position3D end)
+NetworkOf<T>::addExtend(GlobalPosition3D start, GlobalPosition3D end)
 {
 	const auto [cstart, cend, centre] = genCurveDef(start, end, findNodeDirection(nodeAt(start)));
 	return {addLink<typename T::CurveLink>(cstart, cend, centre)};

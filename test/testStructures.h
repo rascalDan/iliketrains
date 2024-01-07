@@ -32,9 +32,9 @@ struct TestObject : public Persistence::Persistable {
 	float flt {};
 	std::string str {};
 	bool bl {};
-	Position3D pos {};
+	RelativePosition3D pos {};
 	std::vector<float> flts;
-	std::vector<Position3D> poss;
+	std::vector<RelativePosition3D> poss;
 	std::vector<std::vector<std::vector<std::string>>> nest;
 	std::unique_ptr<TestObject> ptr;
 	std::unique_ptr<AbsObject> aptr;

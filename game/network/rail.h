@@ -32,7 +32,7 @@ public:
 	NO_MOVE(RailLink);
 
 protected:
-	[[nodiscard]] Position3D vehiclePositionOffset() const override;
+	[[nodiscard]] RelativePosition3D vehiclePositionOffset() const override;
 	[[nodiscard]] static Mesh::Ptr defaultMesh(const std::span<Vertex> vertices);
 
 	Mesh::Ptr mesh;
@@ -45,22 +45,22 @@ public:
 	RailLinkStraight(const Node::Ptr &, const Node::Ptr &);
 
 private:
-	RailLinkStraight(Node::Ptr, Node::Ptr, const Position3D & diff);
+	RailLinkStraight(Node::Ptr, Node::Ptr, const RelativePosition3D & diff);
 };
 
 class RailLinkCurve : public RailLink, public LinkCurve {
 public:
-	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, Position2D);
+	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, GlobalPosition2D);
 
 private:
-	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, Position3D, const Arc);
+	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, GlobalPosition3D, const Arc);
 };
 
 class RailLinks : public NetworkOf<RailLink>, public WorldObject {
 public:
 	RailLinks();
 
-	std::shared_ptr<RailLink> addLinksBetween(Position3D start, Position3D end);
+	std::shared_ptr<RailLink> addLinksBetween(GlobalPosition3D start, GlobalPosition3D end);
 
 private:
 	void tick(TickDuration elapsed) override;

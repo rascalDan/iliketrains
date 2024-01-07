@@ -11,7 +11,7 @@ class BuilderStraight : public EditNetwork::Builder {
 	void move(Network * network, const GeoData * geoData, const SDL_MouseMotionEvent & e,
 			const Ray<GlobalPosition3D> & ray) override;
 
-	void create(Network * network, Position3D p1, Position3D p2) const;
+	void create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const;
 
-	std::optional<Position3D> p1;
+	std::optional<GlobalPosition3D> p1;
 };

@@ -6,7 +6,6 @@
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
 #include <glm/gtx/intersect.hpp>
-#include <initializer_list>
 #include <ray.h>
 #include <stdexcept>
 #include <utility>
@@ -14,13 +13,13 @@
 Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(tn)} { }
 
 Node::Ptr
-Network::nodeAt(Position3D pos)
+Network::nodeAt(GlobalPosition3D pos)
 {
 	return newNodeAt(pos).first;
 }
 
 Network::NodeInsertion
-Network::newNodeAt(Position3D pos)
+Network::newNodeAt(GlobalPosition3D pos)
 {
 	if (auto [n, i] = candidateNodeAt(pos); i == NodeIs::NotInNetwork) {
 		return {*nodes.insert(std::move(n)).first, i};
@@ -31,7 +30,7 @@ Network::newNodeAt(Position3D pos)
 }
 
 Node::Ptr
-Network::findNodeAt(Position3D pos) const
+Network::findNodeAt(GlobalPosition3D pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
 		return *n;
@@ -40,7 +39,7 @@ Network::findNodeAt(Position3D pos) const
 }
 
 Network::NodeInsertion
-Network::candidateNodeAt(Position3D pos) const
+Network::candidateNodeAt(GlobalPosition3D pos) const
 {
 	if (const auto n = nodes.find(pos); n != nodes.end()) {
 		return {*n, NodeIs::InNetwork};
@@ -80,7 +79,7 @@ Network::joinLinks(const Link::Ptr & l, const Link::Ptr & ol)
 }
 
 Link::Nexts
-Network::routeFromTo(const Link::End & start, Position3D dest) const
+Network::routeFromTo(const Link::End & start, GlobalPosition3D dest) const
 {
 	auto destNode {findNodeAt(dest)};
 	if (!destNode) {
@@ -96,7 +95,7 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest) const
 }
 
 GenCurveDef
-Network::genCurveDef(const Position3D & start, const Position3D & end, float startDir)
+Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir)
 {
 	const auto diff {end - start};
 	const auto vy {vector_yaw(diff)};
@@ -112,28 +111,29 @@ Network::genCurveDef(const Position3D & start, const Position3D & end, float sta
 }
 
 std::pair<GenCurveDef, GenCurveDef>
-Network::genCurveDef(const Position3D & start, const Position3D & end, float startDir, float endDir)
+Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir)
 {
 	startDir += pi;
 	endDir += pi;
-	const Position2D flatStart {start.xy()}, flatEnd {end.xy()};
+	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	auto midheight = [&](auto mid) {
-		const auto sm = glm::distance(flatStart, mid), em = glm::distance(flatEnd, mid);
-		return start.z + ((end.z - start.z) * (sm / (sm + em)));
+		const auto sm = glm::length(RelativePosition2D(flatStart - mid)),
+				   em = glm::length(RelativePosition2D(flatEnd - mid));
+		return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (sm / (sm + em)));
 	};
 	if (const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir); radii.first < radii.second) {
 		const auto radius {radii.first};
-		const auto c1 = flatStart + sincosf(startDir + half_pi) * radius;
-		const auto c2 = flatEnd + sincosf(endDir + half_pi) * radius;
-		const auto mid = (c1 + c2) / 2.F;
+		const auto c1 = flatStart + GlobalPosition2D(sincosf(startDir + half_pi) * radius);
+		const auto c2 = flatEnd + GlobalPosition2D(sincosf(endDir + half_pi) * radius);
+		const auto mid = (c1 + c2) / 2;
 		const auto midh = mid || midheight(mid);
 		return {{start, midh, c1}, {end, midh, c2}};
 	}
 	else {
 		const auto radius {radii.second};
-		const auto c1 = flatStart + sincosf(startDir - half_pi) * radius;
-		const auto c2 = flatEnd + sincosf(endDir - half_pi) * radius;
-		const auto mid = (c1 + c2) / 2.F;
+		const auto c1 = flatStart + GlobalPosition2D(sincosf(startDir - half_pi) * radius);
+		const auto c2 = flatEnd + GlobalPosition2D(sincosf(endDir - half_pi) * radius);
+		const auto mid = (c1 + c2) / 2;
 		const auto midh = mid || midheight(mid);
 		return {{midh, start, c1}, {midh, end, c2}};
 	}
