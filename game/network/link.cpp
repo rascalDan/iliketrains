@@ -63,12 +63,13 @@ LinkCurve::intersectRay(const Ray<GlobalPosition3D> & ray) const
 	const auto & e1p {ends[1].node->pos};
 	const auto slength = round_frac(length / 2.F, 5.F);
 	const auto segs = std::round(15.F * slength / std::pow(radius, 0.7F));
-	const auto step {Position2D {arc_length(arc), e1p.z - e0p.z} / segs};
+	const auto step {glm::vec<2, RelativeDistance> {arc_length(arc), e1p.z - e0p.z} / segs};
 
 	auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
 	std::vector<GlobalPosition3D> points;
 	points.reserve(segCount);
-	for (Position2D swing = {arc.first, centreBase.z - e0p.z}; segCount; swing += step, --segCount) {
+	for (std::remove_const_t<decltype(step)> swing = {arc.first, centreBase.z - e0p.z}; segCount;
+			swing += step, --segCount) {
 		points.emplace_back(centreBase + GlobalPosition3D((sincosf(swing.x) * radius) || swing.y));
 	}
 	return ray.passesCloseToEdges(points, 1.F);
