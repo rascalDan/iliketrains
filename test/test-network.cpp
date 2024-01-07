@@ -26,7 +26,10 @@ BOOST_GLOBAL_FIXTURE(TestMainWindow);
 struct TestLink : public LinkStraight {
 	TestLink(const Node::Ptr & a, const Node::Ptr & b) : TestLink {a, b, (a->pos - b->pos)} { }
 
-	TestLink(Node::Ptr a, Node::Ptr b, glm::vec2 l) : Link {{std::move(a), 0}, {std::move(b), pi}, glm::length(l)} { }
+	TestLink(Node::Ptr a, Node::Ptr b, RelativePosition2D l) :
+		Link {{std::move(a), 0}, {std::move(b), pi}, glm::length(l)}
+	{
+	}
 
 	TestLink(Node::Ptr a, Node::Ptr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
 
@@ -34,8 +37,8 @@ struct TestLink : public LinkStraight {
 	using CurveLink = TestLink;
 };
 
-constexpr glm::vec3 p000 {0, 0, 0}, p100 {1, 0, 0}, p200 {2, 0, 0}, p300 {3, 0, 0};
-constexpr glm::vec3 p110 {1, 1, 0};
+constexpr GlobalPosition3D p000 {0, 0, 0}, p100 {10000, 0, 0}, p200 {20000, 0, 0}, p300 {30000, 0, 0};
+constexpr GlobalPosition3D p110 {10000, 10000, 0};
 
 struct TestNetwork : public NetworkOf<TestLink> {
 	TestNetwork() : NetworkOf<TestLink> {RESDIR "rails.jpg"}
@@ -55,13 +58,13 @@ struct TestNetwork : public NetworkOf<TestLink> {
 	}
 };
 
-const auto VALID_NODES = boost::unit_test::data::make<glm::vec3>({
+const auto VALID_NODES = boost::unit_test::data::make<GlobalPosition3D>({
 		p000,
 		p100,
 		p200,
 		p300,
 });
-const auto INVALID_NODES = boost::unit_test::data::make<glm::vec3>({
+const auto INVALID_NODES = boost::unit_test::data::make<GlobalPosition3D>({
 		{1000, 0, 0},
 		{0, 1000, 0},
 		{0, 0, 1000},
@@ -201,7 +204,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 	//    --------
 	auto l0 = addLinksBetween(p000, p100);
 	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l0.get()));
-	BOOST_CHECK_EQUAL(l0->length, 1.F);
+	BOOST_CHECK_EQUAL(l0->length, 10000);
 	BOOST_CHECK_CLOSE(l0->ends[0].dir, half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l0->ends[1].dir, -half_pi, 0.1F);
 	BOOST_CHECK(l0->ends[0].nexts.empty());
@@ -209,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 
 	auto l1 = addLinksBetween(p200, p100);
 	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l1.get()));
-	BOOST_CHECK_EQUAL(l1->length, 1.F);
+	BOOST_CHECK_EQUAL(l1->length, 10000);
 	BOOST_CHECK_CLOSE(l1->ends[0].dir, half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l1->ends[1].dir, -half_pi, 0.1F);
 	BOOST_CHECK(l0->ends[0].nexts.empty());
@@ -221,7 +224,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 
 	auto l2 = addLinksBetween(p200, p300);
 	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l2.get()));
-	BOOST_CHECK_EQUAL(l2->length, 1.F);
+	BOOST_CHECK_EQUAL(l2->length, 10000);
 	BOOST_CHECK_CLOSE(l2->ends[0].dir, half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l2->ends[1].dir, -half_pi, 0.1F);
 	BOOST_CHECK(l0->ends[0].nexts.empty());
@@ -233,7 +236,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 
 	auto l3 = addLinksBetween(p000, p110);
 	BOOST_CHECK(dynamic_cast<RailLinkCurve *>(l3.get()));
-	BOOST_CHECK_CLOSE(l3->length, pi + half_pi, 0.1F);
+	BOOST_CHECK_CLOSE(l3->length, (pi + half_pi) * 10000.F, 0.1F);
 	BOOST_CHECK_CLOSE(l3->ends[0].dir, -half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l3->ends[1].dir, 0, 0.1F);
 	BOOST_CHECK_EQUAL(l0->ends[0].nexts.at(0).first.lock(), l3);
@@ -243,7 +246,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 	BOOST_CHECK(l3->ends[1].nexts.empty());
 
 	auto l4 = addLinksBetween(p110, p300);
-	BOOST_CHECK_CLOSE(l4->length, 3.04F, 0.1F);
+	BOOST_CHECK_CLOSE(l4->length, 30400.F, 0.1F);
 	BOOST_CHECK_BETWEEN(l4->ends[0].dir, .23F, .24F);
 	BOOST_CHECK_CLOSE(l4->ends[1].dir, half_pi, 0.1F);
 }
