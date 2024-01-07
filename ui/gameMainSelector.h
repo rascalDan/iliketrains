@@ -10,7 +10,7 @@
 #include <string>
 
 class SceneShader;
-class Ray;
+template<typename> class Ray;
 class UIShader;
 class Camera;
 
@@ -20,8 +20,8 @@ public:
 	public:
 		virtual ~Component() = default;
 
-		virtual bool click(const SDL_MouseButtonEvent &, const Ray &);
-		virtual bool move(const SDL_MouseMotionEvent &, const Ray &);
+		virtual bool click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &);
+		virtual bool move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool handleInput(const SDL_Event &, const Position & pos);
 		virtual void render(const UIShader & shader, const Position & pos) const;
 		virtual void render(const SceneShader &) const;
@@ -34,7 +34,7 @@ public:
 
 	bool handleInput(const SDL_Event & e, const Position &) override;
 
-	void defaultClick(const Ray & ray);
+	void defaultClick(const Ray<GlobalPosition3D> & ray);
 
 	std::unique_ptr<Component> target;
 

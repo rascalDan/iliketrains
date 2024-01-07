@@ -24,7 +24,7 @@ NetworkOf<T>::joinLinks(const Link::Ptr & l) const
 
 template<typename T>
 Link::Ptr
-NetworkOf<T>::intersectRayLinks(const Ray & ray) const
+NetworkOf<T>::intersectRayLinks(const Ray<GlobalPosition3D> & ray) const
 {
 	// Click link
 	if (const auto link = std::find_if(links.objects.begin(), links.objects.end(),

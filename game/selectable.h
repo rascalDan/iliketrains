@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <special_members.h>
 
-class Ray;
+template<typename> class Ray;
 
 class Selectable {
 public:
@@ -12,5 +12,6 @@ public:
 	virtual ~Selectable() = default;
 	DEFAULT_MOVE_COPY(Selectable);
 
-	[[nodiscard]] virtual bool intersectRay(const Ray &, BaryPosition &, RelativeDistance &) const = 0;
+	[[nodiscard]] virtual bool intersectRay(const Ray<GlobalPosition3D> &, BaryPosition &, RelativeDistance &) const
+			= 0;
 };

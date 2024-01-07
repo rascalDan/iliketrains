@@ -22,7 +22,7 @@ EditNetwork::EditNetwork(Network * n) :
 }
 
 bool
-EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray & ray)
+EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	if (builder && (e.button == SDL_BUTTON_LEFT || e.button == SDL_BUTTON_MIDDLE)) {
 		builder->click(network, gameState->geoData.get(), e, ray);
@@ -32,7 +32,7 @@ EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray & ray)
 }
 
 bool
-EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray & ray)
+EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	if (builder) {
 		builder->move(network, gameState->geoData.get(), e, ray);

@@ -33,9 +33,10 @@ LinkStraight::positionAt(float dist, unsigned char start) const
 }
 
 bool
-LinkStraight::intersectRay(const Ray & ray) const
+LinkStraight::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
-	return ray.passesCloseToEdges(std::array {ends.front().node->pos, ends.back().node->pos}, 1.F);
+	return ray.passesCloseToEdges(
+			std::array {GlobalPosition3D {ends.front().node->pos}, GlobalPosition3D {ends.back().node->pos}}, 1000);
 }
 
 Location
@@ -54,7 +55,7 @@ LinkCurve::positionAt(float dist, unsigned char start) const
 }
 
 bool
-LinkCurve::intersectRay(const Ray & ray) const
+LinkCurve::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
 	const auto & e0p {ends[0].node->pos};
 	const auto & e1p {ends[1].node->pos};
@@ -64,7 +65,7 @@ LinkCurve::intersectRay(const Ray & ray) const
 	const auto trans {glm::translate(centreBase)};
 
 	auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
-	std::vector<Position3D> points;
+	std::vector<GlobalPosition3D> points;
 	points.reserve(segCount);
 	for (Position3D swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
 		const auto t {trans * glm::rotate(half_pi - swing.x, up) * glm::translate(Position3D {radius, 0.F, swing.y})};

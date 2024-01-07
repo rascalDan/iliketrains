@@ -161,7 +161,7 @@ namespace {
 	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
 	{
 		const CalcPosition3D a = t[1] - t[0], b = t[2] - t[0];
-		const auto n = crossInt(a, b);
+		const auto n = crossProduct(a, b);
 		return {point, ((n.x * t[0].x) + (n.y * t[0].y) + (n.z * t[0].z) - (n.x * point.x) - (n.y * point.y)) / n.z};
 	}
 
@@ -194,23 +194,23 @@ GeoData::positionAt(const PointFace & p) const
 }
 
 [[nodiscard]] std::optional<GlobalPosition3D>
-GeoData::intersectRay(const Ray & ray) const
+GeoData::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
 	return intersectRay(ray, findPoint(ray.start));
 }
 
 [[nodiscard]] std::optional<GlobalPosition3D>
-GeoData::intersectRay(const Ray & ray, FaceHandle face) const
+GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 {
 	std::optional<GlobalPosition3D> out;
 	walkUntil(PointFace {ray.start, face},
-			ray.start.xy() + (ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
+			ray.start.xy()
+					+ GlobalPosition2D(ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
 			[&out, &ray, this](FaceHandle face) {
 				BaryPosition bari {};
-				float dist {};
+				RelativeDistance dist {};
 				const auto t = triangle<3>(face);
-				if (glm::intersectRayTriangle<RelativePosition3D::value_type, glm::defaultp>(
-							ray.start, ray.direction, t[0], t[1], t[2], bari, dist)) {
+				if (ray.intersectTriangle(t.x, t.y, t.z, bari, dist)) {
 					out = t * bari;
 					return true;
 				}

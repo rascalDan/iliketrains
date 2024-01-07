@@ -9,14 +9,14 @@
 #include <gfx/models/texture.h>
 #include <optional>
 
-class Ray;
+template<typename> class Ray;
 
 class EditNetwork : public GameMainSelector::Component, public WorldOverlay {
 public:
 	explicit EditNetwork(Network *);
 
-	bool click(const SDL_MouseButtonEvent & e, const Ray &) override;
-	bool move(const SDL_MouseMotionEvent & e, const Ray &) override;
+	bool click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> &) override;
+	bool move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> &) override;
 	bool handleInput(const SDL_Event & e, const UIComponent::Position &) override;
 	void render(const SceneShader &) const override;
 	void render(const UIShader & shader, const UIComponent::Position & pos) const override;
@@ -28,8 +28,8 @@ public:
 		virtual ~Builder() = default;
 		virtual void render(const SceneShader & shader) const;
 		virtual std::string hint() const = 0;
-		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray &) = 0;
-		virtual void move(Network *, const GeoData *, const SDL_MouseMotionEvent &, const Ray &) = 0;
+		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &) = 0;
+		virtual void move(Network *, const GeoData *, const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &) = 0;
 
 		using Ptr = std::unique_ptr<Builder>;
 

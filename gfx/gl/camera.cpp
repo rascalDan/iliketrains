@@ -13,7 +13,7 @@ Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance zNe
 	updateView();
 }
 
-Ray
+Ray<GlobalPosition3D>
 Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};
@@ -31,8 +31,8 @@ Camera::updateView()
 Direction3D
 Camera::upFromForward(const Direction3D & forward)
 {
-	const auto right = glm::cross(forward, ::down);
-	return glm::cross(forward, right);
+	const auto right = crossProduct(forward, ::down);
+	return crossProduct(forward, right);
 }
 
 std::array<GlobalPosition4D, 4>

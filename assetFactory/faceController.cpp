@@ -90,7 +90,7 @@ FaceController::split(
 		const size_t nextIdx = (curIdx + 1) % vertexRelations.size();
 		const auto &current = vertexRelations[curIdx], next = vertexRelations[nextIdx];
 		if (GeometricPlane::isIntersect(current.second, next.second)) {
-			const auto ray = Ray::fromPoints(mesh.point(current.first), mesh.point(next.first));
+			const auto ray = RayFactory::fromPoints(mesh.point(current.first), mesh.point(next.first));
 			const auto intersect = split.getRayIntersectPosition(ray);
 			assert(intersect);
 			const auto newv = mesh.add_vertex(intersect->position);

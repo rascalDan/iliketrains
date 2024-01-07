@@ -15,7 +15,7 @@ public:
 		return viewProjection;
 	}
 
-	[[nodiscard]] Ray unProject(const ScreenRelCoord &) const;
+	[[nodiscard]] Ray<GlobalPosition3D> unProject(const ScreenRelCoord &) const;
 
 	void
 	setPosition(const GlobalPosition3D & p)

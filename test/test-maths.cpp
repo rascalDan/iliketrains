@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(camera_clicks)
 	Camera camera {{}, ::half_pi, 1.25F, 1000, 10000000};
 	constexpr float centre {0.5F}, right {0.9F}, left {0.1F}, top {1.F}, bottom {0.F};
 	camera.setForward(::north);
-	BOOST_CHECK_EQUAL(camera.unProject({centre, centre}).start, RelativePosition3D {});
+	BOOST_CHECK_EQUAL(camera.unProject({centre, centre}).start, GlobalPosition3D {});
 	BOOST_CHECK_CLOSE_VEC(camera.unProject({centre, centre}).direction, ::north);
 	BOOST_CHECK_CLOSE_VEC(camera.unProject({left, centre}).direction, glm::normalize(::north + ::west));
 	BOOST_CHECK_CLOSE_VEC(camera.unProject({right, centre}).direction, glm::normalize(::north + ::east));

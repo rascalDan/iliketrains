@@ -74,8 +74,8 @@ public:
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D, FaceHandle start) const;
 
 	[[nodiscard]] GlobalPosition3D positionAt(const PointFace &) const;
-	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray &) const;
-	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray &, FaceHandle start) const;
+	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray<GlobalPosition3D> &) const;
+	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray<GlobalPosition3D> &, FaceHandle start) const;
 
 	void walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const;
