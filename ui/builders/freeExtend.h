@@ -11,5 +11,5 @@ class BuilderFreeExtend : public EditNetwork::Builder {
 	void move(Network * network, const GeoData * geoData, const SDL_MouseMotionEvent & e,
 			const Ray<GlobalPosition3D> & ray) override;
 
-	std::optional<Position3D> p1;
+	std::optional<GlobalPosition3D> p1;
 };

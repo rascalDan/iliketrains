@@ -49,7 +49,7 @@ BuilderStraight::click(
 }
 
 void
-BuilderStraight::create(Network * network, Position3D p1, Position3D p2) const
+BuilderStraight::create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
 	network->addStraight(p1, p2);
 }
