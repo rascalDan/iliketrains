@@ -68,15 +68,29 @@ sq(T v)
 	return v * v;
 }
 
-template<std::integral T, glm::qualifier Q>
-inline constexpr glm::vec<3, T, Q>
-crossInt(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
+template<glm::qualifier Q>
+inline constexpr glm::vec<3, int64_t, Q>
+crossProduct(const glm::vec<3, int64_t, Q> a, const glm::vec<3, int64_t, Q> b)
 {
 	return {
 			(a.y * b.z) - (a.z * b.y),
 			(a.z * b.x) - (a.x * b.z),
 			(a.x * b.y) - (a.y * b.x),
 	};
+}
+
+template<std::integral T, glm::qualifier Q>
+inline constexpr glm::vec<3, T, Q>
+crossProduct(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
+{
+	return crossProduct<int64_t, Q>(a, b);
+}
+
+template<std::floating_point T, glm::qualifier Q>
+inline constexpr glm::vec<3, T, Q>
+crossProduct(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
+{
+	return glm::cross(a, b);
 }
 
 template<typename R = float, typename Ta, typename Tb>

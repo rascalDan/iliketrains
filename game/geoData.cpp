@@ -161,7 +161,7 @@ namespace {
 	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
 	{
 		const CalcPosition3D a = t[1] - t[0], b = t[2] - t[0];
-		const auto n = crossInt(a, b);
+		const auto n = crossProduct(a, b);
 		return {point, ((n.x * t[0].x) + (n.y * t[0].y) + (n.z * t[0].z) - (n.x * point.x) - (n.y * point.y)) / n.z};
 	}
 

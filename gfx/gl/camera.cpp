@@ -31,8 +31,8 @@ Camera::updateView()
 Direction3D
 Camera::upFromForward(const Direction3D & forward)
 {
-	const auto right = glm::cross(forward, ::down);
-	return glm::cross(forward, right);
+	const auto right = crossProduct(forward, ::down);
+	return crossProduct(forward, right);
 }
 
 std::array<GlobalPosition4D, 4>

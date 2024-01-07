@@ -1,4 +1,5 @@
 #include "ray.h"
+#include "maths.h"
 #include <algorithm>
 
 Ray
@@ -14,8 +15,8 @@ Ray::distanceToLine(const Position3D & p1, const Position3D & e1) const
 	const auto diff = p1 - e1;
 	const auto d1 = glm::normalize(diff);
 	const auto &p2 = start, &d2 = direction;
-	const auto n = glm::cross(d1, d2);
-	const auto n2 = glm::cross(d2, n);
+	const auto n = crossProduct(d1, d2);
+	const auto n2 = crossProduct(d2, n);
 	const auto c1 = p1 + (glm::dot((p2 - p1), n2) / glm::dot(d1, n2)) * d1;
 	const auto difflength = glm::length(diff);
 	if (glm::length(c1 - p1) > difflength || glm::length(c1 - e1) > difflength) {
