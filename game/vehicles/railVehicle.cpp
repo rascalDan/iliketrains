@@ -22,12 +22,12 @@ RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
 				 this->get()->front = l->getRotationTransform();
 				 this->get()->frontPos = l->position();
 			 },
-					Position3D {0, rvClass->wheelBase / 2.F, 0}},
+					GlobalPosition3D {0, rvClass->wheelBase / 2.F, 0}},
 			{[this](const BufferedLocation * l) {
 				 this->get()->back = l->getRotationTransform();
 				 this->get()->backPos = l->position();
 			 },
-					Position3D {0, -rvClass->wheelBase / 2.F, 0}},
+					GlobalPosition3D {0, -rvClass->wheelBase / 2.F, 0}},
 	}}
 {
 }
@@ -50,8 +50,7 @@ RailVehicle::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & bary
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3900.F;
 	const glm::mat3 moveBy = location.getRotationTransform();
-	const auto cornerVertices
-			= cuboidCorners(-X, X, -Y, Y, 0.F, Z) * [&moveBy, this](const auto & corner) -> Position3D {
+	const auto cornerVertices = cuboidCorners(-X, X, -Y, Y, 0.F, Z) * [&moveBy, this](const auto & corner) {
 		return location.position() + GlobalPosition3D(moveBy * corner);
 	};
 	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
