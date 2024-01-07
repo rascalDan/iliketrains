@@ -13,7 +13,7 @@ Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance zNe
 	updateView();
 }
 
-Ray
+Ray<GlobalPosition3D>
 Camera::unProject(const ScreenRelCoord & mouse) const
 {
 	static constexpr const glm::vec4 screen {0, 0, 1, 1};

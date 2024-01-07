@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class Ray;
+template<typename> class Ray;
 class Train;
 
 class RailVehicle : Selectable, RailVehicleClass::Instance {
@@ -16,7 +16,7 @@ public:
 
 	void move(const Train *, float & trailBy);
 
-	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition &, RelativeDistance &) const override;
+	[[nodiscard]] bool intersectRay(const Ray<GlobalPosition3D> &, BaryPosition &, RelativeDistance &) const override;
 
 	RailVehicleClassPtr rvClass;
 	using LV = RailVehicleClass::LocationVertex;

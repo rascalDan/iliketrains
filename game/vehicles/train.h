@@ -13,7 +13,7 @@
 
 class SceneShader;
 class ShadowMapper;
-class Ray;
+template<typename> class Ray;
 
 class Train : public Vehicle, public Collection<RailVehicle, false>, public Can<Go>, public Can<Idle> {
 public:
@@ -25,7 +25,7 @@ public:
 		return objects.front()->location;
 	}
 
-	[[nodiscard]] bool intersectRay(const Ray &, BaryPosition &, RelativeDistance &) const override;
+	[[nodiscard]] bool intersectRay(const Ray<GlobalPosition3D> &, BaryPosition &, RelativeDistance &) const override;
 
 	void tick(TickDuration elapsed) override;
 	void doActivity(Go *, TickDuration) override;

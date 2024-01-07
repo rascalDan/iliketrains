@@ -11,7 +11,8 @@ BuilderFreeExtend::hint() const
 }
 
 void
-BuilderFreeExtend::move(Network * network, const GeoData * geoData, const SDL_MouseMotionEvent &, const Ray & ray)
+BuilderFreeExtend::move(
+		Network * network, const GeoData * geoData, const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> & ray)
 {
 	if (p1) {
 		if (const auto p = network->intersectRayNodes(ray)) {
@@ -30,7 +31,8 @@ BuilderFreeExtend::move(Network * network, const GeoData * geoData, const SDL_Mo
 }
 
 void
-BuilderFreeExtend::click(Network * network, const GeoData * geoData, const SDL_MouseButtonEvent & e, const Ray & ray)
+BuilderFreeExtend::click(
+		Network * network, const GeoData * geoData, const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	switch (e.button) {
 		case SDL_BUTTON_LEFT:

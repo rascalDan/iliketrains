@@ -32,7 +32,7 @@ public:
 	}
 
 	[[nodiscard]] inline std::optional<DistAndPosition>
-	getRayIntersectPosition(const Ray & ray) const
+	getRayIntersectPosition(const Ray<PositionType> & ray) const
 	{
 		float dist {};
 		if (!glm::intersectRayPlane(ray.start, ray.direction, origin, normal, dist)) {

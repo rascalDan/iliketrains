@@ -11,7 +11,7 @@ BuilderJoin::hint() const
 }
 
 void
-BuilderJoin::move(Network * network, const GeoData *, const SDL_MouseMotionEvent &, const Ray & ray)
+BuilderJoin::move(Network * network, const GeoData *, const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> & ray)
 {
 	if (p1) {
 		if (const auto p = network->intersectRayNodes(ray)) {
@@ -24,7 +24,8 @@ BuilderJoin::move(Network * network, const GeoData *, const SDL_MouseMotionEvent
 }
 
 void
-BuilderJoin::click(Network * network, const GeoData *, const SDL_MouseButtonEvent & e, const Ray & ray)
+BuilderJoin::click(
+		Network * network, const GeoData *, const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	switch (e.button) {
 		case SDL_BUTTON_LEFT:

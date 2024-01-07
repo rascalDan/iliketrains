@@ -71,7 +71,7 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 }
 
 void
-GameMainSelector::defaultClick(const Ray & ray)
+GameMainSelector::defaultClick(const Ray<GlobalPosition3D> & ray)
 {
 	BaryPosition baryPos {};
 	RelativeDistance distance {};
@@ -90,13 +90,13 @@ GameMainSelector::defaultClick(const Ray & ray)
 }
 
 bool
-GameMainSelector::Component::click(const SDL_MouseButtonEvent &, const Ray &)
+GameMainSelector::Component::click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &)
 {
 	return false;
 }
 
 bool
-GameMainSelector::Component::move(const SDL_MouseMotionEvent &, const Ray &)
+GameMainSelector::Component::move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &)
 {
 	return false;
 }

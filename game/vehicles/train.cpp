@@ -9,7 +9,7 @@
 #include <optional>
 #include <utility>
 
-class Ray;
+template<typename> class Ray;
 
 Location
 Train::getBogiePosition(float linkDist, float dist) const
@@ -20,7 +20,7 @@ Train::getBogiePosition(float linkDist, float dist) const
 }
 
 bool
-Train::intersectRay(const Ray & ray, BaryPosition & baryPos, RelativeDistance & distance) const
+Train::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & baryPos, RelativeDistance & distance) const
 {
 	return applyOne(&RailVehicle::intersectRay, ray, baryPos, distance) != end();
 }

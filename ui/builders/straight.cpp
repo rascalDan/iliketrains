@@ -11,7 +11,8 @@ BuilderStraight::hint() const
 }
 
 void
-BuilderStraight::move(Network * network, const GeoData * geoData, const SDL_MouseMotionEvent &, const Ray & ray)
+BuilderStraight::move(
+		Network * network, const GeoData * geoData, const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> & ray)
 {
 	if (p1) {
 		if (const auto p = geoData->intersectRay(ray)) {
@@ -24,7 +25,8 @@ BuilderStraight::move(Network * network, const GeoData * geoData, const SDL_Mous
 }
 
 void
-BuilderStraight::click(Network * network, const GeoData * geoData, const SDL_MouseButtonEvent & e, const Ray & ray)
+BuilderStraight::click(
+		Network * network, const GeoData * geoData, const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	switch (e.button) {
 		case SDL_BUTTON_LEFT:

@@ -14,7 +14,7 @@
 
 class Texture;
 class SceneShader;
-class Ray;
+template<typename> class Ray;
 
 template<size_t... n> using GenDef = std::tuple<glm::vec<n, Distance>...>;
 using GenCurveDef = GenDef<3, 3, 2>;
@@ -32,8 +32,8 @@ public:
 	using NodeInsertion = std::pair<Node::Ptr, NodeIs>;
 	[[nodiscard]] NodeInsertion newNodeAt(Position3D);
 	[[nodiscard]] NodeInsertion candidateNodeAt(Position3D) const;
-	[[nodiscard]] virtual Link::Ptr intersectRayLinks(const Ray &) const = 0;
-	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray &) const;
+	[[nodiscard]] virtual Link::Ptr intersectRayLinks(const Ray<GlobalPosition3D> &) const = 0;
+	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray<GlobalPosition3D> &) const;
 
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, Position3D) const;
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &) const;
@@ -66,7 +66,7 @@ protected:
 	void joinLinks(const Link::Ptr &) const;
 
 protected:
-	[[nodiscard]] Link::Ptr intersectRayLinks(const Ray &) const override;
+	[[nodiscard]] Link::Ptr intersectRayLinks(const Ray<GlobalPosition3D> &) const override;
 
 public:
 	template<typename L, typename... Params>

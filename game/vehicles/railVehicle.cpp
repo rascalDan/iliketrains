@@ -44,7 +44,7 @@ RailVehicle::move(const Train * t, float & trailBy)
 }
 
 bool
-RailVehicle::intersectRay(const Ray & ray, BaryPosition & baryPos, RelativeDistance & distance) const
+RailVehicle::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & baryPos, RelativeDistance & distance) const
 {
 	constexpr const auto X = 1350.F;
 	const auto Y = this->rvClass->length / 2.F;
@@ -73,7 +73,7 @@ RailVehicle::intersectRay(const Ray & ray, BaryPosition & baryPos, RelativeDista
 	}};
 	return std::any_of(
 			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &distance](const auto & idx) {
-				return glm::intersectRayTriangle(ray.start, ray.direction, cornerVertices[idx[0]],
-						cornerVertices[idx[1]], cornerVertices[idx[2]], baryPos, distance);
+				return ray.intersectTriangle(
+						cornerVertices[idx[0]], cornerVertices[idx[1]], cornerVertices[idx[2]], baryPos, distance);
 			});
 }

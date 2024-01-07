@@ -49,13 +49,14 @@ Network::candidateNodeAt(Position3D pos) const
 }
 
 Node::Ptr
-Network::intersectRayNodes(const Ray & ray) const
+Network::intersectRayNodes(const Ray<GlobalPosition3D> & ray) const
 {
 	// Click within 2m of a node
 	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
 				[&ray](const Node::Ptr & node) {
-					Position3D ipos, inorm;
-					return glm::intersectRaySphere(ray.start, ray.direction, node->pos, 2.F, ipos, inorm);
+					GlobalPosition3D ipos;
+					Normal3D inorm;
+					return ray.intersectSphere(node->pos, 2000, ipos, inorm);
 				});
 			node != nodes.end()) {
 		return *node;
