@@ -20,7 +20,6 @@ template<glm::length_t D> using Normal = Direction<D>;
 template<glm::length_t D> using Rotation = glm::vec<D, Angle>;
 template<glm::length_t Channels> using Colour = glm::vec<Channels, float>;
 
-using Position2D = Position<2>; // deprecate
 using Position3D = Position<3>; // deprecate
 using BaryPosition = glm::vec<2, float>;
 using RelativePosition2D = RelativePosition<2>;
