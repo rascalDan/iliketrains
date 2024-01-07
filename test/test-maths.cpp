@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(test_find_arcs_radius)
 
 struct TestLinkStraight : public LinkStraight {
 	explicit TestLinkStraight(glm::vec3 v) :
-		Link {{std::make_shared<Node>(Position3D {}), vector_yaw(v)}, {std::make_shared<Node>(v), vector_yaw(-v)},
+		Link {{std::make_shared<Node>(GlobalPosition3D {}), vector_yaw(v)}, {std::make_shared<Node>(v), vector_yaw(-v)},
 				glm::length(v)}
 	{
 	}
@@ -216,7 +216,7 @@ struct TestLinkCurve : public LinkCurve {
 	}
 };
 
-using CurvesData = std::tuple<glm::vec3 /*e1*/, glm::vec3 /*ctr*/, float /*angFor*/, float /* angBack*/>;
+using CurvesData = std::tuple<GlobalPosition3D /*e1*/, GlobalPosition3D /*ctr*/, Angle /*angFor*/, Angle /* angBack*/>;
 
 BOOST_DATA_TEST_CASE(curve1,
 		boost::unit_test::data::make<CurvesData>({
@@ -232,13 +232,13 @@ BOOST_DATA_TEST_CASE(curve1,
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
-			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, RelativePosition3D {});
+			BOOST_CHECK_CLOSE_VECI(p.pos, GlobalPosition3D {});
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angFor, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
-			BOOST_CHECK_CLOSE_VECI(RelativePosition3D {p.pos}, e1);
-			BOOST_CHECK_CLOSE_VECI(p.rot, glm::vec3(0, angBack, 0));
+			BOOST_CHECK_CLOSE_VECI(p.pos, e1);
+			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBack, 0));
 		}
 	}
 
@@ -248,13 +248,13 @@ BOOST_DATA_TEST_CASE(curve1,
 		{
 			const auto p = l.positionAt(0, 0);
 			const auto angForReversed = normalize(vector_yaw(-e1) * 2 - angFor);
-			BOOST_CHECK_CLOSE_VECI(RelativePosition3D {p.pos}, e1);
-			BOOST_CHECK_CLOSE_VECI(p.rot, glm::vec3(0, angForReversed, 0));
+			BOOST_CHECK_CLOSE_VECI(p.pos, e1);
+			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angForReversed, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
 			const auto angBackReversed = normalize(vector_yaw(e1) * 2 - angBack);
-			BOOST_CHECK_CLOSE_VEC(RelativePosition3D {p.pos}, Position3D {});
+			BOOST_CHECK_CLOSE_VECI(p.pos, GlobalPosition3D {});
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBackReversed, 0));
 		}
 	}
@@ -330,6 +330,6 @@ BOOST_DATA_TEST_CASE(rayLineDistance,
 	for (float along = 0.2F; along <= 0.8F; along += 0.1F) {
 		const auto target = n1 + (along * nstep);
 		const auto direction = glm::normalize(target - c);
-		BOOST_CHECK_LE(Ray(c, direction).distanceToLine(n1, n2), 0.01F);
+		BOOST_CHECK_LE(Ray<RelativePosition3D>(c, direction).distanceToLine(n1, n2), 0.01F);
 	}
 }
