@@ -48,7 +48,7 @@ run test-maths.cpp ;
 run test-lib.cpp ;
 run test-geoData.cpp : -- : fixtures/height/SD19.asc : <library>test ;
 run test-network.cpp : : : <library>test ;
-run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob-tree fixtures : *.json ] ] : <library>test ;
+run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob-tree $(fixtures)/json : *.json ] ] : <library>test ;
 run test-text.cpp : : : <library>test ;
 run test-enumDetails.cpp ;
 run test-render.cpp : -- : test-assetFactory : <library>test ;
