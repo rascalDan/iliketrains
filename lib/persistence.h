@@ -37,6 +37,7 @@ namespace Persistence {
 		virtual void beginArray() const = 0;
 		virtual void pushValue(bool value) const = 0;
 		virtual void pushValue(float value) const = 0;
+		virtual void pushValue(int value) const = 0;
 		virtual void pushValue(std::nullptr_t) const = 0;
 		virtual void pushValue(std::string_view value) const = 0;
 		virtual void nextValue() const = 0;
@@ -50,7 +51,7 @@ namespace Persistence {
 		virtual ~Selection() = default;
 		DEFAULT_MOVE_COPY(Selection);
 
-		virtual void setValue(float);
+		virtual void setValue(std::string_view);
 		virtual void setValue(bool);
 		virtual void setValue(std::nullptr_t);
 		virtual void setValue(std::string &&);
@@ -91,34 +92,24 @@ namespace Persistence {
 	};
 
 	template<typename T>
-	concept Scalar = std::is_scalar_v<T>;
-	template<typename T>
-	concept NotScalar = (!Scalar<T>);
+	concept Arithmatic = std::is_arithmetic_v<T>;
 
-	template<Scalar T> struct SelectionT<T> : public SelectionV<T> {
-		using SelectionV<T>::SelectionV;
+	template<> struct SelectionT<bool> : public SelectionV<bool> {
+		using SelectionV<bool>::SelectionV;
 		using Selection::setValue;
 
 		void
-		setValue(T evalue) override
+		setValue(bool evalue) override
 		{
-			std::swap(this->v, evalue);
+			this->v = evalue;
 		}
 
 		void
 		setValue(std::string && evalue) override
 		{
-			if constexpr (std::same_as<T, bool>) {
-				using namespace std::literals;
-				if (!(this->v = evalue == "true"sv)) {
-					if (evalue != "false"sv) {
-						throw std::runtime_error("Value conversion failure");
-					}
-				}
-			}
-			else {
-				if (auto res = std::from_chars(evalue.c_str(), evalue.c_str() + evalue.length(), this->v).ec;
-						res != std::errc {}) {
+			using namespace std::literals;
+			if (!(this->v = evalue == "true"sv)) {
+				if (evalue != "false"sv) {
 					throw std::runtime_error("Value conversion failure");
 				}
 			}
@@ -131,7 +122,33 @@ namespace Persistence {
 		}
 	};
 
-	template<NotScalar T> struct SelectionT<T> : public SelectionV<T> {
+	template<Arithmatic T> struct SelectionT<T> : public SelectionV<T> {
+		using SelectionV<T>::SelectionV;
+		using Selection::setValue;
+
+		void
+		setValue(std::string_view evalue) override
+		{
+			if (auto res = std::from_chars(evalue.data(), evalue.data() + evalue.length(), this->v).ec;
+					res != std::errc {}) {
+				throw std::runtime_error("Value conversion failure");
+			}
+		}
+
+		void
+		setValue(std::string && evalue) override
+		{
+			setValue(std::string_view {evalue});
+		}
+
+		void
+		write(const Writer & out) const override
+		{
+			out.pushValue(this->v);
+		}
+	};
+
+	template<typename T> struct SelectionT : public SelectionV<T> {
 		using SelectionV<T>::SelectionV;
 		using Selection::setValue;
 

@@ -52,7 +52,7 @@ text [^\\\"]*
 }
 
 <ARRAY_ITEM,INITIAL>{number} {
-	pushNumber(std::strtof(YYText(), NULL));
+	pushNumber(YYText());
 	yy_pop_state();
 }
 

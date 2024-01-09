@@ -25,7 +25,7 @@ namespace json {
 		virtual void beginArray() = 0;
 
 		virtual void pushBoolean(bool) = 0;
-		virtual void pushNumber(float) = 0;
+		virtual void pushNumber(std::string_view) = 0;
 		virtual void pushNull() = 0;
 		virtual void pushText(std::string &&) = 0;
 		virtual void pushKey(std::string &&) = 0;

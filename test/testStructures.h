@@ -33,6 +33,7 @@ struct TestObject : public Persistence::Persistable {
 	std::string str {};
 	bool bl {};
 	RelativePosition3D pos {};
+	GlobalPosition3D gpos {};
 	std::vector<float> flts;
 	std::vector<RelativePosition3D> poss;
 	std::vector<std::vector<std::vector<std::string>>> nest;

@@ -103,9 +103,9 @@ namespace Persistence {
 	}
 
 	void
-	Selection::setValue(float)
+	Selection::setValue(std::string_view)
 	{
-		throw std::runtime_error("Unexpected float");
+		throw std::runtime_error("Unexpected numeric");
 	}
 
 	void

@@ -38,8 +38,8 @@ bool
 TestObject::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_TYPE && STORE_MEMBER(flt) && STORE_MEMBER(str) && STORE_MEMBER(bl) && STORE_MEMBER(pos)
-			&& STORE_MEMBER(flts) && STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr) && STORE_MEMBER(aptr)
-			&& STORE_MEMBER(vptr);
+			&& STORE_MEMBER(gpos) && STORE_MEMBER(flts) && STORE_MEMBER(poss) && STORE_MEMBER(nest) && STORE_MEMBER(ptr)
+			&& STORE_MEMBER(aptr) && STORE_MEMBER(vptr);
 }
 
 void

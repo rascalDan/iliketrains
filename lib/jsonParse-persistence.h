@@ -27,7 +27,7 @@ namespace Persistence {
 		void beginObject() override;
 		void beginArray() override;
 		void pushBoolean(bool value) override;
-		void pushNumber(float value) override;
+		void pushNumber(std::string_view value) override;
 		void pushNull() override;
 		void pushText(std::string && value) override;
 		void pushKey(std::string && k) override;
@@ -54,6 +54,7 @@ namespace Persistence {
 		void beginArray() const override;
 		void pushValue(bool value) const override;
 		void pushValue(float value) const override;
+		void pushValue(int value) const override;
 		void pushValue(std::nullptr_t) const override;
 		void pushValue(const std::string_view value) const override;
 		void nextValue() const override;

@@ -36,7 +36,7 @@ namespace Persistence {
 	}
 
 	void
-	JsonParsePersistence::pushNumber(float value)
+	JsonParsePersistence::pushNumber(std::string_view value)
 	{
 		pushValue(value);
 	}
@@ -159,6 +159,12 @@ namespace Persistence {
 
 	void
 	JsonWritePersistence::pushValue(float value) const
+	{
+		strm << value;
+	}
+
+	void
+	JsonWritePersistence::pushValue(int value) const
 	{
 		strm << value;
 	}
