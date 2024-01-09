@@ -9,6 +9,8 @@
 #include "assetFactory/object.h"
 #include "assetFactory/texturePacker.h"
 #include "game/scenary/foliage.h"
+#include "game/scenary/illuminator.h"
+#include "game/scenary/light.h"
 #include "game/scenary/plant.h"
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
@@ -121,6 +123,29 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	auto plant3 = std::make_shared<Plant>(tree_01_1_f, Location {{-2000, -4000, 0}, {0, 2, 0}});
 	auto plant4 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, 2000, 0}, {0, 3, 0}});
 	objects.objects.push_back(tree_01_1_f);
+
+	render(6000);
+}
+
+BOOST_AUTO_TEST_CASE(lights, *boost::unit_test::timeout(5))
+{
+	auto mf = AssetFactory::loadXML(RESDIR "/lights.xml");
+	BOOST_REQUIRE(mf);
+	auto rlight = mf->assets.at("r-light");
+	BOOST_REQUIRE(rlight);
+	auto rlight_f = std::dynamic_pointer_cast<Illuminator>(rlight);
+	BOOST_REQUIRE(rlight_f);
+
+	auto light1 = std::make_shared<Light>(rlight_f, Location {{0, 0, 0}, {0, 0, 0}});
+	auto light2 = std::make_shared<Light>(rlight_f, Location {{-4000, 0, 0}, {0, -1, 0}});
+	auto light3 = std::make_shared<Light>(rlight_f, Location {{-4000, -4000, 0}, {0, -3, 0}});
+	auto light4 = std::make_shared<Light>(rlight_f, Location {{3000, 4600, 0}, {0, 1, 0}});
+	objects.objects.push_back(rlight_f);
+
+	// yes I'm hacking some floor to light up as though its a bush
+	auto floorf = std::dynamic_pointer_cast<Foliage>(mf->assets.at("floor"));
+	auto floor = std::make_shared<Plant>(floorf, Location {});
+	objects.objects.push_back(floorf);
 
 	render(6000);
 }
