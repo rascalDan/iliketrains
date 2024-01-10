@@ -49,6 +49,7 @@ public:
 	lights(const SceneShader & shader) const override
 	{
 		shader.pointLight.add({-3, 1, 5}, {1, 1, 1}, .1F);
+		objects.apply(&Renderable::lights, shader);
 	}
 
 	void
