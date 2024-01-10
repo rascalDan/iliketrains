@@ -25,10 +25,10 @@ Illuminator::postLoad()
 	bodyMesh->configureVAO(instanceVAO)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
 	VertexArrayObject {instancesSpotLightVAO}
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 0)
 			.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
 					&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(
-					instancesSpotLight.bufferName(), 1);
+					instancesSpotLight.bufferName(), 0)
+			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
 	std::transform(spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
 		return instancesSpotLight.acquire(*s);
 	});
@@ -47,13 +47,13 @@ Illuminator::render(const SceneShader & shader) const
 }
 
 void
-Illuminator::lights(const SceneShader &) const
+Illuminator::lights(const SceneShader & shader) const
 {
 	if (const auto count = instances.size()) {
 		if (const auto scount = instancesSpotLight.size()) {
-			// shader.pointLight.use();
+			shader.spotLightInst.use();
 			glBindVertexArray(instancesSpotLightVAO);
-			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(count), static_cast<GLsizei>(scount));
+			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(scount), static_cast<GLsizei>(count));
 		}
 
 		glBindVertexArray(0);

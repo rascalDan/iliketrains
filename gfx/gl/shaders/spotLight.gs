@@ -11,9 +11,9 @@ const vec3[] pyramid = vec3[]( // four-sided
 );
 uniform mat4 viewProjection;
 uniform ivec3 viewPoint;
-uniform float arc;
-
-in vec3 position[];
+// uniform float arc;
+const float arc = 1;
+in ivec3 position[];
 in vec3 direction[];
 in float size[];
 in float cosarc[];

@@ -138,9 +138,9 @@ BOOST_AUTO_TEST_CASE(lights, *boost::unit_test::timeout(5))
 	BOOST_REQUIRE(rlight_f);
 
 	auto light1 = std::make_shared<Light>(rlight_f, Location {{0, 0, 0}, {0, 0, 0}});
-	auto light2 = std::make_shared<Light>(rlight_f, Location {{-4000, 0, 0}, {0, -1, 0}});
-	auto light3 = std::make_shared<Light>(rlight_f, Location {{-4000, -4000, 0}, {0, -3, 0}});
-	auto light4 = std::make_shared<Light>(rlight_f, Location {{3000, 4600, 0}, {0, 1, 0}});
+	auto light2 = std::make_shared<Light>(rlight_f, Location {{-4000, 0, 0}, {0, 2, 0}});
+	auto light3 = std::make_shared<Light>(rlight_f, Location {{-4000, -4000, 0}, {0, 1, 0}});
+	auto light4 = std::make_shared<Light>(rlight_f, Location {{3000, 4600, 0}, {0, 3, 0}});
 	objects.objects.push_back(rlight_f);
 
 	// yes I'm hacking some floor to light up as though its a bush

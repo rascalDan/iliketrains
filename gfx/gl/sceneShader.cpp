@@ -21,15 +21,15 @@
 
 SceneShader::SceneShader() :
 	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs},
-	absolute {fixedPoint_vs, material_fs}
+	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs}
 {
 }
 
 void
 SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
-	for (const auto & prog : std::array<const SceneProgram *, 7> {
-				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
+	for (const auto & prog : std::initializer_list<const SceneProgram *> {
+				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLightInst}) {
 		prog->setViewProjection(viewPoint, viewProjection);
 	}
 }
@@ -37,8 +37,8 @@ SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::ma
 void
 SceneShader::setViewPort(const ViewPort & viewPort) const
 {
-	for (const auto & prog : std::array<const SceneProgram *, 7> {
-				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLight}) {
+	for (const auto & prog : std::initializer_list<const SceneProgram *> {
+				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLightInst}) {
 		prog->setViewPort(viewPort);
 	}
 }
@@ -103,30 +103,6 @@ SceneShader::PointLightShader::add(const Position3D & position, const RGB & colo
 	glBindBuffer(GL_ARRAY_BUFFER, b);
 	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
 	glUniform1f(kqLoc, kq);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
-	glDrawArrays(GL_POINTS, 0, 1);
-}
-
-SceneShader::SpotLightShader::SpotLightShader() :
-	SceneProgram {spotLight_vs, spotLight_gs, spotLight_fs}, directionLoc {*this, "v_direction"},
-	colourLoc {*this, "colour"}, kqLoc {*this, "kq"}, arcLoc {*this, "arc"}, viewPointLoc {*this, "viewPoint"}
-
-{
-	using v3pair = std::pair<Position3D, Direction3D>;
-	VertexArrayObject {va}.addAttribs<v3pair, &v3pair::first, &v3pair::second>(b);
-}
-
-void
-SceneShader::SpotLightShader::add(const Position3D & position, const Direction3D & direction, const RGB & colour,
-		const float kq, const float arc) const
-{
-	Program::use();
-	glBindVertexArray(va);
-	glBindBuffer(GL_ARRAY_BUFFER, b);
-	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
-	glUniform3fv(directionLoc, 1, glm::value_ptr(direction));
-	glUniform1f(kqLoc, kq);
-	glUniform1f(arcLoc, arc);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, 1);
 }
