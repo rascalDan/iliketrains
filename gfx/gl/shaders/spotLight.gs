@@ -11,17 +11,19 @@ const vec3[] pyramid = vec3[]( // four-sided
 );
 uniform mat4 viewProjection;
 uniform ivec3 viewPoint;
-// uniform float arc;
-const float arc = 1;
-in ivec3 position[];
-in vec3 direction[];
-in float size[];
-in float cosarc[];
+flat in ivec3 position[];
+flat in vec3 direction[];
+flat in vec3 colour[];
+flat in float size[];
+flat in float kq[];
+flat in vec2 arc[];
 layout(points) in;
 
 layout(triangle_strip, max_vertices = 8) out;
-out vec4 geo_centre;
-out vec4 geo_direction;
+flat out vec4 geo_centre;
+flat out vec4 geo_direction;
+flat out vec3 geo_colour;
+flat out float geo_kq;
 
 vec3
 perp(vec3 a)
@@ -36,14 +38,16 @@ doVertex(vec4 ndcpos)
 {
 	gl_Position = ndcpos;
 	geo_centre = vec4(position[0], size[0]);
-	geo_direction = vec4(direction[0], cosarc[0]);
+	geo_direction = vec4(direction[0], arc[0].x);
+	geo_colour = colour[0];
+	geo_kq = kq[0];
 	EmitVertex();
 }
 
 void
 main()
 {
-	const float base = size[0] * tan(arc / 2);
+	const float base = size[0] * arc[0].y;
 	const vec3 offx = perp(direction[0]);
 	const vec3 offy = cross(direction[0], offx);
 	vec4 out_py[pyramid.length()];
