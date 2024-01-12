@@ -158,34 +158,4 @@ BOOST_AUTO_TEST_CASE(terrain)
 	Texture::save(outImage, "/tmp/terrain.tga");
 }
 
-BOOST_AUTO_TEST_CASE(pointlight)
-{
-	SceneRenderer ss {size, output};
-	ss.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
-
-	class PointLightScene : public TestScene {
-	public:
-		void
-		environment(const SceneShader &, const SceneRenderer & r) const override
-		{
-			r.setAmbientLight({0.2F, 0.2F, 0.2F});
-			r.setDirectionalLight({0.2F, 0.2F, 0.2F}, west + down, *this);
-		}
-
-		void
-		lights(const SceneShader & shader) const override
-		{
-			for (int x = 50000; x < 100000; x += 20000) {
-				for (int y = 50000; y < 2000000; y += 20000) {
-					shader.pointLight.add({x, y, 4000}, {1.0, 1.0, 1.0}, 0.1F);
-				}
-			}
-		}
-	};
-
-	const PointLightScene scene;
-	ss.render(scene);
-	Texture::save(outImage, "/tmp/pointlight.tga");
-}
-
 BOOST_AUTO_TEST_SUITE_END();

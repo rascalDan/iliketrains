@@ -11,7 +11,7 @@ class Texture;
 class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illuminator> {
 	Mesh::Ptr bodyMesh;
 	std::shared_ptr<Texture> texture;
-	glVertexArray instanceVAO, instancesSpotLightVAO;
+	glVertexArray instanceVAO, instancesSpotLightVAO, instancesPointLightVAO;
 
 public:
 	struct SpotLightVertex {
@@ -22,9 +22,21 @@ public:
 		Angle arc;
 	};
 
+	struct PointLightVertex {
+		RelativePosition3D position;
+		RGB colour;
+		RelativeDistance kq;
+	};
+
 	struct SpotLight : Persistence::Persistable, SpotLightVertex, StdTypeDefs<SpotLight> {
 	private:
 		friend Persistence::SelectionPtrBase<std::shared_ptr<SpotLight>>;
+		bool persist(Persistence::PersistenceStore & store) override;
+	};
+
+	struct PointLight : Persistence::Persistable, PointLightVertex, StdTypeDefs<PointLight> {
+	private:
+		friend Persistence::SelectionPtrBase<std::shared_ptr<PointLight>>;
 		bool persist(Persistence::PersistenceStore & store) override;
 	};
 
@@ -32,6 +44,7 @@ public:
 	using LocationVertex = std::pair<glm::mat4, GlobalPosition3D>;
 	mutable InstanceVertices<LocationVertex> instances;
 	mutable InstanceVertices<SpotLightVertex> instancesSpotLight;
+	mutable InstanceVertices<PointLightVertex> instancesPointLight;
 	void render(const SceneShader &) const override;
 	void lights(const SceneShader &) const override;
 
@@ -41,5 +54,7 @@ protected:
 	void postLoad() override;
 
 	std::vector<SpotLight::Ptr> spotLight;
+	std::vector<PointLight::Ptr> pointLight;
 	std::vector<InstanceVertices<SpotLightVertex>::InstanceProxy> spotLightInstances;
+	std::vector<InstanceVertices<PointLightVertex>::InstanceProxy> pointLightInstances;
 };

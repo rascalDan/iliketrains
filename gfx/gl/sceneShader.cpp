@@ -1,5 +1,4 @@
 #include "sceneShader.h"
-#include <array>
 #include <gfx/gl/shaders/fs-landmass.h>
 #include <gfx/gl/shaders/fs-material.h>
 #include <gfx/gl/shaders/fs-pointLight.h>
@@ -21,7 +20,8 @@
 
 SceneShader::SceneShader() :
 	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs},
-	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs}
+	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
+	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs}
 {
 }
 
@@ -29,7 +29,7 @@ void
 SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	for (const auto & prog : std::initializer_list<const SceneProgram *> {
-				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLightInst}) {
+				 &basic, &basicInst, &water, &landmass, &absolute, &pointLightInst, &spotLightInst}) {
 		prog->setViewProjection(viewPoint, viewProjection);
 	}
 }
@@ -38,7 +38,7 @@ void
 SceneShader::setViewPort(const ViewPort & viewPort) const
 {
 	for (const auto & prog : std::initializer_list<const SceneProgram *> {
-				 &basic, &basicInst, &water, &landmass, &absolute, &pointLight, &spotLightInst}) {
+				 &basic, &basicInst, &water, &landmass, &absolute, &pointLightInst, &spotLightInst}) {
 		prog->setViewPort(viewPort);
 	}
 }
@@ -86,23 +86,4 @@ SceneShader::WaterProgram::use(float waveCycle) const
 {
 	Program::use();
 	glUniform1f(waveLoc, waveCycle);
-}
-
-SceneShader::PointLightShader::PointLightShader() :
-	SceneProgram {pointLight_vs, pointLight_gs, pointLight_fs}, colourLoc {*this, "colour"}, kqLoc {*this, "kq"},
-	viewPointLoc {*this, "viewPoint"}
-{
-	VertexArrayObject {va}.addAttribs<Position3D>(b);
-}
-
-void
-SceneShader::PointLightShader::add(const Position3D & position, const RGB & colour, const float kq) const
-{
-	Program::use();
-	glBindVertexArray(va);
-	glBindBuffer(GL_ARRAY_BUFFER, b);
-	glUniform3fv(colourLoc, 1, glm::value_ptr(colour));
-	glUniform1f(kqLoc, kq);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Position3D), glm::value_ptr(position), GL_DYNAMIC_DRAW);
-	glDrawArrays(GL_POINTS, 0, 1);
 }

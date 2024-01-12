@@ -12,9 +12,16 @@ Illuminator::SpotLight::persist(Persistence::PersistenceStore & store)
 }
 
 bool
+Illuminator::PointLight::persist(Persistence::PersistenceStore & store)
+{
+	return STORE_TYPE && STORE_MEMBER(position) && STORE_MEMBER(colour) && STORE_MEMBER(kq);
+}
+
+bool
 Illuminator::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_TYPE && STORE_HELPER(bodyMesh, Asset::MeshConstruct)
+			&& STORE_HELPER(pointLight, Persistence::Appender<decltype(pointLight)>)
 			&& STORE_HELPER(spotLight, Persistence::Appender<decltype(spotLight)>) && Asset::persist(store);
 }
 
@@ -32,6 +39,14 @@ Illuminator::postLoad()
 	std::transform(spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
 		return instancesSpotLight.acquire(*s);
 	});
+	VertexArrayObject {instancesPointLightVAO}
+			.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
+					&PointLightVertex::kq>(instancesPointLight.bufferName(), 0)
+			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+	std::transform(
+			pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {
+				return instancesPointLight.acquire(*s);
+			});
 }
 
 void
@@ -54,6 +69,11 @@ Illuminator::lights(const SceneShader & shader) const
 			shader.spotLightInst.use();
 			glBindVertexArray(instancesSpotLightVAO);
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(scount), static_cast<GLsizei>(count));
+		}
+		if (const auto pcount = instancesPointLight.size()) {
+			shader.pointLightInst.use();
+			glBindVertexArray(instancesPointLightVAO);
+			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(pcount), static_cast<GLsizei>(count));
 		}
 
 		glBindVertexArray(0);
