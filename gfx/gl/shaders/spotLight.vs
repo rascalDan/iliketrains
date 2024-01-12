@@ -20,8 +20,8 @@ flat out float kq;
 void
 main()
 {
-	position = modelPos + ivec3(v_position * mat3(model));
-	direction = normalize(v_direction * mat3(model));
+	position = modelPos + ivec3(mat3(model) * v_position);
+	direction = normalize(mat3(model) * v_direction);
 	colour = v_colour;
 	kq = v_kq;
 	size = (8000 * sqrt(max(max(colour.r, colour.g), colour.b))) / sqrt(kq);
