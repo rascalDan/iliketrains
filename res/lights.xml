@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<ilt p.id="assetFactory">
+  <asset p.typeid="Illuminator" id="r-light" name="r-light">
+    <bodyMesh id="body">
+      <use type="cylinder" scale="0.12,0.12,1" colour="lightslategray"/>
+      <use type="cylinder" scale="0.07,0.07,3" position="0,0,1" colour="lightslategray"/>
+      <use type="cylinder" scale="0.05,0.05,1.5" position="0,-0.1,4" rotation="-1.5,0,0" colour="lightslategray"/>
+      <use type="cuboid" position="0,1.400,4.060" scale=".14,.3,0.07" colour="lightslategray"/>
+    </bodyMesh>
+    <spotLight position="0,1400,4100" direction="0,0.1,-1" colour=".9,.9,.9" kq="0.3" arc="1.8"/>
+  </asset>
+  <asset p.typeid="Illuminator" id="old-lamp" name="old-lamp">
+    <bodyMesh id="body">
+      <use type="cylinder" scale="0.13,0.13,.5" colour="#222222"/>
+      <use type="cylinder" scale="0.06,0.06,1.5" position="0,0,.5" colour="#222222"/>
+      <use type="cuboid" scale="0.3,0.02,0.02" position="0,0,1.8" colour="#222222"/>
+      <use type="cuboid" scale="0.2,0.2,0.4" position="0,0,2" colour="#dddddd"/>
+      <use type="cuboid" scale="0.1,0.1,0.1" position="0,0,2.4" colour="#222222"/>
+    </bodyMesh>
+    <pointLight position="0,0,2200" colour=".9,.9,.6" kq="0.3"/>
+  </asset>
+  <!-- yes I'm hacking some floor to light up as though its a bush -->
+  <asset p.typeid="Foliage" id="floor" name="floor">
+    <bodyMesh id="body">
+      <use type="plane" scale="10,10,0" colour="#aaaaaa"/>
+    </bodyMesh>
+  </asset>
+</ilt>

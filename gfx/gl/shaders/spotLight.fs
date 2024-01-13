@@ -6,10 +6,10 @@ out vec3 FragColor;
 layout(binding = 0) uniform isampler2D gPosition;
 layout(binding = 1) uniform sampler2D gNormal;
 uniform ivec4 viewPort;
-uniform vec3 colour;
-uniform float kq;
-in vec4 geo_centre;
-in vec4 geo_direction;
+flat in vec4 geo_centre;
+flat in vec4 geo_direction;
+flat in vec3 geo_colour;
+flat in float geo_kq;
 
 void
 main()
@@ -30,5 +30,5 @@ main()
 	if (normalDot < 0) {
 		discard;
 	}
-	FragColor = (colour * normalDot) / (1 + (kq * pow(lightDist / 1000.0, 2)));
+	FragColor = (geo_colour * normalDot) / (1 + (geo_kq * pow(lightDist / 1000.0, 2)));
 }
