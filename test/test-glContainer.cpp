@@ -204,6 +204,29 @@ BOOST_AUTO_TEST_CASE(random_access)
 	BOOST_CHECK_EQUAL(1, *i);
 }
 
+BOOST_AUTO_TEST_CASE(random_write)
+{
+	BOOST_CHECK_NO_THROW(resize(3));
+	BOOST_CHECK_EQUAL(size(), 3);
+	BOOST_CHECK_NO_THROW(unmap());
+	BOOST_REQUIRE(!data_.data());
+	BOOST_CHECK_NO_THROW(at(0, 10));
+	BOOST_CHECK_NO_THROW(at(1, 20));
+	BOOST_CHECK_NO_THROW(at(2, 30));
+	BOOST_CHECK(!data_.data());
+	{
+		std::array expected1 {10, 20, 30};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+	BOOST_CHECK(data_.data());
+	BOOST_CHECK_NO_THROW(at(1, 40));
+	{
+		std::array expected1 {10, 40, 30};
+		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
+	}
+	BOOST_CHECK_THROW(at(4, 0), std::out_of_range);
+}
+
 BOOST_AUTO_TEST_CASE(insert_remove_test)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1));

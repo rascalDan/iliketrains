@@ -136,6 +136,22 @@ public:
 		return size_;
 	}
 
+	void
+	at(size_type pos, const T & value)
+	{
+		if (pos >= size()) {
+			throw std::out_of_range {__FUNCTION__};
+		}
+		if (data_.data()) {
+			data_[pos] = value;
+		}
+		else {
+			glBindBuffer(GL_ARRAY_BUFFER, buffer_);
+			glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(pos * sizeof(T)), sizeof(value), &value);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+	}
+
 	[[nodiscard]] reference_type
 	at(size_type pos)
 	{
