@@ -14,19 +14,18 @@ class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illumina
 	glVertexArray instanceVAO, instancesSpotLightVAO, instancesPointLightVAO;
 
 public:
-	struct SpotLightVertex {
+	struct LightCommonVertex {
 		RelativePosition3D position;
-		Direction3D direction;
 		RGB colour;
 		RelativeDistance kq;
+	};
+
+	struct SpotLightVertex : LightCommonVertex {
+		Direction3D direction;
 		Angle arc;
 	};
 
-	struct PointLightVertex {
-		RelativePosition3D position;
-		RGB colour;
-		RelativeDistance kq;
-	};
+	struct PointLightVertex : LightCommonVertex { };
 
 	struct SpotLight : Persistence::Persistable, SpotLightVertex, StdTypeDefs<SpotLight> {
 	private:
