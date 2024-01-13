@@ -1,8 +1,7 @@
 #include "illuminator.h"
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/vertexArrayObject.h"
-#include "gfx/models/texture.h"
-#include "location.h"
+#include "gfx/models/texture.h" // IWYU pragma: keep
 
 bool
 Illuminator::SpotLight::persist(Persistence::PersistenceStore & store)
@@ -28,6 +27,9 @@ Illuminator::persist(Persistence::PersistenceStore & store)
 void
 Illuminator::postLoad()
 {
+	if (spotLight.empty() && pointLight.empty()) {
+		throw std::logic_error {"Illuminator has no lights"};
+	}
 	texture = getTexture();
 	bodyMesh->configureVAO(instanceVAO)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
