@@ -33,22 +33,29 @@ Illuminator::postLoad()
 	texture = getTexture();
 	bodyMesh->configureVAO(instanceVAO)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
-	VertexArrayObject {instancesSpotLightVAO}
-			.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
-					&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(
-					instancesSpotLight.bufferName(), 0)
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
-	std::transform(spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
-		return instancesSpotLight.acquire(*s);
-	});
-	VertexArrayObject {instancesPointLightVAO}
-			.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
-					&PointLightVertex::kq>(instancesPointLight.bufferName(), 0)
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
-	std::transform(
-			pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {
-				return instancesPointLight.acquire(*s);
-			});
+	if (!spotLight.empty()) {
+		instancesSpotLightVAO.emplace();
+		VertexArrayObject {*instancesSpotLightVAO}
+				.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
+						&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(
+						instancesSpotLight.bufferName(), 0)
+				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+		std::transform(
+				spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
+					return instancesSpotLight.acquire(*s);
+				});
+	}
+	if (!pointLight.empty()) {
+		instancesPointLightVAO.emplace();
+		VertexArrayObject {*instancesPointLightVAO}
+				.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
+						&PointLightVertex::kq>(instancesPointLight.bufferName(), 0)
+				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+		std::transform(
+				pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {
+					return instancesPointLight.acquire(*s);
+				});
+	}
 }
 
 void
@@ -69,12 +76,12 @@ Illuminator::lights(const SceneShader & shader) const
 	if (const auto count = instances.size()) {
 		if (const auto scount = instancesSpotLight.size()) {
 			shader.spotLightInst.use();
-			glBindVertexArray(instancesSpotLightVAO);
+			glBindVertexArray(*instancesSpotLightVAO);
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(scount), static_cast<GLsizei>(count));
 		}
 		if (const auto pcount = instancesPointLight.size()) {
 			shader.pointLightInst.use();
-			glBindVertexArray(instancesPointLightVAO);
+			glBindVertexArray(*instancesPointLightVAO);
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(pcount), static_cast<GLsizei>(count));
 		}
 

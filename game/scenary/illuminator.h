@@ -11,7 +11,8 @@ class Texture;
 class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illuminator> {
 	Mesh::Ptr bodyMesh;
 	std::shared_ptr<Texture> texture;
-	glVertexArray instanceVAO, instancesSpotLightVAO, instancesPointLightVAO;
+	glVertexArray instanceVAO;
+	std::optional<glVertexArray> instancesSpotLightVAO, instancesPointLightVAO;
 
 public:
 	struct LightCommonVertex {
