@@ -56,11 +56,11 @@ BOOST_AUTO_TEST_CASE(autoMapUnmap)
 {
 	{
 		auto proxy = acquire();
-		BOOST_CHECK(data_);
+		BOOST_CHECK(data_.data());
 		std::ignore = bufferName();
-		BOOST_CHECK(data_);
+		BOOST_CHECK(data_.data());
 		BOOST_CHECK_EQUAL(1, size());
-		BOOST_CHECK(!data_);
+		BOOST_CHECK(!data_.data());
 	}
 	BOOST_CHECK_EQUAL(0, size());
 }
