@@ -129,6 +129,8 @@ public:
 		}
 	}
 
+	DEFAULT_MOVE_NO_COPY(glContainer);
+
 	[[nodiscard]] iterator
 	begin()
 	{
