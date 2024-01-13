@@ -9,7 +9,7 @@ public:
 	explicit Location(GlobalPosition3D pos = {}, Rotation3D rot = {}) : pos {pos}, rot {rot} { }
 #endif
 
-	[[nodiscard]] glm::mat4 getRotationTransform() const;
+	[[nodiscard]] glm::mat3 getRotationTransform() const;
 
 	GlobalPosition3D pos;
 	Rotation3D rot;

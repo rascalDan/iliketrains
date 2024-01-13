@@ -16,9 +16,9 @@ getMaterialDetail(uint midx)
 void
 main()
 {
-	FragPos = (model * vec4(position, 1.0)).xyz + modelPos;
+	FragPos = (model * position) + modelPos;
 	TexCoords = texCoord;
-	Normal = (model * vec4(normal, 0.0)).xyz;
+	Normal = (model * normal);
 	Colour = colour;
 	Material = getMaterialDetail(material);
 

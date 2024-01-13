@@ -43,7 +43,7 @@ RailVehicleClass::postLoad()
 	bogies.back()
 			->configureVAO(instancesBogiesVAO.back())
 			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(instances.bufferName(), 1);
-	static_assert(sizeof(LocationVertex) == 228UL);
+	static_assert(sizeof(LocationVertex) == 144UL);
 }
 
 void

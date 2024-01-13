@@ -4,7 +4,7 @@ include(`meshIn.glsl')
 
 uniform mat4 viewProjection;
 uniform ivec3 viewPoint;
-uniform mat4 model;
+uniform mat3 model;
 uniform ivec3 modelPos;
 
 include(`commonShadowPoint.glsl')

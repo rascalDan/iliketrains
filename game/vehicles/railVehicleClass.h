@@ -19,7 +19,7 @@ public:
 	void shadows(const ShadowMapper & shadowMapper) const override;
 
 	struct LocationVertex {
-		glm::mat4 body, front, back;
+		glm::mat3 body, front, back;
 		GlobalPosition3D bodyPos, frontPos, backPos;
 	};
 

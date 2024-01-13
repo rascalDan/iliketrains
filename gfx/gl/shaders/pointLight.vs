@@ -3,8 +3,8 @@
 layout(location = 0) in vec3 v_position;
 layout(location = 1) in vec3 v_colour;
 layout(location = 2) in float v_kq;
-layout(location = 3) in mat4 model;
-layout(location = 7) in ivec3 modelPos;
+layout(location = 3) in mat3 model;
+layout(location = 6) in ivec3 modelPos;
 
 uniform ivec3 viewPoint;
 

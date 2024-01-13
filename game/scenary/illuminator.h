@@ -41,7 +41,7 @@ public:
 	};
 
 public:
-	using LocationVertex = std::pair<glm::mat4, GlobalPosition3D>;
+	using LocationVertex = std::pair<glm::mat3, GlobalPosition3D>;
 	mutable InstanceVertices<LocationVertex> instances;
 	mutable InstanceVertices<SpotLightVertex> instancesSpotLight;
 	mutable InstanceVertices<PointLightVertex> instancesPointLight;

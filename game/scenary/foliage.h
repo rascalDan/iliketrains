@@ -15,7 +15,7 @@ class Foliage : public Asset, public Renderable, public StdTypeDefs<Foliage> {
 	glVertexArray instanceVAO;
 
 public:
-	using LocationVertex = std::pair<glm::mat4, GlobalPosition3D>;
+	using LocationVertex = std::pair<glm::mat3, GlobalPosition3D>;
 	mutable InstanceVertices<LocationVertex> instances;
 	void render(const SceneShader &) const override;
 	void shadows(const ShadowMapper &) const override;
