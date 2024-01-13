@@ -122,11 +122,14 @@ public:
 		allocBuffer(1);
 	}
 
-	~glContainer() noexcept(is_trivial_dest)
+	~glContainer()
+		requires(is_trivial_dest)
+	= default;
+
+	~glContainer()
+		requires(!is_trivial_dest)
 	{
-		if constexpr (!is_trivial_dest) {
-			clear();
-		}
+		clear();
 	}
 
 	DEFAULT_MOVE_NO_COPY(glContainer);
