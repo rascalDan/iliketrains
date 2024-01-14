@@ -143,11 +143,11 @@ SceneRenderer::DirectionalLightProgram::setDirectionalLight(const RGB & c, const
 		const GlobalPosition3D & p, const std::span<const glm::mat4x4> lvp,
 		const std::span<const TextureRelRegion> shadowMapRegions, std::size_t maps) const
 {
-	glUniform3fv(colourLoc, 1, glm::value_ptr(c));
+	glUniform(colourLoc, c);
 	const auto nd = glm::normalize(d);
-	glUniform3fv(directionLoc, 1, glm::value_ptr(nd));
-	glUniform3iv(lightPointLoc, 1, glm::value_ptr(p));
-	glUniform1ui(lightViewProjectionCountLoc, static_cast<GLuint>(maps));
-	glUniformMatrix4fv(lightViewProjectionLoc, static_cast<GLsizei>(maps), GL_FALSE, glm::value_ptr(lvp.front()));
-	glUniform4fv(lightViewShadowMapRegionLoc, static_cast<GLsizei>(maps), glm::value_ptr(shadowMapRegions.front()));
+	glUniform(directionLoc, nd);
+	glUniform(lightPointLoc, p);
+	glUniform(lightViewProjectionCountLoc, static_cast<GLuint>(maps));
+	glUniform(lightViewProjectionLoc, lvp);
+	glUniform(lightViewShadowMapRegionLoc, shadowMapRegions);
 }

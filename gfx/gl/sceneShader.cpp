@@ -47,8 +47,8 @@ void
 SceneShader::SceneProgram::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
-	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
-	glUniform3iv(viewPointLoc, 1, glm::value_ptr(viewPoint));
+	glUniform(viewProjectionLoc, viewProjection);
+	glUniform(viewPointLoc, viewPoint);
 }
 
 void
@@ -56,7 +56,7 @@ SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 {
 	if (viewPortLoc >= 0) {
 		glUseProgram(*this);
-		glUniform4iv(viewPortLoc, 1, glm::value_ptr(viewPort));
+		glUniform(viewPortLoc, viewPort);
 	}
 }
 
@@ -68,8 +68,8 @@ SceneShader::BasicProgram::BasicProgram() :
 void
 SceneShader::BasicProgram::setModel(Location const & location) const
 {
-	glUniformMatrix3fv(modelLoc, 1, GL_FALSE, glm::value_ptr(location.getRotationTransform()));
-	glUniform3iv(modelPosLoc, 1, glm::value_ptr(location.pos));
+	glUniform(modelLoc, location.getRotationTransform());
+	glUniform(modelPosLoc, location.pos);
 }
 
 void
@@ -85,5 +85,5 @@ void
 SceneShader::WaterProgram::use(float waveCycle) const
 {
 	Program::use();
-	glUniform1f(waveLoc, waveCycle);
+	glUniform(waveLoc, waveCycle);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/types.h"
+#include "gl_traits.h"
 #include "program.h"
 #include <cstddef>
 #include <glad/gl.h>
@@ -21,7 +22,7 @@ private:
 		{
 			const RequiredUniformLocation uiProjectionLoc {*this, "uiProjection"};
 			glUseProgram(*this);
-			glUniformMatrix4fv(uiProjectionLoc, 1, GL_FALSE, glm::value_ptr(vp));
+			glUniform(uiProjectionLoc, vp);
 		}
 	};
 

@@ -1,4 +1,5 @@
 #include "uiShader.h"
+#include "gl_traits.h"
 #include <gfx/gl/program.h>
 #include <gfx/gl/shader.h>
 #include <gfx/gl/shaders/fs-uiShader.h>
@@ -26,5 +27,5 @@ void
 UIShader::TextProgram::use(const RGB & colour) const
 {
 	Program::use();
-	glUniform3fv(colorLoc, 1, glm::value_ptr(colour));
+	glUniform(colorLoc, colour);
 }

@@ -4,6 +4,7 @@
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowFixedPoint.h"
+#include "gl_traits.h"
 #include "location.h"
 #include "maths.h"
 #include "sceneProvider.h"
@@ -174,8 +175,8 @@ void
 ShadowMapper::FixedPoint::setViewProjection(const GlobalPosition3D viewPoint, const glm::mat4 & viewProjection) const
 {
 	use();
-	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
-	glUniform3iv(viewPointLoc, 1, glm::value_ptr(viewPoint));
+	glUniform(viewProjectionLoc, viewProjection);
+	glUniform(viewPointLoc, viewPoint);
 }
 
 void
@@ -194,8 +195,8 @@ void
 ShadowMapper::DynamicPoint::setViewProjection(const GlobalPosition3D viewPoint, const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
-	glUniformMatrix4fv(viewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
-	glUniform3iv(viewPointLoc, 1, glm::value_ptr(viewPoint));
+	glUniform(viewProjectionLoc, viewProjection);
+	glUniform(viewPointLoc, viewPoint);
 }
 
 void
@@ -208,6 +209,6 @@ ShadowMapper::DynamicPoint::use(const Location & location) const
 void
 ShadowMapper::DynamicPoint::setModel(const Location & location) const
 {
-	glUniformMatrix3fv(modelLoc, 1, GL_FALSE, glm::value_ptr(location.getRotationTransform()));
-	glUniform3iv(modelPosLoc, 1, glm::value_ptr(location.pos));
+	glUniform(modelLoc, location.getRotationTransform());
+	glUniform(modelPosLoc, location.pos);
 }
