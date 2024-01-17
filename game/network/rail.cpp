@@ -13,12 +13,12 @@
 #include <utility>
 #include <vector>
 
-template class NetworkOf<RailLink>;
+template class NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>;
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
 constexpr Size3D RAIL_HEIGHT {0, 0, 250.F};
 
-RailLinks::RailLinks() : NetworkOf<RailLink> {"rails.jpg"} { }
+RailLinks::RailLinks() : NetworkOf<RailLink, RailLinkStraight, RailLinkCurve> {"rails.jpg"} { }
 
 void
 RailLinks::tick(TickDuration)
@@ -117,15 +117,20 @@ round_sleepers(const float v)
 	return round_frac(v, sleepers);
 }
 
-RailLinkStraight::RailLinkStraight(const Node::Ptr & a, const Node::Ptr & b) : RailLinkStraight(a, b, b->pos - a->pos)
+RailLinkStraight::RailLinkStraight(
+		NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & a, const Node::Ptr & b) :
+	RailLinkStraight(instances, a, b, b->pos - a->pos)
 {
 }
 
-RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const RelativePosition3D & diff) :
-	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff))
+RailLinkStraight::RailLinkStraight(
+		NetworkLinkHolder<RailLinkStraight> & instances, Node::Ptr a, Node::Ptr b, const RelativePosition3D & diff) :
+	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff)),
+	instance {instances.vertices.acquire(
+			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), round_sleepers(length / 2.F))}
 {
 	if (glGenVertexArrays) {
-		std::vector<Vertex> vertices;
+		std::vector<::Vertex> vertices;
 		vertices.reserve(2 * railCrossSection.size());
 		const auto len = round_sleepers(length / 2000.F);
 		const glm::mat3 trans {flat_orientation(diff)};
@@ -139,15 +144,19 @@ RailLinkStraight::RailLinkStraight(Node::Ptr a, Node::Ptr b, const RelativePosit
 	}
 }
 
-RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
-	RailLinkCurve(a, b, c || a->pos.z, {c || 0, a->pos, b->pos})
+RailLinkCurve::RailLinkCurve(
+		NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
+	RailLinkCurve(instances, a, b, c || a->pos.z, {c || 0, a->pos, b->pos})
 {
 }
 
-RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, GlobalPosition3D c, const Arc arc) :
+RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
+		GlobalPosition3D c, const Arc arc) :
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			glm::length(RelativePosition3D(a->pos - c)) * arc_length(arc)),
-	LinkCurve {c, glm::length(RelativePosition3D(ends[0].node->pos - c)), arc}
+	LinkCurve {c, glm::length(RelativePosition3D(ends[0].node->pos - c)), arc},
+	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2.F))}
+
 {
 	if (glGenVertexArrays) {
 		const auto & e0p {ends[0].node->pos};
@@ -157,7 +166,7 @@ RailLinkCurve::RailLinkCurve(const Node::Ptr & a, const Node::Ptr & b, GlobalPos
 		const auto step {RelativePosition3D {arc_length(arc), e1p.z - e0p.z, slength / 1000.F} / segs};
 
 		auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
-		std::vector<Vertex> vertices;
+		std::vector<::Vertex> vertices;
 		vertices.reserve(segCount * railCrossSection.size());
 		for (RelativePosition3D swing = {arc.first, centreBase.z - e0p.z, 0.F}; segCount; swing += step, --segCount) {
 			const auto t {

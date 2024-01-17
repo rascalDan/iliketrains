@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx/gl/instanceVertices.h"
 #include "link.h"
 #include <collection.h>
 #include <gfx/renderable.h>
@@ -58,7 +59,13 @@ protected:
 	std::shared_ptr<Texture> texture;
 };
 
-template<typename T> class NetworkOf : public Network, public Renderable {
+template<typename LinkType> class NetworkLinkHolder {
+	friend LinkType;
+	mutable InstanceVertices<typename LinkType::Vertex> vertices;
+};
+
+template<typename T, typename... Links>
+class NetworkOf : public Network, public Renderable, public NetworkLinkHolder<Links>... {
 protected:
 	using Network::Network;
 
@@ -75,7 +82,7 @@ public:
 		requires std::is_base_of_v<T, L>
 	{
 		const auto node1 = candidateNodeAt(a).first, node2 = candidateNodeAt(b).first;
-		return std::make_shared<L>(node1, node2, std::forward<Params>(params)...);
+		return std::make_shared<L>(*this, node1, node2, std::forward<Params>(params)...);
 	}
 
 	template<typename L, typename... Params>
@@ -84,7 +91,7 @@ public:
 		requires std::is_base_of_v<T, L>
 	{
 		const auto node1 = nodeAt(a), node2 = nodeAt(b);
-		auto l {links.template create<L>(node1, node2, std::forward<Params>(params)...)};
+		auto l {links.template create<L>(*this, node1, node2, std::forward<Params>(params)...)};
 		joinLinks(l);
 		return l;
 	}

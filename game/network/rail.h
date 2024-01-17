@@ -40,23 +40,39 @@ protected:
 
 RailLink::~RailLink() = default;
 
+class RailLinks;
+
 class RailLinkStraight : public RailLink, public LinkStraight {
 public:
-	RailLinkStraight(const Node::Ptr &, const Node::Ptr &);
+	RailLinkStraight(NetworkLinkHolder<RailLinkStraight> &, const Node::Ptr &, const Node::Ptr &);
+
+	struct Vertex {
+		GlobalPosition3D a, b;
+		glm::mat2 rotation;
+		float textureRepeats;
+	};
 
 private:
-	RailLinkStraight(Node::Ptr, Node::Ptr, const RelativePosition3D & diff);
+	RailLinkStraight(NetworkLinkHolder<RailLinkStraight> &, Node::Ptr, Node::Ptr, const RelativePosition3D & diff);
+	InstanceVertices<Vertex>::InstanceProxy instance;
 };
 
 class RailLinkCurve : public RailLink, public LinkCurve {
 public:
-	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, GlobalPosition2D);
+	RailLinkCurve(NetworkLinkHolder<RailLinkCurve> &, const Node::Ptr &, const Node::Ptr &, GlobalPosition2D);
+
+	struct Vertex {
+		GlobalPosition3D a, b, c;
+		float textureRepeats;
+	};
 
 private:
-	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, GlobalPosition3D, const Arc);
+	RailLinkCurve(
+			NetworkLinkHolder<RailLinkCurve> &, const Node::Ptr &, const Node::Ptr &, GlobalPosition3D, const Arc);
+	InstanceVertices<Vertex>::InstanceProxy instance;
 };
 
-class RailLinks : public NetworkOf<RailLink>, public WorldObject {
+class RailLinks : public NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>, public WorldObject {
 public:
 	RailLinks();
 
