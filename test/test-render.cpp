@@ -8,6 +8,7 @@
 
 #include <assetFactory/assetFactory.h>
 #include <game/geoData.h>
+#include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
@@ -156,6 +157,48 @@ BOOST_AUTO_TEST_CASE(terrain)
 
 	ss.render(TestTerrain {});
 	Texture::save(outImage, "/tmp/terrain.tga");
+}
+
+BOOST_AUTO_TEST_CASE(railnet)
+{
+	SceneRenderer ss {size, output};
+	ss.camera.setView({0, 0, 10000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+
+	class TestRail : public SceneProvider {
+		RailLinks net;
+
+	public:
+		TestRail()
+		{
+			net.addLinksBetween({10000, 10000, 0}, {100000, 100000, 0});
+		}
+
+		void
+		content(const SceneShader & shader) const override
+		{
+			net.render(shader);
+		}
+
+		void
+		environment(const SceneShader &, const SceneRenderer & sr) const override
+		{
+			sr.setAmbientLight({0.1, 0.1, 0.1});
+			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+		}
+
+		void
+		lights(const SceneShader &) const override
+		{
+		}
+
+		void
+		shadows(const ShadowMapper &) const override
+		{
+		}
+	};
+
+	ss.render(TestRail {});
+	Texture::save(outImage, "/tmp/railnet.tga");
 }
 
 BOOST_AUTO_TEST_SUITE_END();
