@@ -4,17 +4,6 @@
 
 template<typename T, typename... Links>
 void
-NetworkOf<T, Links...>::render(const SceneShader & shader) const
-{
-	if constexpr (std::is_base_of_v<Renderable, T>) {
-		shader.absolute.use();
-		texture->bind();
-		links.apply(&Renderable::render, shader);
-	}
-}
-
-template<typename T, typename... Links>
-void
 NetworkOf<T, Links...>::joinLinks(const Link::Ptr & l) const
 {
 	for (const auto & ol : links.objects) {

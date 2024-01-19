@@ -127,7 +127,7 @@ RailLinkStraight::RailLinkStraight(
 		NetworkLinkHolder<RailLinkStraight> & instances, Node::Ptr a, Node::Ptr b, const RelativePosition3D & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff)),
 	instance {instances.vertices.acquire(
-			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), round_sleepers(length / 2.F))}
+			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), round_sleepers(length / 2000.F))}
 {
 	if (glGenVertexArrays) {
 		std::vector<::Vertex> vertices;
@@ -155,7 +155,7 @@ RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			glm::length(RelativePosition3D(a->pos - c)) * arc_length(arc)),
 	LinkCurve {c, glm::length(RelativePosition3D(ends[0].node->pos - c)), arc},
-	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2.F))}
+	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2000.F))}
 
 {
 	if (glGenVertexArrays) {
@@ -184,4 +184,22 @@ RelativePosition3D
 RailLink::vehiclePositionOffset() const
 {
 	return RAIL_HEIGHT;
+}
+
+void
+RailLinks::render(const SceneShader & shader) const
+{
+	auto renderType = [](auto & v, auto & s) {
+		if (auto count = v.size()) {
+			s.use();
+			glBindBuffer(GL_VERTEX_ARRAY, v.bufferName());
+			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
+		}
+	};
+	if (!links.objects.empty()) {
+		texture->bind();
+		renderType(NetworkLinkHolder<RailLinkStraight>::vertices, shader.networkStraight);
+		renderType(NetworkLinkHolder<RailLinkCurve>::vertices, shader.networkCurve);
+		glBindBuffer(GL_VERTEX_ARRAY, 0);
+	}
 }

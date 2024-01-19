@@ -60,6 +60,7 @@ protected:
 };
 
 template<typename LinkType> class NetworkLinkHolder {
+protected:
 	friend LinkType;
 	mutable InstanceVertices<typename LinkType::Vertex> vertices;
 };
@@ -104,8 +105,6 @@ public:
 	Link::CCollection addExtend(GlobalPosition3D, GlobalPosition3D) override;
 
 	[[nodiscard]] float findNodeDirection(Node::AnyCPtr) const override;
-
-	void render(const SceneShader &) const override;
 
 protected:
 	Link::CCollection addJoins();

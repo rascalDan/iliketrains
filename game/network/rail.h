@@ -77,6 +77,7 @@ public:
 	RailLinks();
 
 	std::shared_ptr<RailLink> addLinksBetween(GlobalPosition3D start, GlobalPosition3D end);
+	void render(const SceneShader &) const override;
 
 private:
 	void tick(TickDuration elapsed) override;

@@ -68,6 +68,11 @@ struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
 		addLink<TestLinkS>(p200, p110, 2.F);
 		addLink<TestLinkS>(p100, p110, 1.F);
 	}
+
+	void
+	render(const SceneShader &) const override
+	{
+	}
 };
 
 const auto VALID_NODES = boost::unit_test::data::make<GlobalPosition3D>({

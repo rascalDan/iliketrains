@@ -57,6 +57,7 @@ public:
 	BasicProgram basic;
 	WaterProgram water;
 	AbsolutePosProgram basicInst, landmass, absolute, spotLightInst, pointLightInst;
+	AbsolutePosProgram networkStraight, networkCurve;
 
 	void setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const;
 	void setViewPort(const ViewPort & viewPort) const;
