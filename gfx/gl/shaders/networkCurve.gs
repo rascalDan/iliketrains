@@ -6,6 +6,7 @@ flat in ivec3 cpos[];
 flat in float reps[];
 flat in float aangle[];
 flat in float bangle[];
+flat in float radius[];
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 255) out;
@@ -24,7 +25,6 @@ void
 main()
 {
 	float segs = floor(255 / (profile.length() * 2));
-	float radius = distance(cpos[0], apos[0]);
 	vec3 arcstep = vec3((bangle[0] - aangle[0]), // angle
 						   reps[0], // texture
 						   (bpos[0].z - apos[0].z)) // height
@@ -35,7 +35,7 @@ main()
 	float prevTex = 0;
 	for (vec3 arc = arcstep; arc.y < reps[0] - 0.01; arc += arcstep) {
 		mat2 rot = getRot(arc.x + aangle[0]);
-		ivec3 pos = cpos[0] + ivec3(rot * vec2(radius, 0), arc.z);
+		ivec3 pos = cpos[0] + ivec3(rot * vec2(radius[0], 0), arc.z);
 		float tex = arc.y;
 		doSeg(segDist(prevPos, pos), pos, prevPos, tex, prevTex, rot, prevRot);
 		prevPos = pos;
