@@ -155,8 +155,8 @@ RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			glm::length(RelativePosition3D(a->pos - c)) * arc_length(arc)),
 	LinkCurve {c, glm::length(RelativePosition3D(ends[0].node->pos - c)), arc},
-	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2000.F))}
-
+	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2000.F),
+			half_pi - arc.first, half_pi - arc.second)}
 {
 	if (glGenVertexArrays) {
 		const auto & e0p {ends[0].node->pos};
@@ -198,7 +198,8 @@ template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder()
 {
 	VertexArrayObject {vao}
 			.addAttribs<RailLinkCurve::Vertex, &RailLinkCurve::Vertex::a, &RailLinkCurve::Vertex::b,
-					&RailLinkCurve::Vertex::c, &RailLinkCurve::Vertex::textureRepeats>(vertices.bufferName());
+					&RailLinkCurve::Vertex::c, &RailLinkCurve::Vertex::textureRepeats, &RailLinkCurve::Vertex::aangle,
+					&RailLinkCurve::Vertex::bangle>(vertices.bufferName());
 }
 
 namespace {

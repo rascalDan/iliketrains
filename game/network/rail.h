@@ -64,6 +64,7 @@ public:
 	struct Vertex {
 		GlobalPosition3D a, b, c;
 		float textureRepeats;
+		float aangle, bangle;
 	};
 
 private:

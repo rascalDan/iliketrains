@@ -16,26 +16,33 @@ uniform float flatDistance = 1000000;
 out vec2 texCoord;
 out vec3 rposition;
 
-void
-doVertex(const ivec3 end, const int v, const float texY, const mat2 rot)
+float
+segDist(const ivec3 a, const ivec3 b)
 {
-	rposition = vec3(rot * profile[v].xy, profile[v].z);
-	ivec3 vpos = end + ivec3(rposition);
-	gl_Position = viewProjection * vec4(vpos - viewPoint, 1);
-	texCoord = vec2(texturePos[v], texY);
-	EmitVertex();
+	return min(distance(viewPoint, a), distance(viewPoint, b));
 }
 
-void
-doSeg(const float dist, const ivec3 apos, const ivec3 bpos, const float atexY, const float btexY, const mat2 arot,
-		const mat2 brot)
-{
-	if (dist < clipDistance) {
-		int vstep = (dist < flatDistance) ? 1 : profile.length() - 1;
-		for (int v = 0; v < profile.length(); v += vstep) {
-			doVertex(bpos, v, btexY, brot);
-			doVertex(apos, v, atexY, arot);
+ifelse(
+		TYPE, .gs,
+		// Begin: Geometry shader only function
+		void doVertex(const ivec3 end, const int v, const float texY, const mat2 rot) {
+			rposition = vec3(rot * profile[v].xy, profile[v].z);
+			ivec3 vpos = end + ivec3(rposition);
+			gl_Position = viewProjection * vec4(vpos - viewPoint, 1);
+			texCoord = vec2(texturePos[v], texY);
+			EmitVertex();
 		}
-		EndPrimitive();
-	}
-}
+
+		void doSeg(const float dist, const ivec3 apos, const ivec3 bpos, const float atexY, const float btexY,
+				const mat2 arot, const mat2 brot) {
+			if (dist < clipDistance) {
+				int vstep = (dist < flatDistance) ? 1 : profile.length() - 1;
+				for (int v = 0; v < profile.length(); v += vstep) {
+					doVertex(bpos, v, btexY, brot);
+					doVertex(apos, v, atexY, arot);
+				}
+				EndPrimitive();
+			}
+		}
+		// End: Geometry shader only function
+)
