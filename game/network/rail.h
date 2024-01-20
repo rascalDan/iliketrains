@@ -72,6 +72,9 @@ private:
 	InstanceVertices<Vertex>::InstanceProxy instance;
 };
 
+template<> NetworkLinkHolder<RailLinkStraight>::NetworkLinkHolder();
+template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder();
+
 class RailLinks : public NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>, public WorldObject {
 public:
 	RailLinks();

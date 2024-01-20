@@ -60,8 +60,11 @@ protected:
 };
 
 template<typename LinkType> class NetworkLinkHolder {
-protected:
+public:
+	// Implemented per LinkType to configure vao
+	NetworkLinkHolder();
 	friend LinkType;
+	glVertexArray vao;
 	mutable InstanceVertices<typename LinkType::Vertex> vertices;
 };
 

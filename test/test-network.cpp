@@ -52,6 +52,8 @@ struct TestLinkS : public TestLink, public LinkStraight {
 constexpr GlobalPosition3D p000 {0, 0, 0}, p100 {10000, 0, 0}, p200 {20000, 0, 0}, p300 {30000, 0, 0};
 constexpr GlobalPosition3D p110 {10000, 10000, 0};
 
+template<> NetworkLinkHolder<TestLinkS>::NetworkLinkHolder() = default;
+
 struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
 	TestNetwork() : NetworkOf<TestLink, TestLinkS> {RESDIR "rails.jpg"}
 	{

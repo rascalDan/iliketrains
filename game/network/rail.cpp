@@ -186,20 +186,41 @@ RailLink::vehiclePositionOffset() const
 	return RAIL_HEIGHT;
 }
 
-void
-RailLinks::render(const SceneShader & shader) const
+template<> NetworkLinkHolder<RailLinkStraight>::NetworkLinkHolder()
 {
-	auto renderType = [](auto & v, auto & s) {
-		if (auto count = v.size()) {
+	VertexArrayObject {vao}
+			.addAttribs<RailLinkStraight::Vertex, &RailLinkStraight::Vertex::a, &RailLinkStraight::Vertex::b,
+					&RailLinkStraight::Vertex::rotation, &RailLinkStraight::Vertex::textureRepeats>(
+					vertices.bufferName());
+}
+
+template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder()
+{
+	VertexArrayObject {vao}
+			.addAttribs<RailLinkCurve::Vertex, &RailLinkCurve::Vertex::a, &RailLinkCurve::Vertex::b,
+					&RailLinkCurve::Vertex::c, &RailLinkCurve::Vertex::textureRepeats>(vertices.bufferName());
+}
+
+namespace {
+	template<typename LinkType>
+	void
+	renderType(const NetworkLinkHolder<LinkType> & n, auto & s)
+	{
+		if (auto count = n.vertices.size()) {
 			s.use();
-			glBindBuffer(GL_VERTEX_ARRAY, v.bufferName());
+			glBindVertexArray(n.vao);
 			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
 		}
 	};
+}
+
+void
+RailLinks::render(const SceneShader & shader) const
+{
 	if (!links.objects.empty()) {
 		texture->bind();
-		renderType(NetworkLinkHolder<RailLinkStraight>::vertices, shader.networkStraight);
-		renderType(NetworkLinkHolder<RailLinkCurve>::vertices, shader.networkCurve);
-		glBindBuffer(GL_VERTEX_ARRAY, 0);
+		renderType<RailLinkStraight>(*this, shader.networkStraight);
+		renderType<RailLinkCurve>(*this, shader.networkCurve);
+		glBindVertexArray(0);
 	}
 }
