@@ -170,7 +170,11 @@ BOOST_AUTO_TEST_CASE(railnet)
 	public:
 		TestRail()
 		{
-			net.addLinksBetween({10000, 10000, 0}, {100000, 100000, 0});
+			net.addLinksBetween({20000, 10000, 0}, {100000, 100000, 0});
+			net.addLinksBetween({20000, 10000, 0}, {10000, 10000, 0});
+			net.addLinksBetween({10000, 20000, 0}, {100000, 120000, 0});
+			net.addLinksBetween({10000, 20000, 0}, {10000, 10000, 0});
+			net.addLinksBetween({100000, 100000, 0}, {100000, 120000, 0});
 		}
 
 		void
