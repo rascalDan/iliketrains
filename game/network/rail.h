@@ -2,13 +2,11 @@
 
 #include "chronology.h"
 #include "game/worldobject.h"
-#include "gfx/models/mesh.h"
 #include "gfx/renderable.h"
 #include "link.h"
 #include "network.h"
 #include <glm/glm.hpp>
 #include <memory>
-#include <span>
 #include <special_members.h>
 
 class SceneShader;
@@ -19,7 +17,7 @@ struct Arc;
 class RailLinkStraight;
 class RailLinkCurve;
 
-class RailLink : public virtual Link, public Renderable {
+class RailLink : public virtual Link {
 public:
 	RailLink() = default;
 	inline ~RailLink() override = 0;
@@ -27,15 +25,11 @@ public:
 	using StraightLink = RailLinkStraight;
 	using CurveLink = RailLinkCurve;
 
-	void render(const SceneShader &) const override;
 	NO_COPY(RailLink);
 	NO_MOVE(RailLink);
 
 protected:
 	[[nodiscard]] RelativePosition3D vehiclePositionOffset() const override;
-	[[nodiscard]] static Mesh::Ptr defaultMesh(const std::span<Vertex> vertices);
-
-	Mesh::Ptr mesh;
 };
 
 RailLink::~RailLink() = default;
