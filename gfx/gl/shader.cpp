@@ -7,7 +7,10 @@ Shader::ShaderRef
 Shader::compile() const
 {
 	ShaderRef shader {type};
-	glShaderSource(shader, 1, &text, &len);
+	auto source = [&shader](auto text, GLint len) {
+		glShaderSource(shader, 1, &text, &len);
+	};
+	source(text.data(), static_cast<GLint>(text.length()));
 	glCompileShader(shader);
 
 	CheckShaderError(shader, GL_COMPILE_STATUS, false, "Error compiling shader!");
