@@ -10,7 +10,16 @@ Shader::compile() const
 	auto source = [&shader](auto text, GLint len) {
 		glShaderSource(shader, 1, &text, &len);
 	};
-	source(text.data(), static_cast<GLint>(text.length()));
+	if (lookups) {
+		std::basic_string<GLchar> textMod {text};
+		for (const auto & match : ctre::range<R"(\bGL_[A-Z_]+\b)">(textMod)) {
+			textMod.replace(match.begin(), match.end(), "255");
+		}
+		source(textMod.c_str(), static_cast<GLint>(textMod.length()));
+	}
+	else {
+		source(text.data(), static_cast<GLint>(text.length()));
+	}
 	glCompileShader(shader);
 
 	CheckShaderError(shader, GL_COMPILE_STATUS, false, "Error compiling shader!");
