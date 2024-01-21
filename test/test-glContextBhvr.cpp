@@ -1,10 +1,9 @@
 #define BOOST_TEST_MODULE test_glcontextbehaviour
-
-#include "testHelpers.h"
 #include <boost/test/unit_test.hpp>
 
 #include <gfx/gl/sceneRenderer.h>
 #include <lib/glArrays.h>
+#include <optional>
 #include <ui/applicationBase.h>
 #include <ui/window.h>
 
