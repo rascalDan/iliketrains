@@ -9,7 +9,7 @@ flat in float bangle[];
 flat in float radius[];
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 255) out;
+layout(triangle_strip, max_vertices = GL_MAX_GEOMETRY_OUTPUT_VERTICES) out;
 
 const mat2 rot = mat2(1);
 
@@ -24,7 +24,7 @@ getRot(float angle)
 void
 main()
 {
-	float segs = floor(255 / (profile.length() * 2));
+	float segs = floor(GL_MAX_GEOMETRY_OUTPUT_VERTICES / (profile.length() * 2));
 	vec3 arcstep = vec3((bangle[0] - aangle[0]), // angle
 						   reps[0], // texture
 						   (bpos[0].z - apos[0].z)) // height
