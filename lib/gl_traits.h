@@ -125,6 +125,15 @@ glUniform(GLint location, std::span<const glm::vec<L, T, Q>> v)
 	(*gl_traits<T>::glUniformvFunc[L - 1])(location, static_cast<GLsizei>(v.size()), glm::value_ptr(v.front()));
 }
 
+template<typename T>
+void
+glUniform(GLint location, std::span<const T> v)
+{
+	static_assert(
+			requires { gl_traits<T>::glUniformvFunc; }, "Has glUnformNTv");
+	(*gl_traits<T>::glUniformvFunc.front())(location, static_cast<GLsizei>(v.size()), v.data());
+}
+
 template<glm::length_t L, typename T, glm::qualifier Q>
 void
 glUniform(GLint location, const glm::mat<L, L, T, Q> & v)
