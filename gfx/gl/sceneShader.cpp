@@ -86,6 +86,23 @@ SceneShader::BasicProgram::use(Location const & location) const
 	setModel(location);
 }
 
+template<typename... S>
+SceneShader::NetworkProgram::NetworkProgram(S &&... s) :
+	AbsolutePosProgram {std::forward<S>(s)...}, profileLoc {*this, "profile"}, texturePosLoc {*this, "texturePos"},
+	profileLengthLoc {*this, "profileLength"}
+{
+}
+
+void
+SceneShader::NetworkProgram::use(
+		const std::span<const glm::vec3> profile, const std::span<const float> texturePos) const
+{
+	Program::use();
+	glUniform(profileLoc, profile);
+	glUniform(texturePosLoc, texturePos);
+	glUniform(profileLengthLoc, static_cast<GLuint>(profile.size()));
+}
+
 SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vs, water_fs}, waveLoc {*this, "waves"} { }
 
 void

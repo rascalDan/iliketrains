@@ -73,16 +73,20 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	return addLink<RailLinkCurve>(start, end, centre.first);
 }
 
-constexpr const std::array<std::pair<RelativePosition3D, float>, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
-		//   ___________
-		// _/           \_
-		//  left to right
-		{{-1900.F, 0.F, 0.F}, 0.F},
-		{{-608.F, 0.F, RAIL_HEIGHT.z}, .34F},
-		{{0, 0.F, RAIL_HEIGHT.z * .7F}, .5F},
-		{{608.F, 0.F, RAIL_HEIGHT.z}, .66F},
-		{{1900.F, 0.F, 0.F}, 1.F},
+constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
+		{-1900.F, 0.F, 0.F},
+		{-608.F, 0.F, RAIL_HEIGHT.z},
+		{0, 0.F, RAIL_HEIGHT.z * .7F},
+		{608.F, 0.F, RAIL_HEIGHT.z},
+		{1900.F, 0.F, 0.F},
 }};
+constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> railTexturePos {
+		0.F,
+		.34F,
+		.5F,
+		.66F,
+		1.F,
+};
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
 
 inline auto
@@ -149,7 +153,7 @@ namespace {
 	renderType(const NetworkLinkHolder<LinkType> & n, auto & s)
 	{
 		if (auto count = n.vertices.size()) {
-			s.use();
+			s.use(railCrossSection, railTexturePos);
 			glBindVertexArray(n.vao);
 			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
 		}
