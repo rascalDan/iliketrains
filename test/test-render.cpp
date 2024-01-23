@@ -25,6 +25,7 @@ class TestScene : public SceneProvider {
 	const RailVehicleClassPtr brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(
 			AssetFactory::loadXML(RESDIR "/brush47.xml")->assets.at("brush-47"));
 	std::shared_ptr<RailVehicle> train1, train2;
+	RailLinks rail;
 
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
@@ -42,6 +43,8 @@ public:
 		train2->location.setPosition({52000, 30000, 2000});
 		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
 		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
+		rail.addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
+		rail.addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
 	}
 
 	void
@@ -49,6 +52,7 @@ public:
 	{
 		terrain.render(shader);
 		brush47rvc->render(shader);
+		rail.render(shader);
 	}
 
 	void

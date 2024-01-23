@@ -21,9 +21,9 @@ ifelse(
 		TYPE, .gs,
 		// Begin: Geometry shader only function
 		void doVertex(const ivec3 end, const uint v, const float texY, const mat2 rot) {
-			rposition = vec3(rot * profile[v].xy, profile[v].z);
-			ivec3 vpos = end + ivec3(rposition);
-			gl_Position = viewProjection * vec4(vpos - viewPoint, 1);
+			ivec3 vpos = end + ivec3(rot * profile[v].xy, profile[v].z);
+			rposition = vpos - viewPoint;
+			gl_Position = viewProjection * vec4(rposition, 1);
 			texCoord = vec2(texturePos[v], texY);
 			EmitVertex();
 		}
