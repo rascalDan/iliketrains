@@ -2,13 +2,11 @@
 
 #include "chronology.h"
 #include "game/worldobject.h"
-#include "gfx/models/mesh.h"
 #include "gfx/renderable.h"
 #include "link.h"
 #include "network.h"
 #include <glm/glm.hpp>
 #include <memory>
-#include <span>
 #include <special_members.h>
 
 class SceneShader;
@@ -19,7 +17,7 @@ struct Arc;
 class RailLinkStraight;
 class RailLinkCurve;
 
-class RailLink : public virtual Link, public Renderable {
+class RailLink : public virtual Link {
 public:
 	RailLink() = default;
 	inline ~RailLink() override = 0;
@@ -27,40 +25,57 @@ public:
 	using StraightLink = RailLinkStraight;
 	using CurveLink = RailLinkCurve;
 
-	void render(const SceneShader &) const override;
 	NO_COPY(RailLink);
 	NO_MOVE(RailLink);
 
 protected:
 	[[nodiscard]] RelativePosition3D vehiclePositionOffset() const override;
-	[[nodiscard]] static Mesh::Ptr defaultMesh(const std::span<Vertex> vertices);
-
-	Mesh::Ptr mesh;
 };
 
 RailLink::~RailLink() = default;
 
+class RailLinks;
+
 class RailLinkStraight : public RailLink, public LinkStraight {
 public:
-	RailLinkStraight(const Node::Ptr &, const Node::Ptr &);
+	RailLinkStraight(NetworkLinkHolder<RailLinkStraight> &, const Node::Ptr &, const Node::Ptr &);
+
+	struct Vertex {
+		GlobalPosition3D a, b;
+		glm::mat2 rotation;
+		float textureRepeats;
+	};
 
 private:
-	RailLinkStraight(Node::Ptr, Node::Ptr, const RelativePosition3D & diff);
+	RailLinkStraight(NetworkLinkHolder<RailLinkStraight> &, Node::Ptr, Node::Ptr, const RelativePosition3D & diff);
+	InstanceVertices<Vertex>::InstanceProxy instance;
 };
 
 class RailLinkCurve : public RailLink, public LinkCurve {
 public:
-	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, GlobalPosition2D);
+	RailLinkCurve(NetworkLinkHolder<RailLinkCurve> &, const Node::Ptr &, const Node::Ptr &, GlobalPosition2D);
+
+	struct Vertex {
+		GlobalPosition3D a, b, c;
+		float textureRepeats;
+		float aangle, bangle, radius;
+	};
 
 private:
-	RailLinkCurve(const Node::Ptr &, const Node::Ptr &, GlobalPosition3D, const Arc);
+	RailLinkCurve(
+			NetworkLinkHolder<RailLinkCurve> &, const Node::Ptr &, const Node::Ptr &, GlobalPosition3D, const Arc);
+	InstanceVertices<Vertex>::InstanceProxy instance;
 };
 
-class RailLinks : public NetworkOf<RailLink>, public WorldObject {
+template<> NetworkLinkHolder<RailLinkStraight>::NetworkLinkHolder();
+template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder();
+
+class RailLinks : public NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>, public WorldObject {
 public:
 	RailLinks();
 
 	std::shared_ptr<RailLink> addLinksBetween(GlobalPosition3D start, GlobalPosition3D end);
+	void render(const SceneShader &) const override;
 
 private:
 	void tick(TickDuration elapsed) override;

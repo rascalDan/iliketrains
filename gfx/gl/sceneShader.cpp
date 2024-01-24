@@ -1,14 +1,19 @@
 #include "sceneShader.h"
 #include <gfx/gl/shaders/fs-landmass.h>
 #include <gfx/gl/shaders/fs-material.h>
+#include <gfx/gl/shaders/fs-network.h>
 #include <gfx/gl/shaders/fs-pointLight.h>
 #include <gfx/gl/shaders/fs-spotLight.h>
 #include <gfx/gl/shaders/fs-water.h>
+#include <gfx/gl/shaders/gs-networkCurve.h>
+#include <gfx/gl/shaders/gs-networkStraight.h>
 #include <gfx/gl/shaders/gs-pointLight.h>
 #include <gfx/gl/shaders/gs-spotLight.h>
 #include <gfx/gl/shaders/vs-dynamicPoint.h>
 #include <gfx/gl/shaders/vs-dynamicPointInst.h>
 #include <gfx/gl/shaders/vs-fixedPoint.h>
+#include <gfx/gl/shaders/vs-networkCurve.h>
+#include <gfx/gl/shaders/vs-networkStraight.h>
 #include <gfx/gl/shaders/vs-pointLight.h>
 #include <gfx/gl/shaders/vs-spotLight.h>
 #include <gfx/gl/shaders/vs-water.h>
@@ -21,15 +26,17 @@
 SceneShader::SceneShader() :
 	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs},
 	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
-	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs}
+	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs},
+	networkStraight {networkStraight_vs, networkStraight_gs, network_fs},
+	networkCurve {networkCurve_vs, networkCurve_gs, network_fs}
 {
 }
 
 void
 SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
-	for (const auto & prog : std::initializer_list<const SceneProgram *> {
-				 &basic, &basicInst, &water, &landmass, &absolute, &pointLightInst, &spotLightInst}) {
+	for (const auto & prog : std::initializer_list<const SceneProgram *> {&basic, &basicInst, &water, &landmass,
+				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve}) {
 		prog->setViewProjection(viewPoint, viewProjection);
 	}
 }
@@ -37,8 +44,8 @@ SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::ma
 void
 SceneShader::setViewPort(const ViewPort & viewPort) const
 {
-	for (const auto & prog : std::initializer_list<const SceneProgram *> {
-				 &basic, &basicInst, &water, &landmass, &absolute, &pointLightInst, &spotLightInst}) {
+	for (const auto & prog : std::initializer_list<const SceneProgram *> {&basic, &basicInst, &water, &landmass,
+				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve}) {
 		prog->setViewPort(viewPort);
 	}
 }
@@ -77,6 +84,23 @@ SceneShader::BasicProgram::use(Location const & location) const
 {
 	Program::use();
 	setModel(location);
+}
+
+template<typename... S>
+SceneShader::NetworkProgram::NetworkProgram(S &&... s) :
+	AbsolutePosProgram {std::forward<S>(s)...}, profileLoc {*this, "profile"}, texturePosLoc {*this, "texturePos"},
+	profileLengthLoc {*this, "profileLength"}
+{
+}
+
+void
+SceneShader::NetworkProgram::use(
+		const std::span<const glm::vec3> profile, const std::span<const float> texturePos) const
+{
+	Program::use();
+	glUniform(profileLoc, profile);
+	glUniform(texturePosLoc, texturePos);
+	glUniform(profileLengthLoc, static_cast<GLuint>(profile.size()));
 }
 
 SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vs, water_fs}, waveLoc {*this, "waves"} { }

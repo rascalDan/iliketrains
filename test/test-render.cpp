@@ -8,6 +8,7 @@
 
 #include <assetFactory/assetFactory.h>
 #include <game/geoData.h>
+#include <game/network/rail.h>
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
@@ -24,6 +25,7 @@ class TestScene : public SceneProvider {
 	const RailVehicleClassPtr brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(
 			AssetFactory::loadXML(RESDIR "/brush47.xml")->assets.at("brush-47"));
 	std::shared_ptr<RailVehicle> train1, train2;
+	RailLinks rail;
 
 	Terrain terrain {[]() {
 		auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
@@ -41,6 +43,8 @@ public:
 		train2->location.setPosition({52000, 30000, 2000});
 		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
 		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
+		rail.addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
+		rail.addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
 	}
 
 	void
@@ -48,6 +52,7 @@ public:
 	{
 		terrain.render(shader);
 		brush47rvc->render(shader);
+		rail.render(shader);
 	}
 
 	void
@@ -156,6 +161,52 @@ BOOST_AUTO_TEST_CASE(terrain)
 
 	ss.render(TestTerrain {});
 	Texture::save(outImage, "/tmp/terrain.tga");
+}
+
+BOOST_AUTO_TEST_CASE(railnet)
+{
+	SceneRenderer ss {size, output};
+	ss.camera.setView({0, 0, 10000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
+
+	class TestRail : public SceneProvider {
+		RailLinks net;
+
+	public:
+		TestRail()
+		{
+			net.addLinksBetween({20000, 10000, 0}, {100000, 100000, 0});
+			net.addLinksBetween({20000, 10000, 0}, {10000, 10000, 0});
+			net.addLinksBetween({10000, 20000, 0}, {100000, 120000, 0});
+			net.addLinksBetween({10000, 20000, 0}, {10000, 10000, 0});
+			net.addLinksBetween({100000, 100000, 0}, {100000, 120000, 0});
+		}
+
+		void
+		content(const SceneShader & shader) const override
+		{
+			net.render(shader);
+		}
+
+		void
+		environment(const SceneShader &, const SceneRenderer & sr) const override
+		{
+			sr.setAmbientLight({0.1, 0.1, 0.1});
+			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+		}
+
+		void
+		lights(const SceneShader &) const override
+		{
+		}
+
+		void
+		shadows(const ShadowMapper &) const override
+		{
+		}
+	};
+
+	ss.render(TestRail {});
+	Texture::save(outImage, "/tmp/railnet.tga");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

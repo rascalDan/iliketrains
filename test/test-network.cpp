@@ -23,25 +23,39 @@
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
-struct TestLink : public LinkStraight {
-	TestLink(const Node::Ptr & a, const Node::Ptr & b) : TestLink {a, b, (a->pos - b->pos)} { }
+struct TestLinkS;
 
-	TestLink(Node::Ptr a, Node::Ptr b, RelativePosition2D l) :
+struct TestLink : public virtual Link {
+	using StraightLink = TestLinkS;
+	using CurveLink = TestLinkS;
+};
+
+struct TestLinkS : public TestLink, public LinkStraight {
+	TestLinkS(NetworkLinkHolder<TestLinkS> & network, const Node::Ptr & a, const Node::Ptr & b) :
+		TestLinkS {network, a, b, (a->pos - b->pos)}
+	{
+	}
+
+	TestLinkS(NetworkLinkHolder<TestLinkS> &, Node::Ptr a, Node::Ptr b, RelativePosition2D l) :
 		Link {{std::move(a), 0}, {std::move(b), pi}, glm::length(l)}
 	{
 	}
 
-	TestLink(Node::Ptr a, Node::Ptr b, float l) : Link {{std::move(a), 0}, {std::move(b), pi}, l} { }
+	struct Vertex { };
 
-	using StraightLink = TestLink;
-	using CurveLink = TestLink;
+	TestLinkS(NetworkLinkHolder<TestLinkS> &, Node::Ptr a, Node::Ptr b, float l) :
+		Link {{std::move(a), 0}, {std::move(b), pi}, l}
+	{
+	}
 };
 
 constexpr GlobalPosition3D p000 {0, 0, 0}, p100 {10000, 0, 0}, p200 {20000, 0, 0}, p300 {30000, 0, 0};
 constexpr GlobalPosition3D p110 {10000, 10000, 0};
 
-struct TestNetwork : public NetworkOf<TestLink> {
-	TestNetwork() : NetworkOf<TestLink> {RESDIR "rails.jpg"}
+template<> NetworkLinkHolder<TestLinkS>::NetworkLinkHolder() = default;
+
+struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
+	TestNetwork() : NetworkOf<TestLink, TestLinkS> {RESDIR "rails.jpg"}
 	{
 		//       0        1        2
 		// p000 <-> p100 <-> p200 <-> p300
@@ -49,12 +63,17 @@ struct TestNetwork : public NetworkOf<TestLink> {
 		//    \       5      /
 		//     3      |     4
 		//      \-> p110 <-/
-		addLink<TestLink>(p000, p100, 1.F);
-		addLink<TestLink>(p100, p200, 1.F);
-		addLink<TestLink>(p200, p300, 1.F);
-		addLink<TestLink>(p000, p110, 2.F);
-		addLink<TestLink>(p200, p110, 2.F);
-		addLink<TestLink>(p100, p110, 1.F);
+		addLink<TestLinkS>(p000, p100, 1.F);
+		addLink<TestLinkS>(p100, p200, 1.F);
+		addLink<TestLinkS>(p200, p300, 1.F);
+		addLink<TestLinkS>(p000, p110, 2.F);
+		addLink<TestLinkS>(p200, p110, 2.F);
+		addLink<TestLinkS>(p100, p110, 1.F);
+	}
+
+	void
+	render(const SceneShader &) const override
+	{
 	}
 };
 

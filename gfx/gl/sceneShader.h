@@ -3,6 +3,7 @@
 #include "config/types.h"
 #include "program.h"
 #include <glArrays.h>
+#include <span>
 
 class Location;
 
@@ -41,8 +42,17 @@ class SceneShader {
 		using SceneProgram::SceneProgram;
 	};
 
-	class WaterProgram : public SceneProgram {
+	class NetworkProgram : public AbsolutePosProgram {
 	public:
+		template<typename... S> explicit NetworkProgram(S &&...);
+
+		void use(const std::span<const glm::vec3>, const std::span<const float>) const;
+
+	private:
+		RequiredUniformLocation profileLoc, texturePosLoc, profileLengthLoc;
+	};
+
+	class WaterProgram : public SceneProgram {
 	public:
 		WaterProgram();
 		void use(float waveCycle) const;
@@ -57,6 +67,7 @@ public:
 	BasicProgram basic;
 	WaterProgram water;
 	AbsolutePosProgram basicInst, landmass, absolute, spotLightInst, pointLightInst;
+	NetworkProgram networkStraight, networkCurve;
 
 	void setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const;
 	void setViewPort(const ViewPort & viewPort) const;
