@@ -71,4 +71,7 @@ public:
 
 	void setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const;
 	void setViewPort(const ViewPort & viewPort) const;
+
+private:
+	inline void allPrograms(auto member, auto &&... ps) const;
 };

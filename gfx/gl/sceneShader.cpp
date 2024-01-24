@@ -23,6 +23,15 @@
 #include <location.h>
 #include <maths.h>
 
+inline void
+SceneShader::allPrograms(auto member, auto &&... ps) const
+{
+	for (const auto & prog : std::initializer_list<const SceneProgram *> {&basic, &basicInst, &water, &landmass,
+				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve}) {
+		(prog->*member)(std::forward<decltype(ps)>(ps)...);
+	}
+}
+
 SceneShader::SceneShader() :
 	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs},
 	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
@@ -35,19 +44,13 @@ SceneShader::SceneShader() :
 void
 SceneShader::setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const
 {
-	for (const auto & prog : std::initializer_list<const SceneProgram *> {&basic, &basicInst, &water, &landmass,
-				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve}) {
-		prog->setViewProjection(viewPoint, viewProjection);
-	}
+	allPrograms(&SceneProgram::setViewProjection, viewPoint, viewProjection);
 }
 
 void
 SceneShader::setViewPort(const ViewPort & viewPort) const
 {
-	for (const auto & prog : std::initializer_list<const SceneProgram *> {&basic, &basicInst, &water, &landmass,
-				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve}) {
-		prog->setViewPort(viewPort);
-	}
+	allPrograms(&SceneProgram::setViewPort, viewPort);
 }
 
 void
