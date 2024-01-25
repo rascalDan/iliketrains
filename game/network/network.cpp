@@ -2,7 +2,6 @@
 #include "routeWalker.h"
 #include <array>
 #include <cache.h>
-#include <filesystem>
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
 #include <glm/gtx/intersect.hpp>
@@ -10,7 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
-Network::Network(const std::string & tn) : texture {Texture::cachedTexture.get(tn)} { }
+Network::Network(const std::string & tn) : texture {std::make_shared<Texture>(tn)} { }
 
 Node::Ptr
 Network::nodeAt(GlobalPosition3D pos)

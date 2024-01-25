@@ -3,12 +3,12 @@
 #include "config/types.h"
 #include "lib/glArrays.h"
 #include "program.h"
+#include <gfx/models/texture.h>
 #include <glm/vec2.hpp>
+#include <vector>
 
 class SceneProvider;
 class Camera;
-
-#include <gfx/models/texture.h>
 
 class ShadowMapper {
 public:

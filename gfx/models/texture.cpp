@@ -2,7 +2,6 @@
 #include "config/types.h"
 #include "glArrays.h"
 #include "tga.h"
-#include <cache.h>
 #include <fcntl.h>
 #include <filesystem.h>
 #include <gfx/image.h>
@@ -12,8 +11,6 @@
 #include <resource.h>
 #include <stb/stb_image.h>
 #include <sys/mman.h>
-
-Cache<Texture, std::filesystem::path> Texture::cachedTexture;
 
 GLint
 TextureOptions::glMapMode(TextureOptions::MapMode mm)

@@ -1,12 +1,10 @@
 #pragma once
 
 #include "config/types.h"
-#include <cache.h>
 #include <filesystem>
 #include <glArrays.h>
 #include <glm/fwd.hpp>
 
-// IWYU pragma: no_forward_declare Cache
 class Image;
 
 struct TextureOptions {
@@ -31,8 +29,6 @@ public:
 	explicit Texture(const Image & image, TextureOptions = {});
 	explicit Texture(GLsizei width, GLsizei height, TextureOptions = {});
 	explicit Texture(GLsizei width, GLsizei height, const void * data, TextureOptions = {});
-
-	static Cache<Texture, std::filesystem::path> cachedTexture;
 
 	virtual void bind(GLenum unit = GL_TEXTURE0) const;
 
