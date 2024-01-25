@@ -69,6 +69,7 @@ lib ilt :
 	]
 	:
 	<define>GLM_FORCE_SWIZZLE
+	<define>GLM_ENABLE_EXPERIMENTAL
 	<variant>debug:<warnings>pedantic
 	<variant>debug:<warnings-as-errors>on
 	<variant>debug:<cflags>-Wnon-virtual-dtor
@@ -98,6 +99,7 @@ lib ilt :
 	<library>pthread
 	<library>OpenMeshCore
 	: :
+	<define>GLM_ENABLE_EXPERIMENTAL
 	<include>.
 	<include>lib
 	<implicit-dependency>thirdparty//glad
