@@ -1,4 +1,5 @@
 #include "testRenderOutput.h"
+#include <gl_traits.h>
 #include <stdexcept>
 
 TestRenderOutput::TestRenderOutput(TextureAbsCoord s) : size {s}
@@ -8,8 +9,8 @@ TestRenderOutput::TestRenderOutput(TextureAbsCoord s) : size {s}
 			= [this](const GLuint data, const GLint format, const GLenum type, const GLenum attachment) {
 				  glBindTexture(GL_TEXTURE_2D, data);
 				  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGBA, type, nullptr);
-				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				  glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				  glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 				  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
 			  };
 	configuregdata(outImage, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);

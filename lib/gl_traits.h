@@ -42,6 +42,8 @@ template<> struct gl_traits<glm::f32> : public gl_traits_float {
 	static constexpr auto glUniformFunc {&glUniform1f};
 	static constexpr std::array glUniformvFunc {&glUniform1fv, &glUniform2fv, &glUniform3fv, &glUniform4fv};
 	static constexpr std::array glUniformmFunc {&glUniformMatrix2fv, &glUniformMatrix3fv, &glUniformMatrix4fv};
+	static constexpr auto glTexParameterFunc {&glTexParameterf};
+	static constexpr auto glTexParameterfFunc {&glTexParameterfv};
 };
 
 template<> struct gl_traits<glm::f64> : public gl_traits_longfloat {
@@ -60,6 +62,8 @@ template<> struct gl_traits<glm::int32> : public gl_traits_integer {
 	static constexpr GLenum type {GL_INT};
 	static constexpr auto glUniformFunc {&glUniform1i};
 	static constexpr std::array glUniformvFunc {&glUniform1iv, &glUniform2iv, &glUniform3iv, &glUniform4iv};
+	static constexpr auto glTexParameterFunc {&glTexParameteri};
+	static constexpr auto glTexParameterfFunc {&glTexParameteriv};
 };
 
 template<> struct gl_traits<glm::uint8> : public gl_traits_integer {
@@ -104,6 +108,10 @@ template<typename T>
 concept has_glUniformNv = requires { gl_traits<T>::glUniformvFunc; };
 template<typename T>
 concept has_glUniformMatrixNv = requires { gl_traits<T>::glUniformmFunc; };
+template<typename T>
+concept has_glTexParameter = requires { gl_traits<T>::glTexParameterFunc; };
+template<typename T>
+concept has_glTexParameterf = requires { gl_traits<T>::glTexParameterfFunc; };
 
 template<has_glUniform1 T>
 void
@@ -146,4 +154,18 @@ glUniform(GLint location, std::span<const glm::mat<L, L, T, Q>> v)
 {
 	(*gl_traits<T>::glUniformmFunc[L - 2])(
 			location, static_cast<GLsizei>(v.size()), GL_FALSE, glm::value_ptr(v.front()));
+}
+
+template<has_glTexParameter T>
+void
+glTexParameter(GLenum target, GLenum pname, T param)
+{
+	(*gl_traits<T>::glTexParameterFunc)(target, pname, param);
+}
+
+template<glm::length_t L, has_glTexParameterf T, glm::qualifier Q>
+void
+glTexParameter(GLenum target, GLenum pname, const glm::vec<L, T, Q> & param)
+{
+	(*gl_traits<T>::glTexParameterfFunc)(target, pname, glm::value_ptr(param));
 }

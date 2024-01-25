@@ -24,8 +24,8 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 	const auto configuregdata = [this](const GLuint data, const std::initializer_list<GLint> iformats,
 										const GLenum format, const GLenum attachment) {
 		glBindTexture(GL_TEXTURE_2D, data);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		for (const auto iformat : iformats) {
 			glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
 

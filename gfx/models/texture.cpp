@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <filesystem.h>
 #include <gfx/image.h>
+#include <gl_traits.h>
 #include <glad/gl.h>
 #include <glm/geometric.hpp>
 #include <resource.h>
@@ -46,11 +47,11 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 	glBindTexture(type, m_texture);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
-	glTexParameteri(type, GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
+	glTexParameter(type, GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
+	glTexParameter(type, GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
 
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
+	glTexParameter(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
+	glTexParameter(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
 	glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
@@ -125,11 +126,11 @@ TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Textur
 {
 	glBindTexture(GL_TEXTURE_RECTANGLE, m_atlas);
 
-	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA16UI, 2, static_cast<GLsizei>(count), 0, GL_RGBA_INTEGER,
 			GL_UNSIGNED_BYTE, nullptr);
 }
