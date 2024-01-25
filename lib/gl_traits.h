@@ -99,56 +99,51 @@ struct gl_traits<glm::mat<C, R, T, Q>> : public gl_traits<T> {
 };
 
 template<typename T>
+concept has_glUniform1 = requires { gl_traits<T>::glUniformFunc; };
+template<typename T>
+concept has_glUniformNv = requires { gl_traits<T>::glUniformvFunc; };
+template<typename T>
+concept has_glUniformMatrixNv = requires { gl_traits<T>::glUniformmFunc; };
+
+template<has_glUniform1 T>
 void
 glUniform(GLint location, T v)
 {
-	static_assert(
-			requires { gl_traits<T>::glUniformFunc; }, "Has glUnform1T");
 	(*gl_traits<T>::glUniformFunc)(location, v);
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
+template<glm::length_t L, has_glUniformNv T, glm::qualifier Q>
 void
 glUniform(GLint location, const glm::vec<L, T, Q> & v)
 {
-	static_assert(
-			requires { gl_traits<T>::glUniformFunc; }, "Has glUnformNTv");
 	(*gl_traits<T>::glUniformvFunc[L - 1])(location, 1, glm::value_ptr(v));
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
+template<glm::length_t L, has_glUniformNv T, glm::qualifier Q>
 void
 glUniform(GLint location, std::span<const glm::vec<L, T, Q>> v)
 {
-	static_assert(
-			requires { gl_traits<T>::glUniformvFunc; }, "Has glUnformNTv");
 	(*gl_traits<T>::glUniformvFunc[L - 1])(location, static_cast<GLsizei>(v.size()), glm::value_ptr(v.front()));
 }
 
-template<typename T>
+template<has_glUniformNv T>
 void
 glUniform(GLint location, std::span<const T> v)
 {
-	static_assert(
-			requires { gl_traits<T>::glUniformvFunc; }, "Has glUnformNTv");
 	(*gl_traits<T>::glUniformvFunc.front())(location, static_cast<GLsizei>(v.size()), v.data());
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
+template<glm::length_t L, has_glUniformMatrixNv T, glm::qualifier Q>
 void
 glUniform(GLint location, const glm::mat<L, L, T, Q> & v)
 {
-	static_assert(
-			requires { gl_traits<T>::glUniformmFunc; }, "Has glUnformMatrixNTv");
 	(*gl_traits<T>::glUniformmFunc[L - 2])(location, 1, GL_FALSE, glm::value_ptr(v));
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
+template<glm::length_t L, has_glUniformMatrixNv T, glm::qualifier Q>
 void
 glUniform(GLint location, std::span<const glm::mat<L, L, T, Q>> v)
 {
-	static_assert(
-			requires { gl_traits<T>::glUniformmFunc; }, "Has glUnformMatrixNTv");
 	(*gl_traits<T>::glUniformmFunc[L - 2])(
 			location, static_cast<GLsizei>(v.size()), GL_FALSE, glm::value_ptr(v.front()));
 }
