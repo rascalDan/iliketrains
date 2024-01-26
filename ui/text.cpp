@@ -3,7 +3,6 @@
 #include "gfx/gl/uiShader.h"
 #include "uiComponent.h"
 #include <array>
-#include <cache.h>
 #include <glArrays.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>

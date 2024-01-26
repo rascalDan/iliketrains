@@ -1,6 +1,5 @@
 #include "font.h"
 #include <algorithm>
-#include <cache.h>
 #include <cctype>
 #include <ft2build.h>
 #include FT_FREETYPE_H
