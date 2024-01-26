@@ -8,14 +8,16 @@
 #include <game/selectable.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/gl/camera.h>
-#include <math.h>
 #include <optional>
-#include <span>
 #include <stream_support.h>
 #include <typeinfo>
-#include <vector>
 
-GameMainSelector::GameMainSelector(const Camera * c, ScreenAbsCoord size) : UIComponent {{{}, size}}, camera {c} { }
+const std::filesystem::path fontpath {"/usr/share/fonts/hack/Hack-Regular.ttf"};
+
+GameMainSelector::GameMainSelector(const Camera * c, ScreenAbsCoord size) :
+	UIComponent {{{}, size}}, camera {c}, font {fontpath, 15}
+{
+}
 
 constexpr ScreenAbsCoord TargetPos {5, 45};
 
@@ -26,7 +28,7 @@ GameMainSelector::render(const UIShader & shader, const Position & parentPos) co
 		target->render(shader, parentPos + position + TargetPos);
 	}
 	if (!clicked.empty()) {
-		Text {clicked, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
+		Text {clicked, font, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
 	}
 }
 

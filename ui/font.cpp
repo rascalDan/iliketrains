@@ -60,8 +60,6 @@ using Face = glRef<FT_Face,
 		},
 		FT_Done_Face>;
 
-Cache<Font, std::filesystem::path, unsigned int> Font::cachedFontRenderings;
-
 Font::Font(std::filesystem::path p, unsigned s) : path {std::move(p)}, size {getTextureSize(s)}
 {
 	generateChars(BASIC_CHARS);

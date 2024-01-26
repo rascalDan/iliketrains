@@ -1,22 +1,17 @@
 #pragma once
 
 #include <array>
-#include <cache.h>
 #include <cstddef>
-#include <cstdint>
 #include <filesystem>
 #include <glArrays.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <map>
-#include <string_view>
 #include <unicode.h>
 #include <vector>
 
 class Font {
 public:
-	static Cache<Font, std::filesystem::path, unsigned int> cachedFontRenderings;
-
 	Font(std::filesystem::path path, unsigned int height);
 
 	using Quad = std::array<glm::vec4, 4>;

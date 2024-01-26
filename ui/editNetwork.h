@@ -7,7 +7,6 @@
 #include <game/gamestate.h>
 #include <game/network/network.h>
 #include <gfx/models/texture.h>
-#include <optional>
 
 template<typename> class Ray;
 
@@ -43,6 +42,7 @@ private:
 	Mode<Builder::Ptr, ModeSecondClick::NoAction> mode {builder};
 	Toolbar builderToolbar;
 	Texture blue;
+	const Font font;
 };
 
 template<typename T> class EditNetworkOf : public EditNetwork {

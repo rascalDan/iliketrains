@@ -2,7 +2,7 @@
 
 #include "SDL_events.h"
 #include "config/types.h"
-#include "special_members.h"
+#include "font.h"
 #include "uiComponent.h"
 #include "worldOverlay.h"
 #include <glm/glm.hpp>
@@ -40,5 +40,6 @@ public:
 
 private:
 	const Camera * camera;
+	const Font font;
 	std::string clicked;
 };
