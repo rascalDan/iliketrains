@@ -77,6 +77,7 @@ Font::generateChars(const utf8_string_view chars) const
 		if (charsData.find(codepoint) == charsData.end()) {
 			if (!ft) {
 				ft.emplace();
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			}
 			if (!face) {
 				face.emplace(*ft, path.c_str());
