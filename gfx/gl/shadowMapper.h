@@ -27,7 +27,8 @@ public:
 	class FixedPoint : public Program {
 	public:
 		FixedPoint(const Shader & vs);
-		void setViewProjection(const GlobalPosition3D, const glm::mat4 &) const;
+		void setViewPoint(const GlobalPosition3D) const;
+		void setViewProjection(const glm::mat4 &) const;
 		void use() const;
 
 	private:
@@ -37,7 +38,8 @@ public:
 	class DynamicPoint : public Program {
 	public:
 		DynamicPoint();
-		void setViewProjection(const GlobalPosition3D, const glm::mat4 &) const;
+		void setViewPoint(const GlobalPosition3D) const;
+		void setViewProjection(const glm::mat4 &) const;
 		void use(const Location &) const;
 		void setModel(const Location &) const;
 

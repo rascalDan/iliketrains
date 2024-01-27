@@ -134,11 +134,14 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	const auto lightViewDir = glm::lookAt({}, dir, up);
 	const auto lightViewPoint = camera.getPosition();
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
+	fixedPoint.setViewPoint(lightViewPoint);
+	dynamicPoint.setViewPoint(lightViewPoint);
+	dynamicPointInst.setViewPoint(lightViewPoint);
 
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			DefinitionsInserter {out},
-			[&scene, this, bands = bandViewExtents.size() - 2, &out, &lightViewPoint, &lightViewDir](
+			[&scene, this, bands = bandViewExtents.size() - 2, &out, &lightViewDir](
 					const auto & near, const auto & far) {
 				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
 					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
@@ -150,9 +153,9 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 				}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
 				const auto lightViewDirProjection = lightProjection * lightViewDir;
-				fixedPoint.setViewProjection(lightViewPoint, lightViewDirProjection);
-				dynamicPoint.setViewProjection(lightViewPoint, lightViewDirProjection);
-				dynamicPointInst.setViewProjection(lightViewPoint, lightViewDirProjection);
+				fixedPoint.setViewProjection(lightViewDirProjection);
+				dynamicPoint.setViewProjection(lightViewDirProjection);
+				dynamicPointInst.setViewProjection(lightViewDirProjection);
 
 				const auto & viewport = viewports[bands][out.maps];
 				glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
@@ -172,11 +175,17 @@ ShadowMapper::FixedPoint::FixedPoint(const Shader & vs) :
 }
 
 void
-ShadowMapper::FixedPoint::setViewProjection(const GlobalPosition3D viewPoint, const glm::mat4 & viewProjection) const
+ShadowMapper::FixedPoint::setViewPoint(const GlobalPosition3D viewPoint) const
+{
+	use();
+	glUniform(viewPointLoc, viewPoint);
+}
+
+void
+ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	use();
 	glUniform(viewProjectionLoc, viewProjection);
-	glUniform(viewPointLoc, viewPoint);
 }
 
 void
@@ -192,11 +201,17 @@ ShadowMapper::DynamicPoint::DynamicPoint() :
 }
 
 void
-ShadowMapper::DynamicPoint::setViewProjection(const GlobalPosition3D viewPoint, const glm::mat4 & viewProjection) const
+ShadowMapper::DynamicPoint::setViewPoint(const GlobalPosition3D viewPoint) const
+{
+	glUseProgram(*this);
+	glUniform(viewPointLoc, viewPoint);
+}
+
+void
+ShadowMapper::DynamicPoint::setViewProjection(const glm::mat4 & viewProjection) const
 {
 	glUseProgram(*this);
 	glUniform(viewProjectionLoc, viewProjection);
-	glUniform(viewPointLoc, viewPoint);
 }
 
 void
