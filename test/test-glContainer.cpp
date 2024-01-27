@@ -305,6 +305,15 @@ BOOST_AUTO_TEST_CASE(iter_compare)
 
 BOOST_AUTO_TEST_SUITE_END();
 
+BOOST_AUTO_TEST_CASE(create_copy_source, *boost::unit_test::timeout(1))
+{
+	const std::vector src {4, 6, 2, 4, 6, 0};
+	glContainer dst {src};
+	static_assert(std::is_same_v<decltype(src)::value_type, decltype(dst)::value_type>);
+	dst.unmap();
+	BOOST_CHECK_EQUAL_COLLECTIONS(src.begin(), src.end(), dst.begin(), dst.end());
+}
+
 struct C {
 	int x;
 	float y;

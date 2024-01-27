@@ -1,6 +1,5 @@
 #include "font.h"
 #include <algorithm>
-#include <cache.h>
 #include <cctype>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -60,8 +59,6 @@ using Face = glRef<FT_Face,
 		},
 		FT_Done_Face>;
 
-Cache<Font, std::filesystem::path, unsigned int> Font::cachedFontRenderings;
-
 Font::Font(std::filesystem::path p, unsigned s) : path {std::move(p)}, size {getTextureSize(s)}
 {
 	generateChars(BASIC_CHARS);
@@ -77,6 +74,7 @@ Font::generateChars(const utf8_string_view chars) const
 		if (charsData.find(codepoint) == charsData.end()) {
 			if (!ft) {
 				ft.emplace();
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			}
 			if (!face) {
 				face.emplace(*ft, path.c_str());

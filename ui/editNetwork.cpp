@@ -8,6 +8,7 @@
 #include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
+const std::filesystem::path fontpath {"/usr/share/fonts/hack/Hack-Regular.ttf"};
 constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
 
 EditNetwork::EditNetwork(Network * n) :
@@ -17,7 +18,7 @@ EditNetwork::EditNetwork(Network * n) :
 			{"ui/icon/network.png", mode.toggle<BuilderJoin>()},
 			{"ui/icon/network.png", mode.toggle<BuilderFreeExtend>()},
 	},
-	blue {1, 1, &TRANSPARENT_BLUE}
+	blue {1, 1, &TRANSPARENT_BLUE}, font {fontpath, 15}
 {
 }
 
@@ -66,7 +67,7 @@ void
 EditNetwork::render(const UIShader & shader, const UIComponent::Position & parentPos) const
 {
 	if (builder) {
-		Text {builder->hint(), {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
+		Text {builder->hint(), font, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
 	}
 	builderToolbar.render(shader, parentPos);
 }

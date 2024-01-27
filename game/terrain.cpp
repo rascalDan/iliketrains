@@ -2,9 +2,7 @@
 #include "game/geoData.h"
 #include "gfx/models/texture.h"
 #include <algorithm>
-#include <cache.h>
 #include <cstddef>
-#include <filesystem>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/gl/shadowMapper.h>
 #include <gfx/image.h>

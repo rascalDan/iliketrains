@@ -83,6 +83,14 @@ template<> struct gl_traits<glm::uint32> : public gl_traits_integer {
 
 template<typename T, std::size_t S> struct gl_traits<std::array<T, S>> : public gl_traits<T> {
 	static constexpr GLint size {S * gl_traits<T>::size};
+	static constexpr auto vertexAttribFunc {
+			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
+				const auto base = static_cast<const T *>(pointer);
+				for (GLuint e = 0; e < S; e++) {
+					glVertexAttribPointer(index + e, gl_traits<T>::size, type, GL_FALSE, stride, base + e);
+				}
+				return S;
+			}};
 };
 
 template<glm::length_t L, typename T, glm::qualifier Q> struct gl_traits<glm::vec<L, T, Q>> : public gl_traits<T> {

@@ -1,44 +1,48 @@
 #include "text.h"
 #include "font.h"
 #include "gfx/gl/uiShader.h"
+#include "gfx/gl/vertexArrayObject.h"
 #include "uiComponent.h"
 #include <array>
-#include <cache.h>
-#include <filesystem>
+#include <collections.h>
 #include <glArrays.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <map>
-#include <memory>
+#include <maths.h>
+#include <numeric>
 #include <utility>
 
-const std::filesystem::path font {"/usr/share/fonts/hack/Hack-Regular.ttf"};
-
-Text::Text(std::string_view s, Position pos, glm::vec3 c) : UIComponent {pos}, colour {c}
+Text::Text(std::string_view s, const Font & font, Position pos, glm::vec3 c) :
+	UIComponent {pos}, colour {c}, font {font}
 {
-	for (const auto & textureQuads :
-			Font::cachedFontRenderings.get(font, static_cast<unsigned int>(pos.size.y))->render(s)) {
-		auto & rendering
-				= models.emplace_back(textureQuads.first, static_cast<GLsizei>(6 * textureQuads.second.size()));
-		glBindVertexArray(rendering.vao);
+	VertexArrayObject {vao}.addAttribs<Font::Quad::value_type>(quads.bufferName(), 0);
+	operator=(s);
+}
 
-		glBindBuffer(GL_ARRAY_BUFFER, rendering.vbo);
-		std::vector<glm::vec4> vertices;
-		vertices.reserve(6 * textureQuads.second.size());
-		for (const auto & quad : textureQuads.second) {
-			for (auto offset = 0U; offset < 3; offset += 2) {
-				for (auto vertex = 0U; vertex < 3; vertex += 1) {
-					vertices.emplace_back(quad[(vertex + offset) % 4] + glm::vec4 {position.origin, 0, 0});
-				}
-			}
-		};
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(glm::vec4)) * rendering.count,
-				glm::value_ptr(vertices.front()), GL_STATIC_DRAW);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), nullptr);
-
-		glBindVertexArray(0);
+Text &
+Text::operator=(const std::string_view s)
+{
+	auto tquads = font.render(s);
+	models.resize(tquads.size());
+	const auto glyphCount = std::accumulate(tquads.begin(), tquads.end(), size_t {}, [](auto && init, const auto & q) {
+		return init += q.second.size();
+	});
+	quads.resize(glyphCount);
+	GLint current = 0;
+	auto model = models.begin();
+	auto quad = quads.begin();
+	for (const auto & [texture, fquads] : tquads) {
+		model->first = texture;
+		model->second = {fquads.size() * 4, current * 4};
+		current += static_cast<GLint>(fquads.size());
+		model++;
+		quad = std::transform(fquads.begin(), fquads.end(), quad, [this](const Font::Quad & q) {
+			return q * [this](const glm::vec4 & corner) {
+				return corner + glm::vec4 {this->position.origin, 0, 0};
+			};
+		});
 	}
+	quads.unmap();
+	return *this;
 }
 
 void
@@ -46,10 +50,10 @@ Text::render(const UIShader & shader, const Position &) const
 {
 	shader.text.use(colour);
 	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(vao);
 	for (const auto & m : models) {
-		glBindTexture(GL_TEXTURE_2D, m.texture);
-		glBindVertexArray(m.vao);
-		glDrawArrays(GL_TRIANGLES, 0, m.count);
+		glBindTexture(GL_TEXTURE_2D, m.first);
+		glDrawArrays(GL_QUADS, m.second.second, m.second.first);
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -60,5 +64,3 @@ Text::handleInput(const SDL_Event &, const Position &)
 {
 	return false;
 }
-
-Text::Model::Model(GLuint t, GLsizei c) : texture {t}, count {c} { }

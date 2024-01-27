@@ -2,26 +2,12 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/vertexArrayObject.h"
-#include "gfx/models/mesh.h"
-#include "gfx/models/texture.h"
-#include "stream_support.h"
-#include <algorithm>
 #include <array>
-#include <cache.h>
-#include <cmath>
-#include <cstddef>
-#include <filesystem>
 #include <glm/glm.hpp>
-#include <iterator>
 #include <lib/resource.h>
 #include <location.h>
-#include <map>
 #include <maths.h>
 #include <memory>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
 bool
 RailVehicleClass::persist(Persistence::PersistenceStore & store)
