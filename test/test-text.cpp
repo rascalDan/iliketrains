@@ -121,9 +121,9 @@ BOOST_AUTO_TEST_CASE(render_text)
 	glViewport(0, 0, 640, 480);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	Text t {"I Like Trains", *this, {{0, 0}, {200, 40}}, {1, 1, 1}};
+	Text t {"I Like Trains", *this, {{10, 10}, {200, 40}}, {1, 1, 1}};
 	UIShader s {640, 480};
-	t.render(s, {{200, 200}, {200, 100}});
+	t.render(s, {});
 	Texture::save(output.outImage, "/tmp/text.tga");
 }
 
