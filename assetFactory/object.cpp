@@ -4,7 +4,7 @@
 Object::Object(std::string i) : id {std::move(i)} { }
 
 Object::CreatedFaces
-Object::createMesh(ModelFactoryMesh & mesh, float levelOfDetailFactor) const
+Object::createMesh(ModelFactoryMesh & mesh, Scale3D levelOfDetailFactor) const
 {
 	CreatedFaces faces;
 	for (const auto & use : uses) {

@@ -2,7 +2,7 @@
 #include "modelFactoryMesh.h"
 
 Plane::CreatedFaces
-Plane::createMesh(ModelFactoryMesh & mesh, float) const
+Plane::createMesh(ModelFactoryMesh & mesh, Scale3D) const
 {
 	static constexpr std::array<RelativePosition3D, 4> VERTICES {{
 			{n, n, z},

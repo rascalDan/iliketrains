@@ -19,7 +19,7 @@ public:
 
 	virtual ~Shape() = default;
 
-	virtual CreatedFaces createMesh(ModelFactoryMesh &, float levelOfDetailFactor) const = 0;
+	virtual CreatedFaces createMesh(ModelFactoryMesh &, Scale3D levelOfDetailFactor) const = 0;
 
 	static std::vector<OpenMesh::VertexHandle> addToMesh(
 			ModelFactoryMesh & mesh, const std::span<const RelativePosition3D> vertices);

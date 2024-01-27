@@ -22,12 +22,6 @@ Mutation::getLocationMatrix() const
 	return glm::translate(glm::identity<Matrix>(), position) * rotate_ypr(rotation);
 }
 
-float
-Mutation::relativeLevelOfDetail() const
-{
-	return std::max({scale.x, scale.y, scale.z});
-}
-
 bool
 Mutation::persist(Persistence::PersistenceStore & store)
 {

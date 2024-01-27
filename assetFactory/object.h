@@ -10,7 +10,7 @@ public:
 	Object() = default;
 	Object(std::string i);
 
-	CreatedFaces createMesh(ModelFactoryMesh & mesh, float lodf) const override;
+	CreatedFaces createMesh(ModelFactoryMesh & mesh, Scale3D lodf) const override;
 
 	Use::Collection uses;
 	std::string id;

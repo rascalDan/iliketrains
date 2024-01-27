@@ -3,9 +3,9 @@
 #include "modelFactoryMesh.h"
 
 Cylinder::CreatedFaces
-Cylinder::createMesh(ModelFactoryMesh & mesh, float lodf) const
+Cylinder::createMesh(ModelFactoryMesh & mesh, Scale3D lodf) const
 {
-	const auto P = static_cast<unsigned int>(std::round(15.F * std::sqrt(lodf)));
+	const auto P = std::max(5U, static_cast<unsigned int>(std::round(10.F * std::max(lodf.x, lodf.y))));
 	const auto step = two_pi / static_cast<float>(P);
 
 	// Generate 2D circumference points

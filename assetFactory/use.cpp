@@ -7,7 +7,7 @@
 #include <stream_support.h>
 
 Shape::CreatedFaces
-Use::createMesh(ModelFactoryMesh & mesh, float levelOfDetailFactor) const
+Use::createMesh(ModelFactoryMesh & mesh, Scale3D levelOfDetailFactor) const
 {
 	auto apply = [&mesh](const auto & faces, const Mutation::Matrix & m) {
 		std::set<ModelFactoryMesh::VertexHandle> vs;
@@ -22,7 +22,7 @@ Use::createMesh(ModelFactoryMesh & mesh, float levelOfDetailFactor) const
 		}
 	};
 
-	auto faces = type->createMesh(mesh, levelOfDetailFactor * relativeLevelOfDetail());
+	auto faces = type->createMesh(mesh, levelOfDetailFactor * scale);
 	applyStyle(mesh, {this}, faces);
 	apply(faces, getDeformationMatrix());
 	for (const auto & [name, faceController] : faceControllers) {

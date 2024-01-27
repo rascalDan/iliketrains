@@ -2,7 +2,7 @@
 #include "modelFactoryMesh.h"
 
 Cuboid::CreatedFaces
-Cuboid::createMesh(ModelFactoryMesh & mesh, float) const
+Cuboid::createMesh(ModelFactoryMesh & mesh, Scale3D) const
 {
 	static constexpr std::array<RelativePosition3D, 8> VERTICES {{
 			// bottom

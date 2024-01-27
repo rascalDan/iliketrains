@@ -1,5 +1,4 @@
 #include "factoryMesh.h"
-#include "collections.h"
 #include "gfx/models/vertex.h"
 #include "modelFactoryMesh.h"
 
@@ -11,7 +10,7 @@ FactoryMesh::createMesh() const
 
 	for (const auto & use : uses) {
 		ModelFactoryMesh mesh;
-		use->createMesh(mesh, 1);
+		use->createMesh(mesh, Scale3D {1});
 
 		if (!mesh.normalsProvidedProperty) {
 			mesh.update_face_normals();

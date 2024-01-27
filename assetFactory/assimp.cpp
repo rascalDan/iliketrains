@@ -39,7 +39,7 @@ public:
 	const aiNode * node;
 
 	CreatedFaces
-	createMesh(ModelFactoryMesh & mesh, float) const
+	createMesh(ModelFactoryMesh & mesh, Scale3D) const
 	{
 		CreatedFaces faces;
 		addMesh(faces, mesh, node);
