@@ -6,10 +6,12 @@
 #include <stream_support.h>
 
 #include "testMainWindow.h"
+#include "testRenderOutput.h"
 #include "ui/applicationBase.h"
+#include "ui/text.h"
 #include <array>
+#include <gfx/models/texture.h>
 #include <glm/glm.hpp>
-#include <span>
 #include <ui/font.h>
 #include <unicode.h>
 #include <vector>
@@ -86,7 +88,7 @@ BOOST_DATA_TEST_CASE(initialize_chardata_A,
 static_assert(glm::vec2 {862, 0} / glm::vec2 {2048, 64} == glm::vec2 {0.4208984375, 0});
 static_assert(glm::vec2 {866, 35} / glm::vec2 {2048, 64} == glm::vec2 {0.4228515625, 0.546875});
 
-BOOST_AUTO_TEST_CASE(render_text)
+BOOST_AUTO_TEST_CASE(render_font)
 {
 	constexpr std::string_view text {"I Like Trains"};
 	const auto spaces = static_cast<std::size_t>(std::count_if(text.begin(), text.end(), isspace));
@@ -110,6 +112,19 @@ BOOST_AUTO_TEST_CASE(render_text)
 		BOOST_CHECK_CLOSE_VEC(v[1][2], glm::vec4(54, 35, 0.42, 0));
 		BOOST_CHECK_CLOSE_VEC(v[1][3], glm::vec4(32, 35, 0.42, 0));
 	}
+}
+
+BOOST_AUTO_TEST_CASE(render_text)
+{
+	TestRenderOutput output;
+	glBindFramebuffer(GL_FRAMEBUFFER, output.output);
+	glViewport(0, 0, 640, 480);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	Text t {"I Like Trains", *this, {{0, 0}, {200, 40}}, {1, 1, 1}};
+	UIShader s {640, 480};
+	t.render(s, {{200, 200}, {200, 100}});
+	Texture::save(output.outImage, "/tmp/text.tga");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
