@@ -38,6 +38,12 @@ public:
 		clear();
 	}
 
+	template<template<typename, typename...> typename C> explicit glContainer(const C<T> & src)
+	{
+		reserve(src.size());
+		std::copy(src.begin(), src.end(), std::back_inserter(*this));
+	}
+
 	DEFAULT_MOVE_NO_COPY(glContainer);
 
 	[[nodiscard]] iterator
