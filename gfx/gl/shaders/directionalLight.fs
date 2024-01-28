@@ -9,7 +9,7 @@ in vec2 TexCoords;
 
 layout(binding = 0) uniform isampler2D gPosition;
 layout(binding = 1) uniform sampler2D gNormal;
-layout(binding = 2) uniform sampler2D shadowMap;
+layout(binding = 2) uniform sampler2DArray shadowMap;
 
 uniform vec3 lightDirection;
 uniform vec3 lightColour;
@@ -34,8 +34,9 @@ isShaded(vec4 Position)
 		const vec3 PositionInLightSpace = (lightViewProjection[m] * Position).xyz;
 		const float inside = insideShadowCube(PositionInLightSpace);
 		if (inside > 0) {
-			const float lightSpaceDepth
-					= texture(shadowMap, PositionInLightSpace.xy * shadowMapRegion[m].xy + shadowMapRegion[m].zw).r;
+			const float lightSpaceDepth = texture(
+					shadowMap, vec3(PositionInLightSpace.xy * shadowMapRegion[m].xy + shadowMapRegion[m].zw, m))
+												  .r;
 			return step(lightSpaceDepth, PositionInLightSpace.z * .5 + .5);
 		}
 	}

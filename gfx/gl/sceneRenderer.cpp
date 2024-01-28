@@ -81,7 +81,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, shadowMapper);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
 	scene.environment(shader, *this);
 	glDisable(GL_DEPTH_TEST);
 	scene.lights(shader);

@@ -1,6 +1,7 @@
 #include "shadowMapper.h"
 #include "camera.h"
 #include "collections.h"
+#include "gfx/gl/shaders/gs-commonShadowPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowFixedPoint.h"
@@ -17,19 +18,21 @@
 #include <vector>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
-	fixedPoint {shadowFixedPoint_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
+	fixedPoint {shadowFixedPoint_vs, commonShadowPoint_gs},
+	dynamicPointInst {shadowDynamicPointInst_vs, commonShadowPoint_gs}, size {s}
 {
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
+	glTexImage3D(
+			GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, size.x, size.y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	static constexpr RGBA border {std::numeric_limits<RGBA::value_type>::infinity()};
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
+	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, border);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -130,19 +133,16 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
+	glViewport(0, 0, size.x, size.y);
 
 	const auto lightViewDir = glm::lookAt({}, dir, up);
 	const auto lightViewPoint = camera.getPosition();
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
-	fixedPoint.setViewPoint(lightViewPoint);
-	dynamicPoint.setViewPoint(lightViewPoint);
-	dynamicPointInst.setViewPoint(lightViewPoint);
-
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			DefinitionsInserter {out},
-			[&scene, this, bands = bandViewExtents.size() - 2, &out, &lightViewDir](
-					const auto & near, const auto & far) {
+			[this, bands = bandViewExtents.size() - 2, &out, &lightViewDir](
+					const auto & near, const auto & far) mutable {
 				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
 					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
 					return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
@@ -153,39 +153,46 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 				}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
 				const auto lightViewDirProjection = lightProjection * lightViewDir;
-				fixedPoint.setViewProjection(lightViewDirProjection);
-				dynamicPoint.setViewProjection(lightViewDirProjection);
-				dynamicPointInst.setViewProjection(lightViewDirProjection);
+				fixedPoint.setViewProjection(lightViewDirProjection, out.maps);
+				dynamicPoint.setViewProjection(lightViewDirProjection, out.maps);
+				dynamicPointInst.setViewProjection(lightViewDirProjection, out.maps);
 
-				const auto & viewport = viewports[bands][out.maps];
-				glViewport(size.x >> viewport.x, size.y >> viewport.y, size.x >> viewport.z, size.y >> viewport.w);
-				scene.shadows(*this);
-
-				return std::make_pair(lightViewDirProjection, shadowMapRegions[bands][out.maps]);
+				return std::make_pair(lightViewDirProjection, shadowMapRegions[0][0]);
 			});
+	fixedPoint.setViewPoint(lightViewPoint, out.maps);
+	dynamicPoint.setViewPoint(lightViewPoint, out.maps);
+	dynamicPointInst.setViewPoint(lightViewPoint, out.maps);
+	scene.shadows(*this);
 
 	glCullFace(GL_BACK);
 
 	return out;
 }
 
-ShadowMapper::FixedPoint::FixedPoint(const Shader & vs) :
-	Program {vs}, viewProjectionLoc {*this, "viewProjection"}, viewPointLoc {*this, "viewPoint"}
+ShadowMapper::FixedPoint::FixedPoint(const Shader & vs, const Shader & gs) :
+	Program {vs, gs}, viewProjectionLoc {{
+							  {*this, "viewProjection[0]"},
+							  {*this, "viewProjection[1]"},
+							  {*this, "viewProjection[2]"},
+							  {*this, "viewProjection[3]"},
+					  }},
+	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}
 {
 }
 
 void
-ShadowMapper::FixedPoint::setViewPoint(const GlobalPosition3D viewPoint) const
+ShadowMapper::FixedPoint::setViewPoint(const GlobalPosition3D viewPoint, size_t n) const
 {
 	use();
 	glUniform(viewPointLoc, viewPoint);
+	glUniform(viewProjectionsLoc, static_cast<GLint>(n));
 }
 
 void
-ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection) const
+ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection, size_t n) const
 {
 	use();
-	glUniform(viewProjectionLoc, viewProjection);
+	glUniform(viewProjectionLoc[n], viewProjection);
 }
 
 void
@@ -195,23 +202,30 @@ ShadowMapper::FixedPoint::use() const
 }
 
 ShadowMapper::DynamicPoint::DynamicPoint() :
-	Program {shadowDynamicPoint_vs}, viewProjectionLoc {*this, "viewProjection"}, viewPointLoc {*this, "viewPoint"},
-	modelLoc {*this, "model"}, modelPosLoc {*this, "modelPos"}
+	Program {shadowDynamicPoint_vs, commonShadowPoint_gs}, viewProjectionLoc {{
+																   {*this, "viewProjection[0]"},
+																   {*this, "viewProjection[1]"},
+																   {*this, "viewProjection[2]"},
+																   {*this, "viewProjection[3]"},
+														   }},
+	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}, modelLoc {*this, "model"},
+	modelPosLoc {*this, "modelPos"}
 {
 }
 
 void
-ShadowMapper::DynamicPoint::setViewPoint(const GlobalPosition3D viewPoint) const
+ShadowMapper::DynamicPoint::setViewPoint(const GlobalPosition3D viewPoint, size_t n) const
 {
 	glUseProgram(*this);
 	glUniform(viewPointLoc, viewPoint);
+	glUniform(viewProjectionsLoc, static_cast<GLint>(n));
 }
 
 void
-ShadowMapper::DynamicPoint::setViewProjection(const glm::mat4 & viewProjection) const
+ShadowMapper::DynamicPoint::setViewProjection(const glm::mat4 & viewProjection, size_t n) const
 {
 	glUseProgram(*this);
-	glUniform(viewProjectionLoc, viewProjection);
+	glUniform(viewProjectionLoc[n], viewProjection);
 }
 
 void
