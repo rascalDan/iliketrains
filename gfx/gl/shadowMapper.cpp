@@ -18,8 +18,7 @@
 #include <vector>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
-	fixedPoint {shadowFixedPoint_vs, commonShadowPoint_gs},
-	dynamicPointInst {shadowDynamicPointInst_vs, commonShadowPoint_gs}, size {s}
+	fixedPoint {shadowFixedPoint_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
 	glTexImage3D(
@@ -169,19 +168,19 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	return out;
 }
 
-ShadowMapper::FixedPoint::FixedPoint(const Shader & vs, const Shader & gs) :
-	Program {vs, gs}, viewProjectionLoc {{
-							  {*this, "viewProjection[0]"},
-							  {*this, "viewProjection[1]"},
-							  {*this, "viewProjection[2]"},
-							  {*this, "viewProjection[3]"},
-					  }},
+ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) :
+	Program {vs, commonShadowPoint_gs}, viewProjectionLoc {{
+												{*this, "viewProjection[0]"},
+												{*this, "viewProjection[1]"},
+												{*this, "viewProjection[2]"},
+												{*this, "viewProjection[3]"},
+										}},
 	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}
 {
 }
 
 void
-ShadowMapper::FixedPoint::setViewPoint(const GlobalPosition3D viewPoint, size_t n) const
+ShadowMapper::ShadowProgram::setViewPoint(const GlobalPosition3D viewPoint, size_t n) const
 {
 	use();
 	glUniform(viewPointLoc, viewPoint);
@@ -189,43 +188,23 @@ ShadowMapper::FixedPoint::setViewPoint(const GlobalPosition3D viewPoint, size_t 
 }
 
 void
-ShadowMapper::FixedPoint::setViewProjection(const glm::mat4 & viewProjection, size_t n) const
+ShadowMapper::ShadowProgram::setViewProjection(const glm::mat4 & viewProjection, size_t n) const
 {
 	use();
 	glUniform(viewProjectionLoc[n], viewProjection);
 }
 
 void
-ShadowMapper::FixedPoint::use() const
+ShadowMapper::ShadowProgram::use() const
 {
 	glUseProgram(*this);
 }
+
+ShadowMapper::FixedPoint::FixedPoint(const Shader & vs) : ShadowProgram {vs} { }
 
 ShadowMapper::DynamicPoint::DynamicPoint() :
-	Program {shadowDynamicPoint_vs, commonShadowPoint_gs}, viewProjectionLoc {{
-																   {*this, "viewProjection[0]"},
-																   {*this, "viewProjection[1]"},
-																   {*this, "viewProjection[2]"},
-																   {*this, "viewProjection[3]"},
-														   }},
-	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}, modelLoc {*this, "model"},
-	modelPosLoc {*this, "modelPos"}
+	ShadowProgram {shadowDynamicPoint_vs}, modelLoc {*this, "model"}, modelPosLoc {*this, "modelPos"}
 {
-}
-
-void
-ShadowMapper::DynamicPoint::setViewPoint(const GlobalPosition3D viewPoint, size_t n) const
-{
-	glUseProgram(*this);
-	glUniform(viewPointLoc, viewPoint);
-	glUniform(viewProjectionsLoc, static_cast<GLint>(n));
-}
-
-void
-ShadowMapper::DynamicPoint::setViewProjection(const glm::mat4 & viewProjection, size_t n) const
-{
-	glUseProgram(*this);
-	glUniform(viewProjectionLoc[n], viewProjection);
 }
 
 void

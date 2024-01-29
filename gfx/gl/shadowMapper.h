@@ -24,9 +24,10 @@ public:
 
 	[[nodiscard]] Definitions update(const SceneProvider &, const Direction3D & direction, const Camera &) const;
 
-	class FixedPoint : public Program {
+	class ShadowProgram : public Program {
 	public:
-		FixedPoint(const Shader & vs, const Shader & gs);
+		explicit ShadowProgram(const Shader & vs);
+
 		void setViewPoint(const GlobalPosition3D, size_t n) const;
 		void setViewProjection(const glm::mat4 &, size_t n) const;
 		void use() const;
@@ -37,18 +38,18 @@ public:
 		RequiredUniformLocation viewPointLoc;
 	};
 
-	class DynamicPoint : public Program {
+	class FixedPoint : public ShadowProgram {
+	public:
+		explicit FixedPoint(const Shader & vs);
+	};
+
+	class DynamicPoint : public ShadowProgram {
 	public:
 		DynamicPoint();
-		void setViewPoint(const GlobalPosition3D, size_t n) const;
-		void setViewProjection(const glm::mat4 &, size_t n) const;
 		void use(const Location &) const;
 		void setModel(const Location &) const;
 
 	private:
-		std::array<RequiredUniformLocation, 4> viewProjectionLoc;
-		RequiredUniformLocation viewProjectionsLoc;
-		RequiredUniformLocation viewPointLoc;
 		RequiredUniformLocation modelLoc;
 		RequiredUniformLocation modelPosLoc;
 	};
