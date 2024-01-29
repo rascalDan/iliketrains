@@ -140,8 +140,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			DefinitionsInserter {out},
-			[this, bands = bandViewExtents.size() - 2, &out, &lightViewDir](
-					const auto & near, const auto & far) mutable {
+			[bands = bandViewExtents.size() - 2, &lightViewDir](const auto & near, const auto & far) mutable {
 				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
 					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
 					return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
@@ -152,15 +151,13 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 				}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
 				const auto lightViewDirProjection = lightProjection * lightViewDir;
-				fixedPoint.setViewProjection(lightViewDirProjection, out.maps);
-				dynamicPoint.setViewProjection(lightViewDirProjection, out.maps);
-				dynamicPointInst.setViewProjection(lightViewDirProjection, out.maps);
 
 				return std::make_pair(lightViewDirProjection, shadowMapRegions[0][0]);
 			});
-	fixedPoint.setViewPoint(lightViewPoint, out.maps);
-	dynamicPoint.setViewPoint(lightViewPoint, out.maps);
-	dynamicPointInst.setViewPoint(lightViewPoint, out.maps);
+	std::span vps {out.projections.data(), out.maps};
+	for (const auto p : std::initializer_list<const ShadowProgram *> {&fixedPoint, &dynamicPoint, &dynamicPointInst}) {
+		p->setView(vps, lightViewPoint);
+	}
 	scene.shadows(*this);
 
 	glCullFace(GL_BACK);
@@ -169,29 +166,19 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 }
 
 ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) :
-	Program {vs, commonShadowPoint_gs}, viewProjectionLoc {{
-												{*this, "viewProjection[0]"},
-												{*this, "viewProjection[1]"},
-												{*this, "viewProjection[2]"},
-												{*this, "viewProjection[3]"},
-										}},
+	Program {vs, commonShadowPoint_gs}, viewProjectionLoc {*this, "viewProjection"},
 	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}
 {
 }
 
 void
-ShadowMapper::ShadowProgram::setViewPoint(const GlobalPosition3D viewPoint, size_t n) const
+ShadowMapper::ShadowProgram::setView(
+		const std::span<const glm::mat4> viewProjection, const GlobalPosition3D viewPoint) const
 {
 	use();
 	glUniform(viewPointLoc, viewPoint);
-	glUniform(viewProjectionsLoc, static_cast<GLint>(n));
-}
-
-void
-ShadowMapper::ShadowProgram::setViewProjection(const glm::mat4 & viewProjection, size_t n) const
-{
-	use();
-	glUniform(viewProjectionLoc[n], viewProjection);
+	glUniform(viewProjectionLoc, viewProjection);
+	glUniform(viewProjectionsLoc, static_cast<GLint>(viewProjection.size()));
 }
 
 void

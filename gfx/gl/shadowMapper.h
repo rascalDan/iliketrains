@@ -5,6 +5,7 @@
 #include "program.h"
 #include <gfx/models/texture.h>
 #include <glm/vec2.hpp>
+#include <span>
 #include <vector>
 
 class SceneProvider;
@@ -28,12 +29,11 @@ public:
 	public:
 		explicit ShadowProgram(const Shader & vs);
 
-		void setViewPoint(const GlobalPosition3D, size_t n) const;
-		void setViewProjection(const glm::mat4 &, size_t n) const;
+		void setView(const std::span<const glm::mat4>, const GlobalPosition3D) const;
 		void use() const;
 
 	private:
-		std::array<RequiredUniformLocation, 4> viewProjectionLoc;
+		RequiredUniformLocation viewProjectionLoc;
 		RequiredUniformLocation viewProjectionsLoc;
 		RequiredUniformLocation viewPointLoc;
 	};
