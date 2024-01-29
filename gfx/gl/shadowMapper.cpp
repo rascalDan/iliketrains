@@ -40,72 +40,12 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-constexpr std::array<std::array<TextureAbsRegion, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS> viewports {{
-		{{
-				{31, 31, 0, 0}, // full
-		}},
-		{{
-				{31, 31, 0, 1}, // lower half
-				{31, 1, 0, 1}, // upper half
-		}},
-		{{
-				{31, 31, 0, 1}, // lower half
-				{31, 1, 1, 1}, // upper left
-				{1, 1, 1, 1}, // upper right
-		}},
-		{{
-				{31, 31, 1, 1}, // lower left
-				{1, 31, 1, 1}, // lower right
-				{31, 1, 1, 1}, // upper left
-				{1, 1, 1, 1}, // upper right
-		}},
-}};
-constexpr std::array<std::array<TextureRelRegion, ShadowMapper::SHADOW_BANDS>, ShadowMapper::SHADOW_BANDS>
-		shadowMapRegions {{
-				{{
-						{0.5F, 0.5F, 0.5F, 0.5F}, // full
-				}},
-				{{
-						{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
-						{0.5F, 0.25F, 0.5F, 0.75F}, // upper half
-				}},
-				{{
-						{0.5F, 0.25F, 0.5F, 0.25F}, // lower half
-						{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
-						{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
-				}},
-
-				{{
-						{0.25F, 0.25F, 0.25F, 0.25F}, // lower left
-						{0.25F, 0.25F, 0.75F, 0.25F}, // lower right
-						{0.25F, 0.25F, 0.25F, 0.75F}, // upper left
-						{0.25F, 0.25F, 0.75F, 0.75F}, // upper right
-				}},
-		}};
 constexpr std::array<GlobalDistance, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
 		1000,
 		250000,
 		750000,
 		2500000,
 		10000000,
-};
-static_assert(viewports.size() == shadowMapRegions.size());
-static_assert(shadowBands.size() == shadowMapRegions.size() + 1);
-
-struct DefinitionsInserter {
-	auto
-	operator++()
-	{
-		return out.maps++;
-	};
-
-	auto
-	operator*()
-	{
-		return std::tie(out.projections[out.maps], out.regions[out.maps]);
-	}
-
-	ShadowMapper::Definitions & out;
 };
 
 std::vector<std::array<RelativePosition3D, 4>>
@@ -139,7 +79,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
 	Definitions out;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
-			DefinitionsInserter {out},
+			std::back_inserter(out),
 			[bands = bandViewExtents.size() - 2, &lightViewDir](const auto & near, const auto & far) mutable {
 				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
 					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
@@ -150,13 +90,10 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 					return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
 				}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
 
-				const auto lightViewDirProjection = lightProjection * lightViewDir;
-
-				return std::make_pair(lightViewDirProjection, shadowMapRegions[0][0]);
+				return lightProjection * lightViewDir;
 			});
-	std::span vps {out.projections.data(), out.maps};
 	for (const auto p : std::initializer_list<const ShadowProgram *> {&fixedPoint, &dynamicPoint, &dynamicPointInst}) {
-		p->setView(vps, lightViewPoint);
+		p->setView(out, lightViewPoint);
 	}
 	scene.shadows(*this);
 

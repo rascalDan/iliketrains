@@ -17,11 +17,7 @@ public:
 
 	static constexpr std::size_t SHADOW_BANDS {4};
 
-	struct Definitions {
-		std::array<glm::mat4x4, SHADOW_BANDS> projections {};
-		std::array<TextureRelRegion, SHADOW_BANDS> regions {};
-		size_t maps {};
-	};
+	using Definitions = std::vector<glm::mat4x4>;
 
 	[[nodiscard]] Definitions update(const SceneProvider &, const Direction3D & direction, const Camera &) const;
 
