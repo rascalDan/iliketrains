@@ -81,7 +81,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, shadowMapper);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
 	scene.environment(shader, *this);
 	glDisable(GL_DEPTH_TEST);
 	scene.lights(shader);
@@ -116,7 +116,7 @@ SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direc
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
-		dirLight.setDirectionalLight(colour, direction, camera.getPosition(), lvp.projections, lvp.regions, lvp.maps);
+		dirLight.setDirectionalLight(colour, direction, camera.getPosition(), lvp);
 		renderQuad();
 	}
 }
@@ -133,21 +133,24 @@ SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 	Program {lighting_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
 	colourLoc {*this, "lightColour"}, lightPointLoc {*this, "lightPoint"},
 	lightViewProjectionLoc {*this, "lightViewProjection"},
-	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"},
-	lightViewShadowMapRegionLoc {*this, "shadowMapRegion"}
+	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"}
 {
 }
 
+const auto toTextureSpaceMat = glm::translate(glm::identity<glm::mat4>(), glm::vec3 {0.5F})
+		* glm::scale(glm::identity<glm::mat4>(), glm::vec3 {0.5F});
+
 void
-SceneRenderer::DirectionalLightProgram::setDirectionalLight(const RGB & c, const Direction3D & d,
-		const GlobalPosition3D & p, const std::span<const glm::mat4x4> lvp,
-		const std::span<const TextureRelRegion> shadowMapRegions, std::size_t maps) const
+SceneRenderer::DirectionalLightProgram::setDirectionalLight(
+		const RGB & c, const Direction3D & d, const GlobalPosition3D & p, const std::span<const glm::mat4x4> lvp) const
 {
+	const auto toTextureSpace = [](const glm::mat4 & m) {
+		return toTextureSpaceMat * m;
+	};
 	glUniform(colourLoc, c);
 	const auto nd = glm::normalize(d);
 	glUniform(directionLoc, nd);
 	glUniform(lightPointLoc, p);
-	glUniform(lightViewProjectionCountLoc, static_cast<GLuint>(maps));
-	glUniform(lightViewProjectionLoc, lvp);
-	glUniform(lightViewShadowMapRegionLoc, shadowMapRegions);
+	glUniform(lightViewProjectionCountLoc, static_cast<GLuint>(lvp.size()));
+	glUniform(lightViewProjectionLoc, std::span<const glm::mat4> {lvp * toTextureSpace});
 }

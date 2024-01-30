@@ -5,6 +5,7 @@
 #include "program.h"
 #include <gfx/models/texture.h>
 #include <glm/vec2.hpp>
+#include <span>
 #include <vector>
 
 class SceneProvider;
@@ -16,33 +17,35 @@ public:
 
 	static constexpr std::size_t SHADOW_BANDS {4};
 
-	struct Definitions {
-		std::array<glm::mat4x4, SHADOW_BANDS> projections {};
-		std::array<TextureRelRegion, SHADOW_BANDS> regions {};
-		size_t maps {};
-	};
+	using Definitions = std::vector<glm::mat4x4>;
 
 	[[nodiscard]] Definitions update(const SceneProvider &, const Direction3D & direction, const Camera &) const;
 
-	class FixedPoint : public Program {
+	class ShadowProgram : public Program {
 	public:
-		FixedPoint(const Shader & vs);
-		void setViewProjection(const GlobalPosition3D, const glm::mat4 &) const;
+		explicit ShadowProgram(const Shader & vs);
+
+		void setView(const std::span<const glm::mat4>, const GlobalPosition3D) const;
 		void use() const;
 
 	private:
-		RequiredUniformLocation viewProjectionLoc, viewPointLoc;
+		RequiredUniformLocation viewProjectionLoc;
+		RequiredUniformLocation viewProjectionsLoc;
+		RequiredUniformLocation viewPointLoc;
 	};
 
-	class DynamicPoint : public Program {
+	class FixedPoint : public ShadowProgram {
+	public:
+		explicit FixedPoint(const Shader & vs);
+	};
+
+	class DynamicPoint : public ShadowProgram {
 	public:
 		DynamicPoint();
-		void setViewProjection(const GlobalPosition3D, const glm::mat4 &) const;
 		void use(const Location &) const;
 		void setModel(const Location &) const;
 
 	private:
-		RequiredUniformLocation viewProjectionLoc, viewPointLoc;
 		RequiredUniformLocation modelLoc;
 		RequiredUniformLocation modelPosLoc;
 	};
