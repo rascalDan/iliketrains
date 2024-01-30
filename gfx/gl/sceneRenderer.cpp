@@ -137,14 +137,20 @@ SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
 {
 }
 
+const auto toTextureSpaceMat = glm::translate(glm::identity<glm::mat4>(), glm::vec3 {0.5F})
+		* glm::scale(glm::identity<glm::mat4>(), glm::vec3 {0.5F});
+
 void
 SceneRenderer::DirectionalLightProgram::setDirectionalLight(
 		const RGB & c, const Direction3D & d, const GlobalPosition3D & p, const std::span<const glm::mat4x4> lvp) const
 {
+	const auto toTextureSpace = [](const glm::mat4 & m) {
+		return toTextureSpaceMat * m;
+	};
 	glUniform(colourLoc, c);
 	const auto nd = glm::normalize(d);
 	glUniform(directionLoc, nd);
 	glUniform(lightPointLoc, p);
 	glUniform(lightViewProjectionCountLoc, static_cast<GLuint>(lvp.size()));
-	glUniform(lightViewProjectionLoc, lvp);
+	glUniform(lightViewProjectionLoc, std::span<const glm::mat4> {lvp * toTextureSpace});
 }
