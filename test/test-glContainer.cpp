@@ -23,14 +23,14 @@ BOOST_FIXTURE_TEST_SUITE(i, glContainer<int>)
 
 BOOST_AUTO_TEST_CASE(createDestroy, *boost::unit_test::timeout(1))
 {
-	BOOST_CHECK(!data_.data());
+	BOOST_CHECK(!data_);
 	BOOST_CHECK_NO_THROW(map());
-	BOOST_REQUIRE(!data_.data());
+	BOOST_REQUIRE(!data_);
 	BOOST_CHECK_NO_THROW(emplace_back(0));
 	BOOST_CHECK_NO_THROW(map());
-	BOOST_REQUIRE(data_.data());
+	BOOST_REQUIRE(data_);
 	BOOST_CHECK_NO_THROW(unmap());
-	BOOST_CHECK(!data_.data());
+	BOOST_CHECK(!data_);
 }
 
 BOOST_AUTO_TEST_CASE(push_back_test, *boost::unit_test::timeout(1))
@@ -44,7 +44,6 @@ BOOST_AUTO_TEST_CASE(push_back_test, *boost::unit_test::timeout(1))
 	BOOST_CHECK_NO_THROW(push_back(5));
 	BOOST_CHECK_EQUAL(capacity_, 8);
 	BOOST_CHECK_EQUAL(size_, 5);
-	BOOST_CHECK_EQUAL(data_.size(), 5);
 	{
 		std::array expected1 {1, 2, 3, 4, 5};
 		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
@@ -166,7 +165,7 @@ BOOST_AUTO_TEST_CASE(getters)
 	BOOST_CHECK_EQUAL(2, at(1));
 	BOOST_CHECK_EQUAL(1, (*this)[0]);
 	BOOST_CHECK_EQUAL(2, (*this)[1]);
-	BOOST_CHECK_EQUAL(data_.data(), data());
+	BOOST_CHECK_EQUAL(data_, data());
 	BOOST_CHECK_THROW(std::ignore = at(2), std::out_of_range);
 
 	const auto & constCont {*this};
@@ -183,7 +182,7 @@ BOOST_AUTO_TEST_CASE(getters)
 	BOOST_CHECK_EQUAL(2, constCont.at(1));
 	BOOST_CHECK_EQUAL(1, constCont[0]);
 	BOOST_CHECK_EQUAL(2, constCont[1]);
-	BOOST_CHECK_EQUAL(data_.data(), constCont.data());
+	BOOST_CHECK_EQUAL(data_, constCont.data());
 	BOOST_CHECK_THROW(std::ignore = constCont.at(2), std::out_of_range);
 }
 
@@ -209,16 +208,16 @@ BOOST_AUTO_TEST_CASE(random_write)
 	BOOST_CHECK_NO_THROW(resize(3));
 	BOOST_CHECK_EQUAL(size(), 3);
 	BOOST_CHECK_NO_THROW(unmap());
-	BOOST_REQUIRE(!data_.data());
+	BOOST_REQUIRE(!data_);
 	BOOST_CHECK_NO_THROW(at(0, 10));
 	BOOST_CHECK_NO_THROW(at(1, 20));
 	BOOST_CHECK_NO_THROW(at(2, 30));
-	BOOST_CHECK(!data_.data());
+	BOOST_CHECK(!data_);
 	{
 		std::array expected1 {10, 20, 30};
 		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
 	}
-	BOOST_CHECK(data_.data());
+	BOOST_CHECK(data_);
 	BOOST_CHECK_NO_THROW(at(1, 40));
 	{
 		std::array expected1 {10, 40, 30};

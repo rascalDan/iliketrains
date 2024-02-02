@@ -50,84 +50,84 @@ public:
 	begin()
 	{
 		map();
-		return data_.begin();
+		return mkspan().begin();
 	}
 
 	[[nodiscard]] iterator
 	end()
 	{
 		map();
-		return data_.end();
+		return mkspan().end();
 	}
 
 	[[nodiscard]] const_iterator
 	begin() const
 	{
 		map();
-		return const_span {data_}.begin();
+		return mkcspan().begin();
 	}
 
 	[[nodiscard]] const_iterator
 	end() const
 	{
 		map();
-		return const_span {data_}.end();
+		return mkcspan().end();
 	}
 
 	[[nodiscard]] const_iterator
 	cbegin() const
 	{
 		map();
-		return const_span {data_}.begin();
+		return mkcspan().begin();
 	}
 
 	[[nodiscard]] const_iterator
 	cend() const
 	{
 		map();
-		return const_span {data_}.end();
+		return mkcspan().end();
 	}
 
 	[[nodiscard]] reverse_iterator
 	rbegin()
 	{
 		map();
-		return data_.rbegin();
+		return mkspan().rbegin();
 	}
 
 	[[nodiscard]] reverse_iterator
 	rend()
 	{
 		map();
-		return data_.rend();
+		return mkspan().rend();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	rbegin() const
 	{
 		map();
-		return const_span {data_}.rbegin();
+		return mkcspan().rbegin();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	rend() const
 	{
 		map();
-		return const_span {data_}.rend();
+		return mkcspan().rend();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	crbegin() const
 	{
 		map();
-		return const_span {data_}.rbegin();
+		return mkcspan().rbegin();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	crend() const
 	{
 		map();
-		return const_span {data_}.rend();
+		return mkcspan().rend();
 	}
 
 	[[nodiscard]] const auto &
@@ -148,8 +148,8 @@ public:
 		if (pos >= size()) {
 			throw std::out_of_range {__FUNCTION__};
 		}
-		if (data_.data()) {
-			data_[pos] = value;
+		if (data_) {
+			mkspan()[pos] = value;
 		}
 		else {
 			glBindBuffer(GL_ARRAY_BUFFER, buffer_);
@@ -165,7 +165,7 @@ public:
 			throw std::out_of_range {__FUNCTION__};
 		}
 		map();
-		return data_[pos];
+		return mkspan()[pos];
 	}
 
 	[[nodiscard]] const_reference_type
@@ -175,63 +175,63 @@ public:
 			throw std::out_of_range {__FUNCTION__};
 		}
 		map();
-		return data_[pos];
+		return mkcspan()[pos];
 	}
 
 	[[nodiscard]] reference_type
 	operator[](size_type pos)
 	{
 		map();
-		return data_[pos];
+		return mkspan()[pos];
 	}
 
 	[[nodiscard]] const_reference_type
 	operator[](size_type pos) const
 	{
 		map();
-		return data_[pos];
+		return mkcspan()[pos];
 	}
 
 	[[nodiscard]] pointer_type
 	data()
 	{
 		map();
-		return data_.data();
+		return data_;
 	}
 
 	[[nodiscard]] const_pointer_type
 	data() const
 	{
 		map();
-		return data_.data();
+		return data_;
 	}
 
 	[[nodiscard]] reference_type
 	front()
 	{
 		map();
-		return data_.front();
+		return mkspan().front();
 	}
 
 	[[nodiscard]] reference_type
 	back()
 	{
 		map();
-		return data_.back();
+		return mkspan().back();
 	}
 
 	[[nodiscard]] const_reference_type
 	front() const
 	{
 		map();
-		return data_.front();
+		return mkcspan().front();
 	}
 
 	[[nodiscard]] const_reference_type
 	back() const
 	{
 		map();
-		return data_.back();
+		return mkcspan().back();
 	}
 
 	[[nodiscard]] bool
@@ -249,7 +249,7 @@ public:
 	void
 	unmap() const
 	{
-		if (data_.data()) {
+		if (data_) {
 			glUnmapNamedBuffer(buffer_);
 			data_ = {};
 		}
@@ -291,8 +291,10 @@ public:
 			allocBuffer(newSize);
 			mapForAdd();
 		}
-		for (auto uninitialised = data_.data() + size_; uninitialised < data_.data() + newSize; ++uninitialised) {
-			new (uninitialised) T {};
+		if (newSize > size_) {
+			for (auto & uninitialised : mkspan().subspan(size_, newSize - size_)) {
+				new (&uninitialised) T {};
+			}
 		}
 		setSize(newSize);
 	}
@@ -333,7 +335,7 @@ public:
 		auto newSize = size_ + 1;
 		reserve(newSize);
 		mapForAdd();
-		new (&data_[size_]) T {std::forward<P>(ps)...};
+		new (&*end()) T {std::forward<P>(ps)...};
 		setSize(newSize);
 		return back();
 	}
@@ -347,10 +349,10 @@ public:
 		const auto idx = pos - begin();
 		reserve(newSize);
 		mapForAdd();
-		auto newT = begin() + idx;
-		std::move_backward(newT, end(), end() + 1);
-		newT->~T();
-		new (&*newT) T {std::forward<P>(ps)...};
+		pos = begin() + idx;
+		std::move_backward(pos, end(), end() + 1);
+		pos->~T();
+		new (&*pos) T {std::forward<P>(ps)...};
 		setSize(newSize);
 		return pos;
 	}
@@ -362,7 +364,7 @@ public:
 		auto newSize = size_ + 1;
 		reserve(newSize);
 		mapForAdd();
-		new (&data_[size_]) T {std::move(p)};
+		new (&*end()) T {std::move(p)};
 		setSize(newSize);
 		return back();
 	}
@@ -375,10 +377,10 @@ public:
 		const auto idx = pos - begin();
 		reserve(newSize);
 		mapForAdd();
-		auto newT = begin() + idx;
-		std::move_backward(newT, end(), end() + 1);
-		newT->~T();
-		new (&*newT) T {std::move(p)};
+		pos = begin() + idx;
+		std::move_backward(pos, end(), end() + 1);
+		pos->~T();
+		new (&*pos) T {std::move(p)};
 		setSize(newSize);
 		return pos;
 	}
@@ -388,11 +390,9 @@ public:
 	{
 		if constexpr (!is_trivial_dest) {
 			map();
-			data_[--size_].~T();
+			back().~T();
 		}
-		else {
-			--size_;
-		}
+		--size_;
 	}
 
 	void
@@ -419,7 +419,7 @@ protected:
 	void
 	setSize(size_type s)
 	{
-		data_ = {data_.data(), size_ = s};
+		size_ = s;
 	}
 
 	void
@@ -446,14 +446,28 @@ protected:
 	void
 	mapForAdd() const
 	{
-		if (!data_.data()) {
-			data_ = {static_cast<T *>(glMapNamedBuffer(buffer_, GL_READ_WRITE)), size_};
-			assert(data_.data());
+		if (!data_) {
+			data_ = static_cast<T *>(glMapNamedBuffer(buffer_, GL_READ_WRITE));
+			assert(data_);
 		}
+	}
+
+	span
+	mkspan() const
+	{
+		assert(!size_ || data_);
+		return span {data_, size_};
+	}
+
+	const_span
+	mkcspan() const
+	{
+		assert(!size_ || data_);
+		return const_span {data_, size_};
 	}
 
 	glBuffer buffer_;
 	std::size_t capacity_ {};
 	std::size_t size_ {};
-	mutable span data_;
+	mutable T * data_;
 };
