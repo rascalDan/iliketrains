@@ -26,7 +26,7 @@ public:
 	using const_reverse_iterator = const_span::reverse_iterator;
 	static constexpr bool is_trivial_dest = std::is_trivially_destructible_v<T>;
 
-	glContainer()
+	explicit glContainer(GLenum target = GL_ARRAY_BUFFER) : target_ {target}
 	{
 		allocBuffer(1);
 	}
@@ -41,7 +41,8 @@ public:
 		clear();
 	}
 
-	template<template<typename, typename...> typename C> explicit glContainer(const C<T> & src)
+	template<template<typename, typename...> typename C>
+	explicit glContainer(const C<T> & src, GLenum target = GL_ARRAY_BUFFER) : target_ {target}
 	{
 		reserve(src.size());
 		std::copy(src.begin(), src.end(), std::back_inserter(*this));
@@ -155,9 +156,9 @@ public:
 			mkspan()[pos] = value;
 		}
 		else {
-			glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-			glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(pos * sizeof(T)), sizeof(value), &value);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(target_, buffer_);
+			glBufferSubData(target_, static_cast<GLintptr>(pos * sizeof(T)), sizeof(value), &value);
+			glBindBuffer(target_, 0);
 		}
 	}
 
@@ -253,7 +254,9 @@ public:
 	unmap() const
 	{
 		if (data_) {
-			glUnmapNamedBuffer(buffer_);
+			glBindBuffer(target_, buffer_);
+			glUnmapBuffer(target_);
+			glBindBuffer(target_, 0);
 			data_ = {};
 			access_ = {};
 		}
@@ -432,9 +435,9 @@ protected:
 		if (newCapacity == 0) {
 			return allocBuffer(1);
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(T) * newCapacity), nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(target_, buffer_);
+		glBufferData(target_, static_cast<GLsizeiptr>(sizeof(T) * newCapacity), nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(target_, 0);
 		capacity_ = newCapacity;
 		data_ = {};
 		access_ = {};
@@ -463,7 +466,9 @@ protected:
 			unmap();
 		}
 		if (!data_) {
-			data_ = static_cast<T *>(glMapNamedBuffer(buffer_, access));
+			glBindBuffer(target_, buffer_);
+			data_ = static_cast<T *>(glMapBuffer(target_, access));
+			glBindBuffer(target_, 0);
 			assert(data_);
 			access_ = access;
 		}
@@ -484,6 +489,7 @@ protected:
 	}
 
 	glBuffer buffer_;
+	GLenum target_;
 	std::size_t capacity_ {};
 	std::size_t size_ {};
 	mutable T * data_;
