@@ -272,6 +272,7 @@ public:
 
 	void
 	resize(size_type newSize)
+		requires std::is_default_constructible_v<T>
 	{
 		if (newSize == size_) {
 			return;
@@ -327,6 +328,7 @@ public:
 	template<typename... P>
 	reference_type
 	emplace_back(P &&... ps)
+		requires std::is_constructible_v<T, P...>
 	{
 		auto newSize = size_ + 1;
 		reserve(newSize);
@@ -339,8 +341,8 @@ public:
 	template<typename... P>
 	iterator
 	emplace(iterator pos, P &&... ps)
+		requires std::is_nothrow_constructible_v<T, P...>
 	{
-		static_assert(std::is_nothrow_constructible_v<T, P...>);
 		auto newSize = size_ + 1;
 		const auto idx = pos - begin();
 		reserve(newSize);
@@ -355,6 +357,7 @@ public:
 
 	reference_type
 	push_back(T p)
+		requires std::is_move_constructible_v<T>
 	{
 		auto newSize = size_ + 1;
 		reserve(newSize);
@@ -366,8 +369,8 @@ public:
 
 	iterator
 	insert(iterator pos, T p)
+		requires std::is_nothrow_move_constructible_v<T>
 	{
-		static_assert(std::is_nothrow_move_constructible_v<T>);
 		auto newSize = size_ + 1;
 		const auto idx = pos - begin();
 		reserve(newSize);
