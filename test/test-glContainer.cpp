@@ -1,6 +1,5 @@
 #define BOOST_TEST_MODULE glContainer
 
-#include "testHelpers.h"
 #include "testMainWindow.h"
 #include "ui/applicationBase.h"
 #include <boost/test/data/test_case.hpp>
@@ -23,14 +22,69 @@ BOOST_FIXTURE_TEST_SUITE(i, glContainer<int>)
 
 BOOST_AUTO_TEST_CASE(createDestroy, *boost::unit_test::timeout(1))
 {
+	// Unmapped
 	BOOST_CHECK(!data_);
-	BOOST_CHECK_NO_THROW(map());
+	BOOST_CHECK(!access_);
+	// Request map, but empty
+	BOOST_CHECK_NO_THROW(map(GL_READ_ONLY));
 	BOOST_REQUIRE(!data_);
+	BOOST_REQUIRE(!access_);
+	BOOST_CHECK_NO_THROW(map(GL_READ_WRITE));
+	BOOST_REQUIRE(!data_);
+	BOOST_REQUIRE(!access_);
+	// Add something
 	BOOST_CHECK_NO_THROW(emplace_back(0));
-	BOOST_CHECK_NO_THROW(map());
 	BOOST_REQUIRE(data_);
+	BOOST_REQUIRE_EQUAL(access_, GL_READ_WRITE);
+	// Unmap
+	BOOST_CHECK_NO_THROW(unmap());
+	BOOST_REQUIRE(!data_);
+	BOOST_REQUIRE(!access_);
+	// Map RO
+	BOOST_CHECK_NO_THROW(map(GL_READ_ONLY));
+	BOOST_REQUIRE(data_);
+	BOOST_REQUIRE_EQUAL(access_, GL_READ_ONLY);
+	// Map RW upgradde
+	BOOST_CHECK_NO_THROW(map(GL_READ_WRITE));
+	BOOST_REQUIRE(data_);
+	BOOST_REQUIRE_EQUAL(access_, GL_READ_WRITE);
+	// Map RO downgradde, no change
+	BOOST_CHECK_NO_THROW(map(GL_READ_ONLY));
+	BOOST_REQUIRE(data_);
+	BOOST_REQUIRE_EQUAL(access_, GL_READ_WRITE);
+	// Unmap
 	BOOST_CHECK_NO_THROW(unmap());
 	BOOST_CHECK(!data_);
+	BOOST_CHECK(!access_);
+}
+
+BOOST_AUTO_TEST_CASE(mapModes)
+{
+	BOOST_CHECK_EQUAL(std::accumulate(begin(), end(), 0), 0);
+	BOOST_CHECK(!data_);
+	BOOST_CHECK(!access_);
+
+	BOOST_CHECK_NO_THROW(push_back(1));
+	BOOST_CHECK_NO_THROW(push_back(2));
+	BOOST_CHECK_NO_THROW(push_back(3));
+	BOOST_CHECK_NO_THROW(push_back(4));
+	BOOST_CHECK_NO_THROW(unmap());
+
+	BOOST_CHECK_EQUAL(std::accumulate(cbegin(), cend(), 0), 10);
+	BOOST_CHECK(data_);
+	BOOST_CHECK_EQUAL(access_, GL_READ_ONLY);
+	BOOST_CHECK_NO_THROW(unmap());
+
+	BOOST_CHECK_EQUAL(std::accumulate(begin(), end(), 0), 10);
+	BOOST_CHECK(data_);
+	BOOST_CHECK_EQUAL(access_, GL_READ_WRITE);
+	BOOST_CHECK_NO_THROW(unmap());
+
+	const auto & c = *this;
+	BOOST_CHECK_EQUAL(std::accumulate(c.begin(), c.end(), 0), 10);
+	BOOST_CHECK(data_);
+	BOOST_CHECK_EQUAL(access_, GL_READ_ONLY);
+	BOOST_CHECK_NO_THROW(unmap());
 }
 
 BOOST_AUTO_TEST_CASE(push_back_test, *boost::unit_test::timeout(1))

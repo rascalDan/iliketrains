@@ -7,6 +7,9 @@
 #include <utility>
 #include <vector>
 
+static_assert(GL_READ_ONLY < GL_READ_WRITE);
+static_assert(GL_WRITE_ONLY < GL_READ_WRITE);
+
 template<typename T> class glContainer {
 public:
 	using span = std::span<T>;
@@ -49,84 +52,84 @@ public:
 	[[nodiscard]] iterator
 	begin()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan().begin();
 	}
 
 	[[nodiscard]] iterator
 	end()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan().end();
 	}
 
 	[[nodiscard]] const_iterator
 	begin() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().begin();
 	}
 
 	[[nodiscard]] const_iterator
 	end() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().end();
 	}
 
 	[[nodiscard]] const_iterator
 	cbegin() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().begin();
 	}
 
 	[[nodiscard]] const_iterator
 	cend() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().end();
 	}
 
 	[[nodiscard]] reverse_iterator
 	rbegin()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan().rbegin();
 	}
 
 	[[nodiscard]] reverse_iterator
 	rend()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan().rend();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	rbegin() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().rbegin();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	rend() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().rend();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	crbegin() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().rbegin();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	crend() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().rend();
 	}
 
@@ -164,7 +167,7 @@ public:
 		if (pos >= size()) {
 			throw std::out_of_range {__FUNCTION__};
 		}
-		map();
+		map(GL_READ_WRITE);
 		return mkspan()[pos];
 	}
 
@@ -174,63 +177,63 @@ public:
 		if (pos >= size()) {
 			throw std::out_of_range {__FUNCTION__};
 		}
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan()[pos];
 	}
 
 	[[nodiscard]] reference_type
 	operator[](size_type pos)
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan()[pos];
 	}
 
 	[[nodiscard]] const_reference_type
 	operator[](size_type pos) const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan()[pos];
 	}
 
 	[[nodiscard]] pointer_type
 	data()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return data_;
 	}
 
 	[[nodiscard]] const_pointer_type
 	data() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return data_;
 	}
 
 	[[nodiscard]] reference_type
 	front()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan().front();
 	}
 
 	[[nodiscard]] reference_type
 	back()
 	{
-		map();
+		map(GL_READ_WRITE);
 		return mkspan().back();
 	}
 
 	[[nodiscard]] const_reference_type
 	front() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().front();
 	}
 
 	[[nodiscard]] const_reference_type
 	back() const
 	{
-		map();
+		map(GL_READ_ONLY);
 		return mkcspan().back();
 	}
 
@@ -252,6 +255,7 @@ public:
 		if (data_) {
 			glUnmapNamedBuffer(buffer_);
 			data_ = {};
+			access_ = {};
 		}
 	}
 
@@ -308,10 +312,10 @@ public:
 
 		std::vector<T> existing;
 		existing.reserve(size_);
-		map();
+		map(is_trivial_dest ? GL_READ_ONLY : GL_READ_WRITE);
 		std::move(begin(), end(), std::back_inserter(existing));
 		allocBuffer(size_);
-		map();
+		map(GL_READ_WRITE);
 		std::move(existing.begin(), existing.end(), begin());
 	}
 
@@ -319,7 +323,7 @@ public:
 	clear() noexcept(is_trivial_dest)
 	{
 		if constexpr (!is_trivial_dest) {
-			map();
+			map(GL_READ_WRITE);
 			std::for_each(begin(), end(), [](auto && v) {
 				v.~T();
 			});
@@ -389,7 +393,7 @@ public:
 	pop_back()
 	{
 		if constexpr (!is_trivial_dest) {
-			map();
+			map(GL_READ_WRITE);
 			back().~T();
 		}
 		--size_;
@@ -405,7 +409,7 @@ public:
 	erase(iterator pos, iterator to)
 	{
 		const auto eraseSize = to - pos;
-		map();
+		map(GL_READ_WRITE);
 		std::move(to, end(), pos);
 		if constexpr (!is_trivial_dest) {
 			std::for_each(end() - eraseSize, end(), [](auto && v) {
@@ -433,13 +437,14 @@ protected:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		capacity_ = newCapacity;
 		data_ = {};
+		access_ = {};
 	}
 
 	void
-	map() const
+	map(GLenum access) const
 	{
 		if (size_ > 0) {
-			mapForAdd();
+			mapMode(access);
 		}
 	}
 
@@ -447,8 +452,20 @@ protected:
 	mapForAdd() const
 	{
 		if (!data_) {
-			data_ = static_cast<T *>(glMapNamedBuffer(buffer_, GL_READ_WRITE));
+			mapMode(GL_READ_WRITE);
+		}
+	}
+
+	void
+	mapMode(GLenum access) const
+	{
+		if (data_ && access_ < access) {
+			unmap();
+		}
+		if (!data_) {
+			data_ = static_cast<T *>(glMapNamedBuffer(buffer_, access));
 			assert(data_);
+			access_ = access;
 		}
 	}
 
@@ -470,4 +487,5 @@ protected:
 	std::size_t capacity_ {};
 	std::size_t size_ {};
 	mutable T * data_;
+	mutable GLenum access_ {};
 };
