@@ -7,6 +7,9 @@
 #include <utility>
 #include <vector>
 
+static_assert(GL_READ_ONLY < GL_READ_WRITE);
+static_assert(GL_WRITE_ONLY < GL_READ_WRITE);
+
 template<typename T> class glContainer {
 public:
 	using span = std::span<T>;
@@ -23,7 +26,7 @@ public:
 	using const_reverse_iterator = const_span::reverse_iterator;
 	static constexpr bool is_trivial_dest = std::is_trivially_destructible_v<T>;
 
-	glContainer()
+	explicit glContainer(GLenum target = GL_ARRAY_BUFFER) : target_ {target}
 	{
 		allocBuffer(1);
 	}
@@ -38,7 +41,8 @@ public:
 		clear();
 	}
 
-	template<template<typename, typename...> typename C> explicit glContainer(const C<T> & src)
+	template<template<typename, typename...> typename C>
+	explicit glContainer(const C<T> & src, GLenum target = GL_ARRAY_BUFFER) : target_ {target}
 	{
 		reserve(src.size());
 		std::copy(src.begin(), src.end(), std::back_inserter(*this));
@@ -49,85 +53,85 @@ public:
 	[[nodiscard]] iterator
 	begin()
 	{
-		map();
-		return data_.begin();
+		map(GL_READ_WRITE);
+		return mkspan().begin();
 	}
 
 	[[nodiscard]] iterator
 	end()
 	{
-		map();
-		return data_.end();
+		map(GL_READ_WRITE);
+		return mkspan().end();
 	}
 
 	[[nodiscard]] const_iterator
 	begin() const
 	{
-		map();
-		return const_span {data_}.begin();
+		map(GL_READ_ONLY);
+		return mkcspan().begin();
 	}
 
 	[[nodiscard]] const_iterator
 	end() const
 	{
-		map();
-		return const_span {data_}.end();
+		map(GL_READ_ONLY);
+		return mkcspan().end();
 	}
 
 	[[nodiscard]] const_iterator
 	cbegin() const
 	{
-		map();
-		return const_span {data_}.begin();
+		map(GL_READ_ONLY);
+		return mkcspan().begin();
 	}
 
 	[[nodiscard]] const_iterator
 	cend() const
 	{
-		map();
-		return const_span {data_}.end();
+		map(GL_READ_ONLY);
+		return mkcspan().end();
 	}
 
 	[[nodiscard]] reverse_iterator
 	rbegin()
 	{
-		map();
-		return data_.rbegin();
+		map(GL_READ_WRITE);
+		return mkspan().rbegin();
 	}
 
 	[[nodiscard]] reverse_iterator
 	rend()
 	{
-		map();
-		return data_.rend();
+		map(GL_READ_WRITE);
+		return mkspan().rend();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	rbegin() const
 	{
-		map();
-		return const_span {data_}.rbegin();
+		map(GL_READ_ONLY);
+		return mkcspan().rbegin();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	rend() const
 	{
-		map();
-		return const_span {data_}.rend();
+		map(GL_READ_ONLY);
+		return mkcspan().rend();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	crbegin() const
 	{
-		map();
-		return const_span {data_}.rbegin();
+		map(GL_READ_ONLY);
+		return mkcspan().rbegin();
 	}
 
 	[[nodiscard]] const_reverse_iterator
 	crend() const
 	{
-		map();
-		return const_span {data_}.rend();
+		map(GL_READ_ONLY);
+		return mkcspan().rend();
 	}
 
 	[[nodiscard]] const auto &
@@ -148,13 +152,13 @@ public:
 		if (pos >= size()) {
 			throw std::out_of_range {__FUNCTION__};
 		}
-		if (data_.data()) {
-			data_[pos] = value;
+		if (data_) {
+			mkspan()[pos] = value;
 		}
 		else {
-			glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-			glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(pos * sizeof(T)), sizeof(value), &value);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(target_, buffer_);
+			glBufferSubData(target_, static_cast<GLintptr>(pos * sizeof(T)), sizeof(value), &value);
+			glBindBuffer(target_, 0);
 		}
 	}
 
@@ -164,8 +168,8 @@ public:
 		if (pos >= size()) {
 			throw std::out_of_range {__FUNCTION__};
 		}
-		map();
-		return data_[pos];
+		map(GL_READ_WRITE);
+		return mkspan()[pos];
 	}
 
 	[[nodiscard]] const_reference_type
@@ -174,64 +178,64 @@ public:
 		if (pos >= size()) {
 			throw std::out_of_range {__FUNCTION__};
 		}
-		map();
-		return data_[pos];
+		map(GL_READ_ONLY);
+		return mkcspan()[pos];
 	}
 
 	[[nodiscard]] reference_type
 	operator[](size_type pos)
 	{
-		map();
-		return data_[pos];
+		map(GL_READ_WRITE);
+		return mkspan()[pos];
 	}
 
 	[[nodiscard]] const_reference_type
 	operator[](size_type pos) const
 	{
-		map();
-		return data_[pos];
+		map(GL_READ_ONLY);
+		return mkcspan()[pos];
 	}
 
 	[[nodiscard]] pointer_type
 	data()
 	{
-		map();
-		return data_.data();
+		map(GL_READ_WRITE);
+		return data_;
 	}
 
 	[[nodiscard]] const_pointer_type
 	data() const
 	{
-		map();
-		return data_.data();
+		map(GL_READ_ONLY);
+		return data_;
 	}
 
 	[[nodiscard]] reference_type
 	front()
 	{
-		map();
-		return data_.front();
+		map(GL_READ_WRITE);
+		return mkspan().front();
 	}
 
 	[[nodiscard]] reference_type
 	back()
 	{
-		map();
-		return data_.back();
+		map(GL_READ_WRITE);
+		return mkspan().back();
 	}
 
 	[[nodiscard]] const_reference_type
 	front() const
 	{
-		map();
-		return data_.front();
+		map(GL_READ_ONLY);
+		return mkcspan().front();
 	}
 
 	[[nodiscard]] const_reference_type
 	back() const
 	{
-		map();
-		return data_.back();
+		map(GL_READ_ONLY);
+		return mkcspan().back();
 	}
 
 	[[nodiscard]] bool
@@ -249,9 +253,12 @@ public:
 	void
 	unmap() const
 	{
-		if (data_.data()) {
-			glUnmapNamedBuffer(buffer_);
+		if (data_) {
+			glBindBuffer(target_, buffer_);
+			glUnmapBuffer(target_);
+			glBindBuffer(target_, 0);
 			data_ = {};
+			access_ = {};
 		}
 	}
 
@@ -272,6 +279,7 @@ public:
 
 	void
 	resize(size_type newSize)
+		requires std::is_default_constructible_v<T>
 	{
 		if (newSize == size_) {
 			return;
@@ -290,8 +298,10 @@ public:
 			allocBuffer(newSize);
 			mapForAdd();
 		}
-		for (auto uninitialised = data_.data() + size_; uninitialised < data_.data() + newSize; ++uninitialised) {
-			new (uninitialised) T {};
+		if (newSize > size_) {
+			for (auto & uninitialised : mkspan().subspan(size_, newSize - size_)) {
+				new (&uninitialised) T {};
+			}
 		}
 		setSize(newSize);
 	}
@@ -305,10 +315,10 @@ public:
 
 		std::vector<T> existing;
 		existing.reserve(size_);
-		map();
+		map(is_trivial_dest ? GL_READ_ONLY : GL_READ_WRITE);
 		std::move(begin(), end(), std::back_inserter(existing));
 		allocBuffer(size_);
-		map();
+		map(GL_READ_WRITE);
 		std::move(existing.begin(), existing.end(), begin());
 	}
 
@@ -316,7 +326,7 @@ public:
 	clear() noexcept(is_trivial_dest)
 	{
 		if constexpr (!is_trivial_dest) {
-			map();
+			map(GL_READ_WRITE);
 			std::for_each(begin(), end(), [](auto && v) {
 				v.~T();
 			});
@@ -327,11 +337,12 @@ public:
 	template<typename... P>
 	reference_type
 	emplace_back(P &&... ps)
+		requires std::is_constructible_v<T, P...>
 	{
 		auto newSize = size_ + 1;
 		reserve(newSize);
 		mapForAdd();
-		new (&data_[size_]) T {std::forward<P>(ps)...};
+		new (&*end()) T {std::forward<P>(ps)...};
 		setSize(newSize);
 		return back();
 	}
@@ -339,43 +350,44 @@ public:
 	template<typename... P>
 	iterator
 	emplace(iterator pos, P &&... ps)
+		requires std::is_nothrow_constructible_v<T, P...>
 	{
-		static_assert(std::is_nothrow_constructible_v<T, P...>);
 		auto newSize = size_ + 1;
 		const auto idx = pos - begin();
 		reserve(newSize);
 		mapForAdd();
-		auto newT = begin() + idx;
-		std::move_backward(newT, end(), end() + 1);
-		newT->~T();
-		new (&*newT) T {std::forward<P>(ps)...};
+		pos = begin() + idx;
+		std::move_backward(pos, end(), end() + 1);
+		pos->~T();
+		new (&*pos) T {std::forward<P>(ps)...};
 		setSize(newSize);
 		return pos;
 	}
 
 	reference_type
 	push_back(T p)
+		requires std::is_move_constructible_v<T>
 	{
 		auto newSize = size_ + 1;
 		reserve(newSize);
 		mapForAdd();
-		new (&data_[size_]) T {std::move(p)};
+		new (&*end()) T {std::move(p)};
 		setSize(newSize);
 		return back();
 	}
 
 	iterator
 	insert(iterator pos, T p)
+		requires std::is_nothrow_move_constructible_v<T>
 	{
-		static_assert(std::is_nothrow_move_constructible_v<T>);
 		auto newSize = size_ + 1;
 		const auto idx = pos - begin();
 		reserve(newSize);
 		mapForAdd();
-		auto newT = begin() + idx;
-		std::move_backward(newT, end(), end() + 1);
-		newT->~T();
-		new (&*newT) T {std::move(p)};
+		pos = begin() + idx;
+		std::move_backward(pos, end(), end() + 1);
+		pos->~T();
+		new (&*pos) T {std::move(p)};
 		setSize(newSize);
 		return pos;
 	}
@@ -384,12 +396,10 @@ public:
 	pop_back()
 	{
 		if constexpr (!is_trivial_dest) {
-			map();
-			data_[--size_].~T();
+			map(GL_READ_WRITE);
+			back().~T();
 		}
-		else {
-			--size_;
-		}
+		--size_;
 	}
 
 	void
@@ -402,7 +412,7 @@ public:
 	erase(iterator pos, iterator to)
 	{
 		const auto eraseSize = to - pos;
-		map();
+		map(GL_READ_WRITE);
 		std::move(to, end(), pos);
 		if constexpr (!is_trivial_dest) {
 			std::for_each(end() - eraseSize, end(), [](auto && v) {
@@ -416,7 +426,7 @@ protected:
 	void
 	setSize(size_type s)
 	{
-		data_ = {data_.data(), size_ = s};
+		size_ = s;
 	}
 
 	void
@@ -425,32 +435,63 @@ protected:
 		if (newCapacity == 0) {
 			return allocBuffer(1);
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, buffer_);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(sizeof(T) * newCapacity), nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(target_, buffer_);
+		glBufferData(target_, static_cast<GLsizeiptr>(sizeof(T) * newCapacity), nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(target_, 0);
 		capacity_ = newCapacity;
 		data_ = {};
+		access_ = {};
 	}
 
 	void
-	map() const
+	map(GLenum access) const
 	{
 		if (size_ > 0) {
-			mapForAdd();
+			mapMode(access);
 		}
 	}
 
 	void
 	mapForAdd() const
 	{
-		if (!data_.data()) {
-			data_ = {static_cast<T *>(glMapNamedBuffer(buffer_, GL_READ_WRITE)), size_};
-			assert(data_.data());
+		if (!data_) {
+			mapMode(GL_READ_WRITE);
 		}
 	}
 
+	void
+	mapMode(GLenum access) const
+	{
+		if (data_ && access_ < access) {
+			unmap();
+		}
+		if (!data_) {
+			glBindBuffer(target_, buffer_);
+			data_ = static_cast<T *>(glMapBuffer(target_, access));
+			glBindBuffer(target_, 0);
+			assert(data_);
+			access_ = access;
+		}
+	}
+
+	span
+	mkspan() const
+	{
+		assert(!size_ || data_);
+		return span {data_, size_};
+	}
+
+	const_span
+	mkcspan() const
+	{
+		assert(!size_ || data_);
+		return const_span {data_, size_};
+	}
+
 	glBuffer buffer_;
+	GLenum target_;
 	std::size_t capacity_ {};
 	std::size_t size_ {};
-	mutable span data_;
+	mutable T * data_;
+	mutable GLenum access_ {};
 };
