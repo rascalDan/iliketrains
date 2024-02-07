@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <span>
 #include <utility>
 #include <vector>
@@ -160,3 +161,62 @@ template<typename T> struct pair_range {
 };
 
 template<typename T> pair_range(std::pair<T, T>) -> pair_range<T>;
+
+template<typename iter> struct stripiter {
+	[[nodiscard]] constexpr bool
+	operator!=(const stripiter & other) const
+	{
+		return current != other.current;
+	}
+
+	[[nodiscard]] constexpr bool
+	operator==(const stripiter & other) const
+	{
+		return current == other.current;
+	}
+
+	constexpr stripiter &
+	operator++()
+	{
+		++current;
+		off = 1 - off;
+		return *this;
+	}
+
+	constexpr stripiter &
+	operator--()
+	{
+		--current;
+		off = 1 - off;
+		return *this;
+	}
+
+	constexpr auto
+	operator-(const stripiter & other) const
+	{
+		return current - other.current;
+	}
+
+	constexpr auto
+	operator*() const
+	{
+		return std::tie(*(current - (2 - off)), *(current - off - 1), *current);
+	}
+
+	iter current;
+	uint8_t off {};
+};
+
+template<typename T> struct std::iterator_traits<stripiter<T>> : std::iterator_traits<T> { };
+
+constexpr auto
+strip_begin(IterableCollection auto & cont)
+{
+	return stripiter {cont.begin() + 2};
+}
+
+constexpr auto
+strip_end(IterableCollection auto & cont)
+{
+	return stripiter {cont.end()};
+}
