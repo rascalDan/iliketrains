@@ -130,18 +130,25 @@ vectorOfN(std::integral auto N, T start = {}, T step = 1)
 	return v;
 }
 
+template<template<typename...> typename Rtn = std::vector, typename In>
+[[nodiscard]] auto
+materializeRange(const In begin, const In end)
+{
+	return Rtn(begin, end);
+}
+
 template<template<typename...> typename Rtn = std::vector, IterableCollection In>
 [[nodiscard]] auto
-materializeRange(In && in)
+materializeRange(const In & in)
 {
-	return Rtn(in.begin(), in.end());
+	return materializeRange<Rtn>(in.begin(), in.end());
 }
 
 template<template<typename...> typename Rtn = std::vector, typename In>
 [[nodiscard]] auto
 materializeRange(const std::pair<In, In> & in)
 {
-	return Rtn(in.first, in.second);
+	return materializeRange<Rtn>(in.first, in.second);
 }
 
 template<typename T> struct pair_range {
