@@ -103,6 +103,8 @@ protected:
 
 	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
 	[[nodiscard]] bool triangleContainsPoint(const GlobalPosition2D, FaceHandle) const;
+	[[nodiscard]] static bool triangleOverlapsTriangle(const Triangle<2> &, const Triangle<2> &);
+	[[nodiscard]] static bool triangleContainsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 
 	void update_vertex_normals_only();

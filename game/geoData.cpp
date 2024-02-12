@@ -359,3 +359,19 @@ GeoData::update_vertex_normals_only()
 		this->set_normal(vh, glm::normalize(n));
 	}
 }
+
+bool
+GeoData::triangleOverlapsTriangle(const Triangle<2> & a, const Triangle<2> & b)
+{
+	return triangleContainsPoint(a.x, b) || triangleContainsPoint(a.y, b) || triangleContainsPoint(a.z, b)
+			|| triangleContainsPoint(b.x, a) || triangleContainsPoint(b.y, a) || triangleContainsPoint(b.z, a)
+			|| linesCross(a.x, a.y, b.x, b.y) || linesCross(a.x, a.y, b.y, b.z) || linesCross(a.x, a.y, b.z, b.x)
+			|| linesCross(a.y, a.z, b.x, b.y) || linesCross(a.y, a.z, b.y, b.z) || linesCross(a.y, a.z, b.z, b.x)
+			|| linesCross(a.z, a.x, b.x, b.y) || linesCross(a.z, a.x, b.y, b.z) || linesCross(a.z, a.x, b.z, b.x);
+}
+
+bool
+GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
+{
+	return triangleContainsPoint(a.x, b) && triangleContainsPoint(a.y, b) && triangleContainsPoint(a.z, b);
+}
