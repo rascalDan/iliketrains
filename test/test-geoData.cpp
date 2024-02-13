@@ -114,7 +114,7 @@ BOOST_DATA_TEST_CASE(findRayIntersect,
 		}),
 		p, d, i)
 {
-	BOOST_CHECK_EQUAL(fixedTerrtain.intersectRay({p, d}).value(), i);
+	BOOST_CHECK_EQUAL(fixedTerrtain.intersectRay({p, d})->first, i);
 }
 
 BOOST_AUTO_TEST_CASE(boundaryWalk)

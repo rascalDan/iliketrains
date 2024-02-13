@@ -19,7 +19,7 @@ BuilderFreeExtend::move(
 			candidateLinks.objects = network->candidateJoins(*p1, p->pos);
 		}
 		else if (const auto p = geoData->intersectRay(ray)) {
-			candidateLinks.objects = network->candidateExtend(*p1, *p);
+			candidateLinks.objects = network->candidateExtend(*p1, p->first);
 		}
 		else {
 			candidateLinks.removeAll();
@@ -42,8 +42,8 @@ BuilderFreeExtend::click(
 					p1 = p->pos;
 				}
 				else if (const auto p = geoData->intersectRay(ray)) {
-					network->addExtend(*p1, *p);
-					p1 = *p;
+					network->addExtend(*p1, p->first);
+					p1 = p->first;
 				}
 			}
 			else {

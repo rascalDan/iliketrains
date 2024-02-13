@@ -213,16 +213,16 @@ GeoData::positionAt(const PointFace & p) const
 	return positionOnTriangle(p.point, triangle<3>(p.face(this)));
 }
 
-[[nodiscard]] std::optional<GlobalPosition3D>
+[[nodiscard]] GeoData::IntersectionResult
 GeoData::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
 	return intersectRay(ray, findPoint(ray.start));
 }
 
-[[nodiscard]] std::optional<GlobalPosition3D>
+[[nodiscard]] GeoData::IntersectionResult
 GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 {
-	std::optional<GlobalPosition3D> out;
+	GeoData::IntersectionResult out;
 	walkUntil(PointFace {ray.start, face},
 			ray.start.xy()
 					+ GlobalPosition2D(ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
@@ -231,7 +231,7 @@ GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 				RelativeDistance dist {};
 				const auto t = triangle<3>(face);
 				if (ray.intersectTriangle(t.x, t.y, t.z, bari, dist)) {
-					out = t * bari;
+					out.emplace(t * bari, face);
 					return true;
 				}
 				return false;
