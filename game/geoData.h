@@ -66,7 +66,7 @@ public:
 		{
 			const auto & t {*this};
 			return t[0] + GlobalPosition<Dim>(RelativePosition<Dim>(t[1] - t[0]) * bari.x)
-					+ GlobalPosition<Dim>(RelativePosition<Dim>(t[2] - t[1]) * bari.y);
+					+ GlobalPosition<Dim>(RelativePosition<Dim>(t[2] - t[0]) * bari.y);
 		}
 	};
 
