@@ -1,7 +1,12 @@
 #define BOOST_TEST_MODULE terrain
+#include "game/terrain.h"
+#include "test/testMainWindow.h"
+#include "test/testRenderOutput.h"
 #include "testHelpers.h"
+#include "ui/applicationBase.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
+#include <gfx/gl/sceneRenderer.h>
 #include <stream_support.h>
 
 #include <game/geoData.h>
@@ -198,4 +203,59 @@ BOOST_DATA_TEST_CASE(findEntries,
 		from, to, heh)
 {
 	BOOST_CHECK_EQUAL(fixedTerrtain.findEntry(from, to).idx(), heh);
+}
+
+BOOST_AUTO_TEST_CASE(setTriangle, *boost::unit_test::timeout(5))
+{
+	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
+	std::array points {
+			GlobalPosition3D {70100, 123000, 6000},
+			GlobalPosition3D {50100, 52300, 6000},
+			GlobalPosition3D {191000, 283000, 8000},
+			GlobalPosition3D {241000, 123330, -2000},
+	};
+	BOOST_CHECK_NO_THROW(gd->setHeights(points));
+
+	ApplicationBase ab;
+	TestMainWindow tmw;
+	TestRenderOutput tro {{1792, 1024}};
+
+	SceneRenderer ss {tro.size, tro.output};
+	ss.camera.setView({-90000, -90000, 300000}, glm::normalize(glm::vec3 {1, 1, -1.5F}));
+
+	struct TestTerrain : public SceneProvider {
+		explicit TestTerrain(std::shared_ptr<GeoData> gd) : terrain(std::move(gd)) { }
+
+		const Terrain terrain;
+
+		void
+		content(const SceneShader & shader) const override
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			terrain.render(shader);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+		void
+		environment(const SceneShader &, const SceneRenderer & sr) const override
+		{
+			sr.setAmbientLight({0.1, 0.1, 0.1});
+			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+		}
+
+		void
+		lights(const SceneShader &) const override
+		{
+		}
+
+		void
+		shadows(const ShadowMapper & shadowMapper) const override
+		{
+			terrain.shadows(shadowMapper);
+		}
+	};
+
+	TestTerrain t {gd};
+	BOOST_CHECK_NO_THROW(ss.render(t));
+	Texture::save(tro.outImage, "/tmp/geoData.tga");
 }
