@@ -34,7 +34,7 @@ Terrain::generateMeshes()
 			[this, &vertexIndex](const GeoData::VertexHandle v) {
 				vertexIndex.emplace(v, vertexIndex.size());
 				const auto p = geoData->point(v);
-				return Vertex {p, p / 10000, geoData->normal(v)};
+				return Vertex {p, RelativePosition2D(p) / 10000.F, geoData->normal(v)};
 			});
 	std::for_each(
 			geoData->faces_begin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
