@@ -381,8 +381,7 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 void
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {
-	std::set<EdgeHandle> nosplit;
-	//   Create new vertices
+	// Create new vertices
 	std::vector<VertexHandle> newVerts;
 	newVerts.reserve(newVerts.size());
 	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts), [this](const auto tsVert) {
@@ -391,11 +390,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	// Create new faces
 	std::vector<FaceHandle> newFaces;
 	newFaces.reserve(newVerts.size() - 2);
-	std::transform(strip_begin(newVerts), strip_end(newVerts), std::back_inserter(newFaces),
-			[this, &nosplit](const auto & newVert) {
+	std::transform(
+			strip_begin(newVerts), strip_end(newVerts), std::back_inserter(newFaces), [this](const auto & newVert) {
 				const auto [a, b, c] = newVert;
 				auto faceHandle = add_face(a, b, c);
-				std::copy(fe_begin(faceHandle), fe_end(faceHandle), std::inserter(nosplit, nosplit.end()));
 				return faceHandle;
 			});
 	std::vector<HalfedgeHandle> boundary;
@@ -410,7 +408,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	std::vector<std::pair<GlobalPosition3D, GlobalPosition3D>> extrusionExtents;
 	std::vector<VertexHandle> extrusionVertices;
 	std::transform(boundary.begin(), boundary.end(), std::back_inserter(extrusionExtents),
-			[this, &nosplit, &cutpoints, &extrusionVertices](const auto boundaryHeh) {
+			[this, &cutpoints, &extrusionVertices](const auto boundaryHeh) {
 				const auto vectorNormal
 						= []<typename T, glm::qualifier Q>(const glm::vec<2, T, Q> & v) -> glm::vec<2, T, Q> {
 					return {-v.y, v.x};
@@ -422,21 +420,20 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				const auto e0 = glm::normalize(vectorNormal(RelativePosition2D(p1 - p0)));
 				const auto e1 = glm::normalize(vectorNormal(RelativePosition2D(p2 - p1)));
 				const auto mid = glm::normalize((e0 + e1) / 2.F);
-				const auto doExtrusion = [mid, p1, this, &nosplit, &cutpoints, &extrusionVertices](
-												 RelativeDistance vert, GlobalDistance limit) {
-					const auto extrusionDir = glm::normalize(mid || vert);
+				const auto doExtrusion
+						= [mid, p1, this, &cutpoints, &extrusionVertices](RelativeDistance vert, GlobalDistance limit) {
+							  const auto extrusionDir = glm::normalize(mid || vert);
 
-					if (const auto intersect = intersectRay({p1, extrusionDir})) {
-						auto splitVertex = split(intersect->second, intersect->first);
-						cutpoints.insert(splitVertex);
-						extrusionVertices.push_back(splitVertex);
-						std::copy(ve_begin(splitVertex), ve_end(splitVertex), std::inserter(nosplit, nosplit.end()));
-					}
+							  if (const auto intersect = intersectRay({p1, extrusionDir})) {
+								  auto splitVertex = split(intersect->second, intersect->first);
+								  cutpoints.insert(splitVertex);
+								  extrusionVertices.push_back(splitVertex);
+							  }
 
-					const auto extrusion
-							= extrusionDir * std::max(0.F, RelativeDistance(limit - p1.z) / extrusionDir.z);
-					return p1 + extrusion;
-				};
+							  const auto extrusion
+									  = extrusionDir * std::max(0.F, RelativeDistance(limit - p1.z) / extrusionDir.z);
+							  return p1 + extrusion;
+						  };
 				return std::make_pair(doExtrusion(-2, lowerExtent.z - 100), doExtrusion(2, upperExtent.z + 100));
 			});
 
@@ -445,8 +442,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	extrusionVertices.emplace_back(extrusionVertices.front());
 	std::vector<std::vector<VertexHandle>> boundaryFaces;
 	std::transform(boundary.begin(), boundary.end(), std ::back_inserter(boundaryFaces),
-			[ex = extrusionExtents.begin(), exv = extrusionVertices.begin(), this, &nosplit](
-					const auto boundaryHeh) mutable {
+			[ex = extrusionExtents.begin(), exv = extrusionVertices.begin(), this](const auto boundaryHeh) mutable {
 				const auto fromVertex = from_vertex_handle(boundaryHeh);
 				const auto p0 = point(fromVertex);
 				auto toVertex = to_vertex_handle(boundaryHeh);
@@ -475,10 +471,6 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 								return false;
 							}
 							const auto edge = edge_handle(next);
-							if (nosplit.contains(edge)) {
-								// This edge should not be split (for some reason, maybe no longer applies)
-								return false;
-							}
 							const auto ep0 = point(startVertex);
 							const auto ep1 = point(nextVertex);
 							const auto diff = RelativePosition3D(ep1 - ep0);
