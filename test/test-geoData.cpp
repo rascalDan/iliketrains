@@ -109,8 +109,8 @@ using FindRayIntersectData = std::tuple<GlobalPosition3D, Direction3D, GlobalPos
 
 BOOST_DATA_TEST_CASE(findRayIntersect,
 		boost::unit_test::data::make<FindRayIntersectData>({
-				{{310000000, 490000000, 50000}, {1, 1, -2}, {310008582, 490008582, 32834}},
-				{{310000000, 490000000, 50000}, {1, 1, -1}, {310017131, 490017131, 32868}},
+				{{310000000, 490000000, 50000}, {1, 1, -2}, {310008583, 490008583, 32834}},
+				{{310000000, 490000000, 50000}, {1, 1, -1}, {310017131, 490017131, 32869}},
 		}),
 		p, d, i)
 {

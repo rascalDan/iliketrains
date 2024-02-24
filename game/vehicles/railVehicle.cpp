@@ -51,7 +51,7 @@ RailVehicle::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & bary
 	constexpr const auto Z = 3900.F;
 	const glm::mat3 moveBy = location.getRotationTransform();
 	const auto cornerVertices = cuboidCorners(-X, X, -Y, Y, 0.F, Z) * [&moveBy, this](const auto & corner) {
-		return location.position() + GlobalPosition3D(moveBy * corner);
+		return location.position() + (moveBy * corner);
 	};
 	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front

@@ -32,6 +32,34 @@ constexpr auto quarter_pi {half_pi / 2};
 constexpr auto pi {glm::pi<float>()};
 constexpr auto two_pi {glm::two_pi<float>()};
 
+template<glm::length_t D>
+constexpr inline GlobalPosition<D>
+operator+(const GlobalPosition<D> & g, const RelativePosition<D> & r)
+{
+	return g + GlobalPosition<D>(glm::round(r));
+}
+
+template<glm::length_t D>
+constexpr inline GlobalPosition<D>
+operator+(const GlobalPosition<D> & g, const CalcPosition<D> & r)
+{
+	return g + GlobalPosition<D>(r);
+}
+
+template<glm::length_t D>
+constexpr inline GlobalPosition<D>
+operator-(const GlobalPosition<D> & g, const RelativePosition<D> & r)
+{
+	return g - GlobalPosition<D>(glm::round(r));
+}
+
+template<glm::length_t D>
+constexpr inline GlobalPosition<D>
+operator-(const GlobalPosition<D> & g, const CalcPosition<D> & r)
+{
+	return g - GlobalPosition<D>(r);
+}
+
 glm::mat4 flat_orientation(const Rotation3D & diff);
 
 // C++ wrapper for C's sincosf, but with references, not pointers

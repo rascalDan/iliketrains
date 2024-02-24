@@ -65,8 +65,7 @@ public:
 		operator*(BaryPosition bari) const
 		{
 			const auto & t {*this};
-			return t[0] + GlobalPosition<Dim>(RelativePosition<Dim>(t[1] - t[0]) * bari.x)
-					+ GlobalPosition<Dim>(RelativePosition<Dim>(t[2] - t[1]) * bari.y);
+			return t[0] + (RelativePosition<Dim>(t[1] - t[0]) * bari.x) + (RelativePosition<Dim>(t[2] - t[1]) * bari.y);
 		}
 	};
 

@@ -28,8 +28,7 @@ LinkStraight::positionAt(RelativeDistance dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
 	const RelativePosition3D diff {es.second->pos - es.first->pos};
 	const auto dir {glm::normalize(diff)};
-	return Location {es.first->pos + GlobalPosition3D(vehiclePositionOffset() + dir * dist),
-			{vector_pitch(dir), vector_yaw(dir), 0}};
+	return Location {es.first->pos + (vehiclePositionOffset() + dir * dist), {vector_pitch(dir), vector_yaw(dir), 0}};
 }
 
 bool
@@ -70,7 +69,7 @@ LinkCurve::intersectRay(const Ray<GlobalPosition3D> & ray) const
 	points.reserve(segCount);
 	for (std::remove_const_t<decltype(step)> swing = {arc.first, centreBase.z - e0p.z}; segCount;
 			swing += step, --segCount) {
-		points.emplace_back(centreBase + GlobalPosition3D((sincosf(swing.x) * radius) || swing.y));
+		points.emplace_back(centreBase + ((sincosf(swing.x) * radius) || swing.y));
 	}
 	return ray.passesCloseToEdges(points, 1.F);
 }

@@ -24,11 +24,11 @@ FollowCameraController::updateCamera(Camera * camera) const
 			break;
 
 		case Mode::Ride:
-			camera->setView(pos + GlobalPosition3D(up * 4.8F), -sincosf(rot.y) || 0.F);
+			camera->setView(pos + (up * 4.8F), -sincosf(rot.y) || 0.F);
 			break;
 
 		case Mode::ISO:
-			camera->setView(pos + GlobalPosition3D((up + north + east) * 40.F), glm::normalize(down + south + west),
+			camera->setView(pos + ((up + north + east) * 40.F), glm::normalize(down + south + west),
 					glm::normalize(up - north - east));
 			break;
 	}

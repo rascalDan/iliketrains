@@ -43,7 +43,7 @@ Camera::extentsAtDist(const GlobalDistance dist) const
 		if (target.z < -1500) {
 			const CalcPosition3D diff = target - position;
 			const CalcDistance limit = -1500 - position.z;
-			return {position + GlobalPosition3D((limit * diff) / diff.z), (limit * dist) / diff.z};
+			return {position + ((limit * diff) / diff.z), (limit * dist) / diff.z};
 		}
 		return {target, dist};
 	};

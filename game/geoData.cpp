@@ -204,8 +204,7 @@ GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 {
 	std::optional<GlobalPosition3D> out;
 	walkUntil(PointFace {ray.start, face},
-			ray.start.xy()
-					+ GlobalPosition2D(ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
+			ray.start.xy() + (ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
 			[&out, &ray, this](FaceHandle face) {
 				BaryPosition bari {};
 				RelativeDistance dist {};
