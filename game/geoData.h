@@ -65,7 +65,7 @@ public:
 		operator*(BaryPosition bari) const
 		{
 			const auto & t {*this};
-			return t[0] + (RelativePosition<Dim>(t[1] - t[0]) * bari.x) + (RelativePosition<Dim>(t[2] - t[1]) * bari.y);
+			return t[0] + (RelativePosition<Dim>(t[1] - t[0]) * bari.x) + (RelativePosition<Dim>(t[2] - t[0]) * bari.y);
 		}
 	};
 
@@ -73,8 +73,10 @@ public:
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D, FaceHandle start) const;
 
 	[[nodiscard]] GlobalPosition3D positionAt(const PointFace &) const;
-	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray<GlobalPosition3D> &) const;
-	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray<GlobalPosition3D> &, FaceHandle start) const;
+	using IntersectionLocation = std::pair<GlobalPosition3D, FaceHandle>;
+	using IntersectionResult = std::optional<IntersectionLocation>;
+	[[nodiscard]] IntersectionResult intersectRay(const Ray<GlobalPosition3D> &) const;
+	[[nodiscard]] IntersectionResult intersectRay(const Ray<GlobalPosition3D> &, FaceHandle start) const;
 
 	void walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const;
@@ -85,6 +87,8 @@ public:
 	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &, HalfedgeHandle start) const;
 
 	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
+
+	void setHeights(const std::span<const GlobalPosition3D> triangleStrip);
 
 	[[nodiscard]] auto
 	getExtents() const
@@ -102,6 +106,8 @@ protected:
 
 	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
 	[[nodiscard]] bool triangleContainsPoint(const GlobalPosition2D, FaceHandle) const;
+	[[nodiscard]] static bool triangleOverlapsTriangle(const Triangle<2> &, const Triangle<2> &);
+	[[nodiscard]] static bool triangleContainsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 
 	void update_vertex_normals_only();

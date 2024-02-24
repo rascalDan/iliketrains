@@ -47,11 +47,11 @@ public:
 			RelativeDistance & distance) const
 	{
 		if constexpr (std::is_floating_point_v<typename PositionType::value_type>) {
-			return glm::intersectRayTriangle(start, direction, t0, t1, t2, bary, distance);
+			return glm::intersectRayTriangle(start, direction, t0, t1, t2, bary, distance) && distance >= 0.F;
 		}
 		else {
 			const RelativePosition3D t0r = t0 - start, t1r = t1 - start, t2r = t2 - start;
-			return glm::intersectRayTriangle({}, direction, t0r, t1r, t2r, bary, distance);
+			return glm::intersectRayTriangle({}, direction, t0r, t1r, t2r, bary, distance) && distance >= 0.F;
 		}
 	}
 
