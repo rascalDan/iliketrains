@@ -205,23 +205,41 @@ BOOST_DATA_TEST_CASE(findEntries,
 	BOOST_CHECK_EQUAL(fixedTerrtain.findEntry(from, to).idx(), heh);
 }
 
-BOOST_AUTO_TEST_CASE(setTriangle, *boost::unit_test::timeout(5))
+using DeformTerrainData
+		= std::tuple<std::vector<GlobalPosition3D>, std::vector<std::pair<Ray<GlobalPosition3D>, const char *>>>;
+
+template<typename T>
+std::ostream &
+operator<<(std::ostream & s, const Ray<T> & ray)
+{
+	return s << "Ray" << std::make_pair(ray.start, ray.direction);
+}
+
+BOOST_DATA_TEST_CASE(setTriangle,
+		boost::unit_test::data::make<DeformTerrainData>({
+				{{
+						 {70100, 123000, 6000},
+						 {50100, 52300, 6000},
+						 {191000, 283000, 8000},
+						 {241000, 123330, -2000},
+				 },
+						{
+								{{{20000, 20000, 90000}, glm::normalize(Direction3D {1, 1, -1.5F})},
+										"/tmp/geoData0.tga"},
+								{{{30000, 164000, 90000}, glm::normalize(Direction3D {1, -1, -1.5F})},
+										"/tmp/geoData1.tga"},
+								{{{288000, 162000, 90000}, glm::normalize(Direction3D {-1, -1, -1.5F})},
+										"/tmp/geoData2.tga"},
+						}},
+		}),
+		points, cams)
 {
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	std::array points {
-			GlobalPosition3D {70100, 123000, 6000},
-			GlobalPosition3D {50100, 52300, 6000},
-			GlobalPosition3D {191000, 283000, 8000},
-			GlobalPosition3D {241000, 123330, -2000},
-	};
 	BOOST_CHECK_NO_THROW(gd->setHeights(points));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;
-	TestRenderOutput tro {{1792, 1024}};
-
-	SceneRenderer ss {tro.size, tro.output};
-	ss.camera.setView({-90000, -90000, 300000}, glm::normalize(glm::vec3 {1, 1, -1.5F}));
+	TestRenderOutput tro {{640, 480}};
 
 	struct TestTerrain : public SceneProvider {
 		explicit TestTerrain(std::shared_ptr<GeoData> gd) : terrain(std::move(gd)) { }
@@ -256,6 +274,10 @@ BOOST_AUTO_TEST_CASE(setTriangle, *boost::unit_test::timeout(5))
 	};
 
 	TestTerrain t {gd};
-	BOOST_CHECK_NO_THROW(ss.render(t));
-	Texture::save(tro.outImage, "/tmp/geoData.tga");
+	SceneRenderer ss {tro.size, tro.output};
+	std::for_each(cams.begin(), cams.end(), [&ss, &t, &tro](const auto & cam) {
+		ss.camera.setView(cam.first.start, cam.first.direction);
+		BOOST_CHECK_NO_THROW(ss.render(t));
+		Texture::save(tro.outImage, cam.second);
+	});
 }
