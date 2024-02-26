@@ -81,11 +81,11 @@ namespace Persistence {
 			return make_s<SelectionT<T>>(value);
 		}
 
-		template<typename S>
+		template<typename S, typename... Extra>
 		[[nodiscard]] static SelectionPtr
-		make_s(T & value)
+		make_s(T & value, Extra &&... extra)
 		{
-			return std::make_unique<S>(value);
+			return std::make_unique<S>(value, std::forward<Extra>(extra)...);
 		}
 
 		T & v;
