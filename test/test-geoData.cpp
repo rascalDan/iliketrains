@@ -205,34 +205,10 @@ BOOST_DATA_TEST_CASE(findEntries,
 	BOOST_CHECK_EQUAL(fixedTerrtain.findEntry(from, to).idx(), heh);
 }
 
-using DeformTerrainData
-		= std::tuple<std::vector<GlobalPosition3D>, std::vector<std::pair<Ray<GlobalPosition3D>, const char *>>>;
+using DeformTerrainData = std::tuple<std::vector<GlobalPosition3D>,
+		std::vector<std::pair<std::pair<GlobalPosition3D, Direction3D>, std::string>>>;
 
-template<typename T>
-std::ostream &
-operator<<(std::ostream & s, const Ray<T> & ray)
-{
-	return s << "Ray" << std::make_pair(ray.start, ray.direction);
-}
-
-BOOST_DATA_TEST_CASE(setTriangle,
-		boost::unit_test::data::make<DeformTerrainData>({
-				{{
-						 {70100, 123000, 6000},
-						 {50100, 52300, 6000},
-						 {191000, 283000, 8000},
-						 {241000, 123330, -2000},
-				 },
-						{
-								{{{20000, 20000, 90000}, glm::normalize(Direction3D {1, 1, -1.5F})},
-										"/tmp/geoData0.tga"},
-								{{{30000, 164000, 90000}, glm::normalize(Direction3D {1, -1, -1.5F})},
-										"/tmp/geoData1.tga"},
-								{{{288000, 162000, 90000}, glm::normalize(Direction3D {-1, -1, -1.5F})},
-										"/tmp/geoData2.tga"},
-						}},
-		}),
-		points, cams)
+BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/1.json"), points, cams)
 {
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
 	BOOST_CHECK_NO_THROW(gd->setHeights(points));
@@ -276,8 +252,8 @@ BOOST_DATA_TEST_CASE(setTriangle,
 	TestTerrain t {gd};
 	SceneRenderer ss {tro.size, tro.output};
 	std::for_each(cams.begin(), cams.end(), [&ss, &t, &tro](const auto & cam) {
-		ss.camera.setView(cam.first.start, cam.first.direction);
+		ss.camera.setView(cam.first.first, glm::normalize(cam.first.second));
 		BOOST_CHECK_NO_THROW(ss.render(t));
-		Texture::save(tro.outImage, cam.second);
+		Texture::save(tro.outImage, cam.second.c_str());
 	});
 }
