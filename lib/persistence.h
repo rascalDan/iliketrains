@@ -331,6 +331,65 @@ namespace Persistence {
 		}
 	};
 
+	template<typename... T> struct SelectionT<std::tuple<T...>> : public SelectionV<std::tuple<T...>> {
+		using V = std::tuple<T...>;
+		using SelectionV<V>::SelectionV;
+
+		struct Members : public SelectionV<V> {
+			template<size_t... Idx>
+			explicit Members(V & v, std::integer_sequence<size_t, Idx...>) :
+				SelectionV<V> {v}, members {SelectionV<std::tuple_element_t<Idx, V>>::make(std::get<Idx>(v))...}
+			{
+			}
+
+			void
+			beforeValue(Stack & stk) override
+			{
+				stk.push(std::move(members[idx++]));
+			}
+
+			std::size_t idx {0};
+			std::array<SelectionPtr, std::tuple_size_v<V>> members;
+		};
+
+		void
+		beginArray(Stack & stk) override
+		{
+			stk.push(this->template make_s<Members>(
+					this->v, std::make_integer_sequence<size_t, std::tuple_size_v<V>>()));
+		}
+	};
+
+	template<typename T, typename U> struct SelectionT<std::pair<T, U>> : public SelectionV<std::pair<T, U>> {
+		using V = std::pair<T, U>;
+		using SelectionV<V>::SelectionV;
+
+		struct Members : public SelectionV<V> {
+			explicit Members(V & v) :
+				SelectionV<V> {v}, members {
+										   SelectionV<T>::make(v.first),
+										   SelectionV<U>::make(v.second),
+								   }
+			{
+			}
+
+			void
+			beforeValue(Stack & stk) override
+			{
+				stk.push(std::move(members[idx++]));
+			}
+
+			std::size_t idx {0};
+			std::array<SelectionPtr, 2> members;
+		};
+
+		void
+		beginArray(Stack & stk) override
+		{
+			stk.push(this->template make_s<Members>(this->v));
+		}
+	};
+
 	template<typename Map, typename Type = typename Map::mapped_type, auto Key = &Type::element_type::id>
 	struct MapByMember : public Persistence::SelectionT<Type> {
 		MapByMember(Map & m) : Persistence::SelectionT<Type> {s}, map {m} { }
