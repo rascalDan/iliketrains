@@ -2,7 +2,6 @@
 #include "collections.h"
 #include <fstream>
 #include <glm/gtx/intersect.hpp>
-#include <math.h>
 #include <maths.h>
 #include <set>
 
@@ -381,6 +380,8 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 void
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {
+	static const RelativeDistance MAX_SLOPE = 1.5F;
+
 	if (triangleStrip.size() < 3) {
 		return;
 	}
@@ -391,7 +392,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts), [this](const auto tsVert) {
 		return add_vertex(tsVert);
 	});
-	// Create new faces
+	//  Create new faces
 	std::vector<FaceHandle> newFaces;
 	newFaces.reserve(newVerts.size() - 2);
 	std::transform(
@@ -408,121 +409,152 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 			*voh_begin(newVerts.front()));
 
 	// Extrude corners
-	std::set<VertexHandle> cutpoints;
-	std::vector<std::pair<GlobalPosition3D, GlobalPosition3D>> extrusionExtents;
-	std::vector<VertexHandle> extrusionVertices;
-	std::transform(boundary.begin(), boundary.end(), std::back_inserter(extrusionExtents),
-			[this, &cutpoints, &extrusionVertices](const auto boundaryHeh) {
-				const auto vectorNormal
-						= []<typename T, glm::qualifier Q>(const glm::vec<2, T, Q> & v) -> glm::vec<2, T, Q> {
-					return {-v.y, v.x};
-				};
+	struct Extrusion {
+		VertexHandle boundaryVertex, extrusionVertex;
+		GlobalPosition3D lowerLimit, upperLimit;
+	};
 
-				const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
-				const auto p1 = point(from_vertex_handle(boundaryHeh));
-				const auto p2 = point(to_vertex_handle(boundaryHeh));
-				const auto e0 = glm::normalize(vectorNormal(RelativePosition2D(p1 - p0)));
-				const auto e1 = glm::normalize(vectorNormal(RelativePosition2D(p2 - p1)));
-				const auto mid = glm::normalize((e0 + e1) / 2.F);
-				const auto doExtrusion
-						= [mid, p1, this, &cutpoints, &extrusionVertices](RelativeDistance vert, GlobalDistance limit) {
-							  const auto extrusionDir = glm::normalize(mid || vert);
+	std::vector<Extrusion> extrusionExtents;
+	std::for_each(boundary.begin(), boundary.end(), [this, &extrusionExtents](const auto boundaryHeh) {
+		const auto vectorNormal = []<typename T, glm::qualifier Q>(const glm::vec<2, T, Q> & v) -> glm::vec<2, T, Q> {
+			return {-v.y, v.x};
+		};
 
-							  if (const auto intersect = intersectRay({p1, extrusionDir})) {
-								  auto splitVertex = split(intersect->second, intersect->first);
-								  cutpoints.insert(splitVertex);
-								  extrusionVertices.push_back(splitVertex);
-							  }
+		const auto boundaryVertex = from_vertex_handle(boundaryHeh);
+		const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
+		const auto p1 = point(boundaryVertex);
+		const auto p2 = point(to_vertex_handle(boundaryHeh));
+		const auto e0 = glm::normalize(vectorNormal(RelativePosition2D(p1 - p0)));
+		const auto e1 = glm::normalize(vectorNormal(RelativePosition2D(p2 - p1)));
 
-							  const auto extrusion
-									  = extrusionDir * std::max(0.F, RelativeDistance(limit - p1.z) / extrusionDir.z);
-							  return p1 + extrusion;
-						  };
-				return std::make_pair(doExtrusion(-2, lowerExtent.z - 100), doExtrusion(2, upperExtent.z + 100));
-			});
+		const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
+										 GlobalPosition3D boundaryVertex, RelativeDistance vert, GlobalDistance limit) {
+			const auto extrusionDir = glm::normalize(direction || vert);
 
-	// Cut existing terrain
+			if (!extrusionVertex.is_valid()) {
+				if (const auto intersect = intersectRay({boundaryVertex, extrusionDir})) {
+					auto splitVertex = split(intersect->second, intersect->first);
+					extrusionVertex = splitVertex;
+				}
+				else if (const auto intersect
+						= intersectRay({boundaryVertex + GlobalPosition3D {1, 1, 0}, extrusionDir})) {
+					auto splitVertex = split(intersect->second, intersect->first);
+					extrusionVertex = splitVertex;
+				}
+				else if (const auto intersect
+						= intersectRay({boundaryVertex + GlobalPosition3D {1, 0, 0}, extrusionDir})) {
+					auto splitVertex = split(intersect->second, intersect->first);
+					extrusionVertex = splitVertex;
+				}
+			}
+
+			const auto extrusion
+					= extrusionDir * std::max(0.F, RelativeDistance(limit - boundaryVertex.z) / extrusionDir.z);
+			return boundaryVertex + extrusion;
+		};
+		// Previous half edge end to current half end start arc tangents
+		const Arc arc {p1, p1 + (e0 || 0.F), p1 + (e1 || 0.F)};
+		const auto limit = std::floor((arc.second - arc.first) * 5.F / pi);
+		const auto inc = (arc.second - arc.first) / limit;
+		for (float step = 1; step < limit; step += 1.F) {
+			const auto direction = sincosf(arc.first + (step * inc));
+			VertexHandle extrusionVertex;
+			extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
+					doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE, lowerExtent.z - 10),
+					doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE, upperExtent.z + 10));
+			assert(extrusionVertex.is_valid());
+		}
+		// Half edge start/end tangents
+		for (const auto p : {p1, p2}) {
+			VertexHandle extrusionVertex;
+			extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
+					doExtrusion(extrusionVertex, e1, p, -MAX_SLOPE, lowerExtent.z - 10),
+					doExtrusion(extrusionVertex, e1, p, MAX_SLOPE, upperExtent.z + 10));
+			assert(extrusionVertex.is_valid());
+		}
+	});
+
+	//  Cut existing terrain
 	extrusionExtents.emplace_back(extrusionExtents.front()); // Circular next
-	extrusionVertices.emplace_back(extrusionVertices.front());
 	std::vector<std::vector<VertexHandle>> boundaryFaces;
-	std::transform(boundary.begin(), boundary.end(), std ::back_inserter(boundaryFaces),
-			[ex = extrusionExtents.begin(), exv = extrusionVertices.begin(), this](const auto boundaryHeh) mutable {
-				const auto fromVertex = from_vertex_handle(boundaryHeh);
-				const auto p0 = point(fromVertex);
-				auto toVertex = to_vertex_handle(boundaryHeh);
-				const auto p1 = point(toVertex);
-				const auto nex = ex + 1;
-				const auto nexv = exv + 1;
-				const std::array<Triangle<3>, 4> triangles {{
-						{p0, ex->first, nex->first},
-						{p0, p1, nex->first},
-						{p0, ex->second, nex->second},
-						{p0, p1, nex->second},
-				}};
+	std::adjacent_find(extrusionExtents.begin(), extrusionExtents.end(),
+			[this, &boundaryFaces](const auto & first, const auto & second) {
+				const auto p0 = point(first.boundaryVertex);
+				std::vector<Triangle<3>> triangles {
+						{p0, first.lowerLimit, second.lowerLimit}, {p0, first.upperLimit, second.upperLimit}};
+				const auto p1 = point(second.boundaryVertex);
+				if (first.boundaryVertex != second.boundaryVertex) {
+					triangles.emplace_back(p0, p1, second.lowerLimit);
+					triangles.emplace_back(p0, p1, second.upperLimit);
+				}
 
-				std::vector<VertexHandle> sideVerts {fromVertex, *exv};
-				for (auto currentVertex = *exv;
-						std::any_of(voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
-							const auto next = next_halfedge_handle(currentVertexOut);
-							const auto nextVertex = to_vertex_handle(next);
-							const auto startVertex = from_vertex_handle(next);
-							if (nextVertex == *++sideVerts.rbegin()) {
-								// This half edge goes back to the previous vertex
-								return false;
-							}
-							if (nextVertex == *nexv) {
-								// The next half edge goes to the termination point
-								return false;
-							}
-							const auto edge = edge_handle(next);
-							const auto ep0 = point(startVertex);
-							const auto ep1 = point(nextVertex);
-							const auto diff = RelativePosition3D(ep1 - ep0);
-							const auto length = glm::length(diff);
-							const auto dir = diff / length;
-							const Ray r {ep0, dir};
-							return std::any_of(triangles.begin(), triangles.end(), [&](const auto & triangle) {
-								BaryPosition bary;
-								RelativeDistance dist {};
+				auto & out = boundaryFaces.emplace_back();
+				out.emplace_back(first.boundaryVertex);
+				out.emplace_back(first.extrusionVertex);
+				for (auto currentVertex = first.extrusionVertex;
+						std::none_of(voh_begin(currentVertex), voh_end(currentVertex),
+								[&](const auto currentVertexOut) {
+									// The next half edge goes to the termination point
+									const auto next = next_halfedge_handle(currentVertexOut);
+									const auto nextVertex = to_vertex_handle(next);
+									return (nextVertex == second.extrusionVertex);
+								})
+						&& std::any_of(
+								voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
+									const auto next = next_halfedge_handle(currentVertexOut);
+									const auto nextVertex = to_vertex_handle(next);
+									const auto startVertex = from_vertex_handle(next);
+									if (nextVertex == *++out.rbegin()) {
+										//  This half edge goes back to the previous vertex
+										return false;
+									}
+									const auto edge = edge_handle(next);
+									const auto ep0 = point(startVertex);
+									const auto ep1 = point(nextVertex);
+									const auto diff = RelativePosition3D(ep1 - ep0);
+									const auto length = glm::length(diff);
+									const auto dir = diff / length;
+									const Ray r {ep0, dir};
+									return std::any_of(triangles.begin(), triangles.end(), [&](const auto & triangle) {
+										BaryPosition bary;
+										RelativeDistance dist {};
 
-								if (r.intersectTriangle(triangle.x, triangle.y, triangle.z, bary, dist)
-										&& dist <= length - 1 && dist >= 1) {
-									const auto splitPos = triangle * bary;
-									currentVertex = sideVerts.emplace_back(split(edge, splitPos));
-									return true;
-								}
-								return false;
-							});
-						});) {
+										if (r.intersectTriangle(triangle.x, triangle.y, triangle.z, bary, dist)
+												&& dist <= length - 1 && dist >= 1) {
+											const auto splitPos = triangle * bary;
+											currentVertex = out.emplace_back(split(edge, splitPos));
+											return true;
+										}
+										return false;
+									});
+								});) {
 					;
 				}
-				sideVerts.emplace_back(*nexv);
-				sideVerts.emplace_back(toVertex);
-				ex = nex;
-				exv++;
-				return sideVerts;
+				out.emplace_back(second.extrusionVertex);
+				if (first.boundaryVertex != second.boundaryVertex) {
+					out.emplace_back(second.boundaryVertex);
+				}
+				return false;
 			});
 
-	// Remove old faces
+	//  Remove old faces
 	std::set<FaceHandle> visited;
 	auto removeOld = [&](auto & self, const auto face) -> void {
 		if (visited.insert(face).second) {
-			std::vector<FaceHandle> neighbourFaces;
 			std::for_each(fh_begin(face), fh_end(face), [&](const auto fh) {
-				if (std::none_of(boundaryFaces.begin(), boundaryFaces.end(), [fh, this](const auto & bf) {
-						return std::find(bf.begin(), bf.end(), from_vertex_handle(fh)) != bf.end()
-								&& std::find(bf.begin(), bf.end(), to_vertex_handle(fh)) != bf.end();
-					})) {
-					neighbourFaces.emplace_back(opposite_face_handle(fh));
+				const auto b1 = to_vertex_handle(fh);
+				const auto b2 = from_vertex_handle(fh);
+				if (opposite_face_handle(fh).is_valid()
+						&& std::none_of(boundaryFaces.begin(), boundaryFaces.end(), [b2, b1](const auto & bf) {
+							   return std::adjacent_find(bf.begin(), bf.end(), [b2, b1](const auto v1, const auto v2) {
+								   return b1 == v1 && b2 == v2;
+							   }) != bf.end();
+						   })) {
+					self(self, opposite_face_handle(fh));
 				}
 			});
 
 			delete_face(face, false);
-			std::for_each(neighbourFaces.begin(), neighbourFaces.end(), [&self](const auto nextFace) {
-				if (nextFace.is_valid()) {
-					self(self, nextFace);
-				}
-			});
 		}
 	};
 	removeOld(removeOld, findPoint(triangleStrip.front()));
