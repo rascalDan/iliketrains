@@ -381,6 +381,10 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 void
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {
+	if (triangleStrip.size() < 3) {
+		return;
+	}
+
 	// Create new vertices
 	std::vector<VertexHandle> newVerts;
 	newVerts.reserve(newVerts.size());
