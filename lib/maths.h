@@ -111,7 +111,7 @@ template<std::integral T, glm::qualifier Q>
 inline constexpr glm::vec<3, T, Q>
 crossProduct(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
 {
-	return crossProduct<int64_t, Q>(a, b);
+	return crossProduct<Q>(a, b);
 }
 
 template<std::floating_point T, glm::qualifier Q>
