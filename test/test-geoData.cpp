@@ -208,6 +208,8 @@ BOOST_DATA_TEST_CASE(findEntries,
 using DeformTerrainData = std::tuple<std::vector<GlobalPosition3D>,
 		std::vector<std::pair<std::pair<GlobalPosition3D, Direction3D>, std::string>>>;
 
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
+
 BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/1.json"), points, cams)
 {
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
