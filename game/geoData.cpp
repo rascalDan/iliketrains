@@ -492,43 +492,37 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				out.emplace_back(first.boundaryVertex);
 				out.emplace_back(first.extrusionVertex);
 				for (auto currentVertex = first.extrusionVertex;
-						std::none_of(voh_begin(currentVertex), voh_end(currentVertex),
-								[&](const auto currentVertexOut) {
-									// The next half edge goes to the termination point
-									const auto next = next_halfedge_handle(currentVertexOut);
-									const auto nextVertex = to_vertex_handle(next);
-									return (nextVertex == second.extrusionVertex);
-								})
-						&& std::any_of(
-								voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
-									const auto next = next_halfedge_handle(currentVertexOut);
-									const auto nextVertex = to_vertex_handle(next);
-									const auto startVertex = from_vertex_handle(next);
-									if (nextVertex == *++out.rbegin()) {
-										//  This half edge goes back to the previous vertex
-										return false;
-									}
-									const auto edge = edge_handle(next);
-									const auto ep0 = point(startVertex);
-									const auto ep1 = point(nextVertex);
-									const auto diff = RelativePosition3D(ep1 - ep0);
-									const auto length = glm::length(diff);
-									const auto dir = diff / length;
-									const Ray r {ep0, dir};
-									return std::any_of(triangles.begin(), triangles.end(), [&](const auto & triangle) {
-										BaryPosition bary;
-										RelativeDistance dist {};
+						!find_halfedge(currentVertex, second.extrusionVertex).is_valid();) {
+					auto n = std::any_of(
+							voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
+								const auto next = next_halfedge_handle(currentVertexOut);
+								const auto nextVertex = to_vertex_handle(next);
+								const auto startVertex = from_vertex_handle(next);
+								if (nextVertex == *++out.rbegin()) {
+									//  This half edge goes back to the previous vertex
+									return false;
+								}
+								const auto edge = edge_handle(next);
+								const auto ep0 = point(startVertex);
+								const auto ep1 = point(nextVertex);
+								const auto diff = RelativePosition3D(ep1 - ep0);
+								const auto length = glm::length(diff);
+								const auto dir = diff / length;
+								const Ray r {ep0, dir};
+								return std::any_of(triangles.begin(), triangles.end(), [&](const auto & triangle) {
+									BaryPosition bary;
+									RelativeDistance dist {};
 
-										if (r.intersectTriangle(triangle.x, triangle.y, triangle.z, bary, dist)
-												&& dist <= length - 1 && dist >= 1) {
-											const auto splitPos = triangle * bary;
-											currentVertex = out.emplace_back(split(edge, splitPos));
-											return true;
-										}
-										return false;
-									});
-								});) {
-					;
+									if (r.intersectTriangle(triangle.x, triangle.y, triangle.z, bary, dist)
+											&& dist <= length - 1 && dist >= 1) {
+										const auto splitPos = triangle * bary;
+										currentVertex = out.emplace_back(split(edge, splitPos));
+										return true;
+									}
+									return false;
+								});
+							});
+					assert(n);
 				}
 				out.emplace_back(second.extrusionVertex);
 				if (first.boundaryVertex != second.boundaryVertex) {
