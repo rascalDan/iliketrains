@@ -421,9 +421,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		};
 
 		const auto boundaryVertex = from_vertex_handle(boundaryHeh);
+		const auto nextBoundaryVertex = to_vertex_handle(boundaryHeh);
 		const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
 		const auto p1 = point(boundaryVertex);
-		const auto p2 = point(to_vertex_handle(boundaryHeh));
+		const auto p2 = point(nextBoundaryVertex);
 		const auto e0 = glm::normalize(vectorNormal(RelativePosition2D(p1 - p0)));
 		const auto e1 = glm::normalize(vectorNormal(RelativePosition2D(p2 - p1)));
 
@@ -465,11 +466,11 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 			assert(extrusionVertex.is_valid());
 		}
 		// Half edge start/end tangents
-		for (const auto p : {p1, p2}) {
+		for (const auto p : {boundaryVertex, nextBoundaryVertex}) {
 			VertexHandle extrusionVertex;
-			extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
-					doExtrusion(extrusionVertex, e1, p, -MAX_SLOPE, lowerExtent.z - 10),
-					doExtrusion(extrusionVertex, e1, p, MAX_SLOPE, upperExtent.z + 10));
+			extrusionExtents.emplace_back(p, extrusionVertex,
+					doExtrusion(extrusionVertex, e1, point(p), -MAX_SLOPE, lowerExtent.z - 10),
+					doExtrusion(extrusionVertex, e1, point(p), MAX_SLOPE, upperExtent.z + 10));
 			assert(extrusionVertex.is_valid());
 		}
 	});
