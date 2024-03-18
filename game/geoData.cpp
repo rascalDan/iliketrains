@@ -506,7 +506,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				out.emplace_back(first.extrusionVertex);
 				for (auto currentVertex = first.extrusionVertex;
 						!find_halfedge(currentVertex, second.extrusionVertex).is_valid();) {
-					auto n = std::any_of(
+					[[maybe_unused]] const auto n = std::any_of(
 							voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
 								const auto next = next_halfedge_handle(currentVertexOut);
 								const auto nextVertex = to_vertex_handle(next);
