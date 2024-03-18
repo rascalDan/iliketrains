@@ -412,7 +412,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	// Extrude corners
 	struct Extrusion {
 		VertexHandle boundaryVertex, extrusionVertex;
-		GlobalPosition3D lowerLimit, upperLimit;
+		Direction3D lowerLimit, upperLimit;
 	};
 
 	std::vector<Extrusion> extrusionExtents;
@@ -450,8 +450,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				}
 			}
 
-			const auto extrusion = extrusionDir * 1000.F * MAX_SLOPE;
-			return boundaryVertex + extrusion;
+			return extrusionDir;
 		};
 		// Previous half edge end to current half end start arc tangents
 		const Arc arc {p1, p1 + (e0 || 0.F), p1 + (e1 || 0.F)};
@@ -481,25 +480,20 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 			[this, &boundaryFaces](const auto & first, const auto & second) {
 				const auto p0 = point(first.boundaryVertex);
 				const auto p1 = point(second.boundaryVertex);
-				const auto make_normal = [](auto x, auto y, auto z) {
-					const auto cp = crossProduct(z - x, y - x);
-					const auto rcp = RelativePosition3D(cp);
-					const auto nrcp = glm::normalize(rcp);
-					return nrcp;
+				const auto bdir = RelativePosition3D(p1 - p0);
+				const auto make_plane = [p0](auto y, auto z) {
+					return GeometricPlaneT<GlobalPosition3D> {p0, crossProduct(y, z)};
 				};
-				const auto normals = ((first.boundaryVertex == second.boundaryVertex)
-						? std::array {make_normal(p0, first.lowerLimit, second.lowerLimit),
-									make_normal(p0, first.upperLimit, second.upperLimit),
+				const auto planes = ((first.boundaryVertex == second.boundaryVertex)
+						? std::array {make_plane(second.lowerLimit, first.lowerLimit),
+									make_plane(second.upperLimit, first.upperLimit),
 						}
 						: std::array {
-								  make_normal(p0, second.lowerLimit, p1),
-									make_normal(p0, second.upperLimit, p1),
+								  make_plane(bdir, second.lowerLimit),
+									make_plane(bdir, second.upperLimit),
 						});
-				assert(normals.front().z > 0.F);
-				assert(normals.back().z > 0.F);
-				const auto planes = normals * [p0](const auto & normal) {
-					return GeometricPlaneT<GlobalPosition3D> {p0, normal};
-				};
+				assert(planes.front().normal.z > 0.F);
+				assert(planes.back().normal.z > 0.F);
 
 				auto & out = boundaryFaces.emplace_back();
 				out.emplace_back(first.boundaryVertex);
