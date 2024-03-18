@@ -1,5 +1,6 @@
 #include "geoData.h"
 #include "collections.h"
+#include "geometricPlane.h"
 #include <fstream>
 #include <glm/gtx/intersect.hpp>
 #include <maths.h>
@@ -429,7 +430,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		const auto e1 = glm::normalize(vectorNormal(RelativePosition2D(p2 - p1)));
 
 		const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
-										 GlobalPosition3D boundaryVertex, RelativeDistance vert, GlobalDistance limit) {
+										 GlobalPosition3D boundaryVertex, RelativeDistance vert) {
 			const auto extrusionDir = glm::normalize(direction || vert);
 
 			if (!extrusionVertex.is_valid()) {
@@ -449,8 +450,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				}
 			}
 
-			const auto extrusion
-					= extrusionDir * std::max(0.F, RelativeDistance(limit - boundaryVertex.z) / extrusionDir.z);
+			const auto extrusion = extrusionDir * 1000.F * MAX_SLOPE;
 			return boundaryVertex + extrusion;
 		};
 		// Previous half edge end to current half end start arc tangents
@@ -461,16 +461,15 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 			const auto direction = sincosf(arc.first + (step * inc));
 			VertexHandle extrusionVertex;
 			extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
-					doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE, lowerExtent.z - 10),
-					doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE, upperExtent.z + 10));
+					doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
+					doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
 			assert(extrusionVertex.is_valid());
 		}
 		// Half edge start/end tangents
 		for (const auto p : {boundaryVertex, nextBoundaryVertex}) {
 			VertexHandle extrusionVertex;
-			extrusionExtents.emplace_back(p, extrusionVertex,
-					doExtrusion(extrusionVertex, e1, point(p), -MAX_SLOPE, lowerExtent.z - 10),
-					doExtrusion(extrusionVertex, e1, point(p), MAX_SLOPE, upperExtent.z + 10));
+			extrusionExtents.emplace_back(p, extrusionVertex, doExtrusion(extrusionVertex, e1, point(p), -MAX_SLOPE),
+					doExtrusion(extrusionVertex, e1, point(p), MAX_SLOPE));
 			assert(extrusionVertex.is_valid());
 		}
 	});
@@ -481,13 +480,26 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	std::adjacent_find(extrusionExtents.begin(), extrusionExtents.end(),
 			[this, &boundaryFaces](const auto & first, const auto & second) {
 				const auto p0 = point(first.boundaryVertex);
-				std::vector<Triangle<3>> triangles {
-						{p0, first.lowerLimit, second.lowerLimit}, {p0, first.upperLimit, second.upperLimit}};
 				const auto p1 = point(second.boundaryVertex);
-				if (first.boundaryVertex != second.boundaryVertex) {
-					triangles.emplace_back(p0, p1, second.lowerLimit);
-					triangles.emplace_back(p0, p1, second.upperLimit);
-				}
+				const auto make_normal = [](auto x, auto y, auto z) {
+					const auto cp = crossProduct(z - x, y - x);
+					const auto rcp = RelativePosition3D(cp);
+					const auto nrcp = glm::normalize(rcp);
+					return nrcp;
+				};
+				const auto normals = ((first.boundaryVertex == second.boundaryVertex)
+						? std::array {make_normal(p0, first.lowerLimit, second.lowerLimit),
+									make_normal(p0, first.upperLimit, second.upperLimit),
+						}
+						: std::array {
+								  make_normal(p0, second.lowerLimit, p1),
+									make_normal(p0, second.upperLimit, p1),
+						});
+				assert(normals.front().z > 0.F);
+				assert(normals.back().z > 0.F);
+				const auto planes = normals * [p0](const auto & normal) {
+					return GeometricPlaneT<GlobalPosition3D> {p0, normal};
+				};
 
 				auto & out = boundaryFaces.emplace_back();
 				out.emplace_back(first.boundaryVertex);
@@ -500,28 +512,35 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 								const auto nextVertex = to_vertex_handle(next);
 								const auto startVertex = from_vertex_handle(next);
 								if (nextVertex == *++out.rbegin()) {
-									//  This half edge goes back to the previous vertex
+									// This half edge goes back to the previous vertex
 									return false;
 								}
 								const auto edge = edge_handle(next);
 								const auto ep0 = point(startVertex);
 								const auto ep1 = point(nextVertex);
+								if (planes.front().getRelation(ep1) == GeometricPlane::PlaneRelation::Below
+										|| planes.back().getRelation(ep1) == GeometricPlane::PlaneRelation::Above) {
+									return false;
+								}
 								const auto diff = RelativePosition3D(ep1 - ep0);
 								const auto length = glm::length(diff);
 								const auto dir = diff / length;
-								const Ray r {ep0, dir};
-								return std::any_of(triangles.begin(), triangles.end(), [&](const auto & triangle) {
-									BaryPosition bary;
+								const Ray r {ep1, -dir};
+								const auto dists = planes * [r](const auto & plane) {
 									RelativeDistance dist {};
-
-									if (r.intersectTriangle(triangle.x, triangle.y, triangle.z, bary, dist)
-											&& dist <= length - 1 && dist >= 1) {
-										const auto splitPos = triangle * bary;
-										currentVertex = out.emplace_back(split(edge, splitPos));
-										return true;
+									if (r.intersectPlane(plane.origin, plane.normal, dist)) {
+										return dist;
 									}
-									return false;
-								});
+									return INFINITY;
+								};
+								const auto dist = *std::min_element(dists.begin(), dists.end());
+								const auto splitPos = ep1 - (dir * dist);
+								if (dist <= length) {
+									currentVertex = split(edge, splitPos);
+									out.emplace_back(currentVertex);
+									return true;
+								}
+								return false;
 							});
 					assert(n);
 				}
