@@ -19,6 +19,12 @@ struct Arc : public std::pair<float, float> {
 	{
 		return i ? second : first;
 	}
+
+	[[nodiscard]] constexpr inline float
+	length() const
+	{
+		return second - first;
+	}
 };
 
 constexpr const RelativePosition3D up {0, 0, 1};
@@ -169,12 +175,6 @@ inline constexpr glm::vec<L, T, Q>
 operator%=(glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
 	return p = p % mutation;
-}
-
-constexpr inline float
-arc_length(const Arc & arc)
-{
-	return arc.second - arc.first;
 }
 
 float normalize(float ang);
