@@ -76,7 +76,7 @@ rotate_yp(Rotation2D a)
 }
 
 float
-vector_yaw(const Direction3D & diff)
+vector_yaw(const Direction2D & diff)
 {
 	return std::atan2(diff.x, diff.y);
 }

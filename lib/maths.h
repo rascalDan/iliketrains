@@ -84,7 +84,7 @@ glm::mat4 rotate_pitch(float);
 glm::mat4 rotate_yp(Rotation2D);
 glm::mat4 rotate_ypr(Rotation3D);
 
-float vector_yaw(const Direction3D & diff);
+float vector_yaw(const Direction2D & diff);
 float vector_pitch(const Direction3D & diff);
 
 float round_frac(const float & v, const float & frac);
