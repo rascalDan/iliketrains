@@ -8,11 +8,16 @@
 #include <stdexcept>
 #include <utility>
 
-struct Arc : public std::pair<float, float> {
-	using std::pair<float, float>::pair;
+struct Arc : public std::pair<Angle, Angle> {
+	template<glm::length_t Lc, glm::length_t Le, typename T, glm::qualifier Q>
+		requires(Lc >= 2, Le >= 2)
+	Arc(const glm::vec<Lc, T, Q> & centre, const glm::vec<Le, T, Q> & e0p, const glm::vec<Le, T, Q> & e1p) :
+		Arc {RelativePosition2D {e0p.xy() - centre.xy()}, RelativePosition2D {e1p.xy() - centre.xy()}}
+	{
+	}
 
-	template<typename T, glm::qualifier Q>
-	Arc(const glm::vec<3, T, Q> & centre3, const glm::vec<3, T, Q> & e0p, const glm::vec<3, T, Q> & e1p);
+	Arc(const RelativePosition2D & dir0, const RelativePosition2D & dir1);
+	Arc(const Angle angb, const Angle anga);
 
 	auto
 	operator[](bool i) const
@@ -242,21 +247,6 @@ auto
 midpoint(const std::pair<T, T> & v)
 {
 	return std::midpoint(v.first, v.second);
-}
-
-template<typename T, glm::qualifier Q>
-Arc::Arc(const glm::vec<3, T, Q> & centre3, const glm::vec<3, T, Q> & e0p, const glm::vec<3, T, Q> & e1p) :
-	Arc([&]() -> Arc {
-		const auto diffa = e0p - centre3;
-		const auto diffb = e1p - centre3;
-		const auto anga = vector_yaw(diffa);
-		const auto angb = [&diffb, &anga]() {
-			const auto angb = vector_yaw(diffb);
-			return (angb < anga) ? angb + two_pi : angb;
-		}();
-		return {anga, angb};
-	}())
-{
 }
 
 // Conversions

@@ -453,7 +453,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 			return extrusionDir;
 		};
 		// Previous half edge end to current half end start arc tangents
-		const Arc arc {p1, p1 + (e0 || 0.F), p1 + (e1 || 0.F)};
+		const Arc arc {e0, e1};
 		const auto limit = std::floor((arc.second - arc.first) * 5.F / pi);
 		const auto inc = (arc.second - arc.first) / limit;
 		for (float step = 1; step < limit; step += 1.F) {

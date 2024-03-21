@@ -95,9 +95,8 @@ round_sleepers(const float v)
 	return round_frac(v, sleepers);
 }
 
-RailLinkStraight::RailLinkStraight(
-		NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & a, const Node::Ptr & b) :
-	RailLinkStraight(instances, a, b, b->pos - a->pos)
+RailLinkStraight::RailLinkStraight(NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & a,
+		const Node::Ptr & b) : RailLinkStraight(instances, a, b, b->pos - a->pos)
 {
 }
 
@@ -109,9 +108,8 @@ RailLinkStraight::RailLinkStraight(
 {
 }
 
-RailLinkCurve::RailLinkCurve(
-		NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
-	RailLinkCurve(instances, a, b, c || a->pos.z, {c || 0, a->pos, b->pos})
+RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
+		GlobalPosition2D c) : RailLinkCurve(instances, a, b, c || a->pos.z, {c, a->pos, b->pos})
 {
 }
 
