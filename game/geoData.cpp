@@ -417,17 +417,13 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 
 	std::vector<Extrusion> extrusionExtents;
 	std::for_each(boundary.begin(), boundary.end(), [this, &extrusionExtents](const auto boundaryHeh) {
-		const auto vectorNormal = []<typename T, glm::qualifier Q>(const glm::vec<2, T, Q> & v) -> glm::vec<2, T, Q> {
-			return {-v.y, v.x};
-		};
-
 		const auto boundaryVertex = from_vertex_handle(boundaryHeh);
 		const auto nextBoundaryVertex = to_vertex_handle(boundaryHeh);
 		const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
 		const auto p1 = point(boundaryVertex);
 		const auto p2 = point(nextBoundaryVertex);
-		const auto e0 = glm::normalize(vectorNormal(RelativePosition2D(p1 - p0)));
-		const auto e1 = glm::normalize(vectorNormal(RelativePosition2D(p2 - p1)));
+		const auto e0 = glm::normalize(vector_normal(RelativePosition2D(p1 - p0)));
+		const auto e1 = glm::normalize(vector_normal(RelativePosition2D(p2 - p1)));
 
 		const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
 										 GlobalPosition3D boundaryVertex, RelativeDistance vert) {

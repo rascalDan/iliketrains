@@ -98,6 +98,13 @@ glm::mat4 rotate_ypr(Rotation3D);
 float vector_yaw(const Direction2D & diff);
 float vector_pitch(const Direction3D & diff);
 
+template<typename T, glm::qualifier Q>
+glm::vec<2, T, Q>
+vector_normal(const glm::vec<2, T, Q> & v)
+{
+	return {-v.y, v.x};
+};
+
 float round_frac(const float & v, const float & frac);
 
 template<typename T>
