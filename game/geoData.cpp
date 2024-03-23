@@ -422,49 +422,48 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				const auto e0 = glm::normalize(vector_normal(RelativePosition2D(p1 - p0)));
 				const auto e1 = glm::normalize(vector_normal(RelativePosition2D(p2 - p1)));
 
-				const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
-												 GlobalPosition3D boundaryVertex, RelativeDistance vert) {
-					const auto extrusionDir = glm::normalize(direction || vert);
+				const auto addExtrusionFor = [this, &extrusionExtents, boundaryVertex, p1](Direction2D direction) {
+					const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
+													 GlobalPosition3D boundaryVertex, RelativeDistance vert) {
+						const auto extrusionDir = glm::normalize(direction || vert);
 
-					if (!extrusionVertex.is_valid()) {
-						if (const auto intersect = intersectRay({boundaryVertex, extrusionDir})) {
-							auto splitVertex = split(intersect->second, intersect->first);
-							extrusionVertex = splitVertex;
+						if (!extrusionVertex.is_valid()) {
+							if (const auto intersect = intersectRay({boundaryVertex, extrusionDir})) {
+								auto splitVertex = split(intersect->second, intersect->first);
+								extrusionVertex = splitVertex;
+							}
+							else if (const auto intersect
+									= intersectRay({boundaryVertex + GlobalPosition3D {1, 1, 0}, extrusionDir})) {
+								auto splitVertex = split(intersect->second, intersect->first);
+								extrusionVertex = splitVertex;
+							}
+							else if (const auto intersect
+									= intersectRay({boundaryVertex + GlobalPosition3D {1, 0, 0}, extrusionDir})) {
+								auto splitVertex = split(intersect->second, intersect->first);
+								extrusionVertex = splitVertex;
+							}
 						}
-						else if (const auto intersect
-								= intersectRay({boundaryVertex + GlobalPosition3D {1, 1, 0}, extrusionDir})) {
-							auto splitVertex = split(intersect->second, intersect->first);
-							extrusionVertex = splitVertex;
-						}
-						else if (const auto intersect
-								= intersectRay({boundaryVertex + GlobalPosition3D {1, 0, 0}, extrusionDir})) {
-							auto splitVertex = split(intersect->second, intersect->first);
-							extrusionVertex = splitVertex;
-						}
-					}
 
-					return extrusionDir;
-				};
-				// Previous half edge end to current half end start arc tangents
-				if (const Arc arc {e0, e1}; arc.length() < pi) {
-					const auto limit = std::ceil(arc.length() * 5.F / pi);
-					const auto inc = arc.length() / limit;
-					for (float step = 0; step <= limit; step += 1.F) {
-						const auto direction = sincosf(arc.first + (step * inc));
-						VertexHandle extrusionVertex;
-						extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
-								doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
-								doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
-						assert(extrusionVertex.is_valid());
-					}
-				}
-				else {
-					const auto direction = normalize(e0 + e1) / sinf((arc.length() - pi) / 2.F);
+						return extrusionDir;
+					};
+
 					VertexHandle extrusionVertex;
 					extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
 							doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
 							doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
 					assert(extrusionVertex.is_valid());
+				};
+				if (const Arc arc {e0, e1}; arc.length() < pi) {
+					// Previous half edge end to current half end start arc tangents
+					const auto limit = std::ceil(arc.length() * 5.F / pi);
+					const auto inc = arc.length() / limit;
+					for (float step = 0; step <= limit; step += 1.F) {
+						addExtrusionFor(sincosf(arc.first + (step * inc)));
+					}
+				}
+				else {
+					// Single tangent bisecting the difference
+					addExtrusionFor(normalize(e0 + e1) / sinf((arc.length() - pi) / 2.F));
 				}
 			},
 			*voh_begin(newVerts.front()));
