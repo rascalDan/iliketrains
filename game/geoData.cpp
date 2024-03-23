@@ -446,11 +446,20 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 					return extrusionDir;
 				};
 				// Previous half edge end to current half end start arc tangents
-				const Arc arc {e0, e1};
-				const auto limit = std::ceil(arc.length() * 5.F / pi);
-				const auto inc = arc.length() / limit;
-				for (float step = 0; step <= limit; step += 1.F) {
-					const auto direction = sincosf(arc.first + (step * inc));
+				if (const Arc arc {e0, e1}; arc.length() < pi) {
+					const auto limit = std::ceil(arc.length() * 5.F / pi);
+					const auto inc = arc.length() / limit;
+					for (float step = 0; step <= limit; step += 1.F) {
+						const auto direction = sincosf(arc.first + (step * inc));
+						VertexHandle extrusionVertex;
+						extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
+								doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
+								doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
+						assert(extrusionVertex.is_valid());
+					}
+				}
+				else {
+					const auto direction = normalize(e0 + e1) / sinf((arc.length() - pi) / 2.F);
 					VertexHandle extrusionVertex;
 					extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
 							doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
