@@ -402,12 +402,6 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				auto faceHandle = add_face(a, b, c);
 				return faceHandle;
 			});
-	std::vector<HalfedgeHandle> boundary;
-	boundaryWalk(
-			[out = std::back_inserter(boundary)](const auto boundaryHeh) mutable {
-				out = boundaryHeh;
-			},
-			*voh_begin(newVerts.front()));
 
 	// Extrude corners
 	struct Extrusion {
@@ -416,58 +410,61 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	};
 
 	std::vector<Extrusion> extrusionExtents;
-	std::for_each(boundary.begin(), boundary.end(), [this, &extrusionExtents](const auto boundaryHeh) {
-		const auto boundaryVertex = from_vertex_handle(boundaryHeh);
-		const auto nextBoundaryVertex = to_vertex_handle(boundaryHeh);
-		const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
-		const auto p1 = point(boundaryVertex);
-		const auto p2 = point(nextBoundaryVertex);
-		const auto e0 = glm::normalize(vector_normal(RelativePosition2D(p1 - p0)));
-		const auto e1 = glm::normalize(vector_normal(RelativePosition2D(p2 - p1)));
+	boundaryWalk(
+			[this, &extrusionExtents](const auto boundaryHeh) {
+				const auto boundaryVertex = from_vertex_handle(boundaryHeh);
+				const auto nextBoundaryVertex = to_vertex_handle(boundaryHeh);
+				const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
+				const auto p1 = point(boundaryVertex);
+				const auto p2 = point(nextBoundaryVertex);
+				const auto e0 = glm::normalize(vector_normal(RelativePosition2D(p1 - p0)));
+				const auto e1 = glm::normalize(vector_normal(RelativePosition2D(p2 - p1)));
 
-		const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
-										 GlobalPosition3D boundaryVertex, RelativeDistance vert) {
-			const auto extrusionDir = glm::normalize(direction || vert);
+				const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
+												 GlobalPosition3D boundaryVertex, RelativeDistance vert) {
+					const auto extrusionDir = glm::normalize(direction || vert);
 
-			if (!extrusionVertex.is_valid()) {
-				if (const auto intersect = intersectRay({boundaryVertex, extrusionDir})) {
-					auto splitVertex = split(intersect->second, intersect->first);
-					extrusionVertex = splitVertex;
-				}
-				else if (const auto intersect
-						= intersectRay({boundaryVertex + GlobalPosition3D {1, 1, 0}, extrusionDir})) {
-					auto splitVertex = split(intersect->second, intersect->first);
-					extrusionVertex = splitVertex;
-				}
-				else if (const auto intersect
-						= intersectRay({boundaryVertex + GlobalPosition3D {1, 0, 0}, extrusionDir})) {
-					auto splitVertex = split(intersect->second, intersect->first);
-					extrusionVertex = splitVertex;
-				}
-			}
+					if (!extrusionVertex.is_valid()) {
+						if (const auto intersect = intersectRay({boundaryVertex, extrusionDir})) {
+							auto splitVertex = split(intersect->second, intersect->first);
+							extrusionVertex = splitVertex;
+						}
+						else if (const auto intersect
+								= intersectRay({boundaryVertex + GlobalPosition3D {1, 1, 0}, extrusionDir})) {
+							auto splitVertex = split(intersect->second, intersect->first);
+							extrusionVertex = splitVertex;
+						}
+						else if (const auto intersect
+								= intersectRay({boundaryVertex + GlobalPosition3D {1, 0, 0}, extrusionDir})) {
+							auto splitVertex = split(intersect->second, intersect->first);
+							extrusionVertex = splitVertex;
+						}
+					}
 
-			return extrusionDir;
-		};
-		// Previous half edge end to current half end start arc tangents
-		const Arc arc {e0, e1};
-		const auto limit = std::floor((arc.second - arc.first) * 5.F / pi);
-		const auto inc = (arc.second - arc.first) / limit;
-		for (float step = 1; step < limit; step += 1.F) {
-			const auto direction = sincosf(arc.first + (step * inc));
-			VertexHandle extrusionVertex;
-			extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
-					doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
-					doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
-			assert(extrusionVertex.is_valid());
-		}
-		// Half edge start/end tangents
-		for (const auto p : {boundaryVertex, nextBoundaryVertex}) {
-			VertexHandle extrusionVertex;
-			extrusionExtents.emplace_back(p, extrusionVertex, doExtrusion(extrusionVertex, e1, point(p), -MAX_SLOPE),
-					doExtrusion(extrusionVertex, e1, point(p), MAX_SLOPE));
-			assert(extrusionVertex.is_valid());
-		}
-	});
+					return extrusionDir;
+				};
+				// Previous half edge end to current half end start arc tangents
+				const Arc arc {e0, e1};
+				const auto limit = std::floor((arc.second - arc.first) * 5.F / pi);
+				const auto inc = (arc.second - arc.first) / limit;
+				for (float step = 1; step < limit; step += 1.F) {
+					const auto direction = sincosf(arc.first + (step * inc));
+					VertexHandle extrusionVertex;
+					extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
+							doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
+							doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
+					assert(extrusionVertex.is_valid());
+				}
+				// Half edge start/end tangents
+				for (const auto p : {boundaryVertex, nextBoundaryVertex}) {
+					VertexHandle extrusionVertex;
+					extrusionExtents.emplace_back(p, extrusionVertex,
+							doExtrusion(extrusionVertex, e1, point(p), -MAX_SLOPE),
+							doExtrusion(extrusionVertex, e1, point(p), MAX_SLOPE));
+					assert(extrusionVertex.is_valid());
+				}
+			},
+			*voh_begin(newVerts.front()));
 
 	//  Cut existing terrain
 	extrusionExtents.emplace_back(extrusionExtents.front()); // Circular next
