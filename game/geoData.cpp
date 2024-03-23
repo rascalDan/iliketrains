@@ -412,9 +412,11 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	std::vector<Extrusion> extrusionExtents;
 	boundaryWalk(
 			[this, &extrusionExtents](const auto boundaryHeh) {
+				const auto prevBoundaryHeh = prev_halfedge_handle(boundaryHeh);
+				const auto prevBoundaryVertex = from_vertex_handle(prevBoundaryHeh);
 				const auto boundaryVertex = from_vertex_handle(boundaryHeh);
 				const auto nextBoundaryVertex = to_vertex_handle(boundaryHeh);
-				const auto p0 = point(from_vertex_handle(prev_halfedge_handle(boundaryHeh)));
+				const auto p0 = point(prevBoundaryVertex);
 				const auto p1 = point(boundaryVertex);
 				const auto p2 = point(nextBoundaryVertex);
 				const auto e0 = glm::normalize(vector_normal(RelativePosition2D(p1 - p0)));
@@ -445,22 +447,14 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				};
 				// Previous half edge end to current half end start arc tangents
 				const Arc arc {e0, e1};
-				const auto limit = std::floor((arc.second - arc.first) * 5.F / pi);
-				const auto inc = (arc.second - arc.first) / limit;
-				for (float step = 1; step < limit; step += 1.F) {
+				const auto limit = std::ceil(arc.length() * 5.F / pi);
+				const auto inc = arc.length() / limit;
+				for (float step = 0; step <= limit; step += 1.F) {
 					const auto direction = sincosf(arc.first + (step * inc));
 					VertexHandle extrusionVertex;
 					extrusionExtents.emplace_back(boundaryVertex, extrusionVertex,
 							doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
 							doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
-					assert(extrusionVertex.is_valid());
-				}
-				// Half edge start/end tangents
-				for (const auto p : {boundaryVertex, nextBoundaryVertex}) {
-					VertexHandle extrusionVertex;
-					extrusionExtents.emplace_back(p, extrusionVertex,
-							doExtrusion(extrusionVertex, e1, point(p), -MAX_SLOPE),
-							doExtrusion(extrusionVertex, e1, point(p), MAX_SLOPE));
 					assert(extrusionVertex.is_valid());
 				}
 			},
