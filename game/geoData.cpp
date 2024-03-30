@@ -382,6 +382,7 @@ void
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {
 	static const RelativeDistance MAX_SLOPE = 1.5F;
+	static const RelativeDistance MIN_ARC = 0.01F;
 
 	if (triangleStrip.size() < 3) {
 		return;
@@ -453,7 +454,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 							doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
 					assert(extrusionVertex.is_valid());
 				};
-				if (const Arc arc {e0, e1}; arc.length() < pi) {
+				if (const Arc arc {e0, e1}; arc.length() < MIN_ARC) {
+					addExtrusionFor(normalize(e0 + e1) / cosf(arc.length() / 2.F));
+				}
+				else if (arc.length() < pi) {
 					// Previous half edge end to current half end start arc tangents
 					const auto limit = std::ceil(arc.length() * 5.F / pi);
 					const auto inc = arc.length() / limit;
