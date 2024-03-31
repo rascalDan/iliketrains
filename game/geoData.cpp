@@ -395,14 +395,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		return add_vertex(tsVert);
 	});
 	//  Create new faces
-	std::vector<FaceHandle> newFaces;
-	newFaces.reserve(newVerts.size() - 2);
-	std::transform(
-			strip_begin(newVerts), strip_end(newVerts), std::back_inserter(newFaces), [this](const auto & newVert) {
-				const auto [a, b, c] = newVert;
-				auto faceHandle = add_face(a, b, c);
-				return faceHandle;
-			});
+	std::for_each(strip_begin(newVerts), strip_end(newVerts), [this](const auto & newVert) {
+		const auto [a, b, c] = newVert;
+		add_face(a, b, c);
+	});
 
 	// Extrude corners
 	struct Extrusion {
