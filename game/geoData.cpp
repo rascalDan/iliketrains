@@ -383,6 +383,14 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {
 	static const RelativeDistance MAX_SLOPE = 1.5F;
 	static const RelativeDistance MIN_ARC = 0.01F;
+	static const RelativeDistance MAX_EDGE_LENGTH = 20'000.F;
+
+	auto diff = [this](const auto heh) {
+		return RelativePosition3D(point(to_vertex_handle(heh)) - point(from_vertex_handle(heh)));
+	};
+	auto hehlength = [diff](const auto heh) {
+		return glm::length(diff(heh));
+	};
 
 	if (triangleStrip.size() < 3) {
 		return;
@@ -399,6 +407,23 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		const auto [a, b, c] = newVert;
 		add_face(a, b, c);
 	});
+	// Split faces with two large boundary sides
+	boundaryWalk(
+			[this, hehlength](const auto boundaryHeh) {
+				const auto nextHeh = next_halfedge_handle(boundaryHeh);
+				const auto faceHandle = opposite_face_handle(boundaryHeh);
+				if (faceHandle != opposite_face_handle(nextHeh)) {
+					return;
+				}
+				if (hehlength(boundaryHeh) < MAX_EDGE_LENGTH || hehlength(nextHeh) < MAX_EDGE_LENGTH) {
+					return;
+				}
+
+				const auto t = triangle<3>(faceHandle);
+				const auto centre = t * RelativePosition2D {.3F, .3F};
+				split(faceHandle, centre);
+			},
+			*voh_begin(newVerts.front()));
 
 	// Extrude corners
 	struct Extrusion {
