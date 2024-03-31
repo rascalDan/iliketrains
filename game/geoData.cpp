@@ -391,6 +391,9 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	auto hehlength = [diff](const auto heh) {
 		return glm::length(diff(heh));
 	};
+	auto hehcentre = [this, diff](const auto heh) {
+		return point(from_vertex_handle(heh)) + (diff(heh) / 2.F);
+	};
 
 	if (triangleStrip.size() < 3) {
 		return;
@@ -424,6 +427,19 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 				split(faceHandle, centre);
 			},
 			*voh_begin(newVerts.front()));
+	// Split long boundary edges
+	while ([hehlength, hehcentre, this, start = *voh_begin(newVerts.front())]() {
+		size_t countSplit = 0;
+		boundaryWalk(
+				[this, &countSplit, hehlength, hehcentre](const auto boundaryHeh) {
+					if (hehlength(boundaryHeh) > MAX_EDGE_LENGTH) {
+						split(edge_handle(boundaryHeh), hehcentre(boundaryHeh));
+						++countSplit;
+					}
+				},
+				start);
+		return countSplit;
+	}() > 0) { }
 
 	// Extrude corners
 	struct Extrusion {
