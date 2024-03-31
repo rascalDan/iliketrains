@@ -109,6 +109,9 @@ protected:
 	[[nodiscard]] static bool triangleOverlapsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] static bool triangleContainsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
+	[[nodiscard]] RelativePosition3D difference(const HalfedgeHandle) const;
+	[[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
+	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;
 
 	void update_vertex_normals_only();
 

@@ -352,6 +352,24 @@ GeoData::findBoundaryStart() const
 	});
 }
 
+[[nodiscard]] RelativePosition3D
+GeoData::difference(const HalfedgeHandle heh) const
+{
+	return point(to_vertex_handle(heh)) - point(from_vertex_handle(heh));
+}
+
+[[nodiscard]] RelativeDistance
+GeoData::length(const HalfedgeHandle heh) const
+{
+	return glm::length(difference(heh));
+}
+
+[[nodiscard]] GlobalPosition3D
+GeoData::centre(const HalfedgeHandle heh) const
+{
+	return point(from_vertex_handle(heh)) + (difference(heh) / 2.F);
+}
+
 void
 GeoData::update_vertex_normals_only()
 {
@@ -385,16 +403,6 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	static const RelativeDistance MIN_ARC = 0.01F;
 	static const RelativeDistance MAX_EDGE_LENGTH = 20'000.F;
 
-	auto diff = [this](const auto heh) {
-		return RelativePosition3D(point(to_vertex_handle(heh)) - point(from_vertex_handle(heh)));
-	};
-	auto hehlength = [diff](const auto heh) {
-		return glm::length(diff(heh));
-	};
-	auto hehcentre = [this, diff](const auto heh) {
-		return point(from_vertex_handle(heh)) + (diff(heh) / 2.F);
-	};
-
 	if (triangleStrip.size() < 3) {
 		return;
 	}
@@ -412,13 +420,13 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	});
 	// Split faces with two large boundary sides
 	boundaryWalk(
-			[this, hehlength](const auto boundaryHeh) {
+			[this](const auto boundaryHeh) {
 				const auto nextHeh = next_halfedge_handle(boundaryHeh);
 				const auto faceHandle = opposite_face_handle(boundaryHeh);
 				if (faceHandle != opposite_face_handle(nextHeh)) {
 					return;
 				}
-				if (hehlength(boundaryHeh) < MAX_EDGE_LENGTH || hehlength(nextHeh) < MAX_EDGE_LENGTH) {
+				if (length(boundaryHeh) < MAX_EDGE_LENGTH || length(nextHeh) < MAX_EDGE_LENGTH) {
 					return;
 				}
 
@@ -428,12 +436,12 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 			},
 			*voh_begin(newVerts.front()));
 	// Split long boundary edges
-	while ([hehlength, hehcentre, this, start = *voh_begin(newVerts.front())]() {
+	while ([this, start = *voh_begin(newVerts.front())]() {
 		size_t countSplit = 0;
 		boundaryWalk(
-				[this, &countSplit, hehlength, hehcentre](const auto boundaryHeh) {
-					if (hehlength(boundaryHeh) > MAX_EDGE_LENGTH) {
-						split(edge_handle(boundaryHeh), hehcentre(boundaryHeh));
+				[this, &countSplit](const auto boundaryHeh) {
+					if (length(boundaryHeh) > MAX_EDGE_LENGTH) {
+						split(edge_handle(boundaryHeh), centre(boundaryHeh));
 						++countSplit;
 					}
 				},
