@@ -61,11 +61,69 @@ public:
 			});
 		}
 
+		[[nodiscard]]
 		glm::vec<Dim, GlobalDistance>
 		operator*(BaryPosition bari) const
 		{
-			const auto & t {*this};
-			return t[0] + (RelativePosition<Dim>(t[1] - t[0]) * bari.x) + (RelativePosition<Dim>(t[2] - t[0]) * bari.y);
+			return p(0) + (difference(p(0), p(1)) * bari.x) + (difference(p(0), p(2)) * bari.y);
+		}
+
+		[[nodiscard]]
+		auto
+		area() const
+			requires(Dim == 3)
+		{
+			return glm::length(crossProduct(difference(p(0), p(1)), difference(p(0), p(2)))) / 2.F;
+		}
+
+		[[nodiscard]]
+		Normal3D
+		normal() const
+			requires(Dim == 3)
+		{
+			return crossProduct(difference(p(0), p(1)), difference(p(0), p(2)));
+		}
+
+		[[nodiscard]]
+		Normal3D
+		nnormal() const
+			requires(Dim == 3)
+		{
+			return glm::normalize(normal());
+		}
+
+		[[nodiscard]]
+		auto
+		angle(glm::length_t c) const
+		{
+			return Arc {P(c), P(c + 2), P(c + 1)}.length();
+		}
+
+		template<glm::length_t D = Dim>
+		[[nodiscard]]
+		auto
+		angleAt(const GlobalPosition<D> pos) const
+			requires(D <= Dim)
+		{
+			for (glm::length_t i {}; i < 3; ++i) {
+				if (GlobalPosition<D> {p(i)} == pos) {
+					return angle(i);
+				}
+			}
+			return 0.F;
+		}
+
+		[[nodiscard]]
+		inline auto
+		p(const glm::length_t i) const
+		{
+			return base::operator[](i);
+		}
+
+		[[nodiscard]] inline auto
+		P(const glm::length_t i) const
+		{
+			return base::operator[](i % 3);
 		}
 	};
 
@@ -110,6 +168,14 @@ protected:
 	[[nodiscard]] static bool triangleContainsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 	[[nodiscard]] RelativePosition3D difference(const HalfedgeHandle) const;
+
+	template<glm::length_t D>
+	[[nodiscard]] static RelativePosition<D>
+	difference(const GlobalPosition<D> a, const GlobalPosition<D> b)
+	{
+		return b - a;
+	}
+
 	[[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
 	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;
 
