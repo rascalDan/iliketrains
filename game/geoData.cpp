@@ -457,7 +457,6 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {
 	static const RelativeDistance MAX_SLOPE = 1.5F;
 	static const RelativeDistance MIN_ARC = 0.01F;
-	static const RelativeDistance MAX_EDGE_LENGTH = 20'000.F;
 
 	if (triangleStrip.size() < 3) {
 		return;
@@ -474,36 +473,17 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		const auto [a, b, c] = newVert;
 		add_face(a, b, c);
 	});
-	// Split faces with two large boundary sides
-	boundaryWalk(
-			[this](const auto boundaryHeh) {
-				const auto nextHeh = next_halfedge_handle(boundaryHeh);
-				const auto faceHandle = opposite_face_handle(boundaryHeh);
-				if (faceHandle != opposite_face_handle(nextHeh)) {
-					return;
-				}
-				if (length(boundaryHeh) < MAX_EDGE_LENGTH || length(nextHeh) < MAX_EDGE_LENGTH) {
-					return;
-				}
-
-				const auto t = triangle<3>(faceHandle);
-				const auto centre = t * RelativePosition2D {.3F, .3F};
-				split(faceHandle, centre);
-			},
-			*voh_begin(newVerts.front()));
-	// Split long boundary edges
-	while ([this, start = *voh_begin(newVerts.front())]() {
-		size_t countSplit = 0;
-		boundaryWalk(
-				[this, &countSplit](const auto boundaryHeh) {
-					if (length(boundaryHeh) > MAX_EDGE_LENGTH) {
-						split(edge_handle(boundaryHeh), centre(boundaryHeh));
-						++countSplit;
-					}
-				},
-				start);
-		return countSplit;
-	}() > 0) { }
+	for (auto start = faces_sbegin(); std::any_of(start, faces_end(), [this, &start](const auto fh) {
+			 static constexpr auto MAX_FACE_AREA = 100'000'000.F;
+			 if (triangle<3>(fh).area() > MAX_FACE_AREA) {
+				 split(fh);
+				 start = FaceIter {*this, FaceHandle(fh), true};
+				 return true;
+			 }
+			 return false;
+		 });) {
+		;
+	}
 
 	// Extrude corners
 	struct Extrusion {
