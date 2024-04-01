@@ -396,6 +396,62 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 	return triangleContainsPoint(a.x, b) && triangleContainsPoint(a.y, b) && triangleContainsPoint(a.z, b);
 }
 
+std::array<GeoData::FaceHandle, 4>
+GeoData::split(FaceHandle _fh)
+{
+	// Collect halfedges of face
+	const HalfedgeHandle he0 = halfedge_handle(_fh);
+	const HalfedgeHandle he1 = next_halfedge_handle(he0);
+	const HalfedgeHandle he2 = next_halfedge_handle(he1);
+
+	const EdgeHandle eh0 = edge_handle(he0);
+	const EdgeHandle eh1 = edge_handle(he1);
+	const EdgeHandle eh2 = edge_handle(he2);
+
+	// Collect points of face
+	const VertexHandle p0 = to_vertex_handle(he0);
+	const VertexHandle p1 = to_vertex_handle(he1);
+	const VertexHandle p2 = to_vertex_handle(he2);
+
+	// Calculate midpoint coordinates
+	const Point new0 = centre(he0);
+	const Point new1 = centre(he1);
+	const Point new2 = centre(he2);
+
+	// Add vertices at midpoint coordinates
+	const VertexHandle v0 = add_vertex(new0);
+	const VertexHandle v1 = add_vertex(new1);
+	const VertexHandle v2 = add_vertex(new2);
+
+	const bool split0 = !is_boundary(eh0);
+	const bool split1 = !is_boundary(eh1);
+	const bool split2 = !is_boundary(eh2);
+
+	// delete original face
+	delete_face(_fh, false);
+
+	// split boundary edges of deleted face ( if not boundary )
+	if (split0) {
+		split(eh0, v0);
+	}
+
+	if (split1) {
+		split(eh1, v1);
+	}
+
+	if (split2) {
+		split(eh2, v2);
+	}
+
+	// Retriangulate
+	return {
+			add_face(v0, p0, v1),
+			add_face(p2, v0, v2),
+			add_face(v2, v1, p1),
+			add_face(v2, v0, v1),
+	};
+}
+
 void
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 {

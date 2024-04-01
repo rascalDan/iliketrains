@@ -115,6 +115,9 @@ protected:
 
 	void update_vertex_normals_only();
 
+	using OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits>::split;
+	std::array<FaceHandle, 4> split(FaceHandle);
+
 private:
 	GlobalPosition3D lowerExtent {}, upperExtent {};
 };
