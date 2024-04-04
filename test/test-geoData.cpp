@@ -244,9 +244,7 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		void
 		content(const SceneShader & shader) const override
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			terrain.render(shader);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 
 		void
