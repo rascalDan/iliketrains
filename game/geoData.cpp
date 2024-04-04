@@ -373,11 +373,19 @@ GeoData::centre(const HalfedgeHandle heh) const
 void
 GeoData::update_vertex_normals_only()
 {
-	for (auto vh : all_vertices()) {
-		Normal3D n;
-		calc_vertex_normal_correct(vh, n);
-		this->set_normal(vh, glm::normalize(n));
-	}
+	update_vertex_normals_only(vertices_sbegin());
+}
+
+void
+GeoData::update_vertex_normals_only(VertexIter start)
+{
+	std::for_each(start, vertices_end(), [this](const auto vh) {
+		if (normal(vh) == Normal3D {}) {
+			Normal3D n;
+			calc_vertex_normal_correct(vh, n);
+			this->set_normal(vh, glm::normalize(n));
+		}
+	});
 }
 
 bool
@@ -461,6 +469,8 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	if (triangleStrip.size() < 3) {
 		return;
 	}
+
+	const auto initialVertexCount = static_cast<unsigned int>(n_vertices());
 
 	// Create new vertices
 	std::vector<VertexHandle> newVerts;
@@ -653,6 +663,6 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 	});
 
 	// Tidy up
+	update_vertex_normals_only(VertexIter {*this, vertex_handle(initialVertexCount), true});
 	garbage_collection();
-	update_vertex_normals_only();
 }

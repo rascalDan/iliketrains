@@ -180,6 +180,7 @@ protected:
 	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;
 
 	void update_vertex_normals_only();
+	void update_vertex_normals_only(VertexIter start);
 
 	using OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits>::split;
 	std::array<FaceHandle, 4> split(FaceHandle);
