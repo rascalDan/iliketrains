@@ -107,11 +107,11 @@ GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistan
 OpenMesh::FaceHandle
 GeoData::findPoint(GlobalPosition2D p) const
 {
-	return findPoint(p, *faces_begin());
+	return findPoint(p, *faces_sbegin());
 }
 
 GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh) :
-	PointFace {p, mesh, *mesh->faces_begin()}
+	PointFace {p, mesh, *mesh->faces_sbegin()}
 {
 }
 
@@ -135,7 +135,7 @@ GeoData::PointFace::face(const GeoData * mesh, FaceHandle start) const
 GeoData::FaceHandle
 GeoData::PointFace::face(const GeoData * mesh) const
 {
-	return face(mesh, *mesh->faces_begin());
+	return face(mesh, *mesh->faces_sbegin());
 }
 
 namespace {
@@ -347,7 +347,7 @@ GeoData::triangleContainsPoint(const GlobalPosition2D p, FaceHandle face) const
 GeoData::HalfedgeHandle
 GeoData::findBoundaryStart() const
 {
-	return *std::find_if(halfedges_begin(), halfedges_end(), [this](const auto heh) {
+	return *std::find_if(halfedges_sbegin(), halfedges_end(), [this](const auto heh) {
 		return is_boundary(heh);
 	});
 }
@@ -664,5 +664,4 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 
 	// Tidy up
 	update_vertex_normals_only(VertexIter {*this, vertex_handle(initialVertexCount), true});
-	garbage_collection();
 }
