@@ -16,18 +16,22 @@ public:
 
 template<typename PositionType> class GeometricPlaneT : public GeometricPlane {
 public:
+	GeometricPlaneT() = default;
+
+	GeometricPlaneT(PositionType origin, Normal3D normal) : origin(std::move(origin)), normal(normal) { }
+
 	struct DistAndPosition {
 		PositionType::value_type dist;
 		PositionType position;
 	};
 
-	PositionType origin;
-	Normal3D normal;
+	PositionType origin {};
+	Normal3D normal {};
 
 	[[nodiscard]] inline PlaneRelation
 	getRelation(PositionType point) const
 	{
-		const auto d = glm::dot(normal, point - origin);
+		const auto d = glm::dot(normal, RelativePosition3D(point - origin));
 		return d < 0.F ? PlaneRelation::Below : d > 0.F ? PlaneRelation::Above : PlaneRelation::On;
 	}
 

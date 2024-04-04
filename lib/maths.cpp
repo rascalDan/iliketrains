@@ -4,6 +4,11 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
 
+Arc::Arc(const RelativePosition2D & dir0, const RelativePosition2D & dir1) :
+	Arc {vector_yaw(dir0), vector_yaw(dir1)} { }
+
+Arc::Arc(const Angle anga, const Angle angb) : pair {anga, (angb < anga) ? angb + two_pi : angb} { }
+
 glm::mat4
 flat_orientation(const Direction3D & diff)
 {
@@ -76,7 +81,7 @@ rotate_yp(Rotation2D a)
 }
 
 float
-vector_yaw(const Direction3D & diff)
+vector_yaw(const Direction2D & diff)
 {
 	return std::atan2(diff.x, diff.y);
 }

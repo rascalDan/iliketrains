@@ -30,14 +30,14 @@ Terrain::generateMeshes()
 	std::vector<Vertex> vertices;
 	vertices.reserve(geoData->n_vertices());
 	std::map<GeoData::VertexHandle, size_t> vertexIndex;
-	std::transform(geoData->vertices_begin(), geoData->vertices_end(), std::back_inserter(vertices),
+	std::transform(geoData->vertices_sbegin(), geoData->vertices_end(), std::back_inserter(vertices),
 			[this, &vertexIndex](const GeoData::VertexHandle v) {
 				vertexIndex.emplace(v, vertexIndex.size());
 				const auto p = geoData->point(v);
-				return Vertex {p, p / 10000, geoData->normal(v)};
+				return Vertex {p, RelativePosition2D(p) / 10000.F, geoData->normal(v)};
 			});
 	std::for_each(
-			geoData->faces_begin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
+			geoData->faces_sbegin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
 				std::transform(geoData->fv_begin(f), geoData->fv_end(f), std::back_inserter(indices),
 						[&vertexIndex](const GeoData::VertexHandle v) {
 							return vertexIndex[v];

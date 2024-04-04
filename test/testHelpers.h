@@ -2,10 +2,21 @@
 
 #include <boost/test/tools/context.hpp>
 #include <boost/test/tools/interface.hpp>
+#include <filesystem>
+#include <fstream>
 #include <iomanip> // IWYU pragma: keep std::setprecision
+#include <jsonParse-persistence.h>
 #include <memory>
 
 std::unique_ptr<char, decltype(&free)> uasprintf(const char * fmt, ...) __attribute__((format(printf, 1, 2)));
+
+template<typename T>
+decltype(auto)
+loadFixtureJson(const std::filesystem::path & path)
+{
+	std::ifstream in {FIXTURESDIR / path};
+	return Persistence::JsonParsePersistence {}.loadState<std::vector<T>>(in);
+}
 
 #define BOOST_CHECK_CLOSE_VEC(a_, b_) \
 	{ \

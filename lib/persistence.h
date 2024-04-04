@@ -81,11 +81,11 @@ namespace Persistence {
 			return make_s<SelectionT<T>>(value);
 		}
 
-		template<typename S>
+		template<typename S, typename... Extra>
 		[[nodiscard]] static SelectionPtr
-		make_s(T & value)
+		make_s(T & value, Extra &&... extra)
 		{
-			return std::make_unique<S>(value);
+			return std::make_unique<S>(value, std::forward<Extra>(extra)...);
 		}
 
 		T & v;
@@ -328,6 +328,65 @@ namespace Persistence {
 			out.beginArray();
 			Members {this->v}.write(out);
 			out.endArray();
+		}
+	};
+
+	template<typename... T> struct SelectionT<std::tuple<T...>> : public SelectionV<std::tuple<T...>> {
+		using V = std::tuple<T...>;
+		using SelectionV<V>::SelectionV;
+
+		struct Members : public SelectionV<V> {
+			template<size_t... Idx>
+			explicit Members(V & v, std::integer_sequence<size_t, Idx...>) :
+				SelectionV<V> {v}, members {SelectionV<std::tuple_element_t<Idx, V>>::make(std::get<Idx>(v))...}
+			{
+			}
+
+			void
+			beforeValue(Stack & stk) override
+			{
+				stk.push(std::move(members[idx++]));
+			}
+
+			std::size_t idx {0};
+			std::array<SelectionPtr, std::tuple_size_v<V>> members;
+		};
+
+		void
+		beginArray(Stack & stk) override
+		{
+			stk.push(this->template make_s<Members>(
+					this->v, std::make_integer_sequence<size_t, std::tuple_size_v<V>>()));
+		}
+	};
+
+	template<typename T, typename U> struct SelectionT<std::pair<T, U>> : public SelectionV<std::pair<T, U>> {
+		using V = std::pair<T, U>;
+		using SelectionV<V>::SelectionV;
+
+		struct Members : public SelectionV<V> {
+			explicit Members(V & v) :
+				SelectionV<V> {v}, members {
+										   SelectionV<T>::make(v.first),
+										   SelectionV<U>::make(v.second),
+								   }
+			{
+			}
+
+			void
+			beforeValue(Stack & stk) override
+			{
+				stk.push(std::move(members[idx++]));
+			}
+
+			std::size_t idx {0};
+			std::array<SelectionPtr, 2> members;
+		};
+
+		void
+		beginArray(Stack & stk) override
+		{
+			stk.push(this->template make_s<Members>(this->v));
 		}
 	};
 

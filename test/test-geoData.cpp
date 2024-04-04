@@ -1,7 +1,12 @@
 #define BOOST_TEST_MODULE terrain
+#include "game/terrain.h"
+#include "test/testMainWindow.h"
+#include "test/testRenderOutput.h"
 #include "testHelpers.h"
+#include "ui/applicationBase.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
+#include <gfx/gl/sceneRenderer.h>
 #include <stream_support.h>
 
 #include <game/geoData.h>
@@ -114,7 +119,7 @@ BOOST_DATA_TEST_CASE(findRayIntersect,
 		}),
 		p, d, i)
 {
-	BOOST_CHECK_EQUAL(fixedTerrtain.intersectRay({p, d}).value(), i);
+	BOOST_CHECK_EQUAL(fixedTerrtain.intersectRay({p, d})->first, i);
 }
 
 BOOST_AUTO_TEST_CASE(boundaryWalk)
@@ -187,6 +192,23 @@ BOOST_DATA_TEST_CASE(walkTerrainUntil,
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
 
+BOOST_AUTO_TEST_CASE(triangle_helpers)
+{
+	constexpr static GeoData::Triangle<3> t {{0, 0, 0}, {5, 0, 0}, {5, 5, 0}};
+
+	BOOST_CHECK_EQUAL(t.nnormal(), up);
+	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({0, 0, 0}), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 0, 0}), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 5, 0}), quarter_pi, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.angleAt({0, 1, 0}), 0.F, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
+}
+
 using FindEntiesData = std::tuple<GlobalPosition2D, GlobalPosition2D, int>;
 
 BOOST_DATA_TEST_CASE(findEntries,
@@ -198,4 +220,57 @@ BOOST_DATA_TEST_CASE(findEntries,
 		from, to, heh)
 {
 	BOOST_CHECK_EQUAL(fixedTerrtain.findEntry(from, to).idx(), heh);
+}
+
+using DeformTerrainData = std::tuple<std::vector<GlobalPosition3D>,
+		std::vector<std::pair<std::pair<GlobalPosition3D, Direction3D>, std::string>>>;
+
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
+
+BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/1.json"), points, cams)
+{
+	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
+	BOOST_CHECK_NO_THROW(gd->setHeights(points));
+
+	ApplicationBase ab;
+	TestMainWindow tmw;
+	TestRenderOutput tro {{640, 480}};
+
+	struct TestTerrain : public SceneProvider {
+		explicit TestTerrain(std::shared_ptr<GeoData> gd) : terrain(std::move(gd)) { }
+
+		const Terrain terrain;
+
+		void
+		content(const SceneShader & shader) const override
+		{
+			terrain.render(shader);
+		}
+
+		void
+		environment(const SceneShader &, const SceneRenderer & sr) const override
+		{
+			sr.setAmbientLight({0.1, 0.1, 0.1});
+			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+		}
+
+		void
+		lights(const SceneShader &) const override
+		{
+		}
+
+		void
+		shadows(const ShadowMapper & shadowMapper) const override
+		{
+			terrain.shadows(shadowMapper);
+		}
+	};
+
+	TestTerrain t {gd};
+	SceneRenderer ss {tro.size, tro.output};
+	std::for_each(cams.begin(), cams.end(), [&ss, &t, &tro](const auto & cam) {
+		ss.camera.setView(cam.first.first, glm::normalize(cam.first.second));
+		BOOST_CHECK_NO_THROW(ss.render(t));
+		Texture::save(tro.outImage, cam.second.c_str());
+	});
 }

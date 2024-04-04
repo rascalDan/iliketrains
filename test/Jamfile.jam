@@ -12,6 +12,7 @@ project : requirements
 	<define>BOOST_TEST_DYN_LINK
 	<define>RESDIR=\\\"$(res)/\\\"
 	<define>FIXTURESDIR=\\\"$(fixtures)/\\\"
+	<define>GLM_FORCE_SWIZZLE
 	<variant>debug:<warnings>pedantic
 	<variant>debug:<warnings-as-errors>on
 	<variant>debug:<cflags>-Wnon-virtual-dtor
@@ -46,7 +47,7 @@ lib test : [ glob *.cpp : test-*.cpp perf-*.cpp ] ;
 run test-collection.cpp ;
 run test-maths.cpp ;
 run test-lib.cpp ;
-run test-geoData.cpp : -- : fixtures/height/SD19.asc : <library>test ;
+run test-geoData.cpp : -- : [ sequence.insertion-sort [ glob-tree $(fixtures)/geoData : *.json ] fixtures/height/SD19.asc ] : <library>test ;
 run test-network.cpp : : : <library>test ;
 run test-persistence.cpp : -- : [ sequence.insertion-sort [ glob-tree $(fixtures)/json : *.json ] ] : <library>test ;
 run test-text.cpp : -- : test-glContainer : <library>test ;

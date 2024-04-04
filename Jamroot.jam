@@ -17,6 +17,7 @@ lib OpenMeshCore ;
 variant coverage : debug ;
 project : requirements
 	<cxxstd>20
+	<linkflags>-Wl,-z,defs
 	<variant>release:<lto>on
 	<variant>profile:<lto>on
 	<variant>coverage:<coverage>on

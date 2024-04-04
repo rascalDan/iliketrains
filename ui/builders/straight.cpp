@@ -16,7 +16,7 @@ BuilderStraight::move(
 {
 	if (p1) {
 		if (const auto p = geoData->intersectRay(ray)) {
-			candidateLinks.objects = network->candidateStraight(*p1, *p);
+			candidateLinks.objects = network->candidateStraight(*p1, p->first);
 		}
 		else {
 			candidateLinks.removeAll();
@@ -32,12 +32,12 @@ BuilderStraight::click(
 		case SDL_BUTTON_LEFT:
 			if (const auto p = geoData->intersectRay(ray)) {
 				if (p1) {
-					create(network, *p1, *p);
+					create(network, *p1, p->first);
 					candidateLinks.removeAll();
 					p1.reset();
 				}
 				else {
-					p1 = p;
+					p1 = p->first;
 				}
 			}
 			return;

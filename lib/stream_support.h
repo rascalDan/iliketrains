@@ -11,17 +11,16 @@
 template<typename S>
 concept stringlike = requires(const S & s) { s.substr(0); };
 template<typename T>
-concept spanable = std::is_constructible_v<std::span<const typename T::value_type>, T> && !stringlike<T>
-		&& !std::is_same_v<std::span<typename T::value_type>, T>;
+concept NonStringIterableCollection
+		= std::is_same_v<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())> && !stringlike<T>;
 
 namespace std {
-	template<typename T, std::size_t L>
 	std::ostream &
-	operator<<(std::ostream & s, const span<T, L> v)
+	operator<<(std::ostream & s, const NonStringIterableCollection auto & v)
 	{
 		s << '(';
 		for (const auto & i : v) {
-			if (&i != &v.front()) {
+			if (&i != &*v.begin()) {
 				s << ", ";
 			}
 			s << i;
@@ -41,13 +40,6 @@ namespace std {
 	operator<<(std::ostream & s, const glm::vec<L, T, Q> & v)
 	{
 		return (s << std::span {&v[0], L});
-	}
-
-	template<spanable T>
-	std::ostream &
-	operator<<(std::ostream & s, const T & v)
-	{
-		return (s << std::span {v});
 	}
 
 	template<typename First, typename Second>

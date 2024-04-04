@@ -61,11 +61,69 @@ public:
 			});
 		}
 
+		[[nodiscard]]
 		glm::vec<Dim, GlobalDistance>
 		operator*(BaryPosition bari) const
 		{
-			const auto & t {*this};
-			return t[0] + (RelativePosition<Dim>(t[1] - t[0]) * bari.x) + (RelativePosition<Dim>(t[2] - t[1]) * bari.y);
+			return p(0) + (difference(p(0), p(1)) * bari.x) + (difference(p(0), p(2)) * bari.y);
+		}
+
+		[[nodiscard]]
+		auto
+		area() const
+			requires(Dim == 3)
+		{
+			return glm::length(crossProduct(difference(p(0), p(1)), difference(p(0), p(2)))) / 2.F;
+		}
+
+		[[nodiscard]]
+		Normal3D
+		normal() const
+			requires(Dim == 3)
+		{
+			return crossProduct(difference(p(0), p(1)), difference(p(0), p(2)));
+		}
+
+		[[nodiscard]]
+		Normal3D
+		nnormal() const
+			requires(Dim == 3)
+		{
+			return glm::normalize(normal());
+		}
+
+		[[nodiscard]]
+		auto
+		angle(glm::length_t c) const
+		{
+			return Arc {P(c), P(c + 2), P(c + 1)}.length();
+		}
+
+		template<glm::length_t D = Dim>
+		[[nodiscard]]
+		auto
+		angleAt(const GlobalPosition<D> pos) const
+			requires(D <= Dim)
+		{
+			for (glm::length_t i {}; i < 3; ++i) {
+				if (GlobalPosition<D> {p(i)} == pos) {
+					return angle(i);
+				}
+			}
+			return 0.F;
+		}
+
+		[[nodiscard]]
+		inline auto
+		p(const glm::length_t i) const
+		{
+			return base::operator[](i);
+		}
+
+		[[nodiscard]] inline auto
+		P(const glm::length_t i) const
+		{
+			return base::operator[](i % 3);
 		}
 	};
 
@@ -73,8 +131,10 @@ public:
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D, FaceHandle start) const;
 
 	[[nodiscard]] GlobalPosition3D positionAt(const PointFace &) const;
-	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray<GlobalPosition3D> &) const;
-	[[nodiscard]] std::optional<GlobalPosition3D> intersectRay(const Ray<GlobalPosition3D> &, FaceHandle start) const;
+	using IntersectionLocation = std::pair<GlobalPosition3D, FaceHandle>;
+	using IntersectionResult = std::optional<IntersectionLocation>;
+	[[nodiscard]] IntersectionResult intersectRay(const Ray<GlobalPosition3D> &) const;
+	[[nodiscard]] IntersectionResult intersectRay(const Ray<GlobalPosition3D> &, FaceHandle start) const;
 
 	void walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const;
 	void walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const;
@@ -85,6 +145,8 @@ public:
 	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &, HalfedgeHandle start) const;
 
 	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
+
+	void setHeights(const std::span<const GlobalPosition3D> triangleStrip);
 
 	[[nodiscard]] auto
 	getExtents() const
@@ -102,9 +164,26 @@ protected:
 
 	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
 	[[nodiscard]] bool triangleContainsPoint(const GlobalPosition2D, FaceHandle) const;
+	[[nodiscard]] static bool triangleOverlapsTriangle(const Triangle<2> &, const Triangle<2> &);
+	[[nodiscard]] static bool triangleContainsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
+	[[nodiscard]] RelativePosition3D difference(const HalfedgeHandle) const;
+
+	template<glm::length_t D>
+	[[nodiscard]] static RelativePosition<D>
+	difference(const GlobalPosition<D> a, const GlobalPosition<D> b)
+	{
+		return b - a;
+	}
+
+	[[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
+	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;
 
 	void update_vertex_normals_only();
+	void update_vertex_normals_only(VertexIter start);
+
+	using OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits>::split;
+	std::array<FaceHandle, 4> split(FaceHandle);
 
 private:
 	GlobalPosition3D lowerExtent {}, upperExtent {};
