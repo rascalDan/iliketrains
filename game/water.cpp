@@ -1,4 +1,4 @@
-#include "terrain.h"
+#include "water.h"
 #include "game/geoData.h"
 #include "gfx/models/texture.h"
 #include <algorithm>
@@ -15,13 +15,13 @@
 #include <utility>
 #include <vector>
 
-Terrain::Terrain(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, grass {std::make_shared<Texture>("grass.png")}
+Water::Water(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, water {std::make_shared<Texture>("water.png")}
 {
 	generateMeshes();
 }
 
 void
-Terrain::generateMeshes()
+Water::generateMeshes()
 {
 	std::vector<unsigned int> indices;
 	indices.reserve(geoData->n_faces() * 3);
@@ -45,21 +45,15 @@ Terrain::generateMeshes()
 }
 
 void
-Terrain::tick(TickDuration)
+Water::tick(TickDuration dur)
 {
+	waveCycle += dur.count();
 }
 
 void
-Terrain::render(const SceneShader & shader) const
+Water::render(const SceneShader & shader) const
 {
-	shader.landmass.use();
-	grass->bind();
-	meshes.apply(&Mesh::Draw);
-}
-
-void
-Terrain::shadows(const ShadowMapper & shadowMapper) const
-{
-	shadowMapper.fixedPoint.use();
+	shader.water.use(waveCycle);
+	water->bind();
 	meshes.apply(&Mesh::Draw);
 }
