@@ -9,7 +9,6 @@
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.h>
 #include <glm/glm.hpp>
-#include <iterator>
 #include <location.h>
 #include <maths.h>
 #include <set>
@@ -22,6 +21,13 @@ namespace glm {
 	{
 		return std::tie(a.x, a.y) < std::tie(b.x, b.y);
 	}
+}
+
+template<>
+VertexArrayObject &
+VertexArrayObject::addAttribsFor<Water::Vertex>(const GLuint arrayBuffer, const GLuint divisor)
+{
+	return addAttribs<Water::Vertex, &Water::Vertex::pos>(arrayBuffer, divisor);
 }
 
 Water::Water(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, water {std::make_shared<Texture>("water.png")}
@@ -77,8 +83,7 @@ Water::generateMeshes()
 						const auto v = vertexIndex.emplace(pos, vertices.size());
 						if (v.second) {
 							const auto cpos = glm::clamp(pos, std::get<0>(extents).xy(), std::get<1>(extents).xy());
-							vertices.emplace_back(RelativePosition3D {geoData->positionAt(cpos)},
-									TextureRelCoord(pos / TILE_SIZE), up);
+							vertices.emplace_back(geoData->positionAt(cpos));
 						}
 						*out++ = static_cast<unsigned int>(v.first->second);
 					}
@@ -87,7 +92,7 @@ Water::generateMeshes()
 					indices.push_back(currentIndices[i]);
 				}
 			});
-	meshes.create<Mesh>(vertices, indices);
+	meshes.create<MeshT<Vertex>>(vertices, indices);
 }
 
 void
@@ -101,5 +106,5 @@ Water::render(const SceneShader & shader) const
 {
 	shader.water.use(waveCycle);
 	water->bind();
-	meshes.apply(&Mesh::Draw);
+	meshes.apply(&MeshT<GlobalPosition3D>::Draw);
 }

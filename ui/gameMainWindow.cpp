@@ -15,7 +15,6 @@
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <utility>
 
 class GameMainToolbar : Mode<decltype(GameMainSelector::target)>, public Toolbar {
 public:
@@ -31,7 +30,7 @@ public:
 GameMainWindow::GameMainWindow(size_t w, size_t h) :
 	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {Window::size, 0}
 {
-	uiComponents.create<ManualCameraController>(glm::vec2 {315'000'000, 495'000'000});
+	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
 	uiComponents.create<GameMainToolbar>(gms.get());
 }

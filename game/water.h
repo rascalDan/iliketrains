@@ -2,6 +2,7 @@
 
 #include "chronology.h"
 #include "collection.h"
+#include "config/types.h"
 #include "game/worldobject.h"
 #include <gfx/models/mesh.h>
 #include <gfx/renderable.h>
@@ -20,10 +21,14 @@ public:
 	void tick(TickDuration) override;
 	float waveCycle {0.F};
 
+	struct Vertex {
+		GlobalPosition3D pos;
+	};
+
 private:
 	void generateMeshes();
 
 	std::shared_ptr<GeoData> geoData;
-	Collection<Mesh, false> meshes;
+	Collection<MeshT<Vertex>, false> meshes;
 	std::shared_ptr<Texture> water;
 };
