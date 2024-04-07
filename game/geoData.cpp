@@ -65,36 +65,36 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 	return mesh;
 };
 
-template<typename T> constexpr static T GRID_SIZE = 10'000;
+constexpr static GlobalDistance GRID_SIZE = 10'000;
 
 GeoData
 GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistance h)
 {
+	assert((upper - lower) % GRID_SIZE == GlobalPosition2D {});
 	GeoData mesh;
 
 	mesh.lowerExtent = {lower, h};
 	mesh.upperExtent = {upper, h};
 
 	std::vector<VertexHandle> vertices;
-	for (GlobalDistance row = lower.x; row < upper.x; row += GRID_SIZE<GlobalDistance>) {
-		for (GlobalDistance col = lower.y; col < upper.y; col += GRID_SIZE<GlobalDistance>) {
+	for (GlobalDistance row = lower.x; row <= upper.x; row += GRID_SIZE) {
+		for (GlobalDistance col = lower.y; col <= upper.y; col += GRID_SIZE) {
 			vertices.push_back(mesh.add_vertex({col, row, h}));
 		}
 	}
 
-	const auto nrows = static_cast<size_t>(std::ceil(float(upper.x - lower.x) / GRID_SIZE<RelativeDistance>));
-	const auto ncols = static_cast<size_t>(std::ceil(float(upper.y - lower.y) / GRID_SIZE<RelativeDistance>));
-	for (size_t row = 1; row < nrows; ++row) {
-		for (size_t col = 1; col < ncols; ++col) {
+	const auto n = glm::vec<2, size_t> {((upper - lower) / GRID_SIZE) + 1};
+	for (auto row = 1U; row < n.x; ++row) {
+		for (auto col = 1U; col < n.y; ++col) {
 			mesh.add_face({
-					vertices[ncols * (row - 1) + (col - 1)],
-					vertices[ncols * (row - 0) + (col - 0)],
-					vertices[ncols * (row - 0) + (col - 1)],
+					vertices[n.y * (row - 1) + (col - 1)],
+					vertices[n.y * (row - 0) + (col - 0)],
+					vertices[n.y * (row - 0) + (col - 1)],
 			});
 			mesh.add_face({
-					vertices[ncols * (row - 1) + (col - 1)],
-					vertices[ncols * (row - 1) + (col - 0)],
-					vertices[ncols * (row - 0) + (col - 0)],
+					vertices[n.y * (row - 1) + (col - 1)],
+					vertices[n.y * (row - 1) + (col - 0)],
+					vertices[n.y * (row - 0) + (col - 0)],
 			});
 		}
 	}
