@@ -12,6 +12,7 @@
 #include <game/terrain.h>
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
+#include <game/water.h>
 #include <gfx/gl/sceneRenderer.h>
 #include <gfx/models/texture.h>
 #include <lib/glArrays.h>
@@ -26,11 +27,10 @@ class TestScene : public SceneProvider {
 			AssetFactory::loadXML(RESDIR "/brush47.xml")->assets.at("brush-47"));
 	std::shared_ptr<RailVehicle> train1, train2;
 	RailLinks rail;
+	std::shared_ptr<GeoData> gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
 
-	Terrain terrain {[]() {
-		auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
-		return gd;
-	}()};
+	Terrain terrain {gd};
+	Water water {gd};
 
 public:
 	TestScene()
@@ -51,6 +51,7 @@ public:
 	content(const SceneShader & shader) const override
 	{
 		terrain.render(shader);
+		water.render(shader);
 		brush47rvc->render(shader);
 		rail.render(shader);
 	}
@@ -132,12 +133,16 @@ BOOST_AUTO_TEST_CASE(terrain)
 	ss.camera.setView({310000000, 490000000, 600000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 
 	class TestTerrain : public SceneProvider {
-		Terrain terrain {std::make_shared<GeoData>(GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc"))};
+		std::shared_ptr<GeoData> gd
+				= std::make_shared<GeoData>(GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc"));
+		Terrain terrain {gd};
+		Water water {gd};
 
 		void
 		content(const SceneShader & shader) const override
 		{
 			terrain.render(shader);
+			water.render(shader);
 		}
 
 		void

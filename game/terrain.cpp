@@ -15,9 +15,7 @@
 #include <utility>
 #include <vector>
 
-Terrain::Terrain(std::shared_ptr<GeoData> tm) :
-	geoData {std::move(tm)}, grass {std::make_shared<Texture>("grass.png")},
-	water {std::make_shared<Texture>("water.png")}
+Terrain::Terrain(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, grass {std::make_shared<Texture>("grass.png")}
 {
 	generateMeshes();
 }
@@ -47,9 +45,8 @@ Terrain::generateMeshes()
 }
 
 void
-Terrain::tick(TickDuration dur)
+Terrain::tick(TickDuration)
 {
-	waveCycle += dur.count();
 }
 
 void
@@ -57,10 +54,6 @@ Terrain::render(const SceneShader & shader) const
 {
 	shader.landmass.use();
 	grass->bind();
-	meshes.apply(&Mesh::Draw);
-
-	shader.water.use(waveCycle);
-	water->bind();
 	meshes.apply(&Mesh::Draw);
 }
 

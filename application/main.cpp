@@ -18,6 +18,7 @@
 #include <game/vehicles/railVehicle.h>
 #include <game/vehicles/railVehicleClass.h>
 #include <game/vehicles/train.h>
+#include <game/water.h>
 #include <game/worldobject.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
@@ -43,6 +44,7 @@ public:
 		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
 		world.create<Terrain>(geoData);
+		world.create<Water>(geoData);
 		assets = AssetFactory::loadAll("res");
 
 		{

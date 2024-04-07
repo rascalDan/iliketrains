@@ -2,6 +2,7 @@
 
 #include "chronology.h"
 #include "collection.h"
+#include "config/types.h"
 #include "game/worldobject.h"
 #include <gfx/models/mesh.h>
 #include <gfx/renderable.h>
@@ -11,19 +12,23 @@ class SceneShader;
 class Texture;
 class GeoData;
 
-class Terrain : public WorldObject, public Renderable {
+class Water : public WorldObject, public Renderable {
 public:
-	explicit Terrain(std::shared_ptr<GeoData>);
+	explicit Water(std::shared_ptr<GeoData>);
 
 	void render(const SceneShader & shader) const override;
-	void shadows(const ShadowMapper &) const override;
 
 	void tick(TickDuration) override;
+	float waveCycle {0.F};
+
+	struct Vertex {
+		GlobalPosition3D pos;
+	};
 
 private:
 	void generateMeshes();
 
 	std::shared_ptr<GeoData> geoData;
-	Collection<Mesh, false> meshes;
-	std::shared_ptr<Texture> grass;
+	Collection<MeshT<Vertex>, false> meshes;
+	std::shared_ptr<Texture> water;
 };
