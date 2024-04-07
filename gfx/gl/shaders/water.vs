@@ -15,7 +15,7 @@ main()
 			cos(waves + (position.x / 1000000) + (position.y / 8000)) * 300.0);
 
 	FragPos = vec3(wpos.xy, position.z);
-	TexCoords = position.xy / 8192;
+	TexCoords = (position.xy / 8192) - (viewPoint.xy / 8192);
 
 	gl_Position = viewProjection * vec4(wpos - viewPoint, 1.0);
 }
