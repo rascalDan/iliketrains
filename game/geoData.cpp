@@ -6,6 +6,11 @@
 #include <maths.h>
 #include <set>
 
+GeoData::GeoData()
+{
+	add_property(surface);
+}
+
 GeoData
 GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 {

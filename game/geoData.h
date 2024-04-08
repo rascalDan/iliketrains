@@ -20,7 +20,9 @@ struct GeoDataTraits : public OpenMesh::DefaultTraits {
 
 class GeoData : public OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits> {
 private:
-	GeoData() = default;
+	GeoData();
+
+	OpenMesh::FPropHandleT<int> surface;
 
 public:
 	static GeoData loadFromAsciiGrid(const std::filesystem::path &);
@@ -61,47 +63,41 @@ public:
 			});
 		}
 
-		[[nodiscard]]
-		glm::vec<Dim, GlobalDistance>
+		[[nodiscard]] glm::vec<Dim, GlobalDistance>
 		operator*(BaryPosition bari) const
 		{
 			return p(0) + (difference(p(0), p(1)) * bari.x) + (difference(p(0), p(2)) * bari.y);
 		}
 
-		[[nodiscard]]
-		auto
+		[[nodiscard]] auto
 		area() const
 			requires(Dim == 3)
 		{
 			return glm::length(crossProduct(difference(p(0), p(1)), difference(p(0), p(2)))) / 2.F;
 		}
 
-		[[nodiscard]]
-		Normal3D
+		[[nodiscard]] Normal3D
 		normal() const
 			requires(Dim == 3)
 		{
 			return crossProduct(difference(p(0), p(1)), difference(p(0), p(2)));
 		}
 
-		[[nodiscard]]
-		Normal3D
+		[[nodiscard]] Normal3D
 		nnormal() const
 			requires(Dim == 3)
 		{
 			return glm::normalize(normal());
 		}
 
-		[[nodiscard]]
-		auto
+		[[nodiscard]] auto
 		angle(glm::length_t c) const
 		{
 			return Arc {P(c), P(c + 2), P(c + 1)}.length();
 		}
 
 		template<glm::length_t D = Dim>
-		[[nodiscard]]
-		auto
+		[[nodiscard]] auto
 		angleAt(const GlobalPosition<D> pos) const
 			requires(D <= Dim)
 		{
@@ -113,8 +109,7 @@ public:
 			return 0.F;
 		}
 
-		[[nodiscard]]
-		inline auto
+		[[nodiscard]] inline auto
 		p(const glm::length_t i) const
 		{
 			return base::operator[](i);
