@@ -3,6 +3,7 @@
 #include "collections.h" // IWYU pragma: keep IterableCollection
 #include "config/types.h"
 #include "ray.h"
+#include "surface.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
 #include <glm/vec2.hpp>
@@ -22,7 +23,7 @@ class GeoData : public OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits> {
 private:
 	GeoData();
 
-	OpenMesh::FPropHandleT<int> surface;
+	OpenMesh::FPropHandleT<const Surface *> surface;
 
 public:
 	static GeoData loadFromAsciiGrid(const std::filesystem::path &);
