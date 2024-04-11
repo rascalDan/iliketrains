@@ -150,6 +150,13 @@ public:
 		return std::tie(lowerExtent, upperExtent);
 	}
 
+	template<typename HandleT>
+	[[nodiscard]] auto
+	get_surface(const HandleT h)
+	{
+		return property(surface, h);
+	}
+
 protected:
 	template<glm::length_t Dim>
 	[[nodiscard]] Triangle<Dim>

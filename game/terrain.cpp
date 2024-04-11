@@ -27,18 +27,26 @@ Terrain::generateMeshes()
 	indices.reserve(geoData->n_faces() * 3);
 	std::vector<Vertex> vertices;
 	vertices.reserve(geoData->n_vertices());
-	std::map<GeoData::VertexHandle, size_t> vertexIndex;
-	std::transform(geoData->vertices_sbegin(), geoData->vertices_end(), std::back_inserter(vertices),
-			[this, &vertexIndex](const GeoData::VertexHandle v) {
-				vertexIndex.emplace(v, vertexIndex.size());
-				const auto p = geoData->point(v);
-				return Vertex {p, RelativePosition2D(p) / 10000.F, geoData->normal(v)};
+	std::map<std::pair<GeoData::VertexHandle, const Surface *>, size_t> vertexIndex;
+	std::for_each(geoData->vertices_sbegin(), geoData->vertices_end(),
+			[this, &vertexIndex, &vertices](const GeoData::VertexHandle v) {
+				std::for_each(geoData->vf_begin(v), geoData->vf_end(v),
+						[&vertexIndex, v, this, &vertices](const GeoData::FaceHandle f) {
+							if (const auto vertexIndexRef
+									= vertexIndex.emplace(std::make_pair(v, geoData->get_surface(f)), 0);
+									vertexIndexRef.second) {
+								vertexIndexRef.first->second = vertices.size();
+
+								const auto p = geoData->point(v);
+								vertices.emplace_back(p, RelativePosition2D(p) / 10000.F, geoData->normal(v));
+							}
+						});
 			});
 	std::for_each(
 			geoData->faces_sbegin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
 				std::transform(geoData->fv_begin(f), geoData->fv_end(f), std::back_inserter(indices),
-						[&vertexIndex](const GeoData::VertexHandle v) {
-							return vertexIndex[v];
+						[&vertexIndex, f, this](const GeoData::VertexHandle v) {
+							return vertexIndex[std::make_pair(v, geoData->get_surface(f))];
 						});
 			});
 	meshes.create<Mesh>(vertices, indices);
