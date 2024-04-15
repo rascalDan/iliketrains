@@ -4,7 +4,7 @@
 #include "gfx/gl/shaders/gs-commonShadowPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
-#include "gfx/gl/shaders/vs-shadowFixedPoint.h"
+#include "gfx/gl/shaders/vs-shadowLandmass.h"
 #include "gl_traits.h"
 #include "location.h"
 #include "maths.h"
@@ -18,7 +18,7 @@
 #include <vector>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
-	fixedPoint {shadowFixedPoint_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
+	landmess {shadowLandmass_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
 	glTexImage3D(
@@ -92,7 +92,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 
 				return lightProjection * lightViewDir;
 			});
-	for (const auto p : std::initializer_list<const ShadowProgram *> {&fixedPoint, &dynamicPoint, &dynamicPointInst}) {
+	for (const auto p : std::initializer_list<const ShadowProgram *> {&landmess, &dynamicPoint, &dynamicPointInst}) {
 		p->setView(out, lightViewPoint);
 	}
 	scene.shadows(*this);

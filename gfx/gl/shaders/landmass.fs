@@ -1,9 +1,12 @@
 #version 330 core
 
-include(`materialInterface.glsl')
 include(`materialOut.glsl')
+in vec3 FragPos;
+in vec3 Normal;
+flat in vec3 ColourBias;
 
 uniform sampler2D texture0;
+uniform ivec3 viewPoint;
 
 const vec3 grass = vec3(.1, .4, .05);
 const vec3 slope = vec3(.6, .6, .4);
@@ -11,9 +14,9 @@ const vec3 rock = vec3(.2, .2, .1);
 const vec3 sand = vec3(.76, .7, .5);
 const vec3 snow = vec3(.97, .97, .99);
 
-const float beachline = 500;
-const float snowline_low = 28000;
-const float snowline_high = 30000;
+const int beachline = 500;
+const int snowline_low = 28000;
+const int snowline_high = 30000;
 
 const float slope_min = .99;
 const float slope_mid = .95;
@@ -28,10 +31,14 @@ mixBetween(vec3 colA, vec3 colB, float blend, float low, float high)
 void
 main()
 {
-	vec3 color = texture(texture0, TexCoords).rgb;
+	ivec3 position = ivec3(FragPos) + viewPoint;
+	vec3 color = texture(texture0, vec2(position.xy % 10000) / 10000.0).rgb;
 
-	float height = FragPos.z;
-	if (height < beachline) { // Sandy beach
+	int height = position.z;
+	if (ColourBias.r >= 0) {
+		color *= ColourBias;
+	}
+	else if (height < beachline) { // Sandy beach
 		color *= sand;
 	}
 	else if (Normal.z < slope_max) { // Dark rocky face
@@ -60,7 +67,7 @@ main()
 		}
 	}
 
-	gPosition = ivec4(FragPos, 1);
+	gPosition = ivec4(position, 1);
 	gNormal = vec4(Normal, 1);
 	gAlbedoSpec = vec4(color, 1);
 }

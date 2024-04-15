@@ -12,6 +12,7 @@
 #include <gfx/gl/shaders/vs-dynamicPoint.h>
 #include <gfx/gl/shaders/vs-dynamicPointInst.h>
 #include <gfx/gl/shaders/vs-fixedPoint.h>
+#include <gfx/gl/shaders/vs-landmass.h>
 #include <gfx/gl/shaders/vs-networkCurve.h>
 #include <gfx/gl/shaders/vs-networkStraight.h>
 #include <gfx/gl/shaders/vs-pointLight.h>
@@ -33,7 +34,7 @@ SceneShader::allPrograms(auto member, auto &&... ps) const
 }
 
 SceneShader::SceneShader() :
-	basicInst {dynamicPointInst_vs, material_fs}, landmass {fixedPoint_vs, landmass_fs},
+	basicInst {dynamicPointInst_vs, material_fs}, landmass {landmass_vs, landmass_fs},
 	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
 	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs},
 	networkStraight {networkStraight_vs, networkStraight_gs, network_fs},

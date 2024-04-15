@@ -15,9 +15,19 @@
 #include <utility>
 #include <vector>
 
+static constexpr RGB openSurface {-1};
+
 Terrain::Terrain(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, grass {std::make_shared<Texture>("grass.png")}
 {
 	generateMeshes();
+}
+
+template<>
+VertexArrayObject &
+VertexArrayObject::addAttribsFor<Terrain::Vertex>(const GLuint arrayBuffer, const GLuint divisor)
+{
+	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal, &Terrain::Vertex::colourBias>(
+			arrayBuffer, divisor);
 }
 
 void
@@ -32,13 +42,13 @@ Terrain::generateMeshes()
 			[this, &vertexIndex, &vertices](const GeoData::VertexHandle v) {
 				std::for_each(geoData->vf_begin(v), geoData->vf_end(v),
 						[&vertexIndex, v, this, &vertices](const GeoData::FaceHandle f) {
-							if (const auto vertexIndexRef
-									= vertexIndex.emplace(std::make_pair(v, geoData->get_surface(f)), 0);
+							const auto surface = geoData->get_surface(f);
+							if (const auto vertexIndexRef = vertexIndex.emplace(std::make_pair(v, surface), 0);
 									vertexIndexRef.second) {
 								vertexIndexRef.first->second = vertices.size();
 
-								const auto p = geoData->point(v);
-								vertices.emplace_back(p, RelativePosition2D(p) / 10000.F, geoData->normal(v));
+								vertices.emplace_back(geoData->point(v), geoData->normal(v),
+										surface ? surface->colorBias : openSurface);
 							}
 						});
 			});
@@ -49,7 +59,7 @@ Terrain::generateMeshes()
 							return vertexIndex[std::make_pair(v, geoData->get_surface(f))];
 						});
 			});
-	meshes.create<Mesh>(vertices, indices);
+	meshes.create<MeshT<Vertex>>(vertices, indices);
 }
 
 void
@@ -68,6 +78,6 @@ Terrain::render(const SceneShader & shader) const
 void
 Terrain::shadows(const ShadowMapper & shadowMapper) const
 {
-	shadowMapper.fixedPoint.use();
+	shadowMapper.landmess.use();
 	meshes.apply(&Mesh::Draw);
 }
