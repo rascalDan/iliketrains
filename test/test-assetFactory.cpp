@@ -12,6 +12,7 @@
 #include "game/scenary/illuminator.h"
 #include "game/scenary/light.h"
 #include "game/scenary/plant.h"
+#include "game/surface.h"
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
 #include "gfx/gl/sceneRenderer.h"
@@ -79,6 +80,20 @@ private:
 };
 
 BOOST_FIXTURE_TEST_SUITE(m, FactoryFixture);
+
+BOOST_AUTO_TEST_CASE(surfaces, *boost::unit_test::timeout(5))
+{
+	auto mf = AssetFactory::loadXML(RESDIR "/surfaces.xml");
+	BOOST_REQUIRE(mf);
+	BOOST_CHECK_EQUAL(4, mf->assets.size());
+	auto gravelAsset = mf->assets.at("terrain.surface.gravel");
+	BOOST_REQUIRE(gravelAsset);
+	auto gravel = std::dynamic_pointer_cast<Surface>(gravelAsset);
+	BOOST_REQUIRE(gravel);
+	BOOST_REQUIRE_EQUAL(gravel->name, "Gravel");
+	BOOST_REQUIRE_EQUAL(gravel->colorBias, RGB {.9F});
+	BOOST_REQUIRE_EQUAL(gravel->quality, 1.F);
+}
 
 BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 {

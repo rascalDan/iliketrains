@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ilt p.id="assetFactory">
+  <asset p.typeid="Surface" id="terrain.surface.gravel" name="Gravel" colorBias=".9,.9,.9" quality="1"/>
+  <asset p.typeid="Surface" id="terrain.surface.dirt" name="Dirt" colorBias=".38,.35,.25" quality=".1"/>
+  <asset p.typeid="Surface" id="terrain.surface.tarmac" name="Tarmac" colorBias=".1,.1,.1" quality="1"/>
+  <asset p.typeid="Surface" id="terrain.surface.concrete" name="Concrete" colorBias=".8,.8,.8" quality=".9"/>
+</ilt>
