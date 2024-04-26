@@ -409,7 +409,7 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 	return triangleContainsPoint(a.x, b) && triangleContainsPoint(a.y, b) && triangleContainsPoint(a.z, b);
 }
 
-std::array<GeoData::FaceHandle, 4>
+void
 GeoData::split(FaceHandle _fh)
 {
 	// Collect halfedges of face
@@ -457,12 +457,10 @@ GeoData::split(FaceHandle _fh)
 	}
 
 	// Retriangulate
-	return {
-			add_face(v0, p0, v1),
-			add_face(p2, v0, v2),
-			add_face(v2, v1, p1),
-			add_face(v2, v0, v1),
-	};
+	add_face(v0, p0, v1);
+	add_face(p2, v0, v2);
+	add_face(v2, v1, p1);
+	add_face(v2, v0, v1);
 }
 
 void
