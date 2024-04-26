@@ -464,7 +464,7 @@ GeoData::split(FaceHandle _fh)
 }
 
 void
-GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
+GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const Surface & newFaceSurface)
 {
 	static const RelativeDistance MAX_SLOPE = 1.5F;
 	static const RelativeDistance MIN_ARC = 0.01F;
@@ -482,6 +482,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		return add_vertex(tsVert);
 	});
 	//  Create new faces
+	const auto initialFaceCount = static_cast<int>(n_faces());
 	std::for_each(strip_begin(newVerts), strip_end(newVerts), [this](const auto & newVert) {
 		const auto [a, b, c] = newVert;
 		add_face(a, b, c);
@@ -497,6 +498,11 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 		 });) {
 		;
 	}
+	std::vector<FaceHandle> newFaces;
+	std::copy_if(FaceIter {*this, FaceHandle {initialFaceCount}, true}, faces_end(), std::back_inserter(newFaces),
+			[this](FaceHandle fh) {
+				return !this->status(fh).deleted();
+			});
 
 	// Extrude corners
 	struct Extrusion {
@@ -667,4 +673,8 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip)
 
 	// Tidy up
 	update_vertex_normals_only(VertexIter {*this, vertex_handle(initialVertexCount), true});
+
+	std::for_each(newFaces.begin(), newFaces.end(), [&newFaceSurface, this](const auto fh) {
+		property(surface, fh) = &newFaceSurface;
+	});
 }

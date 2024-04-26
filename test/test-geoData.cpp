@@ -229,8 +229,10 @@ BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
 
 BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/1.json"), points, cams)
 {
+	Surface surface;
+	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	BOOST_CHECK_NO_THROW(gd->setHeights(points));
+	BOOST_CHECK_NO_THROW(gd->setHeights(points, surface));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;

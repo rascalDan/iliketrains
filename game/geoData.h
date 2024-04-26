@@ -142,7 +142,7 @@ public:
 
 	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
 
-	void setHeights(const std::span<const GlobalPosition3D> triangleStrip);
+	void setHeights(const std::span<const GlobalPosition3D> triangleStrip, const Surface &);
 
 	[[nodiscard]] auto
 	getExtents() const
