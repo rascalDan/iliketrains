@@ -487,16 +487,12 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		const auto [a, b, c] = newVert;
 		add_face(a, b, c);
 	});
-	for (auto start = faces_sbegin(); std::any_of(start, faces_end(), [this, &start](const auto fh) {
-			 static constexpr auto MAX_FACE_AREA = 100'000'000.F;
-			 if (triangle<3>(fh).area() > MAX_FACE_AREA) {
-				 split(fh);
-				 start = FaceIter {*this, FaceHandle(fh), true};
-				 return true;
-			 }
-			 return false;
-		 });) {
-		;
+	for (auto fhi = FaceIter {*this, FaceHandle {initialFaceCount}, true}; fhi != faces_end(); fhi++) {
+		static constexpr auto MAX_FACE_AREA = 100'000'000.F;
+		const auto fh = *fhi;
+		if (triangle<3>(fh).area() > MAX_FACE_AREA) {
+			split(fh);
+		}
 	}
 	std::vector<FaceHandle> newFaces;
 	std::copy_if(FaceIter {*this, FaceHandle {initialFaceCount}, true}, faces_end(), std::back_inserter(newFaces),
