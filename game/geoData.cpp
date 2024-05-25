@@ -4,6 +4,7 @@
 #include <fstream>
 #include <glm/gtx/intersect.hpp>
 #include <maths.h>
+#include <ranges>
 #include <set>
 
 GeoData::GeoData()
@@ -571,15 +572,14 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	//  Cut existing terrain
 	extrusionExtents.emplace_back(extrusionExtents.front()); // Circular next
 	std::vector<std::vector<VertexHandle>> boundaryFaces;
-	std::adjacent_find(extrusionExtents.begin(), extrusionExtents.end(),
-			[this, &boundaryFaces](const auto & first, const auto & second) {
-				const auto p0 = point(first.boundaryVertex);
-				const auto p1 = point(second.boundaryVertex);
-				const auto bdir = RelativePosition3D(p1 - p0);
-				const auto make_plane = [p0](auto y, auto z) {
-					return GeometricPlaneT<GlobalPosition3D> {p0, crossProduct(y, z)};
-				};
-				const auto planes = ((first.boundaryVertex == second.boundaryVertex)
+	for (const auto & [first, second] : extrusionExtents | std::views::adjacent<2>) {
+		const auto p0 = point(first.boundaryVertex);
+		const auto p1 = point(second.boundaryVertex);
+		const auto bdir = RelativePosition3D(p1 - p0);
+		const auto make_plane = [p0](auto y, auto z) {
+			return GeometricPlaneT<GlobalPosition3D> {p0, crossProduct(y, z)};
+		};
+		const auto planes = ((first.boundaryVertex == second.boundaryVertex)
 						? std::array {make_plane(second.lowerLimit, first.lowerLimit),
 									make_plane(second.upperLimit, first.upperLimit),
 						}
@@ -587,58 +587,57 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 								  make_plane(bdir, second.lowerLimit),
 									make_plane(bdir, second.upperLimit),
 						});
-				assert(planes.front().normal.z > 0.F);
-				assert(planes.back().normal.z > 0.F);
+		assert(planes.front().normal.z > 0.F);
+		assert(planes.back().normal.z > 0.F);
 
-				auto & out = boundaryFaces.emplace_back();
-				out.emplace_back(first.boundaryVertex);
-				out.emplace_back(first.extrusionVertex);
-				for (auto currentVertex = first.extrusionVertex;
-						!find_halfedge(currentVertex, second.extrusionVertex).is_valid();) {
-					[[maybe_unused]] const auto n = std::any_of(
-							voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
-								const auto next = next_halfedge_handle(currentVertexOut);
-								const auto nextVertex = to_vertex_handle(next);
-								const auto startVertex = from_vertex_handle(next);
-								if (nextVertex == *++out.rbegin()) {
-									// This half edge goes back to the previous vertex
-									return false;
-								}
-								const auto edge = edge_handle(next);
-								const auto ep0 = point(startVertex);
-								const auto ep1 = point(nextVertex);
-								if (planes.front().getRelation(ep1) == GeometricPlane::PlaneRelation::Below
-										|| planes.back().getRelation(ep1) == GeometricPlane::PlaneRelation::Above) {
-									return false;
-								}
-								const auto diff = RelativePosition3D(ep1 - ep0);
-								const auto length = glm::length(diff);
-								const auto dir = diff / length;
-								const Ray r {ep1, -dir};
-								const auto dists = planes * [r](const auto & plane) {
-									RelativeDistance dist {};
-									if (r.intersectPlane(plane.origin, plane.normal, dist)) {
-										return dist;
-									}
-									return INFINITY;
-								};
-								const auto dist = *std::min_element(dists.begin(), dists.end());
-								const auto splitPos = ep1 - (dir * dist);
-								if (dist <= length) {
-									currentVertex = split(edge, splitPos);
-									out.emplace_back(currentVertex);
-									return true;
-								}
-								return false;
-							});
-					assert(n);
-				}
-				out.emplace_back(second.extrusionVertex);
-				if (first.boundaryVertex != second.boundaryVertex) {
-					out.emplace_back(second.boundaryVertex);
-				}
-				return false;
-			});
+		auto & out = boundaryFaces.emplace_back();
+		out.emplace_back(first.boundaryVertex);
+		out.emplace_back(first.extrusionVertex);
+		for (auto currentVertex = first.extrusionVertex;
+				!find_halfedge(currentVertex, second.extrusionVertex).is_valid();) {
+			[[maybe_unused]] const auto n
+					= std::any_of(voh_begin(currentVertex), voh_end(currentVertex), [&](const auto currentVertexOut) {
+						  const auto next = next_halfedge_handle(currentVertexOut);
+						  const auto nextVertex = to_vertex_handle(next);
+						  const auto startVertex = from_vertex_handle(next);
+						  if (nextVertex == *++out.rbegin()) {
+							  // This half edge goes back to the previous vertex
+							  return false;
+						  }
+						  const auto edge = edge_handle(next);
+						  const auto ep0 = point(startVertex);
+						  const auto ep1 = point(nextVertex);
+						  if (planes.front().getRelation(ep1) == GeometricPlane::PlaneRelation::Below
+								  || planes.back().getRelation(ep1) == GeometricPlane::PlaneRelation::Above) {
+							  return false;
+						  }
+						  const auto diff = RelativePosition3D(ep1 - ep0);
+						  const auto length = glm::length(diff);
+						  const auto dir = diff / length;
+						  const Ray r {ep1, -dir};
+						  const auto dists = planes * [r](const auto & plane) {
+							  RelativeDistance dist {};
+							  if (r.intersectPlane(plane.origin, plane.normal, dist)) {
+								  return dist;
+							  }
+							  return INFINITY;
+						  };
+						  const auto dist = *std::min_element(dists.begin(), dists.end());
+						  const auto splitPos = ep1 - (dir * dist);
+						  if (dist <= length) {
+							  currentVertex = split(edge, splitPos);
+							  out.emplace_back(currentVertex);
+							  return true;
+						  }
+						  return false;
+					  });
+			assert(n);
+		}
+		out.emplace_back(second.extrusionVertex);
+		if (first.boundaryVertex != second.boundaryVertex) {
+			out.emplace_back(second.boundaryVertex);
+		}
+	}
 
 	//  Remove old faces
 	std::set<FaceHandle> visited;
