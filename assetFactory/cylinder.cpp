@@ -1,6 +1,7 @@
 #include "cylinder.h"
 #include "maths.h"
 #include "modelFactoryMesh.h"
+#include <ranges>
 
 Cylinder::CreatedFaces
 Cylinder::createMesh(ModelFactoryMesh & mesh, Scale3D lodf) const
@@ -40,13 +41,12 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, Scale3D lodf) const
 		// Wrap around
 		edge.back() = edge.front();
 		// Transform adjacent pairs of top/bottom pairs to faces
-		std::adjacent_find(edge.begin(), edge.end(), [&mesh, &surface](const auto & first, const auto & second) {
+		for (const auto & [first, second] : edge | std::views::adjacent<2>) {
 			const auto fh
 					= surface.insert(mesh.add_namedFace("edge", first.first, first.second, second.second, second.first))
 							  ->second;
 			mesh.property(mesh.smoothFaceProperty, fh) = true;
-			return false;
-		});
+		}
 	}
 
 	return surface;
