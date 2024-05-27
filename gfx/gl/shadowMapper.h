@@ -50,7 +50,7 @@ public:
 		RequiredUniformLocation modelPosLoc;
 	};
 
-	FixedPoint fixedPoint, dynamicPointInst;
+	FixedPoint landmess, dynamicPointInst;
 	DynamicPoint dynamicPoint;
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)
