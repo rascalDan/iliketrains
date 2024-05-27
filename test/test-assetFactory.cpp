@@ -79,8 +79,6 @@ private:
 	SceneRenderer sceneRenderer;
 };
 
-BOOST_FIXTURE_TEST_SUITE(m, FactoryFixture);
-
 BOOST_AUTO_TEST_CASE(surfaces, *boost::unit_test::timeout(5))
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/surfaces.xml");
@@ -94,6 +92,8 @@ BOOST_AUTO_TEST_CASE(surfaces, *boost::unit_test::timeout(5))
 	BOOST_REQUIRE_EQUAL(gravel->colorBias, RGB {.9F});
 	BOOST_REQUIRE_EQUAL(gravel->quality, 1.F);
 }
+
+BOOST_FIXTURE_TEST_SUITE(m, FactoryFixture);
 
 BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 {
