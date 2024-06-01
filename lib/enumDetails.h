@@ -108,8 +108,8 @@ private:
 	constexpr static auto valid_count {std::count_if(valid_flags.begin(), valid_flags.end(), std::identity {})};
 
 	constexpr static auto
-	lookup(const auto key, const auto & search, const auto & out)
-			-> std::optional<typename std::decay_t<decltype(out)>::value_type>
+	lookup(const auto key, const auto & search,
+			const auto & out) -> std::optional<typename std::decay_t<decltype(out)>::value_type>
 	{
 		if (const auto itr = std::find(search.begin(), search.end(), key); itr != search.end()) {
 			return out[static_cast<std::size_t>(std::distance(search.begin(), itr))];

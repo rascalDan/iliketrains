@@ -8,8 +8,8 @@ public:
 #ifndef __cpp_aggregate_paren_init
 	constexpr Vertex(
 			RelativePosition3D pos, TextureRelCoord texCoord, Normal3D normal, RGBA colour = {}, GLuint material = 0) :
-		pos {std::move(pos)},
-		texCoord {std::move(texCoord)}, normal {std::move(normal)}, colour {std::move(colour)}, material {material}
+		pos {std::move(pos)}, texCoord {std::move(texCoord)}, normal {std::move(normal)}, colour {std::move(colour)},
+		material {material}
 	{
 	}
 #endif
