@@ -176,7 +176,7 @@ operator||(const glm::vec<L, T, Q> v1, const T v2)
 
 template<glm::length_t L, typename T, glm::qualifier Q>
 inline constexpr glm::vec<L, T, Q>
-operator%(const glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
+perspectiveMultiply(const glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
 	const auto p2 = mutation * (p || T(1));
 	return p2 / p2.w;
@@ -184,9 +184,9 @@ operator%(const glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & muta
 
 template<glm::length_t L, typename T, glm::qualifier Q>
 inline constexpr glm::vec<L, T, Q>
-operator%=(glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
+perspectiveApply(glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
-	return p = p % mutation;
+	return p = perspectiveMultiply(p, mutation);
 }
 
 float normalize(float ang);

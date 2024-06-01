@@ -15,7 +15,7 @@ Use::createMesh(ModelFactoryMesh & mesh, Scale3D levelOfDetailFactor) const
 			const auto fvr = mesh.fv_range(f.second);
 			for (const auto & v : fvr) {
 				if (!vs.contains(v)) {
-					mesh.point(v) %= m;
+					perspectiveApply(mesh.point(v), m);
 					vs.insert(v);
 				}
 			}

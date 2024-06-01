@@ -53,7 +53,7 @@ FaceController::extrude(ModelFactoryMesh & mesh, const std::string & faceName, O
 	// create new vertices
 	const auto vertices
 			= baseVertices * [&mesh, mutation = getMatrix(), centre = mesh.calc_face_centroid(faceHandle)](auto && v) {
-				  return mesh.add_vertex(centre + ((mesh.point(v) - centre) % mutation));
+				  return mesh.add_vertex(centre + perspectiveMultiply((mesh.point(v) - centre), mutation));
 			  };
 	// get new faces names
 	const auto vertexCount = baseVertices.size();
