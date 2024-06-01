@@ -64,7 +64,12 @@ private:
 public:
 	constexpr static std::string_view valueName {nameArr.data(), nameArr.size()};
 	constexpr static auto valid {valueName.back() < '0' || valueName.back() > '9'};
+#pragma GCC diagnostic push
+#ifdef __clang__
+#	pragma GCC diagnostic ignored "-Wenum-constexpr-conversion"
+#endif
 	constexpr static auto raw_value {value};
+#pragma GCC diagnostic pop
 };
 
 /// EnumValueCollection
@@ -85,6 +90,9 @@ private:
 	{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#ifdef __clang__
+#	pragma GCC diagnostic ignored "-Wenum-constexpr-conversion"
+#endif
 		return std::array {EnumValueDetails<static_cast<E>(n)>::valid...};
 #pragma GCC diagnostic pop
 	}
@@ -93,7 +101,12 @@ private:
 	constexpr static auto
 	get_values(std::integer_sequence<int, n...>)
 	{
+#pragma GCC diagnostic push
+#ifdef __clang__
+#	pragma GCC diagnostic ignored "-Wenum-constexpr-conversion"
+#endif
 		return std::array {EnumValueDetails<static_cast<E>(n)>::raw_value...};
+#pragma GCC diagnostic pop
 	}
 
 	template<auto... n>
