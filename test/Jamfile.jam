@@ -13,13 +13,13 @@ project : requirements
 	<define>RESDIR=\\\"$(res)/\\\"
 	<define>FIXTURESDIR=\\\"$(fixtures)/\\\"
 	<define>GLM_FORCE_SWIZZLE
-	<variant>debug:<warnings>pedantic
+	<toolset>gcc,<variant>debug:<warnings>pedantic
+	<toolset>clang,<variant>debug:<warnings>extra
 	<variant>debug:<warnings-as-errors>on
 	<variant>debug:<cflags>-Wnon-virtual-dtor
 	<variant>debug:<cflags>-Wcast-align
 	<variant>debug:<cflags>-Wunused
 	<variant>debug:<cflags>-Woverloaded-virtual
-	<variant>debug:<cflags>-Wpedantic
 	<variant>debug:<cflags>-Wconversion
 	<variant>debug:<cflags>-Wsign-conversion
 	<variant>debug:<cflags>-Wnull-dereference
