@@ -77,11 +77,12 @@ AssetFactory::parseColour(std::string_view in) const
 			throw std::runtime_error("Invalid hex colour specification");
 		}
 		ColourAlpha out {0, 0, 0, 1};
-		std::generate_n(&out.r, (in.length() - 1) / 2, [in = in.data() + 1]() mutable {
-			uint8_t channel;
-			std::from_chars(in, in + 2, channel, 16);
-			in += 2;
-			return static_cast<float>(channel) / 255.f;
+		std::generate_n(&out.r, (in.length() - 1) / 2, [in = in.substr(1)]() mutable {
+			const auto hexpair = in.substr(0, 2);
+			uint8_t channel = 0;
+			std::from_chars(hexpair.begin(), hexpair.end(), channel, 16);
+			in.remove_prefix(2);
+			return static_cast<float>(channel) / 255.F;
 		});
 		return out;
 	}
