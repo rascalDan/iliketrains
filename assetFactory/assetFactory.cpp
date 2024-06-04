@@ -35,7 +35,7 @@ AssetFactory::Assets
 AssetFactory::loadAll(const std::filesystem::path & root)
 {
 	return std::accumulate(std::filesystem::recursive_directory_iterator {root},
-			std::filesystem::recursive_directory_iterator {}, Assets {}, [](auto && out, auto && path) {
+			std::filesystem::recursive_directory_iterator {}, Assets {}, [](auto out, const auto & path) {
 				if (path.path().extension() == ".xml") {
 					out.merge(loadXML(path)->assets);
 				}
