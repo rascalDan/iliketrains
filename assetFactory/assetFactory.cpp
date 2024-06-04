@@ -11,6 +11,7 @@
 #include "resource.h"
 #include "saxParse-persistence.h"
 #include "texturePacker.h"
+#include <fstream>
 #include <numeric>
 
 AssetFactory::AssetFactory() :
@@ -45,14 +46,17 @@ AssetFactory::loadAll(const std::filesystem::path & root)
 AssetFactory::Colours
 AssetFactory::parseX11RGB(const char * path)
 {
-	filesystem::FileStar rgb {path, "r"};
+	std::ifstream rgb {path};
 	Colours out;
-	Colour colour;
-	char inname[BUFSIZ];
-	while (fscanf(rgb, "%f %f %f %[^\n\r]s", &colour.r, &colour.g, &colour.b, inname) == 4) {
-		std::string name {inname};
-		normalizeColourName(name);
-		out.emplace(std::move(name), colour / 255.f);
+	while (rgb.good()) {
+		Colour colour;
+		std::string name;
+		rgb >> colour.r >> colour.g >> colour.b;
+		std::getline(rgb, name);
+		if (rgb.good()) {
+			normalizeColourName(name);
+			out.emplace(std::move(name), colour / 255.F);
+		}
 	}
 	return out;
 }
