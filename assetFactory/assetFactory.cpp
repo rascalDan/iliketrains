@@ -5,10 +5,8 @@
 #include "filesystem.h"
 #include "gfx/image.h"
 #include "gfx/models/texture.h"
-#include "modelFactoryMesh_fwd.h"
 #include "object.h"
 #include "plane.h"
-#include "resource.h"
 #include "saxParse-persistence.h"
 #include "texturePacker.h"
 #include <fstream>
