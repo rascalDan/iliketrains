@@ -18,8 +18,8 @@ variant coverage : debug ;
 project : requirements
 	<cxxstd>23
 	<linkflags>-Wl,-z,defs
-	<variant>release:<lto>on
-	<variant>profile:<lto>on
+	<variant>release:<lto>on-thin
+	<variant>profile:<lto>on-thin
 	<variant>coverage:<coverage>on
 	<toolset>tidy:<enable>all
 	<toolset>tidy:<exclude>bin/link-static/lib/jsonParse.cpp
