@@ -70,10 +70,10 @@ using CharDataTest = std::tuple<decltype(get_codepoint(nullptr)), Font::CharData
 
 BOOST_DATA_TEST_CASE(initialize_chardata_A,
 		boost::unit_test::data::make<CharDataTest>({
-				{'A', {0, {34, 35}, {627, 0}, {-1, 35}, 32}},
-				{'I', {0, {6, 35}, {862, 0}, {4, 35}, 13}},
-				{'j', {0, {11, 45}, {1656, 0}, {-3, 35}, 11}},
-				{'o', {0, {24, 27}, {1748, 0}, {1, 27}, 27}},
+				{'A', {0, {34, 35}, {712, 0}, {-1, 35}, 32}},
+				{'I', {0, {6, 35}, {947, 0}, {4, 35}, 13}},
+				{'j', {0, {11, 45}, {1741, 0}, {-3, 35}, 11}},
+				{'o', {0, {24, 27}, {1833, 0}, {1, 27}, 27}},
 		}),
 		character, expected)
 {

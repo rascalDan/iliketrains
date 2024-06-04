@@ -1,5 +1,6 @@
 #include "window.h"
 #include "uiComponent.h"
+#include <format>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <stdexcept>
@@ -9,7 +10,7 @@ Window::GLInitHelper::GLInitHelper()
 	[[maybe_unused]] static auto init = []() {
 		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 		if (const auto version = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)); version < 30003) {
-			throw std::runtime_error {"Insufficient OpenGL version: " + std::to_string(version)};
+			throw std::runtime_error {std::format("Insufficient OpenGL version: {}", version)};
 		}
 		else {
 			return version;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <charconv>
+#include <format>
 #include <functional>
 #include <glm/glm.hpp>
 #include <iosfwd>
@@ -571,7 +572,7 @@ namespace Persistence {
 				make_default_as_needed(this->v);
 				PersistenceSelect ps {mbr};
 				if (this->v->persist(ps)) {
-					throw std::runtime_error("cannot find member: " + mbr);
+					throw std::runtime_error {std::format("Cannot find member: {}", mbr)};
 				}
 				return std::move(ps.sel);
 			}

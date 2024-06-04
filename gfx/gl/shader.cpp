@@ -1,6 +1,7 @@
 #include "shader.h"
 #include <algorithm>
 #include <array>
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -70,6 +71,6 @@ Shader::CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string
 			glGetShaderInfoLog(shader, error.size(), nullptr, error.data());
 		}
 
-		throw std::runtime_error {std::string {errorMessage} + ": '" + std::string {error.data(), error.size()} + "'"};
+		throw std::runtime_error {std::format("{}: '{}'", errorMessage, error.data())};
 	}
 }

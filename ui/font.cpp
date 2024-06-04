@@ -1,6 +1,7 @@
 #include "font.h"
 #include <algorithm>
 #include <cctype>
+#include <format>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "gl_traits.h"
@@ -15,49 +16,51 @@
 
 // IWYU pragma: no_forward_declare FT_LibraryRec_
 
-std::string
-FT_Error_StringSafe(FT_Error err)
-{
-	if (const auto errstr = FT_Error_String(err)) {
-		return {errstr};
+namespace {
+	std::string
+	FT_Error_StringSafe(FT_Error err)
+	{
+		if (const auto errstr = FT_Error_String(err)) {
+			return {errstr};
+		}
+		return std::format("Unknown FT error: {}", err);
 	}
-	return std::to_string(err);
-}
 
-template<auto Func, typename... Args>
-void
-FT_Check(Args &&... args)
-{
-	if (const auto err = Func(std::forward<Args>(args)...)) {
-		throw std::runtime_error {std::string {"FreeType error: "} + FT_Error_StringSafe(err)};
-	}
-}
-
-const std::string BASIC_CHARS = []() {
-	std::string chars;
-	for (char c {}; c >= 0; c++) {
-		if (isgraph(c)) {
-			chars += c;
+	template<auto Func, typename... Args>
+	void
+	FT_Check(Args &&... args)
+	{
+		if (const auto err = Func(std::forward<Args>(args)...)) {
+			throw std::runtime_error {std::format("FreeType error: {}", FT_Error_StringSafe(err))};
 		}
 	}
-	return chars + "£€²³";
-}();
 
-using FT = glRef<FT_Library,
-		[]() {
-			FT_Library ft {};
-			FT_Check<FT_Init_FreeType>(&ft);
-			return ft;
-		},
-		FT_Done_FreeType>;
+	const std::string BASIC_CHARS = []() {
+		std::string chars {"£€²³"};
+		for (char c {}; c >= 0; c++) {
+			if (isgraph(c)) {
+				chars += c;
+			}
+		}
+		return chars;
+	}();
 
-using Face = glRef<FT_Face,
-		[](FT_Library ft, const char * const name) {
-			FT_Face face {};
-			FT_Check<FT_New_Face>(ft, name, 0, &face);
-			return face;
-		},
-		FT_Done_Face>;
+	using FT = glRef<FT_Library,
+			[]() {
+				FT_Library ft {};
+				FT_Check<FT_Init_FreeType>(&ft);
+				return ft;
+			},
+			FT_Done_FreeType>;
+
+	using Face = glRef<FT_Face,
+			[](FT_Library ft, const char * const name) {
+				FT_Face face {};
+				FT_Check<FT_New_Face>(ft, name, 0, &face);
+				return face;
+			},
+			FT_Done_Face>;
+}
 
 Font::Font(std::filesystem::path p, unsigned s) : path {std::move(p)}, size {getTextureSize(s)}
 {

@@ -1,5 +1,6 @@
 #include "program.h"
 #include "shader.h"
+#include <format>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <location.h>
@@ -30,6 +31,6 @@ Program::RequiredUniformLocation::RequiredUniformLocation(GLuint program, const 
 	UniformLocation {program, name}
 {
 	if (location < 0) {
-		throw std::logic_error(std::string {"Required uniform does not exist: "} + name);
+		throw std::logic_error {std::format("Required uniform does not exist: {}", name)};
 	}
 }

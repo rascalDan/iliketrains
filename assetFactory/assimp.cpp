@@ -1,12 +1,11 @@
 #include "assimp.h"
 #include "assetFactory.h"
 #include "collections.h"
-#include "ptr.h"
 #include "resource.h"
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <future>
+#include <format>
 #include <stb/stb_image.h>
 
 template<typename T>
@@ -39,7 +38,7 @@ public:
 	const aiNode * node;
 
 	CreatedFaces
-	createMesh(ModelFactoryMesh & mesh, Scale3D) const
+	createMesh(ModelFactoryMesh & mesh, Scale3D) const override
 	{
 		CreatedFaces faces;
 		addMesh(faces, mesh, node);
@@ -103,7 +102,7 @@ AssImp::postLoad()
 	SceneCPtr scene {
 			aiImportFile(Resource::mapPath(path).c_str(), aiProcess_RemoveRedundantMaterials), &aiReleaseImport};
 	if (!scene) {
-		throw std::runtime_error("Failed to load asset library: " + path);
+		throw std::runtime_error(std::format("Failed to load asset library: {}", path));
 	}
 	if (auto mf = Persistence::ParseBase::getShared<AssetFactory>("assetFactory")) {
 		const auto root = AIRANGE(scene->mRootNode, Children);
