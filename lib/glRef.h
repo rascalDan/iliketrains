@@ -2,6 +2,7 @@
 
 #include <special_members.h>
 #include <stdexcept>
+#include <utility>
 
 template<typename IdType, auto get, auto release, auto... fixed> class glRef {
 public:
@@ -13,10 +14,7 @@ public:
 		}
 	}
 
-	glRef(glRef && other) : id {other.id}
-	{
-		other.id = {};
-	}
+	glRef(glRef && other) noexcept : id {std::exchange(other.id, {})} { }
 
 	~glRef()
 	{
@@ -28,15 +26,14 @@ public:
 
 	NO_COPY(glRef);
 
-	const auto &
-	operator=(glRef && other)
+	auto &
+	operator=(glRef && other) noexcept
 	{
 		if (id) {
 			// cppcheck-suppress redundantPointerOp
 			(*release)(id);
 		}
-		id = other.id;
-		other.id = {};
+		id = std::exchange(other.id, {});
 		return *this;
 	}
 
@@ -58,5 +55,5 @@ public:
 	}
 
 private:
-	IdType id;
+	IdType id {};
 };
