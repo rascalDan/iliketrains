@@ -15,7 +15,7 @@ lib pthread ;
 lib OpenMeshCore ;
 
 variant coverage : debug ;
-project : requirements
+project i-like-trains : requirements
 	<cxxstd>23
 	<linkflags>-Wl,-z,defs
 	<variant>release:<lto>on-thin
