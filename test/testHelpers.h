@@ -6,9 +6,6 @@
 #include <fstream>
 #include <iomanip> // IWYU pragma: keep std::setprecision
 #include <jsonParse-persistence.h>
-#include <memory>
-
-std::unique_ptr<char, decltype(&free)> uasprintf(const char * fmt, ...) __attribute__((format(printf, 1, 2)));
 
 template<typename T>
 decltype(auto)
