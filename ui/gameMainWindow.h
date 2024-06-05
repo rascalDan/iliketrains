@@ -8,10 +8,14 @@
 class GameMainWindow : public Window, SceneRenderer, public SceneProvider {
 public:
 	GameMainWindow(size_t w, size_t h);
+	~GameMainWindow() override;
 
 	void tick(TickDuration) override;
 
 	void render() const override;
+
+	NO_MOVE(GameMainWindow);
+	NO_COPY(GameMainWindow);
 
 private:
 	void content(const SceneShader &) const override;
