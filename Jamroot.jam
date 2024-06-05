@@ -93,6 +93,7 @@ lib ilt :
 	<library>thirdparty//glad
 	<implicit-dependency>thirdparty//glad
 	<library>sdl2
+	<library>thirdparty//imguisdl2
 	<library>freetype2
 	<library>glib-2.0
 	<library>mxml
