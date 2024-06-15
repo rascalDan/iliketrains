@@ -35,6 +35,7 @@ ApplicationBase::initSDL() const
 void
 ApplicationBase::initImGUI() const
 {
+	puts(__PRETTY_FUNCTION__);
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();

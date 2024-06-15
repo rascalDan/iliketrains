@@ -16,12 +16,6 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdl2.h"
-#pragma GCC diagnostic pop
-
 class GameMainToolbar : Mode<decltype(GameMainSelector::target)>, public Toolbar {
 public:
 	explicit GameMainToolbar(GameMainSelector * gms_) :
@@ -33,22 +27,14 @@ public:
 	}
 };
 
-GameMainWindow::GameMainWindow(size_t w, size_t h) :
-	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {Window::size, 0}
+GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, SceneRenderer {{w, h}, 0}
 {
-	ImGui_ImplSDL2_InitForOpenGL(m_window, glContext.get());
-	ImGui_ImplOpenGL3_Init();
-
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
 	uiComponents.create<GameMainToolbar>(gms.get());
 }
 
-GameMainWindow::~GameMainWindow()
-{
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
-}
+GameMainWindow::~GameMainWindow() { }
 
 void
 GameMainWindow::tick(TickDuration)
@@ -60,7 +46,10 @@ void
 GameMainWindow::render() const
 {
 	SceneRenderer::render(*this);
-	Window::render();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
 }
 
 void

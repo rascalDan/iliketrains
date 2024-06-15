@@ -1,3 +1,4 @@
+#include "ui/mainWindow.h"
 #include <array>
 #include <assetFactory/assetFactory.h>
 #include <chrono>
@@ -41,7 +42,7 @@ public:
 		geoData = std::make_shared<GeoData>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
 
 		Windows windows;
-		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+		windows.create<MainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT)->setContent<GameMainWindow>();
 
 		world.create<Terrain>(geoData);
 		world.create<Water>(geoData);
