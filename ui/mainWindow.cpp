@@ -12,7 +12,6 @@ MainWindow::MainWindow(size_t w, size_t h) : MainWindow {w, h, "I Like Trains", 
 
 MainWindow::MainWindow(size_t w, size_t h, const std::string & title, Uint32 flags) : Window {w, h, title, flags}
 {
-	puts(__PRETTY_FUNCTION__);
 	if (const auto version = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress)); version < 30003) {
 		throw std::runtime_error {std::format("Insufficient OpenGL version: {}", version)};
 	}
