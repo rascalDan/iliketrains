@@ -1,6 +1,11 @@
 #include "window.h"
 #include <glad/gl.h>
 #include <glm/glm.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl2.h"
+#pragma GCC diagnostic pop
 
 Window::Window(size_t width, size_t height, const std::string & title, Uint32 flags) :
 	size {static_cast<int>(width), static_cast<int>(height)},
@@ -48,9 +53,15 @@ Window::refresh() const
 	SDL_GL_MakeCurrent(m_window, glContext);
 	clear(0.0F, 0.0F, 0.0F, 1.0F);
 
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
 	if (content) {
 		content->render();
+		// Render UI stuff here
 	}
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	swapBuffers();
 }
