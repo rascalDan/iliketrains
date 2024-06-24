@@ -6,13 +6,13 @@ import lex ;
 import sequence ;
 import glsl ;
 
-pkg-config.import sdl2 ;
-pkg-config.import freetype2 ;
-pkg-config.import glib-2.0 ;
-pkg-config.import mxml ;
-pkg-config.import assimp ;
-lib pthread ;
-lib OpenMeshCore ;
+pkg-config.import sdl2 : : <link>shared ;
+pkg-config.import freetype2 : : <link>shared ;
+pkg-config.import glib-2.0 : : <link>shared ;
+pkg-config.import mxml : : <link>shared ;
+pkg-config.import assimp : : <link>shared ;
+lib pthread : : <link>shared ;
+lib OpenMeshCore : : <link>shared ;
 
 variant coverage : debug ;
 project i-like-trains : requirements
