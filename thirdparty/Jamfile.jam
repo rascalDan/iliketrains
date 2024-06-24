@@ -4,4 +4,5 @@ lib glad : gl.xml :
 	<cflags>-fPIC
 	<warnings>off
 	<warnings-as-errors>off
+	<glad.version>3.3
 	;
