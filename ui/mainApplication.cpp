@@ -36,6 +36,8 @@ MainApplication::processInputs()
 			return;
 		}
 		ImGui_ImplSDL2_ProcessEvent(&e);
-		windows.applyOne(&Window::handleInput, e);
+		if (!ImGui::GetIO().WantCaptureMouse) {
+			windows.applyOne(&Window::handleInput, e);
+		}
 	}
 }
