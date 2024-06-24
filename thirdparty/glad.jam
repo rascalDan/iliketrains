@@ -4,8 +4,8 @@ import toolset : flags ;
 
 generators.register-standard glad.generate.c : XML : C(%) H(glad/%) XML ;
 feature glad.pythonpath : thirdparty/glad : path ;
-feature glad.profile : core compatibility ;
-feature glad.version : 4.6 ;
+feature glad.profile : core compatibility : symmetric ;
+feature glad.version : 4.6 4.5 4.4 4.3 4.2 4.1 4.0 3.3 3.2 3.1 3.0 2.1 2.0 1.5 1.4 1.3 1.2 1.1 1.0 : symmetric ;
 flags glad.generate.c PYTHONPATH <glad.pythonpath> ;
 flags glad.generate.c PROFILE <glad.profile> ;
 flags glad.generate.c VERSION <glad.version> ;
