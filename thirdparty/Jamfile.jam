@@ -11,8 +11,12 @@ lib imguisdl2 :
 	imgui/backends/imgui_impl_sdl2.cpp
 	imgui/backends/imgui_impl_opengl3.cpp
 	:
+	<link>static
 	<include>imgui
-	<library>..//sdl2
+	<use>..//sdl2
+	<cflags>-fPIC
+	<warnings>off
+	<warnings-as-errors>off
 	: :
 	<include>imgui
 	;
