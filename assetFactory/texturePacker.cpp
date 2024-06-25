@@ -53,7 +53,7 @@ TexturePacker::pack(Size size) const
 			}
 		}
 		else {
-			const auto x = pack({size.x * 2, size.y}), y = pack({size.x, size.y * 2});
+			auto x = pack({size.x * 2, size.y}), y = pack({size.x, size.y * 2});
 			if (!x.first.empty() && (y.first.empty() || area(x.second) < area(y.second))) {
 				return x;
 			}
