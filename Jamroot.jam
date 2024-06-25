@@ -90,6 +90,7 @@ lib ilt :
 	<toolset>gcc,<variant>debug:<cflags>-Wuseless-cast
 	<include>.
 	<include>lib
+	<library>thirdparty//stb
 	<library>thirdparty//glad
 	<implicit-dependency>thirdparty//glad
 	<library>sdl2

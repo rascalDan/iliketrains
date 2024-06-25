@@ -6,3 +6,9 @@ lib glad : gl.xml :
 	<warnings-as-errors>off
 	<glad.version>3.3
 	;
+lib stb : stb_image.c :
+	<link>static
+	<cflags>-fPIC
+	<warnings>off
+	<warnings-as-errors>off
+	;
