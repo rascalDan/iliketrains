@@ -1,7 +1,4 @@
 #include "mesh.h"
-#include "glArrays.h"
-#include "vertex.h"
-#include <cstddef>
 
 MeshBase::MeshBase(GLsizei m_numIndices, GLenum mode) : m_numIndices {m_numIndices}, mode {mode} { }
 

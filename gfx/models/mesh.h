@@ -3,7 +3,6 @@
 #include "gfx/gl/vertexArrayObject.h"
 #include <glArrays.h>
 #include <glad/gl.h>
-#include <memory>
 #include <span>
 #include <stdTypeDefs.h>
 
