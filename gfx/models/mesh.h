@@ -11,7 +11,7 @@ class Vertex;
 class MeshBase {
 public:
 	void Draw() const;
-	void DrawInstanced(GLuint vao, GLsizei count) const;
+	void DrawInstanced(GLuint vao, GLsizei count, GLuint base = 0) const;
 
 protected:
 	MeshBase(GLsizei m_numIndices, GLenum mode);

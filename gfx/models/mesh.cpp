@@ -13,11 +13,11 @@ MeshBase::Draw() const
 }
 
 void
-MeshBase::DrawInstanced(GLuint vao, GLsizei count) const
+MeshBase::DrawInstanced(GLuint vao, GLsizei count, GLuint base) const
 {
 	glBindVertexArray(vao);
 
-	glDrawElementsInstanced(mode, m_numIndices, GL_UNSIGNED_INT, nullptr, count);
+	glDrawElementsInstancedBaseInstance(mode, m_numIndices, GL_UNSIGNED_INT, nullptr, count, base);
 
 	glBindVertexArray(0);
 }
