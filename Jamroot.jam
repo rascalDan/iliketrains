@@ -90,9 +90,8 @@ lib ilt :
 	<toolset>gcc,<variant>debug:<cflags>-Wuseless-cast
 	<include>.
 	<include>lib
-	<library>thirdparty//stb
-	<library>thirdparty//glad
-	<implicit-dependency>thirdparty//glad
+	<library>thirdparty/<variant>release
+	<implicit-dependency>thirdparty
 	<library>sdl2
 	<library>freetype2
 	<library>glib-2.0
@@ -104,7 +103,7 @@ lib ilt :
 	<define>GLM_ENABLE_EXPERIMENTAL
 	<include>.
 	<include>lib
-	<implicit-dependency>thirdparty//glad
+	<implicit-dependency>thirdparty
 	<library>OpenMeshCore
 	;
 
