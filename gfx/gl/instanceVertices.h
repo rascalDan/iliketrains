@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glContainer.h"
-#include "pack.h"
 #include <cassert>
 #include <special_members.h>
 #include <utility>
@@ -14,7 +13,8 @@ public:
 	public:
 		InstanceProxy(InstanceVertices * iv, std::size_t idx) : instances {iv}, index {idx} { }
 
-		InstanceProxy(InstanceProxy && other) : instances {std::exchange(other.instances, nullptr)}, index {other.index}
+		InstanceProxy(InstanceProxy && other) noexcept :
+			instances {std::exchange(other.instances, nullptr)}, index {other.index}
 		{
 		}
 
@@ -28,7 +28,7 @@ public:
 		}
 
 		InstanceProxy &
-		operator=(InstanceProxy && other)
+		operator=(InstanceProxy && other) noexcept
 		{
 			if (instances) {
 				instances->release(index);
@@ -39,17 +39,20 @@ public:
 		}
 
 		template<typename U>
-		T &
+		InstanceProxy &
 		operator=(U && v)
 		{
-			return instances->lookup(index) = std::forward<U>(v);
+			instances->lookup(index) = std::forward<U>(v);
+			return *this;
 		}
 
+		// NOLINTNEXTLINE)hicpp-explicit-conversions
 		[[nodiscard]] operator T &()
 		{
 			return instances->lookup(index);
 		}
 
+		// NOLINTNEXTLINE)hicpp-explicit-conversions
 		[[nodiscard]] operator const T &() const
 		{
 			return instances->lookup(index);
