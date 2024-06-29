@@ -174,4 +174,34 @@ BOOST_DATA_TEST_CASE(shuffle_random, boost::unit_test::data::xrange(0, 10), x)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(partition_by, *boost::unit_test::timeout(1))
+{
+	std::mt19937 gen(std::random_device {}());
+	std::uniform_int_distribution<int> dist(0, 100000);
+	static constexpr auto N = 1000;
+	reserve(N);
+	std::vector<decltype(acquire(0))> instances;
+	instances.reserve(N);
+	// At least one of each
+	instances.push_back(acquire(1));
+	instances.push_back(acquire(3));
+	while (instances.size() < N) {
+		instances.push_back(acquire(dist(gen)));
+	}
+	const std::vector<int> values(instances.begin(), instances.end());
+	BOOST_REQUIRE_EQUAL(size(), N);
+
+	const auto pred = [](auto x) {
+		return (x % 3) == 0;
+	};
+	auto matchedEnd = partition(pred);
+	// The underlying data is partitioned...
+	BOOST_REQUIRE(std::is_partitioned(mkcspan().cbegin(), mkcspan().cend(), pred));
+	// The external view of the data is unchanged...
+	BOOST_CHECK_EQUAL_COLLECTIONS(values.cbegin(), values.cend(), instances.cbegin(), instances.cend());
+	// The partition point is right...
+	BOOST_CHECK(!pred(*matchedEnd));
+	BOOST_CHECK(pred(*--matchedEnd));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -124,6 +124,13 @@ public:
 		return base::size();
 	}
 
+	template<typename Pred>
+	glContainer<T>::iterator
+	partition(Pred pred)
+	{
+		return partition(base::begin(), base::end(), pred);
+	}
+
 protected:
 	friend InstanceProxy;
 
@@ -150,6 +157,22 @@ protected:
 	lookup(size_t pindex)
 	{
 		return base::data()[index[pindex]];
+	}
+
+	template<typename Pred>
+	glContainer<T>::iterator
+	partition(glContainer<T>::iterator first, glContainer<T>::iterator last, Pred pred)
+	{
+		while (first < last) {
+			first = std::find_if_not(first, last, pred);
+			last = --std::find_if(std::make_reverse_iterator(last), std::make_reverse_iterator(first), pred).base();
+			if (first < last) {
+				std::iter_swap(first, last);
+				std::iter_swap(std::find(index.begin(), index.end(), first - base::begin()),
+						std::find(index.begin(), index.end(), last - base::begin()));
+			}
+		}
+		return first;
 	}
 
 	//  Index into buffer given to nth proxy
