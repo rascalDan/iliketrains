@@ -51,3 +51,11 @@ loadFixtureJson(const std::filesystem::path & path)
 		BOOST_CHECK(VAR); \
 	} \
 	else
+
+#define BOOST_CHECK_EQUAL_COLCOL(cola_, colb_) \
+	BOOST_CHECK_EQUAL_COLLECTIONS(cola_.begin(), cola_.end(), colb_.begin(), colb_.end())
+#define BOOST_CHECK_EQUAL_COLVALS(col_, ...) \
+	{ \
+		const std::initializer_list<decltype(col_)::value_type> vals {__VA_ARGS__}; \
+		BOOST_CHECK_EQUAL_COLLECTIONS(col_.begin(), col_.end(), vals.begin(), vals.end()); \
+	}

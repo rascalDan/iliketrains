@@ -13,12 +13,33 @@
 BOOST_GLOBAL_FIXTURE(ApplicationBase);
 BOOST_GLOBAL_FIXTURE(TestMainWindow);
 
-BOOST_FIXTURE_TEST_SUITE(i, InstanceVertices<int>)
+struct TestInstanceVertices : public InstanceVertices<int> {
+	void
+	checkReverseIndex(std::source_location ctx = std::source_location::current())
+	{
+		BOOST_TEST_CONTEXT(ctx.function_name() << ":" << ctx.line()) {
+			std::vector<size_t> genIndexIndex(size(), npos);
+			for (size_t i {}; i < index.size(); i++) {
+				if (index[i] != npos) {
+					BOOST_REQUIRE_EQUAL(genIndexIndex.at(index[i]), npos);
+					genIndexIndex.at(index[i]) = i;
+				}
+			}
+
+			BOOST_TEST_CONTEXT(reverseIndex << genIndexIndex) {
+				BOOST_CHECK_EQUAL_COLCOL(reverseIndex, genIndexIndex);
+			}
+		}
+	}
+};
+
+BOOST_FIXTURE_TEST_SUITE(i, TestInstanceVertices)
 
 BOOST_AUTO_TEST_CASE(createDestroy)
 {
 	BOOST_CHECK(unused.empty());
 	BOOST_CHECK(index.empty());
+	BOOST_CHECK(reverseIndex.empty());
 }
 
 BOOST_AUTO_TEST_CASE(acquireRelease)
@@ -29,11 +50,14 @@ BOOST_AUTO_TEST_CASE(acquireRelease)
 		BOOST_CHECK_EQUAL(1, size());
 		BOOST_REQUIRE_EQUAL(1, index.size());
 		BOOST_CHECK_EQUAL(0, index.front());
+		BOOST_REQUIRE_EQUAL(1, reverseIndex.size());
+		BOOST_CHECK_EQUAL(0, reverseIndex.front());
 		BOOST_CHECK(unused.empty());
 	}
 	BOOST_CHECK_EQUAL(0, size());
 	BOOST_CHECK(unused.empty());
 	BOOST_CHECK(index.empty());
+	BOOST_CHECK(reverseIndex.empty());
 }
 
 BOOST_AUTO_TEST_CASE(acquireReleaseMove)
@@ -50,6 +74,7 @@ BOOST_AUTO_TEST_CASE(acquireReleaseMove)
 	BOOST_CHECK_EQUAL(0, size());
 	BOOST_CHECK(unused.empty());
 	BOOST_CHECK(index.empty());
+	BOOST_CHECK(reverseIndex.empty());
 }
 
 BOOST_AUTO_TEST_CASE(autoMapUnmap)
@@ -100,15 +125,13 @@ BOOST_AUTO_TEST_CASE(shuffle)
 	BOOST_CHECK_EQUAL(at(2), *proxies[2].get());
 	BOOST_CHECK_EQUAL(at(3), *proxies[3].get());
 	BOOST_CHECK(unused.empty());
-	BOOST_REQUIRE_EQUAL(4, index.size());
-	BOOST_CHECK_EQUAL(0, index[0]);
-	BOOST_CHECK_EQUAL(1, index[1]);
-	BOOST_CHECK_EQUAL(2, index[2]);
-	BOOST_CHECK_EQUAL(3, index[3]);
+	BOOST_CHECK_EQUAL_COLVALS(index, 0, 1, 2, 3);
+	checkReverseIndex();
 	// Remove 1, 3 moves to [1]
 	proxies.erase(proxies.begin() + 1);
 	BOOST_REQUIRE_EQUAL(3, proxies.size());
-	BOOST_REQUIRE_EQUAL(4, index.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, 0, npos, 2, 1);
+	BOOST_CHECK_EQUAL_COLVALS(reverseIndex, 0, 3, 2);
 	BOOST_REQUIRE_EQUAL(1, unused.size());
 	BOOST_CHECK_EQUAL(1, unused[0]);
 	BOOST_CHECK_EQUAL(at(0), *proxies[0].get());
@@ -117,6 +140,8 @@ BOOST_AUTO_TEST_CASE(shuffle)
 	//  Remove 1, 2 moves to [1]
 	proxies.erase(proxies.begin() + 1);
 	BOOST_REQUIRE_EQUAL(4, index.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, 0, npos, npos, 1);
+	checkReverseIndex();
 	BOOST_REQUIRE_EQUAL(2, unused.size());
 	BOOST_CHECK_EQUAL(1, unused[0]);
 	BOOST_CHECK_EQUAL(2, unused[1]);
@@ -124,12 +149,33 @@ BOOST_AUTO_TEST_CASE(shuffle)
 	BOOST_CHECK_EQUAL(at(1), *proxies[1].get());
 	// Add new, takes 2 at [2]
 	BOOST_CHECK_EQUAL(4, proxies.emplace_back(acquire(4)));
-	BOOST_REQUIRE_EQUAL(4, index.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, 0, npos, 2, 1);
+	checkReverseIndex();
 	BOOST_REQUIRE_EQUAL(1, unused.size());
 	BOOST_CHECK_EQUAL(1, unused[0]);
 	BOOST_CHECK_EQUAL(at(0), *proxies[0].get());
 	BOOST_CHECK_EQUAL(at(1), *proxies[1].get());
 	BOOST_CHECK_EQUAL(at(2), *proxies[2].get());
+	// Add new, takes 1 at [3]
+	BOOST_CHECK_EQUAL(5, proxies.emplace_back(acquire(5)));
+	BOOST_REQUIRE_EQUAL(proxies.size(), reverseIndex.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, 0, 3, 2, 1);
+	checkReverseIndex();
+	// Add new, takes 4 at [4]
+	BOOST_CHECK_EQUAL(6, proxies.emplace_back(acquire(6)));
+	BOOST_REQUIRE_EQUAL(proxies.size(), reverseIndex.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, 0, 3, 2, 1, 4);
+	checkReverseIndex();
+	// Remove [0]
+	proxies.erase(proxies.begin());
+	BOOST_REQUIRE_EQUAL(proxies.size(), reverseIndex.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, npos, 3, 2, 1, 0);
+	checkReverseIndex();
+	// Remove [3]
+	proxies.erase(proxies.begin());
+	BOOST_REQUIRE_EQUAL(proxies.size(), reverseIndex.size());
+	BOOST_CHECK_EQUAL_COLVALS(index, npos, 1, 2, npos, 0);
+	checkReverseIndex();
 }
 
 BOOST_DATA_TEST_CASE(shuffle_random, boost::unit_test::data::xrange(0, 10), x)
@@ -163,6 +209,7 @@ BOOST_DATA_TEST_CASE(shuffle_random, boost::unit_test::data::xrange(0, 10), x)
 				iused.emplace(index[i]);
 			}
 		}
+		checkReverseIndex();
 
 		BOOST_TEST_CONTEXT(index) {
 			BOOST_REQUIRE_EQUAL(iused.size(), size());
@@ -202,6 +249,7 @@ BOOST_AUTO_TEST_CASE(partition_by, *boost::unit_test::timeout(1))
 	// The partition point is right...
 	BOOST_CHECK(!pred(*matchedEnd));
 	BOOST_CHECK(pred(*--matchedEnd));
+	checkReverseIndex();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -107,10 +107,12 @@ public:
 			auto idx = unused.back();
 			unused.pop_back();
 			index[idx] = base::size();
+			reverseIndex.emplace_back(idx);
 			base::emplace_back(std::forward<Params>(params)...);
 			return InstanceProxy {this, idx};
 		}
 		index.emplace_back(base::size());
+		reverseIndex.push_back(base::size());
 		base::emplace_back(std::forward<Params>(params)...);
 		return InstanceProxy {this, index.size() - 1};
 	}
@@ -132,24 +134,27 @@ public:
 	}
 
 protected:
+	static constexpr auto npos = static_cast<size_t>(-1);
 	friend InstanceProxy;
 
 	void
 	release(const size_t pidx)
 	{
-		if (base::size() - 1 != index[pidx]) {
+		if (const size_t last = base::size() - 1; last != index[pidx]) {
 			lookup(pidx) = std::move(base::back());
-			*std::find_if(index.begin(), index.end(), [this, old = base::size() - 1](const auto & i) {
-				return i == old && !std::binary_search(unused.begin(), unused.end(), &i - index.data());
-			}) = index[pidx];
+			const auto movedKey = reverseIndex[last];
+			index[movedKey] = std::exchange(index[pidx], npos);
+			reverseIndex[index[movedKey]] = movedKey;
 		}
 		base::pop_back();
+		reverseIndex.pop_back();
 		if (pidx == index.size() - 1) {
 			index.pop_back();
 		}
 		else {
-			// Remember p.index is free index now, keeping it sorted
-			unused.insert(std::upper_bound(unused.begin(), unused.end(), pidx), pidx);
+			index[pidx] = npos;
+			// Remember p.index is free index now
+			unused.emplace_back(pidx);
 		}
 	}
 
@@ -168,8 +173,10 @@ protected:
 			last = --std::find_if(std::make_reverse_iterator(last), std::make_reverse_iterator(first), pred).base();
 			if (first < last) {
 				std::iter_swap(first, last);
-				std::iter_swap(std::find(index.begin(), index.end(), first - base::begin()),
-						std::find(index.begin(), index.end(), last - base::begin()));
+				const auto fidx = static_cast<size_t>(first - base::begin()),
+						   lidx = static_cast<size_t>(last - base::begin());
+				std::swap(index[reverseIndex[fidx]], index[reverseIndex[lidx]]);
+				std::swap(reverseIndex[fidx], reverseIndex[lidx]);
 			}
 		}
 		return first;
@@ -177,6 +184,7 @@ protected:
 
 	//  Index into buffer given to nth proxy
 	std::vector<size_t> index;
+	std::vector<size_t> reverseIndex;
 	//  List of free spaces in index
 	std::vector<size_t> unused;
 };
