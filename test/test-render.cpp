@@ -69,8 +69,7 @@ public:
 	}
 };
 
-BOOST_GLOBAL_FIXTURE(ApplicationBase);
-BOOST_GLOBAL_FIXTURE(TestMainWindow);
+BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 BOOST_DATA_TEST_CASE(cam,
 		boost::unit_test::data::xrange(500, 30000, 1300) * boost::unit_test::data::xrange(500, 10000, 300)

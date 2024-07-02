@@ -1,6 +1,7 @@
+#include "ui/mainApplication.h"
+#include "ui/mainWindow.h"
 #include <array>
 #include <assetFactory/assetFactory.h>
-#include <chrono>
 #include <collection.h>
 #include <game/activities/go.h>
 #include <game/activities/idle.h>
@@ -31,17 +32,14 @@
 static const int DISPLAY_WIDTH = 1280;
 static const int DISPLAY_HEIGHT = 1024;
 
-class MainApplication : public GameState, public ApplicationBase {
+class DummyMainApplication : public GameState, public MainApplication {
 public:
-	using Windows = Collection<Window>;
-
 	int
 	run()
 	{
 		geoData = std::make_shared<GeoData>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
 
-		Windows windows;
-		windows.create<GameMainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+		windows.create<MainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT)->setContent<GameMainWindow>();
 
 		world.create<Terrain>(geoData);
 		world.create<Water>(geoData);
@@ -89,41 +87,15 @@ public:
 			}
 		}
 
-		auto t_start = std::chrono::high_resolution_clock::now();
-		while (isRunning) {
-			processInputs(windows);
-			const auto t_end = std::chrono::high_resolution_clock::now();
-			const auto t_passed = std::chrono::duration_cast<TickDuration>(t_end - t_start);
-
-			world.apply(&WorldObject::tick, t_passed);
-			windows.apply(&Window::tick, t_passed);
-			windows.apply(&Window::refresh);
-
-			t_start = t_end;
-		}
+		mainLoop();
 
 		world.objects.clear();
 		return 0;
 	}
-
-private:
-	void
-	processInputs(const Windows & windows)
-	{
-		for (SDL_Event e; SDL_PollEvent(&e);) {
-			if (e.type == SDL_QUIT) {
-				isRunning = false;
-				return;
-			}
-			windows.applyOne(&Window::handleInput, e);
-		}
-	}
-
-	bool isRunning {true};
 };
 
 int
 main(int, char **)
 {
-	return std::make_shared<MainApplication>()->run();
+	return std::make_shared<DummyMainApplication>()->run();
 }

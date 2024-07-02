@@ -1,8 +1,16 @@
 #include "applicationBase.h"
+#include "imgui_wrap.h"
 #include <SDL2/SDL.h>
 #include <stdexcept>
 
 ApplicationBase::ApplicationBase()
+{
+	initSDL();
+	initImGUI();
+}
+
+void
+ApplicationBase::initSDL() const
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
 		throw std::runtime_error(SDL_GetError());
@@ -27,7 +35,22 @@ ApplicationBase::ApplicationBase()
 	setGlAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 }
 
+void
+ApplicationBase::initImGUI() const
+{
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO & io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable viewports
+	io.IniFilename = nullptr; // Disable saving settings automagically
+}
+
 ApplicationBase::~ApplicationBase()
 {
 	SDL_Quit();
+	ImGui::DestroyContext();
 }

@@ -21,10 +21,8 @@
 #include "lib/location.h"
 #include "lib/stream_support.h"
 #include "testMainWindow.h"
-#include "ui/applicationBase.h"
 
-BOOST_GLOBAL_FIXTURE(ApplicationBase);
-BOOST_GLOBAL_FIXTURE(TestMainWindow);
+BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 const std::filesystem::path TMP {"/tmp"};
 

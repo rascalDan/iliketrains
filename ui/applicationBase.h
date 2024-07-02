@@ -9,4 +9,8 @@ public:
 
 	NO_COPY(ApplicationBase);
 	NO_MOVE(ApplicationBase);
+
+private:
+	void initSDL() const;
+	void initImGUI() const;
 };

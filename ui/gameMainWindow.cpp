@@ -27,13 +27,14 @@ public:
 	}
 };
 
-GameMainWindow::GameMainWindow(size_t w, size_t h) :
-	Window {w, h, "I Like Trains", SDL_WINDOW_OPENGL}, SceneRenderer {Window::size, 0}
+GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, SceneRenderer {{w, h}, 0}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
 	uiComponents.create<GameMainToolbar>(gms.get());
 }
+
+GameMainWindow::~GameMainWindow() { }
 
 void
 GameMainWindow::tick(TickDuration)
@@ -45,7 +46,10 @@ void
 GameMainWindow::render() const
 {
 	SceneRenderer::render(*this);
-	Window::render();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
 }
 
 void

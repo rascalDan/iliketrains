@@ -1,17 +1,14 @@
 #define BOOST_TEST_MODULE instancing
 
 #include "stream_support.h"
-#include "testHelpers.h"
 #include "testMainWindow.h"
-#include "ui/applicationBase.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <set>
 
 #include <gfx/gl/instanceVertices.h>
 
-BOOST_GLOBAL_FIXTURE(ApplicationBase);
-BOOST_GLOBAL_FIXTURE(TestMainWindow);
+BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 struct TestInstanceVertices : public InstanceVertices<int> {
 	void

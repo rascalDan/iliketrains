@@ -7,7 +7,6 @@
 
 #include "testMainWindow.h"
 #include "testRenderOutput.h"
-#include "ui/applicationBase.h"
 #include "ui/text.h"
 #include <array>
 #include <gfx/models/texture.h>
@@ -16,8 +15,7 @@
 #include <unicode.h>
 #include <vector>
 
-BOOST_GLOBAL_FIXTURE(ApplicationBase);
-BOOST_GLOBAL_FIXTURE(TestMainWindow);
+BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 BOOST_AUTO_TEST_CASE(utf8_string_view_iter)
 {

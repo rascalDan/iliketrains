@@ -1,7 +1,6 @@
 #define BOOST_TEST_MODULE glContainer
 
 #include "testMainWindow.h"
-#include "ui/applicationBase.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -15,8 +14,7 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(glContainer<int>::const_iterator);
 BOOST_TEST_DONT_PRINT_LOG_VALUE(glContainer<int>::reverse_iterator);
 BOOST_TEST_DONT_PRINT_LOG_VALUE(glContainer<int>::const_reverse_iterator);
 
-BOOST_GLOBAL_FIXTURE(ApplicationBase);
-BOOST_GLOBAL_FIXTURE(TestMainWindow);
+BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 BOOST_FIXTURE_TEST_SUITE(i, glContainer<int>)
 
