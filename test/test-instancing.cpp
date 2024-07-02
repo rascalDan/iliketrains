@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE instancing
 
-#include "stream_support.h"
+#include "stream_support.h" // IWYU pragma: keep
+#include "testHelpers.h"
 #include "testMainWindow.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
