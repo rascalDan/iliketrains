@@ -27,13 +27,20 @@ Text::operator=(const std::string_view s)
 		return init += q.second.size();
 	});
 	quads.resize(glyphCount);
-	GLint current = 0;
+	GLushort current = 0;
 	auto model = models.begin();
 	auto quad = quads.begin();
 	for (const auto & [texture, fquads] : tquads) {
-		model->first = texture;
-		model->second = {fquads.size() * 4, current * 4};
-		current += static_cast<GLint>(fquads.size());
+		model->textureId = texture;
+		model->range.resize(fquads.size() * 6);
+		for (auto out = model->range.begin(); const auto & q [[maybe_unused]] : fquads) {
+			static constexpr std::array<GLushort, 6> quadIndices {0, 1, 2, 2, 3, 0};
+			std::transform(quadIndices.begin(), quadIndices.end(), out, [current](auto x) {
+				return current + x;
+			});
+			current += 4;
+			out += 6;
+		}
 		model++;
 		quad = std::transform(fquads.begin(), fquads.end(), quad, [this](const Font::Quad & q) {
 			return q * [this](const glm::vec4 & corner) {
@@ -52,8 +59,8 @@ Text::render(const UIShader & shader, const Position &) const
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(vao);
 	for (const auto & m : models) {
-		glBindTexture(GL_TEXTURE_2D, m.first);
-		glDrawArrays(GL_QUADS, m.second.second, m.second.first);
+		glBindTexture(GL_TEXTURE_2D, m.textureId);
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m.range.size()), GL_UNSIGNED_SHORT, m.range.data());
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
