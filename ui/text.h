@@ -21,7 +21,12 @@ public:
 	Text & operator=(const std::string_view s);
 
 private:
-	std::vector<std::pair<GLuint, std::pair<GLsizei, GLint>>> models;
+	struct TextData {
+		GLuint textureId;
+		std::vector<unsigned short> range;
+	};
+
+	std::vector<TextData> models;
 	glContainer<Font::Quad> quads;
 	glVertexArray vao;
 	glm::vec3 colour;
