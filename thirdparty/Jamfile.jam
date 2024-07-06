@@ -12,3 +12,18 @@ lib stb : stb_image.c :
 	<warnings>off
 	<warnings-as-errors>off
 	;
+
+lib imguisdl2 :
+	[ glob imgui/imgui*.cpp : imgui/imgui_demo.cpp ]
+	imgui/backends/imgui_impl_sdl2.cpp
+	imgui/backends/imgui_impl_opengl3.cpp
+	:
+	<link>static
+	<include>imgui
+	<use>..//sdl2
+	<cflags>-fPIC
+	<warnings>off
+	<warnings-as-errors>off
+	: :
+	<include>imgui
+	;

@@ -1,13 +1,12 @@
 #pragma once
 
 #include "chronology.h"
-#include "collection.h"
-#include "gfx/gl/uiShader.h"
+#include "config/types.h"
 #include "ptr.h"
-#include "uiComponent.h" // IWYU pragma: keep
+#include "special_members.h"
+#include "windowContent.h"
 #include <SDL2/SDL.h>
 #include <cstddef>
-#include <special_members.h>
 #include <string>
 
 using SDL_WindowPtr = wrapped_ptrt<SDL_Window, SDL_CreateWindow, SDL_DestroyWindow>;
@@ -22,24 +21,26 @@ public:
 	NO_COPY(Window);
 	NO_MOVE(Window);
 
-	virtual void tick(TickDuration elapsed) = 0;
+	template<typename C, typename... P>
+	void
+	setContent(P &&... p)
+	{
+		glm::ivec2 size {};
+		SDL_GetWindowSizeInPixels(m_window, &size.x, &size.y);
+		content = std::make_unique<C>(size.x, size.y, std::forward<P>(p)...);
+	}
+
+	void tick(TickDuration elapsed);
 	void refresh() const;
 	bool handleInput(const SDL_Event & e);
 
-	void clear(float r, float g, float b, float a) const;
 	void swapBuffers() const;
 
 protected:
-	virtual void render() const;
-
-	struct GLInitHelper {
-		GLInitHelper();
-	};
+	void clear(float r, float g, float b, float a) const;
 
 	const ScreenAbsCoord size;
 	SDL_WindowPtr m_window;
 	SDL_GLContextPtr glContext;
-	GLInitHelper glInithelper;
-	Collection<UIComponent> uiComponents;
-	UIShader uiShader;
+	WindowContent::Ptr content;
 };

@@ -1,13 +1,11 @@
 #include "assetFactory/assetFactory.h"
-#include "assetFactory/factoryMesh.h"
 #include "testMainWindow.h"
-#include "ui/applicationBase.h"
 #include <benchmark/benchmark.h>
 
 static void
 brush47xml_load(benchmark::State & state)
 {
-	TestMainWindow window;
+	TestMainWindowAppBase window;
 
 	for (auto _ : state) {
 		benchmark::DoNotOptimize(AssetFactory::loadXML(RESDIR "/brush47.xml"));
@@ -17,7 +15,7 @@ brush47xml_load(benchmark::State & state)
 static void
 foliagexml_load(benchmark::State & state)
 {
-	TestMainWindow window;
+	TestMainWindowAppBase window;
 
 	for (auto _ : state) {
 		benchmark::DoNotOptimize(AssetFactory::loadXML(RESDIR "/foliage.xml"));

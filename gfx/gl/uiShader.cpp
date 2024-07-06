@@ -7,7 +7,6 @@
 #include <gfx/gl/shaders/vs-uiShader.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <initializer_list>
 
 UIShader::IconProgram::IconProgram(const glm::mat4 & vp) : UIProgram {vp, uiShader_vs, uiShader_fs} { }
 

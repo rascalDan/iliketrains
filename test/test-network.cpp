@@ -5,7 +5,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "testMainWindow.h"
-#include "ui/applicationBase.h"
 #include <array>
 #include <collection.h>
 #include <game/network/link.h>
@@ -20,8 +19,7 @@
 #include <utility>
 #include <vector>
 
-BOOST_GLOBAL_FIXTURE(ApplicationBase);
-BOOST_GLOBAL_FIXTURE(TestMainWindow);
+BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 struct TestLinkS;
 

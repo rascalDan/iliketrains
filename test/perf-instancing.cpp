@@ -26,7 +26,7 @@ struct data {
 static void
 partition(benchmark::State & state)
 {
-	TestMainWindow window;
+	TestMainWindowAppBase window;
 	data d(static_cast<size_t>(state.range()));
 	GlobalPosition2D pos {};
 	for (auto _ : state) {
