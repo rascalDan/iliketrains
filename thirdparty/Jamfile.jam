@@ -14,12 +14,13 @@ lib stb : stb_image.c :
 	;
 
 lib imguisdl2 :
-	[ glob imgui/imgui*.cpp : imgui/imgui_demo.cpp ]
+	[ glob imgui/imgui*.cpp imgui/misc/cpp/*.cpp : imgui/imgui_demo.cpp ]
 	imgui/backends/imgui_impl_sdl2.cpp
 	imgui/backends/imgui_impl_opengl3.cpp
 	:
 	<link>static
 	<include>imgui
+	<include>imgui/misc/cpp
 	<use>..//sdl2
 	<cflags>-fPIC
 	<warnings>off
