@@ -35,7 +35,10 @@ void
 Foliage::shadows(const ShadowMapper & mapper) const
 {
 	if (const auto count = instances.size()) {
-		mapper.dynamicPointInst.use();
+		mapper.dynamicPointInstWithTextures.use();
+		if (texture) {
+			texture->bind(GL_TEXTURE3);
+		}
 		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }

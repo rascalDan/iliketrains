@@ -1,9 +1,12 @@
 #include "shadowMapper.h"
 #include "camera.h"
 #include "collections.h"
+#include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
 #include "gfx/gl/shaders/gs-commonShadowPoint.h"
+#include "gfx/gl/shaders/gs-shadowDynamicPointInstWithTextures.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
+#include "gfx/gl/shaders/vs-shadowDynamicPointInstWithTextures.h"
 #include "gfx/gl/shaders/vs-shadowLandmass.h"
 #include "gl_traits.h"
 #include "location.h"
@@ -14,11 +17,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
-#include <tuple>
 #include <vector>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
-	landmess {shadowLandmass_vs}, dynamicPointInst {shadowDynamicPointInst_vs}, size {s}
+	landmess {shadowLandmass_vs}, dynamicPointInst {shadowDynamicPointInst_vs},
+	dynamicPointInstWithTextures {shadowDynamicPointInstWithTextures_vs, shadowDynamicPointInstWithTextures_gs,
+			shadowDynamicPointInstWithTextures_fs},
+	size {s}
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
 	glTexImage3D(
@@ -92,7 +97,8 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 
 				return lightProjection * lightViewDir;
 			});
-	for (const auto p : std::initializer_list<const ShadowProgram *> {&landmess, &dynamicPoint, &dynamicPointInst}) {
+	for (const auto p : std::initializer_list<const ShadowProgram *> {
+				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures}) {
 		p->setView(out, lightViewPoint);
 	}
 	scene.shadows(*this);
@@ -105,6 +111,12 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) :
 	Program {vs, commonShadowPoint_gs}, viewProjectionLoc {*this, "viewProjection"},
 	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}
+{
+}
+
+ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs, const Shader & gs, const Shader & fs) :
+	Program {vs, gs, fs}, viewProjectionLoc {*this, "viewProjection"}, viewProjectionsLoc {*this, "viewProjections"},
+	viewPointLoc {*this, "viewPoint"}
 {
 }
 

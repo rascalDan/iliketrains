@@ -24,6 +24,7 @@ public:
 	class ShadowProgram : public Program {
 	public:
 		explicit ShadowProgram(const Shader & vs);
+		explicit ShadowProgram(const Shader & vs, const Shader & gs, const Shader & fs);
 
 		void setView(const std::span<const glm::mat4>, const GlobalPosition3D) const;
 		void use() const;
@@ -51,6 +52,7 @@ public:
 	};
 
 	FixedPoint landmess, dynamicPointInst;
+	ShadowProgram dynamicPointInstWithTextures;
 	DynamicPoint dynamicPoint;
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)

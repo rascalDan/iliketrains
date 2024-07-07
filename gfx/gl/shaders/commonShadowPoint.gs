@@ -7,6 +7,8 @@ in vec4 vworldPos[];
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 12) out;
 
+ifdef(`TEXTURES', in vec2 vtexCoord[]; out vec2 texCoord;);
+
 void
 main()
 {
@@ -15,6 +17,7 @@ main()
 			gl_Position = viewProjection[vp] * vworldPos[v];
 			gl_Position.z = max(gl_Position.z, -1);
 			gl_Layer = vp;
+			ifdef(`TEXTURES',  texCoord = vtexCoord[v];);
 			EmitVertex();
 		}
 		EndPrimitive();
