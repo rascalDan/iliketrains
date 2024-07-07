@@ -108,15 +108,10 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	return out;
 }
 
-ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) :
-	Program {vs, commonShadowPoint_gs}, viewProjectionLoc {*this, "viewProjection"},
-	viewProjectionsLoc {*this, "viewProjections"}, viewPointLoc {*this, "viewPoint"}
-{
-}
+ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) : Program {vs, commonShadowPoint_gs} { }
 
 ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs, const Shader & gs, const Shader & fs) :
-	Program {vs, gs, fs}, viewProjectionLoc {*this, "viewProjection"}, viewProjectionsLoc {*this, "viewProjections"},
-	viewPointLoc {*this, "viewPoint"}
+	Program {vs, gs, fs}
 {
 }
 
@@ -136,12 +131,7 @@ ShadowMapper::ShadowProgram::use() const
 	glUseProgram(*this);
 }
 
-ShadowMapper::FixedPoint::FixedPoint(const Shader & vs) : ShadowProgram {vs} { }
-
-ShadowMapper::DynamicPoint::DynamicPoint() :
-	ShadowProgram {shadowDynamicPoint_vs}, modelLoc {*this, "model"}, modelPosLoc {*this, "modelPos"}
-{
-}
+ShadowMapper::DynamicPoint::DynamicPoint() : ShadowProgram {shadowDynamicPoint_vs} { }
 
 void
 ShadowMapper::DynamicPoint::use(const Location & location) const

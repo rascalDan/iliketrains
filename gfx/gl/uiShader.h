@@ -38,7 +38,7 @@ private:
 		void use(const RGB & colour) const;
 
 	private:
-		RequiredUniformLocation colorLoc;
+		RequiredUniformLocation colorLoc {*this, "colour"};
 	};
 
 public:

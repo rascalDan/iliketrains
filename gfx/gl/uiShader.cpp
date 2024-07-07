@@ -10,10 +10,7 @@
 
 UIShader::IconProgram::IconProgram(const glm::mat4 & vp) : UIProgram {vp, uiShader_vs, uiShader_fs} { }
 
-UIShader::TextProgram::TextProgram(const glm::mat4 & vp) :
-	UIProgram {vp, uiShader_vs, uiShaderFont_fs}, colorLoc {*this, "colour"}
-{
-}
+UIShader::TextProgram::TextProgram(const glm::mat4 & vp) : UIProgram {vp, uiShader_vs, uiShaderFont_fs} { }
 
 UIShader::UIShader(size_t width, size_t height) :
 	UIShader {glm::ortho<float>(0, static_cast<float>(width), 0, static_cast<float>(height))}

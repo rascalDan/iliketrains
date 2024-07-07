@@ -129,13 +129,7 @@ SceneRenderer::renderQuad() const
 	glBindVertexArray(0);
 }
 
-SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() :
-	Program {lighting_vs, directionalLight_fs}, directionLoc {*this, "lightDirection"},
-	colourLoc {*this, "lightColour"}, lightPointLoc {*this, "lightPoint"},
-	lightViewProjectionLoc {*this, "lightViewProjection"},
-	lightViewProjectionCountLoc {*this, "lightViewProjectionCount"}
-{
-}
+SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() : Program {lighting_vs, directionalLight_fs} { }
 
 const auto toTextureSpaceMat = glm::translate(glm::identity<glm::mat4>(), glm::vec3 {0.5F})
 		* glm::scale(glm::identity<glm::mat4>(), glm::vec3 {0.5F});

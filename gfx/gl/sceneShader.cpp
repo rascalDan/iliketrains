@@ -71,10 +71,7 @@ SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 	}
 }
 
-SceneShader::BasicProgram::BasicProgram() :
-	SceneProgram {dynamicPoint_vs, material_fs}, modelLoc {*this, "model"}, modelPosLoc {*this, "modelPos"}
-{
-}
+SceneShader::BasicProgram::BasicProgram() : SceneProgram {dynamicPoint_vs, material_fs} { }
 
 void
 SceneShader::BasicProgram::setModel(Location const & location) const
@@ -90,13 +87,6 @@ SceneShader::BasicProgram::use(Location const & location) const
 	setModel(location);
 }
 
-template<typename... S>
-SceneShader::NetworkProgram::NetworkProgram(S &&... s) :
-	AbsolutePosProgram {std::forward<S>(s)...}, profileLoc {*this, "profile"}, texturePosLoc {*this, "texturePos"},
-	profileLengthLoc {*this, "profileLength"}
-{
-}
-
 void
 SceneShader::NetworkProgram::use(
 		const std::span<const glm::vec3> profile, const std::span<const float> texturePos) const
@@ -107,7 +97,7 @@ SceneShader::NetworkProgram::use(
 	glUniform(profileLengthLoc, static_cast<GLuint>(profile.size()));
 }
 
-SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vs, water_fs}, waveLoc {*this, "waves"} { }
+SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vs, water_fs} { }
 
 void
 SceneShader::WaterProgram::use(float waveCycle) const

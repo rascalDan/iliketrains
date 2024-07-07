@@ -42,8 +42,11 @@ protected:
 				const RGB &, const Direction3D &, const GlobalPosition3D &, const std::span<const glm::mat4x4>) const;
 
 	private:
-		RequiredUniformLocation directionLoc, colourLoc, lightPointLoc, lightViewProjectionLoc,
-				lightViewProjectionCountLoc;
+		RequiredUniformLocation directionLoc {*this, "lightDirection"};
+		RequiredUniformLocation colourLoc {*this, "lightColour"};
+		RequiredUniformLocation lightPointLoc {*this, "lightPoint"};
+		RequiredUniformLocation lightViewProjectionLoc {*this, "lightViewProjection"};
+		RequiredUniformLocation lightViewProjectionCountLoc {*this, "lightViewProjectionCount"};
 	};
 
 	DeferredLightProgram lighting;

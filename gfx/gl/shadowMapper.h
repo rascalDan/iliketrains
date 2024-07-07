@@ -30,14 +30,9 @@ public:
 		void use() const;
 
 	private:
-		RequiredUniformLocation viewProjectionLoc;
-		RequiredUniformLocation viewProjectionsLoc;
-		RequiredUniformLocation viewPointLoc;
-	};
-
-	class FixedPoint : public ShadowProgram {
-	public:
-		explicit FixedPoint(const Shader & vs);
+		RequiredUniformLocation viewProjectionLoc {*this, "viewProjection"};
+		RequiredUniformLocation viewProjectionsLoc {*this, "viewProjections"};
+		RequiredUniformLocation viewPointLoc {*this, "viewPoint"};
 	};
 
 	class DynamicPoint : public ShadowProgram {
@@ -47,12 +42,11 @@ public:
 		void setModel(const Location &) const;
 
 	private:
-		RequiredUniformLocation modelLoc;
-		RequiredUniformLocation modelPosLoc;
+		RequiredUniformLocation modelLoc {*this, "model"};
+		RequiredUniformLocation modelPosLoc {*this, "modelPos"};
 	};
 
-	FixedPoint landmess, dynamicPointInst;
-	ShadowProgram dynamicPointInstWithTextures;
+	ShadowProgram landmess, dynamicPointInst, dynamicPointInstWithTextures;
 	DynamicPoint dynamicPoint;
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)

@@ -10,19 +10,15 @@ class Location;
 class SceneShader {
 	class SceneProgram : public Program {
 	public:
-		template<typename... S>
-		inline explicit SceneProgram(const S &... srcs) :
-			Program {srcs...}, viewProjectionLoc {*this, "viewProjection"}, viewPointLoc {*this, "viewPoint"},
-			viewPortLoc {*this, "viewPort"}
-		{
-		}
+		using Program::Program;
 
 		void setViewProjection(const GlobalPosition3D &, const glm::mat4 &) const;
 		void setViewPort(const ViewPort &) const;
 
 	private:
-		RequiredUniformLocation viewProjectionLoc, viewPointLoc;
-		UniformLocation viewPortLoc;
+		RequiredUniformLocation viewProjectionLoc {*this, "viewProjection"};
+		RequiredUniformLocation viewPointLoc {*this, "viewPoint"};
+		UniformLocation viewPortLoc {*this, "viewPort"};
 	};
 
 	class BasicProgram : public SceneProgram {
@@ -32,8 +28,8 @@ class SceneShader {
 		void use(const Location &) const;
 
 	private:
-		RequiredUniformLocation modelLoc;
-		RequiredUniformLocation modelPosLoc;
+		RequiredUniformLocation modelLoc {*this, "model"};
+		RequiredUniformLocation modelPosLoc {*this, "modelPos"};
 	};
 
 	class AbsolutePosProgram : public SceneProgram {
@@ -44,12 +40,14 @@ class SceneShader {
 
 	class NetworkProgram : public AbsolutePosProgram {
 	public:
-		template<typename... S> explicit NetworkProgram(S &&...);
+		using AbsolutePosProgram::AbsolutePosProgram;
 
 		void use(const std::span<const glm::vec3>, const std::span<const float>) const;
 
 	private:
-		RequiredUniformLocation profileLoc, texturePosLoc, profileLengthLoc;
+		RequiredUniformLocation profileLoc {*this, "profile"};
+		RequiredUniformLocation texturePosLoc {*this, "texturePos"};
+		RequiredUniformLocation profileLengthLoc {*this, "profileLength"};
 	};
 
 	class WaterProgram : public SceneProgram {
@@ -58,7 +56,7 @@ class SceneShader {
 		void use(float waveCycle) const;
 
 	private:
-		RequiredUniformLocation waveLoc;
+		RequiredUniformLocation waveLoc {*this, "waves"};
 	};
 
 public:
