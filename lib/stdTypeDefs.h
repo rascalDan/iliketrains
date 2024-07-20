@@ -28,6 +28,18 @@ template<typename T> struct AnyPtr {
 		return *ptr;
 	}
 
+	// NOLINTNEXTLINE(hicpp-explicit-conversions)
+	operator bool() const
+	{
+		return ptr != nullptr;
+	}
+
+	bool
+	operator!() const
+	{
+		return ptr == nullptr;
+	}
+
 private:
 	T * ptr;
 };
