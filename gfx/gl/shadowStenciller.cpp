@@ -32,8 +32,7 @@ ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
 }
 
 void
-ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh, const RelativePosition3D & mins,
-		const RelativePosition3D & maxs) const
+ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, stencil, 0);
@@ -44,6 +43,8 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 256, 256);
 	glEnable(GL_DEPTH_TEST);
+	const auto & mins = mesh.minExtent();
+	const auto & maxs = mesh.maxExtent();
 	const auto extents = glm::ortho(mins.x, maxs.x, mins.z, maxs.z, mins.y, maxs.y);
 	const auto lightDir = glm::lookAt({}, north, up);
 	glUniform(viewProjectionLoc, extents * lightDir);

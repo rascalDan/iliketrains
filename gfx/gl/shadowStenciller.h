@@ -11,8 +11,7 @@ public:
 
 	[[nodiscard]]
 	static glTexture createStencilTexture(GLsizei width, GLsizei height);
-	void renderStencil(const glTexture &, const MeshBase &, const RelativePosition3D & mins,
-			const RelativePosition3D & maxs) const;
+	void renderStencil(const glTexture &, const MeshBase &) const;
 
 private:
 	glFrameBuffer fbo;
