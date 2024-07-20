@@ -2,6 +2,7 @@
 
 #include "assetFactory/asset.h"
 #include "gfx/gl/instanceVertices.h"
+#include "gfx/gl/shadowStenciller.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
@@ -19,6 +20,7 @@ public:
 	mutable InstanceVertices<LocationVertex> instances;
 	void render(const SceneShader &) const override;
 	void shadows(const ShadowMapper &) const override;
+	glTexture shadowStencil = ShadowStenciller::createStencilTexture(256, 256);
 
 protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<Foliage>>;
