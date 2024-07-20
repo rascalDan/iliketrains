@@ -4,10 +4,10 @@ struct MaterialDetail {
 	uvec2 mapmode;
 };
 
-ifelse(TYPE, .fs, in, out) vec3 FragPos;
-ifelse(TYPE, .fs, in, out) vec2 TexCoords;
-ifelse(TYPE, .fs, in, out) vec3 Normal;
-ifelse(TYPE, .fs, in, out) vec4 Colour;
-flat
-ifelse(TYPE, .fs, in, out)
-MaterialDetail Material;
+define(INOUT, ifelse(TYPE, .fs, in, out));
+
+INOUT vec3 FragPos;
+INOUT vec2 TexCoords;
+INOUT vec3 Normal;
+INOUT vec4 Colour;
+flat INOUT MaterialDetail Material;
