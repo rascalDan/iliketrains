@@ -1,19 +1,18 @@
 #pragma once
 
+#include "collection.h"
 #include "gfx/gl/instanceVertices.h"
+#include "gfx/models/texture.h"
+#include "gfx/renderable.h"
 #include "link.h"
-#include <collection.h>
-#include <gfx/renderable.h>
+#include "sorting.h"
+#include "special_members.h"
 #include <glm/glm.hpp>
 #include <memory>
 #include <set>
-#include <sorting.h>
-#include <special_members.h>
 #include <string>
 #include <utility>
-#include <variant>
 
-class Texture;
 class SceneShader;
 template<typename> class Ray;
 
@@ -56,7 +55,7 @@ protected:
 
 	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;
-	std::shared_ptr<Texture> texture;
+	Texture::Ptr texture;
 };
 
 template<typename LinkType> class NetworkLinkHolder {

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "config/types.h"
+#include "glArrays.h"
+#include "stdTypeDefs.h"
 #include <filesystem>
-#include <glArrays.h>
 #include <glm/fwd.hpp>
 
 class Image;
@@ -20,7 +21,7 @@ struct TextureOptions {
 	static GLint glMapMode(MapMode);
 };
 
-class Texture {
+class Texture : public StdTypeDefs<Texture> {
 public:
 	virtual ~Texture() = default;
 	DEFAULT_MOVE_NO_COPY(Texture);

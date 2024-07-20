@@ -3,14 +3,13 @@
 #include "assetFactory/asset.h"
 #include "gfx/gl/instanceVertices.h"
 #include "gfx/models/mesh.h"
+#include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 #include <array>
 #include <memory>
-#include <string>
 
 class SceneShader;
 class ShadowMapper;
-class Texture;
 class Location;
 
 class RailVehicleClass : public Renderable, public Asset {
@@ -25,7 +24,7 @@ public:
 
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;
-	std::shared_ptr<Texture> texture;
+	Texture::Ptr texture;
 	float wheelBase;
 	float length;
 	float maxSpeed;

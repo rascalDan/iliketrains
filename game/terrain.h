@@ -4,12 +4,12 @@
 #include "collection.h"
 #include "config/types.h"
 #include "game/worldobject.h"
-#include <gfx/models/mesh.h>
-#include <gfx/renderable.h>
+#include "gfx/models/mesh.h"
+#include "gfx/models/texture.h"
+#include "gfx/renderable.h"
 #include <memory>
 
 class SceneShader;
-class Texture;
 class GeoData;
 
 class Terrain : public WorldObject, public Renderable {
@@ -32,5 +32,5 @@ private:
 
 	std::shared_ptr<GeoData> geoData;
 	Collection<MeshT<Vertex>, false> meshes;
-	std::shared_ptr<Texture> grass;
+	Texture::Ptr grass;
 };

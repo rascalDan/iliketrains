@@ -2,15 +2,15 @@
 
 #include "assetFactory/asset.h"
 #include "gfx/gl/instanceVertices.h"
+#include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
 class SceneShader;
 class Location;
-class Texture;
 
 class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illuminator> {
 	Mesh::Ptr bodyMesh;
-	std::shared_ptr<Texture> texture;
+	Texture::Ptr texture;
 	glVertexArray instanceVAO;
 	std::optional<glVertexArray> instancesSpotLightVAO, instancesPointLightVAO;
 
