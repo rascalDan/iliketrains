@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shader.h"
+#include "shader.h" // IWYU pragma: export
 #include <glRef.h>
 #include <glad/gl.h>
 #include <glm/mat4x4.hpp>
@@ -12,6 +12,8 @@ using ProgramRef = glRef<GLuint, &glCreateProgram, &glDeleteProgram>;
 
 class Program {
 public:
+	Program() = delete;
+
 	template<typename... S> explicit Program(const S &... srcs)
 	{
 		(glAttachShader(m_program, srcs.compile()), ...);
