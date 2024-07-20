@@ -1,6 +1,9 @@
 #include "mesh.h"
 
-MeshBase::MeshBase(GLsizei m_numIndices, GLenum mode) : m_numIndices {m_numIndices}, mode {mode} { }
+MeshBase::MeshBase(GLsizei m_numIndices, GLenum mode, std::pair<RelativePosition3D, RelativePosition3D> minmax) :
+	m_numIndices {m_numIndices}, mode {mode}, min {minmax.first}, max {minmax.second}
+{
+}
 
 void
 MeshBase::Draw() const
