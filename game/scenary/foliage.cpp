@@ -18,7 +18,7 @@ Foliage::postLoad()
 	bodyMesh->configureVAO(instanceVAO)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
 	ShadowStenciller ss;
-	ss.renderStencil(shadowStencil, *bodyMesh);
+	ss.renderStencil(shadowStencil, *bodyMesh, texture);
 	Texture::saveDepth(shadowStencil, std::format("/tmp/stencil-{}.tga", id).c_str());
 }
 
