@@ -49,6 +49,7 @@ public:
 	}
 
 protected:
+	void checkProgramError(GLuint program, GLuint flag, std::string_view errorMessage) const;
 	void use() const;
 	void linkAndValidate() const;
 	ProgramRef m_program;

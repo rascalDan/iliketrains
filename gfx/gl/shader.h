@@ -15,10 +15,12 @@ public:
 	}
 
 	[[nodiscard]] ShaderRef compile() const;
-	static void CheckShaderError(GLuint shader, GLuint flag, bool isProgram, std::string_view errorMessage);
 
 private:
-	const std::basic_string_view<GLchar> text;
+	using Source = std::basic_string_view<GLchar>;
+
+	void checkShaderError(GLuint shader, GLuint flag, std::string_view errorMessage) const;
+	const Source text;
 	GLuint type;
 	bool lookups;
 };

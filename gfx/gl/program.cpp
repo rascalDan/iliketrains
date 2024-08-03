@@ -10,16 +10,31 @@ void
 Program::linkAndValidate() const
 {
 	glLinkProgram(m_program);
-	Shader::CheckShaderError(m_program, GL_LINK_STATUS, true, "Error linking shader program");
+	checkProgramError(m_program, GL_LINK_STATUS, "Error linking shader program");
 
 	glValidateProgram(m_program);
-	Shader::CheckShaderError(m_program, GL_VALIDATE_STATUS, true, "Invalid shader program");
+	checkProgramError(m_program, GL_VALIDATE_STATUS, "Invalid shader program");
 }
 
 void
 Program::use() const
 {
 	glUseProgram(m_program);
+}
+
+void
+Program::checkProgramError(GLuint program, GLuint flag, std::string_view errorMessage) const
+{
+	GLint success = 0;
+
+	glGetProgramiv(program, flag, &success);
+
+	if (success == GL_FALSE) {
+		std::array<GLchar, 1024> error {};
+		glGetProgramInfoLog(program, error.size(), nullptr, error.data());
+
+		throw std::runtime_error {std::format("{}: '{}'", errorMessage, error.data())};
+	}
 }
 
 Program::UniformLocation::UniformLocation(GLuint program, const char * name) :
