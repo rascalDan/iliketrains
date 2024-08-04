@@ -7,6 +7,7 @@
 
 class Shader {
 public:
+	using Source = std::basic_string_view<GLchar>;
 	using ShaderRef = glRef<GLuint, &glCreateShader, &glDeleteShader>;
 
 	constexpr Shader(const GLchar * text, GLuint type) :
@@ -16,10 +17,11 @@ public:
 
 	[[nodiscard]] ShaderRef compile() const;
 
-private:
-	using Source = std::basic_string_view<GLchar>;
+	[[nodiscard]] static GLint getShaderParam(GLuint shader, GLenum pname);
 
-	void checkShaderError(GLuint shader, GLuint flag, std::string_view errorMessage) const;
+private:
+	void checkShaderError(GLuint shader) const;
+
 	const Source text;
 	GLuint type;
 	bool lookups;

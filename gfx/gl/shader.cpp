@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "msgException.h"
 #include <algorithm>
 #include <array>
 #include <format>
@@ -18,6 +19,39 @@ namespace {
 	constexpr std::array<std::tuple<std::string_view, GLenum, LookUpFunction>, 1> LOOKUPS {{
 			{"GL_MAX_GEOMETRY_OUTPUT_VERTICES", GL_MAX_GEOMETRY_OUTPUT_VERTICES, getInt},
 	}};
+
+	struct ShaderCompileError : public MsgException<std::invalid_argument> {
+		explicit ShaderCompileError(GLuint shader, Shader::Source src) :
+			MsgException<std::invalid_argument> {"Error compiling shader"}, shader {shader}, source {src},
+			msg {getShaderText(GL_INFO_LOG_LENGTH, glGetShaderInfoLog)}
+		{
+		}
+
+		[[nodiscard]] std::string
+		getMsg() const noexcept override
+		{
+			return std::format("Error compiling shader: '{}'\nSource:\n{}",
+					getShaderText(GL_INFO_LOG_LENGTH, glGetShaderInfoLog), source);
+		}
+
+	private:
+		std::string
+		getShaderText(GLenum param, auto getTextFunc) const
+		{
+			std::string text;
+			text.resize_and_overwrite(static_cast<size_t>(Shader::getShaderParam(shader, param)),
+					[this, getTextFunc](auto buf, auto len) {
+						GLsizei outLen {};
+						getTextFunc(shader, static_cast<GLsizei>(len), &outLen, buf);
+						return outLen;
+					});
+			return text;
+		}
+
+		const GLuint shader;
+		const Shader::Source source;
+		const std::string msg;
+	};
 }
 
 Shader::ShaderRef
@@ -46,21 +80,22 @@ Shader::compile() const
 	}
 	glCompileShader(shader);
 
-	checkShaderError(shader, GL_COMPILE_STATUS, "Error compiling shader!");
+	checkShaderError(shader);
 	return shader;
 }
 
 void
-Shader::checkShaderError(GLuint shader, GLuint flag, std::string_view errorMessage) const
+Shader::checkShaderError(GLuint shader) const
 {
-	GLint success = 0;
-
-	glGetShaderiv(shader, flag, &success);
-
-	if (success == GL_FALSE) {
-		std::array<GLchar, 1024> error {};
-		glGetShaderInfoLog(shader, error.size(), nullptr, error.data());
-
-		throw std::runtime_error {std::format("{}: '{}'", errorMessage, error.data())};
+	if (getShaderParam(shader, GL_COMPILE_STATUS) == GL_FALSE) {
+		throw ShaderCompileError {shader, text};
 	}
+}
+
+GLint
+Shader::getShaderParam(GLuint shader, GLenum pname)
+{
+	GLint pvalue {};
+	glGetShaderiv(shader, pname, &pvalue);
+	return pvalue;
 }
