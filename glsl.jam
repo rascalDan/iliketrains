@@ -8,12 +8,13 @@ type.register GL_TESS_CONTROL_SHADER : tcs ;
 type.register GL_TESS_EVALUATION_SHADER : tes ;
 type.register GL_GEOMETRY_SHADER : gs ;
 type.register GL_FRAGMENT_SHADER : fs ;
+type.register GL_GENERIC_SHADER : glsl ;
 
-generators.register-standard glsl.embed : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) ;
-generators.register-standard glsl.embed : GL_TESS_CONTROL_SHADER : CPP(tcs-%) H(tcs-%) ;
-generators.register-standard glsl.embed : GL_TESS_EVALUATION_SHADER : CPP(tes-%) H(tes-%) ;
-generators.register-standard glsl.embed : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) ;
-generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) ;
+generators.register-standard glsl.embed : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) GL_GENERIC_SHADER(vs-%) ;
+generators.register-standard glsl.embed : GL_TESS_CONTROL_SHADER : CPP(tcs-%) H(tcs-%) GL_GENERIC_SHADER(tcs-%) ;
+generators.register-standard glsl.embed : GL_TESS_EVALUATION_SHADER : CPP(tes-%) H(tes-%) GL_GENERIC_SHADER(tes-%) ;
+generators.register-standard glsl.embed : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) GL_GENERIC_SHADER(gs-%) ;
+generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) GL_GENERIC_SHADER(fs-%) ;
 
 class m4-scanner : common-scanner {
     rule pattern ( ) {
@@ -31,8 +32,11 @@ type.set-scanner GL_FRAGMENT_SHADER : m4-scanner ;
 
 actions glsl.embed
 {
-	m4 -I$(2:D) -DNAME=$(2:B) -DTYPE=$(2:S) > $(1[2]) lib/embed-glsl.h.m4
-	m4 -I$(2:D) -DSOURCE=$(2) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) > $(1[1]) lib/embed-glsl.cpp.m4
+	m4 -I$(2:D) -DSOURCE=$(2) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) $(2) > $(1[3])
+	clang-format -i $(1[3])
+	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) lib/embed-glsl.h.m4 > $(1[2])
+	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) lib/embed-glsl.cpp.m4 > $(1[1])
+	clang-format -i $(1[1]) $(1[2])
 }
 
 rule glsl.embed ( targets * : sources * : properties * )

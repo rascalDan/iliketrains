@@ -5,5 +5,5 @@ changecom() dnl
 #include <glad/gl.h>
 
 constexpr Shader NAME`_'substr(TYPE,1) {
-	R"GLSL-EMBED(dnl
+	R"GLSL-EMBED(// OUTPUT
 	include(SOURCE))GLSL-EMBED", GLTYPE };
