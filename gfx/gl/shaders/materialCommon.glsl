@@ -1,5 +1,3 @@
-layout(binding = 0) uniform sampler2D texture0;
-
 float
 map(uint mapmode, float value)
 {
@@ -28,8 +26,8 @@ vec4
 getTextureColour(MaterialDetail mat, vec2 uv)
 {
 	if (mat.textureSize.x > 0) {
-		const vec2 tSize = textureSize(texture0, 0);
+		const vec2 tSize = textureSize(textureAlbedo, 0);
 		uv = (mat.textureOrigin + mat.textureSize * map(mat.mapmode, uv)) / tSize;
 	}
-	return texture(texture0, uv);
+	return texture(textureAlbedo, uv);
 }

@@ -1,4 +1,4 @@
-include(`materialDetail.glsl')
+include(`getMaterialDetail.glsl')
 
 void
 main()

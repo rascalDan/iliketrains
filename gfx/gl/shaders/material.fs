@@ -1,6 +1,8 @@
 #version 330 core
 #extension GL_ARB_shading_language_420pack : enable
 
+layout(binding = 0) uniform sampler2D textureAlbedo;
+
 include(`materialInterface.glsl')
 include(`materialOut.glsl')
 include(`materialCommon.glsl')
