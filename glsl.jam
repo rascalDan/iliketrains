@@ -37,6 +37,8 @@ actions glsl.embed
 
 rule glsl.embed ( targets * : sources * : properties * )
 {
-	DEPENDS $(targets) : lib/embed-glsl.h.m4 lib/embed-glsl.cpp.m4 ;
+	NOUPDATE $(targets[2]) ;
+	DEPENDS $(targets[2]) : lib/embed-glsl.h.m4 ;
+	DEPENDS $(targets[1]) $(targets[3]) : lib/embed-glsl.cpp.m4 ;
 	OPTIONS on $(targets) = [ type.type $(sources) ] ;
 }
