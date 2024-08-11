@@ -47,8 +47,8 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 256, 256);
 	glEnable(GL_DEPTH_TEST);
-	const auto & mins = mesh.minExtent();
-	const auto & maxs = mesh.maxExtent();
+	const auto & mins = mesh.getDimensions().minExtent;
+	const auto & maxs = mesh.getDimensions().maxExtent;
 	const auto extents = glm::ortho(mins.x, maxs.x, mins.z, maxs.z, mins.y, maxs.y);
 	const auto lightDir = glm::lookAt({}, north, up);
 	glUniform(viewProjectionLoc, extents * lightDir);
