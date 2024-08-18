@@ -84,8 +84,8 @@ public:
 				for (auto idx = f.mIndices; const auto fheh : mesh.fh_range(fh)) {
 					const auto ouv = !amesh->mTextureCoords[0][*idx++];
 					mesh.set_texcoord2D(fheh, ouv);
-					mesh.property(mesh.materialFaceProperty, fh) = material;
 				}
+				mesh.property(mesh.materialFaceProperty, fh) = material;
 			}
 		}
 	}
