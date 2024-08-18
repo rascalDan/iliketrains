@@ -34,10 +34,10 @@ isShaded(vec4 Position)
 		const float inside = insideShadowCube(PositionInLightSpace);
 		if (inside > 0) {
 			const float lightSpaceDepth = texture(shadowMap, vec3(PositionInLightSpace.xy, m)).r;
-			return step(lightSpaceDepth, PositionInLightSpace.z);
+			return step(PositionInLightSpace.z, lightSpaceDepth + 0.001);
 		}
 	}
-	return 0;
+	return 1;
 }
 
 void
@@ -46,5 +46,5 @@ main()
 	const vec4 Position = vec4(texture(gPosition, TexCoords).xyz - lightPoint, 1);
 	const vec3 Normal = texture(gNormal, TexCoords).rgb;
 	const float shaded = isShaded(Position);
-	FragColor = (1 - shaded) * max(dot(-lightDirection, Normal) * lightColour, 0);
+	FragColor = shaded * max(dot(-lightDirection, Normal) * lightColour, 0);
 }
