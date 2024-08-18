@@ -25,11 +25,12 @@ FactoryMesh::createMesh() const
 			std::vector<unsigned int> faceIndices;
 			for (const auto & heh : mesh.fh_range(face)) {
 				const auto & vertex = mesh.to_vertex_handle(heh);
-				const auto & textureUV = mesh.texcoord2D(heh);
-				const auto & point = mesh.point(vertex);
-				const auto & normal = useVertexNormals ? mesh.property(mesh.vertex_normals_pph(), vertex)
-													   : mesh.property(mesh.face_normals_pph(), face);
-				Vertex outVertex {point * 1000.F, textureUV, normal, colour, material};
+				Vertex outVertex {.pos = mesh.point(vertex) * 1000.F,
+						.texCoord = mesh.texcoord2D(heh),
+						.normal = useVertexNormals ? mesh.property(mesh.vertex_normals_pph(), vertex)
+												   : mesh.property(mesh.face_normals_pph(), face),
+						.colour = colour,
+						.material = material};
 				if (const auto existingItr = std::find(vertices.rbegin(), vertices.rend(), outVertex);
 						existingItr != vertices.rend()) {
 					faceIndices.push_back(static_cast<unsigned int>(std::distance(existingItr, vertices.rend()) - 1));
