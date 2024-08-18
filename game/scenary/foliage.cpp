@@ -3,7 +3,6 @@
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/texture.h"
-#include "location.h"
 
 bool
 Foliage::persist(Persistence::PersistenceStore & store)
@@ -17,9 +16,15 @@ Foliage::postLoad()
 	texture = getTexture();
 	bodyMesh->configureVAO(instanceVAO)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
-	ShadowStenciller ss;
-	ss.renderStencil(shadowStencil, *bodyMesh, texture);
-	Texture::saveDepth(shadowStencil, std::format("/tmp/stencil-{}.tga", id).c_str());
+}
+
+void
+Foliage::updateStencil(const ShadowStenciller & ss) const
+{
+	if (instances.size() > 0) {
+		ss.renderStencil(shadowStencil, *bodyMesh, texture);
+		Texture::saveDepth(shadowStencil, std::format("/tmp/stencil-{}.tga", id).c_str());
+	}
 }
 
 void

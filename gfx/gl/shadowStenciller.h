@@ -7,7 +7,7 @@
 
 class ShadowStenciller {
 public:
-	ShadowStenciller();
+	ShadowStenciller(const Direction3D & lightDir, const Direction3D & lightDirUp);
 
 	[[nodiscard]]
 	static glTexture createStencilTexture(GLsizei width, GLsizei height);
@@ -16,5 +16,6 @@ public:
 private:
 	glFrameBuffer fbo;
 	Program shadowCaster;
+	glm::mat4 lightDirMat;
 	Program::UniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 };

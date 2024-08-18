@@ -1,6 +1,7 @@
 #include "shadowMapper.h"
 #include "camera.h"
 #include "collections.h"
+#include "game/gamestate.h"
 #include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
 #include "gfx/gl/shaders/gs-commonShadowPoint.h"
 #include "gfx/gl/shaders/gs-shadowDynamicPointInstWithTextures.h"
@@ -8,6 +9,8 @@
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInstWithTextures.h"
 #include "gfx/gl/shaders/vs-shadowLandmass.h"
+#include "gfx/gl/shadowStenciller.h"
+#include "gfx/renderable.h"
 #include "gl_traits.h"
 #include "location.h"
 #include "maths.h"
@@ -74,6 +77,12 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 ShadowMapper::Definitions
 ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const Camera & camera) const
 {
+	ShadowStenciller shadowStenciller {dir, up};
+	for (const auto & [id, asset] : gameState->assets) {
+		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
+			r->updateStencil(shadowStenciller);
+		}
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);

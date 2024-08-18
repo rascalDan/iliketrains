@@ -1,15 +1,14 @@
 #include "shadowStenciller.h"
-#include "config/types.h"
 #include "gfx/gl/program.h"
 #include "gfx/gl/shaders/fs-shadowStencil.h"
 #include "gfx/gl/shaders/vs-shadowStencil.h"
 #include "gfx/models/mesh.h"
 #include "glArrays.h"
 #include "gl_traits.h"
-#include "maths.h"
 #include <stdexcept>
 
-ShadowStenciller::ShadowStenciller() : shadowCaster {shadowStencil_vs, shadowStencil_fs}
+ShadowStenciller::ShadowStenciller(const Direction3D & lightDir, const Direction3D & lightDirUp) :
+	shadowCaster {shadowStencil_vs, shadowStencil_fs}, lightDirMat {glm::lookAt(-lightDir, {}, lightDirUp)}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_NONE);
@@ -47,10 +46,10 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 256, 256);
 	glEnable(GL_DEPTH_TEST);
-	const auto & mins = mesh.getDimensions().minExtent;
-	const auto & maxs = mesh.getDimensions().maxExtent;
-	const auto extents = glm::ortho(mins.x, maxs.x, mins.z, maxs.z, mins.y, maxs.y);
-	const auto lightDir = glm::lookAt({}, north, up);
-	glUniform(viewProjectionLoc, extents * lightDir);
+	const auto & centre = mesh.getDimensions().centre;
+	const auto & size = mesh.getDimensions().size;
+	const auto extentsMat
+			= glm::translate(glm::ortho(-size, size, -size, size, -size, size), {-centre.x, -centre.z, -centre.y});
+	glUniform(viewProjectionLoc, extentsMat * lightDirMat);
 	mesh.Draw();
 }
