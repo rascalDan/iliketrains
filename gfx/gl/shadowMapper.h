@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/types.h"
+#include "gfx/gl/shadowStenciller.h"
 #include "lib/glArrays.h"
 #include "program.h"
 #include <gfx/models/texture.h>
@@ -61,4 +62,5 @@ private:
 	glFrameBuffer depthMapFBO;
 	glTexture depthMap;
 	TextureAbsCoord size;
+	mutable ShadowStenciller shadowStenciller;
 };

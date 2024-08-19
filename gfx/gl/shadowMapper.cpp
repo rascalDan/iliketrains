@@ -80,7 +80,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	glCullFace(GL_FRONT);
 	glEnable(GL_DEPTH_TEST);
 
-	ShadowStenciller shadowStenciller {dir, up};
+	shadowStenciller.setLightDirection(dir, up);
 	for (const auto & [id, asset] : gameState->assets) {
 		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
 			r->updateStencil(shadowStenciller);

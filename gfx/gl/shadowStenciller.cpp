@@ -7,13 +7,18 @@
 #include "gl_traits.h"
 #include <stdexcept>
 
-ShadowStenciller::ShadowStenciller(const Direction3D & lightDir, const Direction3D & lightDirUp) :
-	shadowCaster {shadowStencil_vs, shadowStencil_fs}, lightDirMat {glm::lookAt(-lightDir, {}, lightDirUp)}
+ShadowStenciller::ShadowStenciller() : shadowCaster {shadowStencil_vs, shadowStencil_fs}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void
+ShadowStenciller::setLightDirection(const Direction3D & lightDir, const Direction3D & lightDirUp)
+{
+	lightDirMat = glm::lookAt(-lightDir, {}, lightDirUp);
 }
 
 glTexture
