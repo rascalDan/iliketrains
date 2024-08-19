@@ -77,15 +77,18 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 ShadowMapper::Definitions
 ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const Camera & camera) const
 {
+	glCullFace(GL_FRONT);
+	glEnable(GL_DEPTH_TEST);
+
 	ShadowStenciller shadowStenciller {dir, up};
 	for (const auto & [id, asset] : gameState->assets) {
 		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
 			r->updateStencil(shadowStenciller);
 		}
 	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
 	glViewport(0, 0, size.x, size.y);
 
 	const auto lightViewDir = glm::lookAt({}, dir, up);

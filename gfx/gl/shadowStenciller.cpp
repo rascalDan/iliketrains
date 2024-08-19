@@ -45,7 +45,6 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	glUseProgram(shadowCaster);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, 256, 256);
-	glEnable(GL_DEPTH_TEST);
 	const auto & centre = mesh.getDimensions().centre;
 	const auto & size = mesh.getDimensions().size;
 	const auto extentsMat
