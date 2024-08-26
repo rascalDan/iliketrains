@@ -14,6 +14,7 @@ class Foliage : public Asset, public Renderable, public StdTypeDefs<Foliage> {
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
 	glVertexArray instanceVAO;
+	glVertexArray instancePointVAO;
 
 public:
 	using LocationVertex = std::pair<glm::mat3, GlobalPosition3D>;

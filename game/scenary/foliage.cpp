@@ -16,6 +16,8 @@ Foliage::postLoad()
 	texture = getTexture();
 	bodyMesh->configureVAO(instanceVAO)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+	VertexArrayObject {instancePointVAO}.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(
+			instances.bufferName());
 }
 
 void
