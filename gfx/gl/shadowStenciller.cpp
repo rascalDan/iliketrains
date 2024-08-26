@@ -28,6 +28,8 @@ ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
 	glBindTexture(GL_TEXTURE_2D, stencil);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
