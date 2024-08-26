@@ -7,6 +7,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <assetFactory/assetFactory.h>
+#include <game/gamestate.h>
 #include <game/geoData.h>
 #include <game/network/rail.h>
 #include <game/scenary/foliage.h>
@@ -25,10 +26,8 @@
 #include <ui/window.h>
 
 class TestScene : public SceneProvider {
-	const RailVehicleClassPtr brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(
-			AssetFactory::loadXML(RESDIR "/brush47.xml")->assets.at("brush-47"));
-	const std::shared_ptr<Foliage> tree021f
-			= std::dynamic_pointer_cast<Foliage>(AssetFactory::loadXML(RESDIR "/foliage.xml")->assets.at("Tree-02-1"));
+	RailVehicleClassPtr brush47rvc;
+	std::shared_ptr<Foliage> tree021f;
 	std::shared_ptr<RailVehicle> train1, train2;
 	std::shared_ptr<Plant> plant1;
 	RailLinks rail;
@@ -40,6 +39,9 @@ class TestScene : public SceneProvider {
 public:
 	TestScene()
 	{
+		gameState->assets = AssetFactory::loadAll(RESDIR);
+		brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(gameState->assets.at("brush-47"));
+		tree021f = std::dynamic_pointer_cast<Foliage>(gameState->assets.at("Tree-02-1"));
 		train1 = std::make_shared<RailVehicle>(brush47rvc);
 		train1->location.setPosition({52000, 50000, 2000});
 		train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
