@@ -33,6 +33,12 @@ public:
 			return location;
 		}
 
+		explicit
+		operator bool() const
+		{
+			return location >= 0;
+		}
+
 	protected:
 		GLint location;
 	};

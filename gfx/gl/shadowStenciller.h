@@ -17,7 +17,7 @@ public:
 private:
 	glFrameBuffer fbo;
 	Program shadowCaster;
-	Program::UniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
+	Program::RequiredUniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 
 	glm::mat4 lightDirMat {};
 };

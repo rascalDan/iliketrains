@@ -139,7 +139,9 @@ ShadowMapper::ShadowProgram::setView(const std::span<const glm::mat4x4> viewProj
 	use();
 	glUniform(viewPointLoc, viewPoint);
 	glUniform(viewProjectionLoc, viewProjection);
-	glUniform(sizesLoc, sizes);
+	if (sizesLoc) {
+		glUniform(sizesLoc, sizes);
+	}
 	glUniform(viewProjectionsLoc, static_cast<GLint>(viewProjection.size()));
 }
 
