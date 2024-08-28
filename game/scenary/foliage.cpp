@@ -45,10 +45,12 @@ void
 Foliage::shadows(const ShadowMapper & mapper) const
 {
 	if (const auto count = instances.size()) {
-		mapper.dynamicPointInstWithTextures.use();
-		if (texture) {
-			texture->bind(GL_TEXTURE3);
-		}
-		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
+		const auto dimensions = bodyMesh->getDimensions();
+		mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, shadowStencil);
+		glBindVertexArray(instancePointVAO);
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
+		glBindVertexArray(0);
 	}
 }
