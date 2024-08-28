@@ -3,11 +3,14 @@
 #include "collections.h"
 #include "game/gamestate.h"
 #include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
+#include "gfx/gl/shaders/fs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/gs-commonShadowPoint.h"
 #include "gfx/gl/shaders/gs-shadowDynamicPointInstWithTextures.h"
+#include "gfx/gl/shaders/gs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInstWithTextures.h"
+#include "gfx/gl/shaders/vs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/vs-shadowLandmass.h"
 #include "gfx/gl/shadowStenciller.h"
 #include "gfx/renderable.h"
@@ -115,7 +118,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 				return lightProjection * lightViewDir;
 			});
 	for (const auto p : std::initializer_list<const ShadowProgram *> {
-				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures}) {
+				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures, &stencilShadowProgram}) {
 		p->setView(out, sizes, lightViewPoint);
 	}
 	scene.shadows(*this);
@@ -165,4 +168,17 @@ ShadowMapper::DynamicPoint::setModel(const Location & location) const
 {
 	glUniform(modelLoc, location.getRotationTransform());
 	glUniform(modelPosLoc, location.pos);
+}
+
+ShadowMapper::StencilShadowProgram::StencilShadowProgram() :
+	ShadowProgram {shadowDynamicPointStencil_vs, shadowDynamicPointStencil_gs, shadowDynamicPointStencil_fs}
+{
+}
+
+void
+ShadowMapper::StencilShadowProgram::use(const RelativePosition3D & centre, const float size) const
+{
+	Program::use();
+	glUniform(centreLoc, centre);
+	glUniform(sizeLoc, size);
 }

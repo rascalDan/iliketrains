@@ -50,8 +50,19 @@ public:
 		RequiredUniformLocation modelPosLoc {*this, "modelPos"};
 	};
 
+	class StencilShadowProgram : public ShadowProgram {
+	public:
+		StencilShadowProgram();
+		void use(const RelativePosition3D & centre, const float size) const;
+
+	private:
+		RequiredUniformLocation centreLoc {*this, "centre"};
+		RequiredUniformLocation sizeLoc {*this, "size"};
+	};
+
 	ShadowProgram landmess, dynamicPointInst, dynamicPointInstWithTextures;
 	DynamicPoint dynamicPoint;
+	StencilShadowProgram stencilShadowProgram;
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)
 	operator GLuint() const
