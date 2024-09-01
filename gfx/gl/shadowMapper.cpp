@@ -102,12 +102,13 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			std::back_inserter(out),
 			[bands = bandViewExtents.size() - 2, &lightViewDir, &sizes](const auto & near, const auto & far) mutable {
-				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
-					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
-					return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
-				};
-				const std::array extents
-						= {extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2})};
+				const auto extents_minmax
+						= [extents = std::span {near.begin(), far.end()}](auto && comp, RelativeDistance extra) {
+							  const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
+							  return std::make_pair(comp.get(*mm.first) - extra, comp.get(*mm.second) + extra);
+						  };
+				const std::array extents = {extents_minmax(CompareBy {0}, 0), extents_minmax(CompareBy {1}, 0),
+						extents_minmax(CompareBy {2}, 10'000)};
 
 				const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
 					return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);

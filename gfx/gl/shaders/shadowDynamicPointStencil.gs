@@ -24,6 +24,7 @@ main()
 		vec4 pos = viewProjection[gl_Layer] * vec4(vworldPos[0], 1);
 		for (int c = 0; c < corners.length(); ++c) {
 			gl_Position = pos + vec4(scale.xy * corners[c], 0, 0);
+			gl_Position.z = max(gl_Position.z, -1);
 			texCoord = (corners[c] * 0.5) + 0.5;
 			EmitVertex();
 		}
