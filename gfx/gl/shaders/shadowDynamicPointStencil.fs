@@ -1,9 +1,9 @@
 #version 330 core
 #extension GL_ARB_shading_language_420pack : enable
 
-layout(binding = 0) uniform sampler2D stencilDepth;
+layout(binding = 0) uniform sampler2DArray stencilDepth;
 flat in vec3 scale;
-in vec2 texCoord;
+in vec3 texCoord;
 
 void
 main()

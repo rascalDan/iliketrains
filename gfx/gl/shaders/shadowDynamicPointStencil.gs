@@ -11,7 +11,7 @@ uniform float size;
 in ivec3 vworldPos[];
 
 flat out vec3 scale;
-out vec2 texCoord;
+out vec3 texCoord;
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 16) out;
@@ -25,7 +25,7 @@ main()
 		for (int c = 0; c < corners.length(); ++c) {
 			gl_Position = pos + vec4(scale.xy * corners[c], 0, 0);
 			gl_Position.z = max(gl_Position.z, -1);
-			texCoord = (corners[c] * 0.5) + 0.5;
+			texCoord = vec3((corners[c] * 0.5) + 0.5, 0);
 			EmitVertex();
 		}
 		EndPrimitive();

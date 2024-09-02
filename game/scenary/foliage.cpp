@@ -48,7 +48,7 @@ Foliage::shadows(const ShadowMapper & mapper) const
 		const auto dimensions = bodyMesh->getDimensions();
 		mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, shadowStencil);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowStencil);
 		glBindVertexArray(instancePointVAO);
 		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
 		glBindVertexArray(0);
