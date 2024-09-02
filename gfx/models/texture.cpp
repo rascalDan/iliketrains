@@ -59,12 +59,13 @@ Texture::bind(GLenum unit) const
 	glBindTexture(type, m_texture);
 }
 
-TextureAbsCoord
+TextureDimensions
 Texture::getSize(const glTexture & texture)
 {
-	TextureAbsCoord size;
+	TextureDimensions size {};
 	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_WIDTH, &size.x);
 	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_HEIGHT, &size.y);
+	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_DEPTH, &size.z);
 	return size;
 }
 
@@ -73,7 +74,7 @@ Texture::save(
 		const glTexture & texture, GLenum format, GLenum type, uint8_t channels, const char * path, uint8_t tgaFormat)
 {
 	const auto size = getSize(texture);
-	const size_t dataSize = (static_cast<size_t>(size.x * size.y * channels));
+	const size_t dataSize = (static_cast<size_t>(size.x * size.y * size.z * channels));
 	const size_t fileSize = dataSize + sizeof(TGAHead);
 
 	filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
@@ -81,7 +82,7 @@ Texture::save(
 	auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
 	*tga.get<TGAHead>() = {
 			.format = tgaFormat,
-			.size = size,
+			.size = {size.x, size.y * size.z},
 			.pixelDepth = static_cast<uint8_t>(8 * channels),
 	};
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
