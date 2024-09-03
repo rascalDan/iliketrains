@@ -1,13 +1,14 @@
 #include "shadowStenciller.h"
 #include "gfx/gl/program.h"
 #include "gfx/gl/shaders/fs-shadowStencil.h"
+#include "gfx/gl/shaders/gs-shadowStencil.h"
 #include "gfx/gl/shaders/vs-shadowStencil.h"
 #include "gfx/models/mesh.h"
 #include "glArrays.h"
 #include "gl_traits.h"
 #include <stdexcept>
 
-ShadowStenciller::ShadowStenciller() : shadowCaster {shadowStencil_vs, shadowStencil_fs}
+ShadowStenciller::ShadowStenciller() : shadowCaster {shadowStencil_vs, shadowStencil_gs, shadowStencil_fs}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_NONE);

@@ -4,15 +4,17 @@
 layout(binding = 1) uniform usampler2DRect materialData;
 
 include(`meshIn.glsl')
-include(`materialInterface.glsl')
+include(`materialDetail.glsl')
 include(`getMaterialDetail.glsl')
-uniform mat4 viewProjection;
+
+out vec3 FragPos;
+out vec2 TexCoords;
+flat out MaterialDetail Material;
 
 void
 main()
 {
 	TexCoords = texCoord;
 	Material = getMaterialDetail(material);
-
-	gl_Position = viewProjection * vec4(position, 1);
+	FragPos = position;
 }
