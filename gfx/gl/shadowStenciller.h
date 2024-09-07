@@ -20,4 +20,5 @@ private:
 	Program::RequiredUniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 
 	glm::mat4 lightDirMat {};
+	std::array<glm::mat4, 8> viewProjections;
 };

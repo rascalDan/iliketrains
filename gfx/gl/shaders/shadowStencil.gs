@@ -6,7 +6,7 @@ include(`materialDetail.glsl')
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 24) out;
 
-uniform mat4 viewProjection;
+uniform mat4 viewProjection[8];
 in vec3 FragPos[];
 in vec2 TexCoords[];
 flat in MaterialDetail Material[];
@@ -16,9 +16,9 @@ flat out MaterialDetail gMaterial;
 void
 main()
 {
-	for (gl_Layer = 0; gl_Layer < 8; ++gl_Layer) {
+	for (gl_Layer = 0; gl_Layer < viewProjection.length(); ++gl_Layer) {
 		for (int v = 0; v < FragPos.length(); ++v) {
-			gl_Position = viewProjection * vec4(FragPos[v], 1);
+			gl_Position = viewProjection[gl_Layer] * vec4(FragPos[v], 1);
 			gTexCoords = TexCoords[v];
 			gMaterial = Material[v];
 			EmitVertex();
