@@ -7,10 +7,6 @@
 #include <config/types.h>
 #include <maths.h>
 
-constexpr auto degreesToRads = pi / 180.F;
-constexpr auto dEarthMeanRadius = 6371.01F; // In km
-constexpr auto dAstronomicalUnit = 149597890.F; // In km
-
 // Based on the C++ code published at https://www.psa.es/sdg/sunpos.htm
 // Linked from https://www.pveducation.org/pvcdrom/properties-of-sunlight/suns-position-to-high-accuracy
 Direction2D
@@ -74,7 +70,7 @@ getSunPos(const Direction2D position, const float timeOfYear2024)
 		udtSunCoordinates.x = udtSunCoordinates.x + two_pi;
 	}
 	// Parallax Correction
-	const auto dParallax = (dEarthMeanRadius / dAstronomicalUnit) * sin(udtSunCoordinates.y);
+	const auto dParallax = (earthMeanRadius / astronomicalUnit) * sin(udtSunCoordinates.y);
 	udtSunCoordinates.y = half_pi - (udtSunCoordinates.y + dParallax);
 
 	return udtSunCoordinates;
