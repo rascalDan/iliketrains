@@ -4,13 +4,14 @@
 #include <cmath>
 #include <stream_support.h>
 
+#include <chronology.h>
 #include <config/types.h>
 #include <maths.h>
 
 // Based on the C++ code published at https://www.psa.es/sdg/sunpos.htm
 // Linked from https://www.pveducation.org/pvcdrom/properties-of-sunlight/suns-position-to-high-accuracy
 Direction2D
-getSunPos(const Direction2D position, const float timeOfYear2024)
+getSunPos(const Direction2D position, const time_t time)
 {
 	auto & longitude = position.x;
 	auto & latitude = position.y;
@@ -21,15 +22,13 @@ getSunPos(const Direction2D position, const float timeOfYear2024)
 	using std::floor;
 	using std::sin;
 	using std::tan;
-	constexpr auto JD2451545 {946728000}; // which is noon 1 January 2000 Universal Time
-	constexpr auto J11 {1704067200}; // 31st Dec 2023, so timeOfYear2024 1 is 1st Jan etc
-	constexpr auto JDiff = static_cast<float>(J11 - JD2451545);
+	static const auto JD2451545 = "2000-01-01T12:00:00"_time_t;
 
 	// Calculate difference in days between the current Julian Day
 	// and JD 2451545.0, which is noon 1 January 2000 Universal Time
 	// Calculate time of the day in UT decimal hours
-	const auto dDecimalHours = 24.F * (timeOfYear2024 - floor(timeOfYear2024));
-	const auto dElapsedJulianDays = (JDiff + timeOfYear2024 * 86400.F) / 86400.F;
+	const auto dDecimalHours = static_cast<float>(time % 86400) / 3600.F;
+	const auto dElapsedJulianDays = static_cast<float>(time - JD2451545) / 86400.F;
 
 	// Calculate ecliptic coordinates (ecliptic longitude and obliquity of the
 	// ecliptic in radians but without limiting the angle to be less than 2*Pi
@@ -76,22 +75,23 @@ getSunPos(const Direction2D position, const float timeOfYear2024)
 	return udtSunCoordinates;
 }
 
-using sunPosTestData = std::tuple<Direction2D, float, Direction2D>;
+using sunPosTestData = std::tuple<Direction2D, time_t, Direction2D>;
 constexpr Direction2D Doncaster = {-1.1, 53.5};
 constexpr Direction2D NewYork = {74.0, 40.7};
 constexpr Direction2D Syndey = {-151.2, -33.9};
+constexpr Direction2D EqGM = {};
 
 BOOST_DATA_TEST_CASE(sun_position,
 		boost::unit_test::data::make<sunPosTestData>({
-				{{0.F, 0.F}, 1.00F, {181.52F, -66.86F}},
-				{{0.F, 0.F}, 1.25F, {113.12F, -0.85F}},
-				{{0.F, 0.F}, 1.50F, {177.82F, 66.97F}},
-				{{0.F, 0.F}, 1.75F, {246.99F, 0.90F}},
-				{{0.F, 0.F}, 2.00F, {181.52F, -67.04F}},
-				{{0.F, 0.F}, 180.50F, {2.1F, 66.80F}},
-				{Doncaster, 180.50F, {176.34F, 59.64F}},
-				{NewYork, 180.50F, {278.04F, 27.34F}},
-				{Syndey, 180.50F, {106.13F, -63.29F}},
+				{EqGM, "2024-01-02T00:00:00"_time_t, {181.52F, -66.86F}},
+				{EqGM, "2024-01-02T06:00:00"_time_t, {113.12F, -0.85F}},
+				{EqGM, "2024-01-02T12:00:00"_time_t, {177.82F, 66.97F}},
+				{EqGM, "2024-01-02T18:00:00"_time_t, {246.99F, 0.90F}},
+				{EqGM, "2024-01-03T00:00:00"_time_t, {181.52F, -67.04F}},
+				{EqGM, "2024-06-29T12:00:00"_time_t, {2.1F, 66.80F}},
+				{Doncaster, "2024-06-29T12:00:00"_time_t, {176.34F, 59.64F}},
+				{NewYork, "2024-06-29T12:00:00"_time_t, {278.04F, 27.34F}},
+				{Syndey, "2024-06-29T12:00:00"_time_t, {106.13F, -63.29F}},
 		}),
 		position, timeOfYear, expSunPos)
 {
