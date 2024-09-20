@@ -7,6 +7,7 @@
 
 class WorldObject;
 class GeoData;
+class Environment;
 
 class GameState {
 public:
@@ -17,6 +18,7 @@ public:
 
 	Collection<WorldObject> world;
 	std::shared_ptr<GeoData> geoData;
+	std::shared_ptr<Environment> environment;
 	AssetFactory::Assets assets;
 };
 

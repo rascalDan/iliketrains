@@ -1,16 +1,17 @@
 #include "gameMainWindow.h"
 #include "editNetwork.h"
 #include "gameMainSelector.h"
-#include "gfx/camera_controller.h"
 #include "manualCameraController.h"
 #include "modeHelper.h"
 #include "toolbar.h"
 #include "window.h"
 #include <SDL2/SDL.h>
 #include <collection.h>
+#include <game/environment.h>
 #include <game/gamestate.h>
 #include <game/network/rail.h>
 #include <game/worldobject.h> // IWYU pragma: keep
+#include <gfx/camera_controller.h>
 #include <gfx/renderable.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
@@ -65,10 +66,9 @@ GameMainWindow::content(const SceneShader & shader) const
 }
 
 void
-GameMainWindow::environment(const SceneShader & s, const SceneRenderer & r) const
+GameMainWindow::environment(const SceneShader &, const SceneRenderer & r) const
 {
-	// default for now
-	SceneProvider::environment(s, r);
+	gameState->environment->render(r, *this);
 }
 
 void

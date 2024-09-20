@@ -1,3 +1,4 @@
+#include "game/environment.h"
 #define BOOST_TEST_MODULE test_render
 
 #include "testHelpers.h"
@@ -33,6 +34,7 @@ class TestScene : public SceneProvider {
 	std::shared_ptr<Plant> plant1;
 	RailLinks rail;
 	std::shared_ptr<GeoData> gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
+	std::shared_ptr<Environment> env = std::make_shared<Environment>();
 
 	Terrain terrain {gd};
 	Water water {gd};
@@ -66,6 +68,12 @@ public:
 	void
 	lights(const SceneShader &) const override
 	{
+	}
+
+	void
+	environment(const SceneShader &, const SceneRenderer & r) const override
+	{
+		env->render(r, *this);
 	}
 
 	void
