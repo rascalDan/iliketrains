@@ -13,10 +13,17 @@ Environment::tick(TickDuration)
 void
 Environment::render(const SceneRenderer & renderer, const SceneProvider & scene) const
 {
+	constexpr RGB baseAmbient {0.1F}, baseDirectional {0.0F};
+	constexpr RGB relativeAmbient {0.3F, 0.3F, 0.4F}, relativeDirectional {0.6F, 0.6F, 0.5F};
+
 	const auto sunPos = getSunPos({}, worldTime);
 	const auto sunDir = (glm::mat3 {rotate_yp({sunPos.y + pi, sunPos.x})} * north);
-	renderer.setAmbientLight({0.5F, 0.5F, 0.5F});
-	renderer.setDirectionalLight({0.6F, 0.6F, 0.6F}, sunDir, scene);
+	const auto vertical = -std::min(0.F, sunDir.z - 0.1F);
+	const auto ambient = baseAmbient + relativeAmbient * vertical;
+	const auto directional = baseDirectional + relativeDirectional * vertical;
+
+	renderer.setAmbientLight(ambient);
+	renderer.setDirectionalLight(directional, sunDir, scene);
 }
 
 // Based on the C++ code published at https://www.psa.es/sdg/sunpos.htm
