@@ -7,14 +7,16 @@ Environment::Environment() : worldTime {"2024-01-01T12:00:00"_time_t} { }
 void
 Environment::tick(TickDuration)
 {
-	worldTime += 1;
+	worldTime += 50;
 }
 
 void
 Environment::render(const SceneRenderer & renderer, const SceneProvider & scene) const
 {
+	const auto sunPos = getSunPos({}, worldTime);
+	const auto sunDir = (glm::mat3 {rotate_yp({sunPos.y + pi, sunPos.x})} * north);
 	renderer.setAmbientLight({0.5F, 0.5F, 0.5F});
-	renderer.setDirectionalLight({0.6F, 0.6F, 0.6F}, {-1, 1, -1}, scene);
+	renderer.setDirectionalLight({0.6F, 0.6F, 0.6F}, sunDir, scene);
 }
 
 // Based on the C++ code published at https://www.psa.es/sdg/sunpos.htm
