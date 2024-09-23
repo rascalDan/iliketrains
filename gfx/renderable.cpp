@@ -9,3 +9,8 @@ void
 Renderable::shadows(const ShadowMapper &) const
 {
 }
+
+void
+Renderable::updateStencil(const ShadowStenciller &) const
+{
+}

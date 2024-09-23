@@ -62,7 +62,7 @@ SceneRenderer::render(const SceneProvider & scene) const
 	shader.setViewProjection(camera.getPosition(), camera.getViewProjection());
 	glViewport(0, 0, size.x, size.y);
 
-	// Geometry pass
+	// Geometry/colour pass - writes albedo, normal and position textures
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
@@ -73,7 +73,13 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	scene.content(shader);
 
-	// Illumination pass
+	// Environment pass -
+	// * ambient - clears illumination texture - see setAmbientLight
+	// * directional - updates shadowMapper, reads normal and position, writes illumination - see setDirectionalLight
+	scene.environment(shader, *this);
+
+	// Scene lights pass -
+	// * per light - reads normal and position, writes illumination
 	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 	glBlendFunc(GL_ONE, GL_ONE);
 	glActiveTexture(GL_TEXTURE0);
@@ -82,11 +88,10 @@ SceneRenderer::render(const SceneProvider & scene) const
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
-	scene.environment(shader, *this);
 	glDisable(GL_DEPTH_TEST);
 	scene.lights(shader);
 
-	// Lighting pass
+	// Composition pass - reads albedo and illumination, writes output
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 	glViewport(0, 0, size.x, size.y);
 	glCullFace(GL_BACK);
@@ -114,6 +119,13 @@ SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direc
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
 		const auto lvp = shadowMapper.update(scene, direction, camera);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
 		dirLight.setDirectionalLight(colour, direction, camera.getPosition(), lvp);

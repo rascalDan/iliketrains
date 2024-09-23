@@ -4,6 +4,7 @@
 
 class SceneShader;
 class ShadowMapper;
+class ShadowStenciller;
 
 class Renderable {
 public:
@@ -14,4 +15,6 @@ public:
 	virtual void render(const SceneShader & shader) const = 0;
 	virtual void lights(const SceneShader & shader) const;
 	virtual void shadows(const ShadowMapper & shadowMapper) const;
+
+	virtual void updateStencil(const ShadowStenciller & lightDir) const;
 };

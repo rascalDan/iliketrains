@@ -65,7 +65,7 @@ SceneShader::SceneProgram::setViewProjection(const GlobalPosition3D & viewPoint,
 void
 SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 {
-	if (viewPortLoc >= 0) {
+	if (viewPortLoc) {
 		glUseProgram(*this);
 		glUniform(viewPortLoc, viewPort);
 	}

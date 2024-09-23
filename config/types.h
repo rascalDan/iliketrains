@@ -42,6 +42,7 @@ using Normal3D = Normal<3>;
 using Rotation2D = Rotation<2>;
 using Rotation3D = Rotation<3>;
 using TextureRelCoord = glm::vec<2, float>;
+using TextureDimensions = glm::vec<3, GLsizei>;
 using TextureRelRegion = glm::vec<4, float>;
 using TextureAbsCoord = glm::vec<2, GLsizei>;
 using TextureAbsRegion = glm::vec<4, GLsizei>;
