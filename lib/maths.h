@@ -97,6 +97,7 @@ glm::mat4 rotate_roll(float);
 glm::mat4 rotate_yaw(float);
 glm::mat4 rotate_pitch(float);
 glm::mat4 rotate_yp(Rotation2D);
+glm::mat4 rotate_yp(Angle yaw, Angle pitch);
 glm::mat4 rotate_ypr(Rotation3D);
 
 float vector_yaw(const Direction2D & diff);

@@ -77,7 +77,13 @@ rotate_ypr(Rotation3D a)
 glm::mat4
 rotate_yp(Rotation2D a)
 {
-	return rotate_yaw(a.y) * rotate_pitch(a.x);
+	return rotate_yp(a.y, a.x);
+}
+
+glm::mat4
+rotate_yp(Angle yaw, Angle pitch)
+{
+	return rotate_yaw(yaw) * rotate_pitch(pitch);
 }
 
 float
