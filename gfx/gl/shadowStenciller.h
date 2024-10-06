@@ -5,13 +5,15 @@
 #include "gfx/models/texture.h"
 #include "glArrays.h"
 
+class LightDirection;
+
 class ShadowStenciller {
 public:
 	ShadowStenciller();
 
 	[[nodiscard]]
 	static glTexture createStencilTexture(GLsizei width, GLsizei height);
-	void setLightDirection(const Direction3D & lightDir, const Direction3D & lightDirUp);
+	void setLightDirection(const LightDirection & lightDir);
 	void renderStencil(const glTexture &, const MeshBase &, const Texture::AnyPtr texture) const;
 
 private:
@@ -19,6 +21,5 @@ private:
 	Program shadowCaster;
 	Program::RequiredUniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 
-	glm::mat4 lightDirMat {};
 	std::array<glm::mat4, 8> viewProjections;
 };

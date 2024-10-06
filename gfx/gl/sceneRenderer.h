@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera.h"
+#include "gfx/lightDirection.h"
 #include "glArrays.h"
 #include "program.h"
 #include "sceneProvider.h"
@@ -14,7 +15,7 @@ public:
 
 	void render(const SceneProvider &) const;
 	void setAmbientLight(const RGB & colour) const;
-	void setDirectionalLight(const RGB & colour, const Direction3D & direction, const SceneProvider &) const;
+	void setDirectionalLight(const RGB & colour, const LightDirection & direction, const SceneProvider &) const;
 
 	Camera camera;
 

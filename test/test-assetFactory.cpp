@@ -54,7 +54,7 @@ public:
 	environment(const SceneShader &, const SceneRenderer & sceneRenderer) const override
 	{
 		sceneRenderer.setAmbientLight({.4, .4, .4});
-		sceneRenderer.setDirectionalLight({.6, .6, .6}, east + south + south + down, *this);
+		sceneRenderer.setDirectionalLight({.6, .6, .6}, {{0.9, 0.5}}, *this);
 	}
 
 	void

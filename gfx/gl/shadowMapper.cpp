@@ -13,6 +13,7 @@
 #include "gfx/gl/shaders/vs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/vs-shadowLandmass.h"
 #include "gfx/gl/shadowStenciller.h"
+#include "gfx/lightDirection.h"
 #include "gfx/renderable.h"
 #include "gl_traits.h"
 #include "location.h"
@@ -78,12 +79,12 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 }
 
 ShadowMapper::Definitions
-ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const Camera & camera) const
+ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, const Camera & camera) const
 {
 	glCullFace(GL_FRONT);
 	glEnable(GL_DEPTH_TEST);
 
-	shadowStenciller.setLightDirection(dir, up);
+	shadowStenciller.setLightDirection(dir);
 	for (const auto & [id, asset] : gameState->assets) {
 		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
 			r->updateStencil(shadowStenciller);
@@ -94,7 +95,7 @@ ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, size.x, size.y);
 
-	const auto lightViewDir = glm::lookAt({}, dir, up);
+	const auto lightViewDir = glm::lookAt({}, dir.vector(), up);
 	const auto lightViewPoint = camera.getPosition();
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
 	Definitions out;

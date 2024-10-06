@@ -3,6 +3,7 @@
 #include "gfx/gl/shaders/fs-shadowStencil.h"
 #include "gfx/gl/shaders/gs-shadowStencil.h"
 #include "gfx/gl/shaders/vs-shadowStencil.h"
+#include "gfx/lightDirection.h"
 #include "gfx/models/mesh.h"
 #include "glArrays.h"
 #include "gl_traits.h"
@@ -26,10 +27,9 @@ ShadowStenciller::ShadowStenciller() :
 }
 
 void
-ShadowStenciller::setLightDirection(const Direction3D & lightDir, const Direction3D & lightDirUp)
+ShadowStenciller::setLightDirection(const LightDirection & lightDir)
 {
-	lightDirMat = glm::lookAt(-lightDir, {}, lightDirUp);
-	viewProjections = angles * [this](const auto & a) {
+	viewProjections = angles * [lightDirMat = rotate_pitch(lightDir.position().y)](const auto & a) {
 		return lightDirMat * a;
 	};
 }
@@ -68,10 +68,11 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	glViewport(0, 0, 256, 256);
 	const auto & centre = mesh.getDimensions().centre;
 	const auto & size = mesh.getDimensions().size;
-	const auto extentsMat
-			= glm::translate(glm::ortho(-size, size, -size, size, -size, size), {-centre.x, -centre.z, -centre.y});
-	glUniform(viewProjectionLoc, std::span<const glm::mat4> {viewProjections * [&](const auto & vp) {
-		return extentsMat * vp;
+	glUniform(viewProjectionLoc,
+			std::span<const glm::mat4> {viewProjections *
+					[extentsMat = glm::translate(glm::ortho(-size, size, -size, size, -size, size), -centre)](
+							const auto & vp) {
+						return vp * extentsMat;
 	}});
 	mesh.Draw();
 }

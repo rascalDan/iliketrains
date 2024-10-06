@@ -1,4 +1,3 @@
-#include "game/environment.h"
 #define BOOST_TEST_MODULE test_render
 
 #include "testHelpers.h"
@@ -8,6 +7,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <assetFactory/assetFactory.h>
+#include <game/environment.h>
 #include <game/gamestate.h>
 #include <game/geoData.h>
 #include <game/network/rail.h>
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(terrain)
 		environment(const SceneShader &, const SceneRenderer & sr) const override
 		{
 			sr.setAmbientLight({0.1, 0.1, 0.1});
-			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+			sr.setDirectionalLight({1, 1, 1}, {{0, quarter_pi}}, *this);
 		}
 
 		void
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(railnet)
 		environment(const SceneShader &, const SceneRenderer & sr) const override
 		{
 			sr.setAmbientLight({0.1, 0.1, 0.1});
-			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+			sr.setDirectionalLight({1, 1, 1}, {{0, quarter_pi}}, *this);
 		}
 
 		void

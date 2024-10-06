@@ -114,7 +114,8 @@ SceneRenderer::setAmbientLight(const RGB & colour) const
 }
 
 void
-SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direction, const SceneProvider & scene) const
+SceneRenderer::setDirectionalLight(
+		const RGB & colour, const LightDirection & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
 		const auto lvp = shadowMapper.update(scene, direction, camera);
@@ -128,7 +129,7 @@ SceneRenderer::setDirectionalLight(const RGB & colour, const Direction3D & direc
 		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
-		dirLight.setDirectionalLight(colour, direction, camera.getPosition(), lvp);
+		dirLight.setDirectionalLight(colour, direction.vector(), camera.getPosition(), lvp);
 		renderQuad();
 	}
 }
@@ -154,8 +155,7 @@ SceneRenderer::DirectionalLightProgram::setDirectionalLight(
 		return toTextureSpaceMat * m;
 	};
 	glUniform(colourLoc, c);
-	const auto nd = glm::normalize(d);
-	glUniform(directionLoc, nd);
+	glUniform(directionLoc, d);
 	glUniform(lightPointLoc, p);
 	glUniform(lightViewProjectionCountLoc, static_cast<GLuint>(lvp.size()));
 	glUniform(lightViewProjectionLoc, std::span<const glm::mat4> {lvp * toTextureSpace});

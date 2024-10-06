@@ -11,6 +11,7 @@
 
 class SceneProvider;
 class Camera;
+class LightDirection;
 
 class ShadowMapper {
 public:
@@ -21,7 +22,7 @@ public:
 	using Definitions = std::vector<glm::mat4x4>;
 	using Sizes = std::vector<RelativePosition3D>;
 
-	[[nodiscard]] Definitions update(const SceneProvider &, const Direction3D & direction, const Camera &) const;
+	[[nodiscard]] Definitions update(const SceneProvider &, const LightDirection & direction, const Camera &) const;
 
 	class ShadowProgram : public Program {
 	public:
