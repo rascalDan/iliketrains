@@ -12,5 +12,5 @@ main()
 	if (stDepth >= 1) {
 		discard;
 	}
-	gl_FragDepth = gl_FragCoord.z + (stDepth * scale.z);
+	gl_FragDepth = gl_FragCoord.z + ((stDepth - 0.5) * scale.z);
 }
