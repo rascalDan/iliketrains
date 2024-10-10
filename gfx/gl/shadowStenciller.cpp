@@ -10,13 +10,6 @@
 #include "maths.h"
 #include <stdexcept>
 
-namespace {
-	static constexpr std::array<float, 8> anglesEigthPi {-3, -2, -1, 0, 1, 2, 3, 4};
-	static const auto angles = anglesEigthPi * [](auto ep) {
-		return rotate_yaw(ep * quarter_pi);
-	};
-}
-
 ShadowStenciller::ShadowStenciller() :
 	shadowCaster {shadowStencil_vs, shadowStencil_gs, shadowStencil_fs}, viewProjections {}
 {
@@ -29,8 +22,8 @@ ShadowStenciller::ShadowStenciller() :
 void
 ShadowStenciller::setLightDirection(const LightDirection & lightDir)
 {
-	viewProjections = angles * [lightDirMat = rotate_pitch(lightDir.position().y)](const auto & a) {
-		return lightDirMat * a;
+	viewProjections = std::array<float, 8> {0, 1, 2, 3, 4, 5, 6, 7} * [&lightDir](const auto & ep) {
+		return rotate_pitch(half_pi - lightDir.position().y) * rotate_yaw((ep * quarter_pi) - lightDir.position().x);
 	};
 }
 
