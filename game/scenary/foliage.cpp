@@ -2,7 +2,6 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/vertexArrayObject.h"
-#include "gfx/models/texture.h"
 
 bool
 Foliage::persist(Persistence::PersistenceStore & store)
@@ -26,7 +25,6 @@ Foliage::updateStencil(const ShadowStenciller & ss) const
 {
 	if (instances.size() > 0) {
 		ss.renderStencil(shadowStencil, *bodyMesh, texture);
-		Texture::saveDepth(shadowStencil, std::format("/tmp/stencil-{}.tga", id).c_str());
 	}
 }
 
