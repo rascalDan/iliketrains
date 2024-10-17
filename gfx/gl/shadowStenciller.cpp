@@ -10,6 +10,8 @@
 #include "maths.h"
 #include <stdexcept>
 
+template<typename T> constexpr T STENCIL_ANGLES = 8;
+
 ShadowStenciller::ShadowStenciller() :
 	shadowCaster {shadowStencil_vs, shadowStencil_gs, shadowStencil_fs}, viewProjections {}
 {
@@ -39,8 +41,8 @@ ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
 	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, 8, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE,
-			nullptr);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, STENCIL_ANGLES<GLint>, 0,
+			GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 
 	return stencil;
 }
