@@ -116,6 +116,18 @@ normalize(float ang)
 	return ang;
 }
 
+static_assert(pow(1, 0) == 1);
+static_assert(pow(1, 1) == 1);
+static_assert(pow(1, 2) == 1);
+static_assert(pow(2, 0) == 1);
+static_assert(pow(2, 1) == 2);
+static_assert(pow(2, 2) == 4);
+static_assert(pow(2, 3) == 8);
+static_assert(pow(3, 0) == 1);
+static_assert(pow(3, 1) == 3);
+static_assert(pow(3, 2) == 9);
+static_assert(pow(pi, 3) == 31.006278991699219F);
+
 float
 operator"" _mph(const long double v)
 {

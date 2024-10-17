@@ -261,6 +261,19 @@ midpoint(const std::pair<T, T> & v)
 	return std::midpoint(v.first, v.second);
 }
 
+// std::pow is not constexpr
+template<typename T>
+	requires requires(T n) { n *= n; }
+constexpr inline T
+pow(const T base, std::integral auto exp)
+{
+	T res {1};
+	while (exp--) {
+		res *= base;
+	}
+	return res;
+}
+
 // Conversions
 template<typename T>
 inline constexpr auto
