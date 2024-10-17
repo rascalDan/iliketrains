@@ -16,7 +16,7 @@ public:
 	[[nodiscard]]
 	static glTexture createStencilTexture(GLsizei width, GLsizei height);
 	void setLightDirection(const LightDirection & lightDir);
-	void renderStencil(const glTexture &, const MeshBase &, const Texture::AnyPtr texture) const;
+	void renderStencil(const glTexture &, const MeshBase &, Texture::AnyPtr texture) const;
 
 private:
 	glFrameBuffer fbo;

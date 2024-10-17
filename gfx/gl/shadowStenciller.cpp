@@ -67,8 +67,8 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	glUniform(viewProjectionLoc,
 			std::span<const glm::mat4> {viewProjections *
 					[extentsMat = glm::translate(glm::ortho(-size, size, -size, size, -size, size), -centre)](
-							const auto & vp) {
-						return vp * extentsMat;
-	}});
+							const auto & viewProjection) {
+						return viewProjection * extentsMat;
+					}});
 	mesh.Draw();
 }
