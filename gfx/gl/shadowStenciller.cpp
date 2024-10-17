@@ -58,7 +58,8 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	}
 	glUseProgram(shadowCaster);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, 256, 256);
+	const auto stencilSize = Texture::getSize(stencil);
+	glViewport(0, 0, stencilSize.x, stencilSize.y);
 	const auto & centre = mesh.getDimensions().centre;
 	const auto & size = mesh.getDimensions().size;
 	glUniform(viewProjectionLoc,
