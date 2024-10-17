@@ -9,6 +9,8 @@ class LightDirection;
 
 class ShadowStenciller {
 public:
+	template<typename T> static constexpr T STENCIL_ANGLES = 8;
+
 	ShadowStenciller();
 
 	[[nodiscard]]
@@ -21,5 +23,5 @@ private:
 	Program shadowCaster;
 	Program::RequiredUniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 
-	std::array<glm::mat4, 8> viewProjections;
+	std::array<glm::mat4, STENCIL_ANGLES<size_t>> viewProjections;
 };

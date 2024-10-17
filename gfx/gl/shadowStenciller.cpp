@@ -10,8 +10,6 @@
 #include "maths.h"
 #include <stdexcept>
 
-template<typename T> constexpr T STENCIL_ANGLES = 8;
-
 ShadowStenciller::ShadowStenciller() :
 	shadowCaster {shadowStencil_vs, shadowStencil_gs, shadowStencil_fs}, viewProjections {}
 {
@@ -24,9 +22,11 @@ ShadowStenciller::ShadowStenciller() :
 void
 ShadowStenciller::setLightDirection(const LightDirection & lightDir)
 {
-	viewProjections = std::array<float, 8> {0, 1, 2, 3, 4, 5, 6, 7} * [&lightDir](const auto & ep) {
-		return rotate_pitch(half_pi - lightDir.position().y) * rotate_yaw((ep * quarter_pi) - lightDir.position().x);
-	};
+	viewProjections = [&lightDir]<GLint... Ep>(std::integer_sequence<GLint, Ep...>) {
+		constexpr float STEP = two_pi / STENCIL_ANGLES<decltype(two_pi)>;
+		return std::array {
+				rotate_pitch(half_pi - lightDir.position().y) * rotate_yaw((Ep * STEP) - lightDir.position().x)...};
+	}(std::make_integer_sequence<GLint, STENCIL_ANGLES<GLint>>());
 }
 
 glTexture
