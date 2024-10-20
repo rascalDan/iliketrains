@@ -107,9 +107,9 @@ const auto angs = boost::unit_test::data::make({pi, half_pi, two_pi, quarter_pi,
 		* boost::unit_test::data::make(0);
 const auto random_angs = boost::unit_test::data::random(-two_pi, two_pi) ^ boost::unit_test::data::xrange(1000);
 const auto rots = boost::unit_test::data::make<std::tuple<glm::vec3, glm::mat4 (*)(float), std::string_view>>({
-		{down, rotate_yaw, "yaw"},
-		{east, rotate_pitch, "pitch"},
-		{north, rotate_roll, "roll"},
+		{down, rotate_yaw<4>, "yaw"},
+		{east, rotate_pitch<4>, "pitch"},
+		{north, rotate_roll<4>, "roll"},
 });
 
 BOOST_DATA_TEST_CASE(test_rotations, (angs + random_angs) * rots, angle, ai, axis, ilt_func, name)
@@ -247,13 +247,13 @@ BOOST_DATA_TEST_CASE(curve1,
 		BOOST_CHECK_EQUAL(l.radius, 1.F);
 		{
 			const auto p = l.positionAt(0, 0);
-			const auto angForReversed = normalize(vector_yaw(-e1) * 2 - angFor);
+			const auto angForReversed = normalize(vector_yaw(difference({}, e1)) * 2 - angFor);
 			BOOST_CHECK_CLOSE_VECI(p.pos, e1);
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angForReversed, 0));
 		}
 		{
 			const auto p = l.positionAt(0, 1);
-			const auto angBackReversed = normalize(vector_yaw(e1) * 2 - angBack);
+			const auto angBackReversed = normalize(vector_yaw(difference(e1, {})) * 2 - angBack);
 			BOOST_CHECK_CLOSE_VECI(p.pos, GlobalPosition3D {});
 			BOOST_CHECK_CLOSE_VEC(p.rot, glm::vec3(0, angBackReversed, 0));
 		}

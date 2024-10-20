@@ -1,12 +1,11 @@
 #include "mutation.h"
-#include <algorithm>
 #include <glm/gtx/transform.hpp>
 #include <maths.h>
 
 Mutation::Matrix
 Mutation::getMatrix() const
 {
-	return glm::translate(glm::identity<Matrix>(), position) * rotate_ypr(rotation)
+	return glm::translate(glm::identity<Matrix>(), position) * rotate_ypr<4>(rotation)
 			* glm::scale(glm::identity<Matrix>(), scale);
 }
 
@@ -19,7 +18,7 @@ Mutation::getDeformationMatrix() const
 Mutation::Matrix
 Mutation::getLocationMatrix() const
 {
-	return glm::translate(glm::identity<Matrix>(), position) * rotate_ypr(rotation);
+	return glm::translate(glm::identity<Matrix>(), position) * rotate_ypr<4>(rotation);
 }
 
 bool

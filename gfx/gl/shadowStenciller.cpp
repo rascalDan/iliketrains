@@ -24,8 +24,8 @@ ShadowStenciller::setLightDirection(const LightDirection & lightDir)
 {
 	viewProjections = [&lightDir]<GLint... Ep>(std::integer_sequence<GLint, Ep...>) {
 		constexpr float STEP = two_pi / STENCIL_ANGLES<decltype(two_pi)>;
-		return std::array {
-				rotate_pitch(half_pi - lightDir.position().y) * rotate_yaw((Ep * STEP) - lightDir.position().x)...};
+		return std::array {rotate_pitch<4>(half_pi - lightDir.position().y)
+				* rotate_yaw<4>((Ep * STEP) - lightDir.position().x)...};
 	}(std::make_integer_sequence<GLint, STENCIL_ANGLES<GLint>>());
 }
 

@@ -17,22 +17,22 @@ struct Arc : public std::pair<Angle, Angle> {
 	}
 
 	Arc(const RelativePosition2D & dir0, const RelativePosition2D & dir1);
-	Arc(const Angle angb, const Angle anga);
+	Arc(Angle anga, Angle angb);
 
 	auto
-	operator[](bool i) const
+	operator[](bool getSecond) const
 	{
-		return i ? second : first;
+		return getSecond ? second : first;
 	}
 
-	[[nodiscard]] constexpr inline float
+	[[nodiscard]] constexpr float
 	length() const
 	{
 		return second - first;
 	}
 };
 
-constexpr const RelativePosition3D up {0, 0, 1};
+constexpr const RelativePosition3D up {0, 0, 1}; // NOLINT(readability-identifier-length)
 constexpr const RelativePosition3D down {0, 0, -1};
 constexpr const RelativePosition3D north {0, 1, 0};
 constexpr const RelativePosition3D south {0, -1, 0};
@@ -40,7 +40,7 @@ constexpr const RelativePosition3D east {1, 0, 0};
 constexpr const RelativePosition3D west {-1, 0, 0};
 constexpr auto half_pi {glm::half_pi<float>()};
 constexpr auto quarter_pi {half_pi / 2};
-constexpr auto pi {glm::pi<float>()};
+constexpr auto pi {glm::pi<float>()}; // NOLINT(readability-identifier-length)
 constexpr auto two_pi {glm::two_pi<float>()};
 constexpr auto degreesToRads = pi / 180.F;
 
@@ -48,153 +48,274 @@ constexpr auto earthMeanRadius = 6371.01F; // In km
 constexpr auto astronomicalUnit = 149597890.F; // In km
 
 template<glm::length_t D>
-constexpr inline GlobalPosition<D>
-operator+(const GlobalPosition<D> & g, const RelativePosition<D> & r)
+constexpr GlobalPosition<D>
+operator+(const GlobalPosition<D> & global, const RelativePosition<D> & relative)
 {
-	return g + GlobalPosition<D>(glm::round(r));
+	return global + GlobalPosition<D>(glm::round(relative));
 }
 
 template<glm::length_t D>
-constexpr inline GlobalPosition<D>
-operator+(const GlobalPosition<D> & g, const CalcPosition<D> & r)
+constexpr GlobalPosition<D>
+operator+(const GlobalPosition<D> & global, const CalcPosition<D> & relative)
 {
-	return g + GlobalPosition<D>(r);
+	return global + GlobalPosition<D>(relative);
 }
 
 template<glm::length_t D>
-constexpr inline GlobalPosition<D>
-operator-(const GlobalPosition<D> & g, const RelativePosition<D> & r)
+constexpr GlobalPosition<D>
+operator-(const GlobalPosition<D> & global, const RelativePosition<D> & relative)
 {
-	return g - GlobalPosition<D>(glm::round(r));
+	return global - GlobalPosition<D>(glm::round(relative));
 }
 
 template<glm::length_t D>
-constexpr inline GlobalPosition<D>
-operator-(const GlobalPosition<D> & g, const CalcPosition<D> & r)
+constexpr GlobalPosition<D>
+operator-(const GlobalPosition<D> & global, const CalcPosition<D> & relative)
 {
-	return g - GlobalPosition<D>(r);
+	return global - GlobalPosition<D>(relative);
+}
+
+template<glm::length_t D, std::integral T, glm::qualifier Q>
+constexpr RelativePosition<D>
+difference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
+{
+	return globalA - globalB;
 }
 
 glm::mat4 flat_orientation(const Rotation3D & diff);
 
-// C++ wrapper for C's sincosf, but with references, not pointers
-inline auto
-sincosf(float a, float & s, float & c)
-{
-	return sincosf(a, &s, &c);
+namespace {
+	// Helpers
+	// C++ wrapper for C's sincosf, but with references, not pointers
+	constexpr auto
+	sincosf(float angle, float & sinOut, float & cosOut)
+	{
+		if consteval {
+			sinOut = ::sinf(angle);
+			cosOut = ::cosf(angle);
+		}
+		else {
+			::sincosf(angle, &sinOut, &cosOut);
+		}
+	}
+
+	template<std::floating_point T>
+	constexpr auto
+	sincosf(const T angle)
+	{
+		Rotation2D sincosOut;
+		sincosf(angle, sincosOut.x, sincosOut.y);
+		return sincosOut;
+	}
+
+	// Helper to lookup into a matrix given an xy vector coordinate
+	template<typename M, typename I>
+	constexpr auto &
+	operator^(M & matrix, glm::vec<2, I> rowCol)
+	{
+		return matrix[rowCol.x][rowCol.y];
+	}
+
+	// Create a matrix for the angle, given the targets into the matrix
+	template<typename M, typename I>
+	constexpr auto
+	rotation(typename M::value_type angle, glm::vec<2, I> cos1, glm::vec<2, I> sin1, glm::vec<2, I> cos2,
+			glm::vec<2, I> negSin1)
+	{
+		M out(1);
+		sincosf(angle, out ^ sin1, out ^ cos1);
+		out ^ cos2 = out ^ cos1;
+		out ^ negSin1 = -(out ^ sin1);
+		return out;
+	}
 }
 
-inline Rotation2D
-sincosf(float a)
+// Create a flat transformation matrix
+template<glm::length_t D = 2, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 2)
+constexpr auto
+rotate_flat(const T angle)
 {
-	Rotation2D sc;
-	sincosf(a, sc.x, sc.y);
-	return sc;
+	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {0, 0}, {0, 1}, {1, 1}, {1, 0});
 }
 
-glm::mat2 rotate_flat(float);
-glm::mat4 rotate_roll(float);
-glm::mat4 rotate_yaw(float);
-glm::mat4 rotate_pitch(float);
-glm::mat4 rotate_yp(Rotation2D);
-glm::mat4 rotate_yp(Angle yaw, Angle pitch);
-glm::mat4 rotate_ypr(Rotation3D);
+// Create a yaw transformation matrix
+template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 2)
+constexpr auto
+rotate_yaw(const T angle)
+{
+	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {0, 0}, {1, 0}, {1, 1}, {0, 1});
+}
 
-float vector_yaw(const Direction2D & diff);
-float vector_pitch(const Direction3D & diff);
+// Create a roll transformation matrix
+template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 3)
+constexpr auto
+rotate_roll(const T angle)
+{
+	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {0, 0}, {2, 0}, {2, 2}, {0, 2});
+}
+
+// Create a pitch transformation matrix
+template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 3)
+constexpr auto
+rotate_pitch(const T angle)
+{
+	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {1, 1}, {1, 2}, {2, 2}, {2, 1});
+}
+
+// Create a combined yaw, pitch, roll transformation matrix
+template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 3)
+constexpr auto
+rotate_ypr(const glm::vec<3, T, Q> & angles)
+{
+	return rotate_yaw<D>(angles.y) * rotate_pitch<D>(angles.x) * rotate_roll<D>(angles.z);
+}
+
+template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 3)
+constexpr auto
+rotate_yp(const T yaw, const T pitch)
+{
+	return rotate_yaw<D>(yaw) * rotate_pitch<D>(pitch);
+}
+
+template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
+	requires(D >= 3)
+constexpr auto
+rotate_yp(const glm::vec<2, T, Q> & angles)
+{
+	return rotate_yp<D>(angles.y, angles.x);
+}
+
+template<glm::length_t D, glm::qualifier Q = glm::qualifier::defaultp, typename T>
+	requires(D >= 2)
+constexpr auto
+vector_yaw(const glm::vec<D, T, Q> & diff)
+{
+	return std::atan2(diff.x, diff.y);
+}
+
+template<glm::length_t D, glm::qualifier Q = glm::qualifier::defaultp, typename T>
+	requires(D >= 3)
+constexpr auto
+vector_pitch(const glm::vec<D, T, Q> & diff)
+{
+	return std::atan(diff.z);
+}
 
 template<typename T, glm::qualifier Q>
-glm::vec<2, T, Q>
-vector_normal(const glm::vec<2, T, Q> & v)
+constexpr glm::vec<2, T, Q>
+vector_normal(const glm::vec<2, T, Q> & vector)
 {
-	return {-v.y, v.x};
+	return {-vector.y, vector.x};
 };
 
-float round_frac(const float & v, const float & frac);
+template<std::floating_point T>
+constexpr auto
+round_frac(const T value, const T frac)
+{
+	return std::round(value / frac) * frac;
+}
 
 template<typename T>
-inline constexpr auto
-sq(T v)
+	requires requires(T value) { value * value; }
+constexpr auto
+sq(T value)
 {
-	return v * v;
+	return value * value;
 }
 
 template<glm::qualifier Q>
-inline constexpr glm::vec<3, int64_t, Q>
-crossProduct(const glm::vec<3, int64_t, Q> a, const glm::vec<3, int64_t, Q> b)
+constexpr glm::vec<3, int64_t, Q>
+crossProduct(const glm::vec<3, int64_t, Q> & valueA, const glm::vec<3, int64_t, Q> & valueB)
 {
 	return {
-			(a.y * b.z) - (a.z * b.y),
-			(a.z * b.x) - (a.x * b.z),
-			(a.x * b.y) - (a.y * b.x),
+			(valueA.y * valueB.z) - (valueA.z * valueB.y),
+			(valueA.z * valueB.x) - (valueA.x * valueB.z),
+			(valueA.x * valueB.y) - (valueA.y * valueB.x),
 	};
 }
 
 template<std::integral T, glm::qualifier Q>
-inline constexpr glm::vec<3, T, Q>
-crossProduct(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
+constexpr glm::vec<3, T, Q>
+crossProduct(const glm::vec<3, T, Q> & valueA, const glm::vec<3, T, Q> & valueB)
 {
-	return crossProduct<Q>(a, b);
+	return crossProduct<Q>(valueA, valueB);
 }
 
 template<std::floating_point T, glm::qualifier Q>
-inline constexpr glm::vec<3, T, Q>
-crossProduct(const glm::vec<3, T, Q> a, const glm::vec<3, T, Q> b)
+constexpr glm::vec<3, T, Q>
+crossProduct(const glm::vec<3, T, Q> & valueA, const glm::vec<3, T, Q> & valueB)
 {
-	return glm::cross(a, b);
+	return glm::cross(valueA, valueB);
 }
 
 template<typename R = float, typename Ta, typename Tb>
-inline constexpr auto
-ratio(Ta a, Tb b)
+constexpr auto
+ratio(const Ta valueA, const Tb valueB)
 {
-	return (static_cast<R>(a) / static_cast<R>(b));
+	return (static_cast<R>(valueA) / static_cast<R>(valueB));
 }
 
 template<typename R = float, typename T, glm::qualifier Q>
-inline constexpr auto
-ratio(glm::vec<2, T, Q> v)
+constexpr auto
+ratio(const glm::vec<2, T, Q> & value)
 {
-	return ratio<R>(v.x, v.y);
+	return ratio<R>(value.x, value.y);
 }
 
-template<glm::length_t L = 3, typename T, glm::qualifier Q>
-inline constexpr glm::vec<L, T, Q>
-perspective_divide(glm::vec<4, T, Q> v)
+template<glm::length_t L = 3, std::floating_point T, glm::qualifier Q>
+constexpr auto
+perspective_divide(const glm::vec<4, T, Q> & value)
 {
-	return v / v.w;
+	return value / value.w;
 }
 
 template<glm::length_t L1, glm::length_t L2, typename T, glm::qualifier Q>
-inline constexpr glm::vec<L1 + L2, T, Q>
-operator||(const glm::vec<L1, T, Q> v1, const glm::vec<L2, T, Q> v2)
+constexpr glm::vec<L1 + L2, T, Q>
+operator||(const glm::vec<L1, T, Q> valueA, const glm::vec<L2, T, Q> valueB)
 {
-	return {v1, v2};
+	return {valueA, valueB};
 }
 
 template<glm::length_t L, typename T, glm::qualifier Q>
-inline constexpr glm::vec<L + 1, T, Q>
-operator||(const glm::vec<L, T, Q> v1, const T v2)
+constexpr glm::vec<L + 1, T, Q>
+operator||(const glm::vec<L, T, Q> valueA, const T valueB)
 {
-	return {v1, v2};
+	return {valueA, valueB};
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
-inline constexpr glm::vec<L, T, Q>
-perspectiveMultiply(const glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
+template<glm::length_t L, std::floating_point T, glm::qualifier Q>
+constexpr glm::vec<L, T, Q>
+perspectiveMultiply(const glm::vec<L, T, Q> & base, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
-	const auto p2 = mutation * (p || T(1));
-	return p2 / p2.w;
+	const auto mutated = mutation * (base || T(1));
+	return mutated / mutated.w;
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
-inline constexpr glm::vec<L, T, Q>
-perspectiveApply(glm::vec<L, T, Q> & p, const glm::mat<L + 1, L + 1, T, Q> & mutation)
+template<glm::length_t L, std::floating_point T, glm::qualifier Q>
+constexpr glm::vec<L, T, Q>
+perspectiveApply(glm::vec<L, T, Q> & base, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
-	return p = perspectiveMultiply(p, mutation);
+	return base = perspectiveMultiply(base, mutation);
 }
 
-float normalize(float ang);
+template<std::floating_point T>
+constexpr T
+normalize(T ang)
+{
+	while (ang > glm::pi<T>()) {
+		ang -= glm::two_pi<T>();
+	}
+	while (ang <= -glm::pi<T>()) {
+		ang += glm::two_pi<T>();
+	}
+	return ang;
+}
 
 template<typename T, glm::qualifier Q>
 std::pair<glm::vec<2, T, Q>, bool>
@@ -264,7 +385,7 @@ midpoint(const std::pair<T, T> & v)
 // std::pow is not constexpr
 template<typename T>
 	requires requires(T n) { n *= n; }
-constexpr inline T
+constexpr T
 pow(const T base, std::integral auto exp)
 {
 	T res {1};
@@ -276,14 +397,14 @@ pow(const T base, std::integral auto exp)
 
 // Conversions
 template<typename T>
-inline constexpr auto
+constexpr auto
 mph_to_ms(T v)
 {
 	return v / 2.237L;
 }
 
 template<typename T>
-inline constexpr auto
+constexpr auto
 kph_to_ms(T v)
 {
 	return v / 3.6L;

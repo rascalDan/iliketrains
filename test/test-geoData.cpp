@@ -168,7 +168,7 @@ BOOST_DATA_TEST_CASE(walkTerrainSetsFromFace,
 		from, to, visits)
 {
 	GeoData::PointFace pf {from};
-	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) {}));
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) { }));
 	BOOST_CHECK_EQUAL(pf.face(&fixedTerrtain).idx(), visits.front());
 }
 

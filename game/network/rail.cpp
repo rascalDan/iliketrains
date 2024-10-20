@@ -32,7 +32,7 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	}
 	// Find start link/end - opposite entry dir to existing link; so pi +...
 	const Angle dir = pi + findNodeDirection(node1ins.first);
-	if (dir == vector_yaw(end - start)) {
+	if (dir == vector_yaw(difference(end, start))) {
 		return addLink<RailLinkStraight>(start, end);
 	}
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
@@ -62,7 +62,7 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 			return addLink<RailLinkCurve>(midh, end, c2);
 		}
 	}
-	const auto diff {end - start};
+	const auto diff = difference(end, start);
 	const auto vy {vector_yaw(diff)};
 	const auto n2ed {(vy * 2) - dir - pi};
 	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};

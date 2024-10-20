@@ -51,7 +51,7 @@ LinkCurve::positionAt(float dist, unsigned char start) const
 			+ RelativePosition3D {0, 0,
 					static_cast<RelativeDistance>(es.first->pos.z - centreBase.z)
 							+ (static_cast<RelativeDistance>(es.second->pos.z - es.first->pos.z) * frac)}};
-	const auto pitch {vector_pitch({0, 0, static_cast<RelativeDistance>(es.second->pos.z - es.first->pos.z) / length})};
+	const auto pitch {vector_pitch(difference(es.second->pos, es.first->pos) / length)};
 	return Location {GlobalPosition3D(relPos + relClimb) + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
 }
 

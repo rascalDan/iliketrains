@@ -95,7 +95,7 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest) const
 GenCurveDef
 Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir)
 {
-	const auto diff {end - start};
+	const auto diff = difference(end, start);
 	const auto vy {vector_yaw(diff)};
 	const auto dir = pi + startDir;
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
