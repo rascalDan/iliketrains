@@ -28,9 +28,7 @@
 
 class TestScene : public SceneProvider {
 	RailVehicleClassPtr brush47rvc;
-	std::shared_ptr<Foliage> tree021f;
 	std::shared_ptr<RailVehicle> train1, train2;
-	std::shared_ptr<Plant> plant1;
 	RailLinks rail;
 	std::shared_ptr<GeoData> gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
 	std::shared_ptr<Environment> env = std::make_shared<Environment>();
@@ -43,7 +41,11 @@ public:
 	{
 		gameState->assets = AssetFactory::loadAll(RESDIR);
 		brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(gameState->assets.at("brush-47"));
-		tree021f = std::dynamic_pointer_cast<Foliage>(gameState->assets.at("Tree-02-1"));
+		std::random_device randomdev {};
+		std::uniform_real_distribution<Angle> rotationDistribution {0, two_pi};
+		std::uniform_int_distribution<GlobalDistance> positionOffsetDistribution {-1500, +1500};
+		std::uniform_int_distribution<int> treeDistribution {1, 3};
+		std::uniform_int_distribution<int> treeVariantDistribution {1, 4};
 		train1 = std::make_shared<RailVehicle>(brush47rvc);
 		train1->location.setPosition({52000, 50000, 2000});
 		train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
@@ -52,7 +54,16 @@ public:
 		train2->location.setPosition({52000, 30000, 2000});
 		train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
 		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
-		plant1 = std::make_shared<Plant>(tree021f, Location {{40000, 60000, 1}, {}});
+		for (auto x = 40000; x < 100000; x += 5000) {
+			for (auto y = 65000; y < 125000; y += 5000) {
+				gameState->world.create<Plant>(
+						std::dynamic_pointer_cast<Foliage>(gameState->assets.at(std::format(
+								"Tree-{:#02}-{}", treeDistribution(randomdev), treeVariantDistribution(randomdev)))),
+						Location {{x + positionOffsetDistribution(randomdev), y + positionOffsetDistribution(randomdev),
+										  1},
+								{0, rotationDistribution(randomdev), 0}});
+			}
+		}
 		rail.addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
 		rail.addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
 	}
@@ -62,9 +73,12 @@ public:
 	{
 		terrain.render(shader);
 		water.render(shader);
-		brush47rvc->render(shader);
-		tree021f->render(shader);
 		rail.render(shader);
+		std::ranges::for_each(gameState->assets, [&shader](const auto & asset) {
+			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
+				renderable->render(shader);
+			}
+		});
 	}
 
 	void
@@ -82,8 +96,11 @@ public:
 	shadows(const ShadowMapper & shadowMapper) const override
 	{
 		terrain.shadows(shadowMapper);
-		brush47rvc->shadows(shadowMapper);
-		tree021f->shadows(shadowMapper);
+		std::ranges::for_each(gameState->assets, [&shadowMapper](const auto & asset) {
+			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
+				renderable->shadows(shadowMapper);
+			}
+		});
 	}
 };
 
