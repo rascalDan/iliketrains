@@ -121,16 +121,16 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 	};
 	if (const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir); radii.first < radii.second) {
 		const auto radius {radii.first};
-		const auto c1 = flatStart + (sincosf(startDir + half_pi) * radius);
-		const auto c2 = flatEnd + (sincosf(endDir + half_pi) * radius);
+		const auto c1 = flatStart + (sincos(startDir + half_pi) * radius);
+		const auto c2 = flatEnd + (sincos(endDir + half_pi) * radius);
 		const auto mid = (c1 + c2) / 2;
 		const auto midh = mid || midheight(mid);
 		return {{start, midh, c1}, {end, midh, c2}};
 	}
 	else {
 		const auto radius {radii.second};
-		const auto c1 = flatStart + (sincosf(startDir - half_pi) * radius);
-		const auto c2 = flatEnd + (sincosf(endDir - half_pi) * radius);
+		const auto c1 = flatStart + (sincos(startDir - half_pi) * radius);
+		const auto c2 = flatEnd + (sincos(endDir - half_pi) * radius);
 		const auto mid = (c1 + c2) / 2;
 		const auto midh = mid || midheight(mid);
 		return {{midh, start, c1}, {midh, end, c2}};

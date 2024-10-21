@@ -45,8 +45,8 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 		const float dir2 = pi + findNodeDirection(node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
 			const auto radius {radii.first};
-			const auto c1 = flatStart + (sincosf(dir + half_pi) * radius);
-			const auto c2 = flatEnd + (sincosf(dir2 + half_pi) * radius);
+			const auto c1 = flatStart + (sincos(dir + half_pi) * radius);
+			const auto c2 = flatEnd + (sincos(dir2 + half_pi) * radius);
 			const auto mid = (c1 + c2) / 2;
 			const auto midh = mid || midheight(mid);
 			addLink<RailLinkCurve>(start, midh, c1);
@@ -54,8 +54,8 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 		}
 		else {
 			const auto radius {radii.second};
-			const auto c1 = flatStart + (sincosf(dir - half_pi) * radius);
-			const auto c2 = flatEnd + (sincosf(dir2 - half_pi) * radius);
+			const auto c1 = flatStart + (sincos(dir - half_pi) * radius);
+			const auto c2 = flatEnd + (sincos(dir2 - half_pi) * radius);
 			const auto mid = (c1 + c2) / 2;
 			const auto midh = mid || midheight(mid);
 			addLink<RailLinkCurve>(midh, start, c1);

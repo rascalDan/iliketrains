@@ -87,43 +87,52 @@ glm::mat4 flat_orientation(const Rotation3D & diff);
 namespace {
 	// Helpers
 	// C++ wrapper for C's sincosf, but with references, not pointers
-	constexpr auto
-	sincosf(float angle, float & sinOut, float & cosOut)
+	template<std::floating_point T>
+	constexpr void
+	sincos(T angle, T & sinOut, T & cosOut)
 	{
 		if consteval {
-			sinOut = ::sinf(angle);
-			cosOut = ::cosf(angle);
+			sinOut = std::sin(angle);
+			cosOut = std::cos(angle);
 		}
 		else {
-			::sincosf(angle, &sinOut, &cosOut);
+			if constexpr (std::is_same_v<T, float>) {
+				::sincosf(angle, &sinOut, &cosOut);
+			}
+			else if constexpr (std::is_same_v<T, double>) {
+				::sincos(angle, &sinOut, &cosOut);
+			}
+			else if constexpr (std::is_same_v<T, long double>) {
+				::sincosl(angle, &sinOut, &cosOut);
+			}
 		}
 	}
 
-	template<std::floating_point T>
+	template<std::floating_point T, glm::qualifier Q = glm::qualifier::defaultp>
 	constexpr auto
-	sincosf(const T angle)
+	sincos(const T angle)
 	{
-		Rotation2D sincosOut;
-		sincosf(angle, sincosOut.x, sincosOut.y);
+		glm::vec<2, T, Q> sincosOut {};
+		sincos(angle, sincosOut.x, sincosOut.y);
 		return sincosOut;
 	}
 
 	// Helper to lookup into a matrix given an xy vector coordinate
-	template<typename M, typename I>
+	template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q, std::integral I = glm::length_t>
 	constexpr auto &
-	operator^(M & matrix, glm::vec<2, I> rowCol)
+	operator^(glm::mat<C, R, T, Q> & matrix, const glm::vec<2, I> rowCol)
 	{
 		return matrix[rowCol.x][rowCol.y];
 	}
 
 	// Create a matrix for the angle, given the targets into the matrix
-	template<typename M, typename I>
+	template<glm::length_t D, std::floating_point T, glm::qualifier Q, std::integral I = glm::length_t>
 	constexpr auto
-	rotation(typename M::value_type angle, glm::vec<2, I> cos1, glm::vec<2, I> sin1, glm::vec<2, I> cos2,
-			glm::vec<2, I> negSin1)
+	rotation(const T angle, const glm::vec<2, I> cos1, const glm::vec<2, I> sin1, const glm::vec<2, I> cos2,
+			const glm::vec<2, I> negSin1)
 	{
-		M out(1);
-		sincosf(angle, out ^ sin1, out ^ cos1);
+		glm::mat<D, D, T, Q> out(1);
+		sincos(angle, out ^ sin1, out ^ cos1);
 		out ^ cos2 = out ^ cos1;
 		out ^ negSin1 = -(out ^ sin1);
 		return out;
@@ -136,7 +145,7 @@ template<glm::length_t D = 2, glm::qualifier Q = glm::qualifier::defaultp, std::
 constexpr auto
 rotate_flat(const T angle)
 {
-	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {0, 0}, {0, 1}, {1, 1}, {1, 0});
+	return rotation<D, T, Q>(angle, {0, 0}, {0, 1}, {1, 1}, {1, 0});
 }
 
 // Create a yaw transformation matrix
@@ -145,7 +154,7 @@ template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::
 constexpr auto
 rotate_yaw(const T angle)
 {
-	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {0, 0}, {1, 0}, {1, 1}, {0, 1});
+	return rotation<D, T, Q>(angle, {0, 0}, {1, 0}, {1, 1}, {0, 1});
 }
 
 // Create a roll transformation matrix
@@ -154,7 +163,7 @@ template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::
 constexpr auto
 rotate_roll(const T angle)
 {
-	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {0, 0}, {2, 0}, {2, 2}, {0, 2});
+	return rotation<D, T, Q>(angle, {0, 0}, {2, 0}, {2, 2}, {0, 2});
 }
 
 // Create a pitch transformation matrix
@@ -163,7 +172,7 @@ template<glm::length_t D = 3, glm::qualifier Q = glm::qualifier::defaultp, std::
 constexpr auto
 rotate_pitch(const T angle)
 {
-	return rotation<glm::mat<D, D, T, Q>, glm::length_t>(angle, {1, 1}, {1, 2}, {2, 2}, {2, 1});
+	return rotation<D, T, Q>(angle, {1, 1}, {1, 2}, {2, 2}, {2, 1});
 }
 
 // Create a combined yaw, pitch, roll transformation matrix
@@ -337,7 +346,7 @@ find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, An
 	if (start == end) {
 		return {start, false};
 	}
-	return find_arc_centre(start, sincosf(entrys + half_pi), end, sincosf(entrye - half_pi));
+	return find_arc_centre(start, sincos(entrys + half_pi), end, sincos(entrye - half_pi));
 }
 
 template<typename T, glm::qualifier Q>
@@ -370,7 +379,7 @@ std::pair<Angle, Angle>
 find_arcs_radius(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
 {
 	const auto getrad = [&](auto leftOrRight) {
-		return find_arcs_radius(start, sincosf(entrys + leftOrRight), end, sincosf(entrye + leftOrRight));
+		return find_arcs_radius(start, sincos(entrys + leftOrRight), end, sincos(entrye + leftOrRight));
 	};
 	return {getrad(-half_pi), getrad(half_pi)};
 }

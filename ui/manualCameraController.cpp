@@ -79,6 +79,6 @@ ManualCameraController::render(const UIShader &, const Position &) const
 void
 ManualCameraController::updateCamera(Camera * camera) const
 {
-	const auto forward = glm::normalize(sincosf(direction) || -sin(pitch));
+	const auto forward = glm::normalize(sincos(direction) || -sin(pitch));
 	camera->setView((focus || 0) - (forward * 3.F * std::pow(dist, 1.3F)), forward);
 }

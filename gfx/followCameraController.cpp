@@ -24,7 +24,7 @@ FollowCameraController::updateCamera(Camera * camera) const
 			break;
 
 		case Mode::Ride:
-			camera->setView(pos + (up * 4.8F), -sincosf(rot.y) || 0.F);
+			camera->setView(pos + (up * 4.8F), -sincos(rot.y) || 0.F);
 			break;
 
 		case Mode::ISO:

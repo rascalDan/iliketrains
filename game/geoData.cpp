@@ -559,7 +559,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					const auto limit = std::ceil(arc.length() * 5.F / pi);
 					const auto inc = arc.length() / limit;
 					for (float step = 0; step <= limit; step += 1.F) {
-						addExtrusionFor(sincosf(arc.first + (step * inc)));
+						addExtrusionFor(sincos(arc.first + (step * inc)));
 					}
 				}
 				else {
