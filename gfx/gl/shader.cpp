@@ -63,8 +63,8 @@ Shader::compile() const
 	};
 	if (lookups) {
 		std::basic_string<GLchar> textMod {text};
-		for (const auto & match : ctre::range<R"(\bGL_[A-Z_]+\b)">(textMod)) {
-			if (const auto lookup = std::find_if(LOOKUPS.begin(), LOOKUPS.end(),
+		for (const auto & match : ctre::search_all<R"(\bGL_[A-Z_]+\b)">(textMod)) {
+			if (const auto * const lookup = std::find_if(LOOKUPS.begin(), LOOKUPS.end(),
 						[&match](const auto & lookup) {
 							return std::get<std::string_view>(lookup) == match;
 						});
