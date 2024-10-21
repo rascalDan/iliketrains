@@ -30,7 +30,7 @@ namespace filesystem {
 
 	class [[nodiscard]] fh final {
 	public:
-		fh(const char * path, int flags, int mode);
+		fh(const char * path, int flags, mode_t mode);
 		~fh();
 		NO_MOVE(fh);
 		NO_COPY(fh);
