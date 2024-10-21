@@ -1,4 +1,3 @@
-using gcc ;
 using pkg-config ;
 import pkg-config ;
 import testing ;
