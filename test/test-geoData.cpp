@@ -168,7 +168,7 @@ BOOST_DATA_TEST_CASE(walkTerrainSetsFromFace,
 		from, to, visits)
 {
 	GeoData::PointFace pf {from};
-	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) {}));
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(pf, to, [](auto) { }));
 	BOOST_CHECK_EQUAL(pf.face(&fixedTerrtain).idx(), visits.front());
 }
 
@@ -253,7 +253,7 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		environment(const SceneShader &, const SceneRenderer & sr) const override
 		{
 			sr.setAmbientLight({0.1, 0.1, 0.1});
-			sr.setDirectionalLight({1, 1, 1}, south + down, *this);
+			sr.setDirectionalLight({1, 1, 1}, {{quarter_pi, -3 * half_pi}}, *this);
 		}
 
 		void

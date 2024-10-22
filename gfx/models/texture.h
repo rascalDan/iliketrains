@@ -38,10 +38,10 @@ public:
 	static void saveDepth(const glTexture &, const char * path);
 	static void saveNormal(const glTexture &, const char * path);
 	static void savePosition(const glTexture &, const char * path);
+	static TextureDimensions getSize(const glTexture &);
 
 protected:
 	static void save(const glTexture &, GLenum, GLenum, uint8_t channels, const char * path, uint8_t tgaFormat);
-	static TextureAbsCoord getSize(const glTexture &);
 
 	glTexture m_texture;
 	GLenum type;

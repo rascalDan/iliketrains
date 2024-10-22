@@ -12,7 +12,7 @@ Cylinder::createMesh(ModelFactoryMesh & mesh, Scale3D lodf) const
 	// Generate 2D circumference points
 	std::vector<RelativePosition2D> circumference(P);
 	std::generate(circumference.begin(), circumference.end(), [a = 0.F, step]() mutable {
-		return sincosf(a += step) * .5F;
+		return sincos(a += step) * .5F;
 	});
 
 	CreatedFaces surface;

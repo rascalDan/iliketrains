@@ -19,96 +19,17 @@ flat_orientation(const Direction3D & diff)
 	return (std::isnan(e[0][0])) ? oneeighty : e;
 }
 
-// Helper to lookup into a matrix given an xy vector coordinate
-template<typename M, typename I>
-inline auto &
-operator^(M & m, glm::vec<2, I> xy)
-{
-	return m[xy.x][xy.y];
-}
-
-// Create a matrix for the angle, given the targets into the matrix
-template<typename M, typename I>
-inline auto
-rotation(typename M::value_type a, glm::vec<2, I> c1, glm::vec<2, I> s1, glm::vec<2, I> c2, glm::vec<2, I> ms2)
-{
-	M m(1);
-	sincosf(a, m ^ s1, m ^ c1);
-	m ^ c2 = m ^ c1;
-	m ^ ms2 = -(m ^ s1);
-	return m;
-}
-
-// Create a flat (2D) transformation matrix
-glm::mat2
-rotate_flat(float a)
-{
-	return rotation<glm::mat2, glm::length_t>(a, {0, 0}, {0, 1}, {1, 1}, {1, 0});
-}
-
-// Create a yaw transformation matrix
-glm::mat4
-rotate_yaw(float a)
-{
-	return rotation<glm::mat4, glm::length_t>(a, {0, 0}, {1, 0}, {1, 1}, {0, 1});
-}
-
-// Create a roll transformation matrix
-glm::mat4
-rotate_roll(float a)
-{
-	return rotation<glm::mat4, glm::length_t>(a, {0, 0}, {2, 0}, {2, 2}, {0, 2});
-}
-
-// Create a pitch transformation matrix
-glm::mat4
-rotate_pitch(float a)
-{
-	return rotation<glm::mat4, glm::length_t>(a, {1, 1}, {1, 2}, {2, 2}, {2, 1});
-}
-
-// Create a combined yaw, pitch, roll transformation matrix
-glm::mat4
-rotate_ypr(Rotation3D a)
-{
-	return rotate_yaw(a.y) * rotate_pitch(a.x) * rotate_roll(a.z);
-}
-
-glm::mat4
-rotate_yp(Rotation2D a)
-{
-	return rotate_yaw(a.y) * rotate_pitch(a.x);
-}
-
-float
-vector_yaw(const Direction2D & diff)
-{
-	return std::atan2(diff.x, diff.y);
-}
-
-float
-vector_pitch(const Direction3D & diff)
-{
-	return std::atan(diff.z);
-}
-
-float
-round_frac(const float & v, const float & frac)
-{
-	return std::round(v / frac) * frac;
-}
-
-float
-normalize(float ang)
-{
-	while (ang > pi) {
-		ang -= two_pi;
-	}
-	while (ang <= -pi) {
-		ang += two_pi;
-	}
-	return ang;
-}
+static_assert(pow(1, 0) == 1);
+static_assert(pow(1, 1) == 1);
+static_assert(pow(1, 2) == 1);
+static_assert(pow(2, 0) == 1);
+static_assert(pow(2, 1) == 2);
+static_assert(pow(2, 2) == 4);
+static_assert(pow(2, 3) == 8);
+static_assert(pow(3, 0) == 1);
+static_assert(pow(3, 1) == 3);
+static_assert(pow(3, 2) == 9);
+static_assert(pow(pi, 3) == 31.006278991699219F);
 
 float
 operator"" _mph(const long double v)

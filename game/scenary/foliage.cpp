@@ -2,8 +2,6 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/vertexArrayObject.h"
-#include "gfx/models/texture.h"
-#include "location.h"
 
 bool
 Foliage::persist(Persistence::PersistenceStore & store)
@@ -16,7 +14,18 @@ Foliage::postLoad()
 {
 	texture = getTexture();
 	bodyMesh->configureVAO(instanceVAO)
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+			.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(
+					instances.bufferName(), 1);
+	VertexArrayObject {instancePointVAO}.addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(
+			instances.bufferName());
+}
+
+void
+Foliage::updateStencil(const ShadowStenciller & ss) const
+{
+	if (instances.size() > 0) {
+		ss.renderStencil(shadowStencil, *bodyMesh, texture);
+	}
 }
 
 void
@@ -35,10 +44,12 @@ void
 Foliage::shadows(const ShadowMapper & mapper) const
 {
 	if (const auto count = instances.size()) {
-		mapper.dynamicPointInstWithTextures.use();
-		if (texture) {
-			texture->bind(GL_TEXTURE3);
-		}
-		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
+		const auto dimensions = bodyMesh->getDimensions();
+		mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowStencil);
+		glBindVertexArray(instancePointVAO);
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
+		glBindVertexArray(0);
 	}
 }

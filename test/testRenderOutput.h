@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/types.h"
+#include "game/gamestate.h"
 #include "glArrays.h"
 #include <glm/vec2.hpp>
 #include <special_members.h>
@@ -17,6 +18,7 @@ public:
 	glFrameBuffer output;
 	glRenderBuffer depth;
 	glTexture outImage;
+	GameState gameState;
 };
 
 template<TextureAbsCoord Size> class TestRenderOutputSize : public TestRenderOutput {

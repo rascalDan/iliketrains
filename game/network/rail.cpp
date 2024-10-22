@@ -32,7 +32,7 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	}
 	// Find start link/end - opposite entry dir to existing link; so pi +...
 	const Angle dir = pi + findNodeDirection(node1ins.first);
-	if (dir == vector_yaw(end - start)) {
+	if (dir == vector_yaw(difference(end, start))) {
 		return addLink<RailLinkStraight>(start, end);
 	}
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
@@ -45,8 +45,8 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 		const float dir2 = pi + findNodeDirection(node2ins.first);
 		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
 			const auto radius {radii.first};
-			const auto c1 = flatStart + (sincosf(dir + half_pi) * radius);
-			const auto c2 = flatEnd + (sincosf(dir2 + half_pi) * radius);
+			const auto c1 = flatStart + (sincos(dir + half_pi) * radius);
+			const auto c2 = flatEnd + (sincos(dir2 + half_pi) * radius);
 			const auto mid = (c1 + c2) / 2;
 			const auto midh = mid || midheight(mid);
 			addLink<RailLinkCurve>(start, midh, c1);
@@ -54,15 +54,15 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 		}
 		else {
 			const auto radius {radii.second};
-			const auto c1 = flatStart + (sincosf(dir - half_pi) * radius);
-			const auto c2 = flatEnd + (sincosf(dir2 - half_pi) * radius);
+			const auto c1 = flatStart + (sincos(dir - half_pi) * radius);
+			const auto c2 = flatEnd + (sincos(dir2 - half_pi) * radius);
 			const auto mid = (c1 + c2) / 2;
 			const auto midh = mid || midheight(mid);
 			addLink<RailLinkCurve>(midh, start, c1);
 			return addLink<RailLinkCurve>(midh, end, c2);
 		}
 	}
-	const auto diff {end - start};
+	const auto diff = difference(end, start);
 	const auto vy {vector_yaw(diff)};
 	const auto n2ed {(vy * 2) - dir - pi};
 	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};

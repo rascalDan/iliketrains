@@ -46,12 +46,12 @@ LinkCurve::positionAt(float dist, unsigned char start) const
 	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
 	const auto as {std::make_pair(arc[start], arc[1 - start])};
 	const auto ang {as.first + ((as.second - as.first) * frac)};
-	const auto relPos {(sincosf(ang) || 0.F) * radius};
+	const auto relPos {(sincos(ang) || 0.F) * radius};
 	const auto relClimb {vehiclePositionOffset()
 			+ RelativePosition3D {0, 0,
 					static_cast<RelativeDistance>(es.first->pos.z - centreBase.z)
 							+ (static_cast<RelativeDistance>(es.second->pos.z - es.first->pos.z) * frac)}};
-	const auto pitch {vector_pitch({0, 0, static_cast<RelativeDistance>(es.second->pos.z - es.first->pos.z) / length})};
+	const auto pitch {vector_pitch(difference(es.second->pos, es.first->pos) / length)};
 	return Location {GlobalPosition3D(relPos + relClimb) + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
 }
 
@@ -69,7 +69,7 @@ LinkCurve::intersectRay(const Ray<GlobalPosition3D> & ray) const
 	points.reserve(segCount);
 	for (std::remove_const_t<decltype(step)> swing = {arc.first, centreBase.z - e0p.z}; segCount;
 			swing += step, --segCount) {
-		points.emplace_back(centreBase + ((sincosf(swing.x) * radius) || swing.y));
+		points.emplace_back(centreBase + ((sincos(swing.x) * radius) || swing.y));
 	}
 	return ray.passesCloseToEdges(points, 1.F);
 }

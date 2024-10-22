@@ -1,13 +1,20 @@
 #include "shadowMapper.h"
 #include "camera.h"
 #include "collections.h"
+#include "game/gamestate.h"
 #include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
+#include "gfx/gl/shaders/fs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/gs-commonShadowPoint.h"
 #include "gfx/gl/shaders/gs-shadowDynamicPointInstWithTextures.h"
+#include "gfx/gl/shaders/gs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
 #include "gfx/gl/shaders/vs-shadowDynamicPointInstWithTextures.h"
+#include "gfx/gl/shaders/vs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/vs-shadowLandmass.h"
+#include "gfx/gl/shadowStenciller.h"
+#include "gfx/lightDirection.h"
+#include "gfx/renderable.h"
 #include "gl_traits.h"
 #include "location.h"
 #include "maths.h"
@@ -45,13 +52,15 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-constexpr std::array<GlobalDistance, ShadowMapper::SHADOW_BANDS + 1> shadowBands {
-		1000,
-		250000,
-		750000,
-		2500000,
-		10000000,
-};
+constexpr auto shadowBands
+		= []<GlobalDistance... ints>(const float scaleFactor, std::integer_sequence<GlobalDistance, ints...>) {
+			  const auto base = 10'000'000 / pow(scaleFactor, sizeof...(ints) - 1);
+			  return std::array {1, static_cast<GlobalDistance>((base * pow(scaleFactor, ints)))...};
+		  }(6.6F, std::make_integer_sequence<GlobalDistance, ShadowMapper::SHADOW_BANDS>());
+
+static_assert(shadowBands.front() == 1);
+static_assert(shadowBands.back() == 10'000'000);
+static_assert(shadowBands.size() == ShadowMapper::SHADOW_BANDS + 1);
 
 std::vector<std::array<RelativePosition3D, 4>>
 ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightViewDir)
@@ -72,34 +81,49 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 }
 
 ShadowMapper::Definitions
-ShadowMapper::update(const SceneProvider & scene, const Direction3D & dir, const Camera & camera) const
+ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, const Camera & camera) const
 {
+	glCullFace(GL_FRONT);
+	glEnable(GL_DEPTH_TEST);
+
+	shadowStenciller.setLightDirection(dir);
+	for (const auto & [id, asset] : gameState->assets) {
+		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
+			r->updateStencil(shadowStenciller);
+		}
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
 	glViewport(0, 0, size.x, size.y);
 
-	const auto lightViewDir = glm::lookAt({}, dir, up);
+	const auto lightViewDir = glm::lookAt({}, dir.vector(), up);
 	const auto lightViewPoint = camera.getPosition();
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
 	Definitions out;
+	Sizes sizes;
 	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
 			std::back_inserter(out),
-			[bands = bandViewExtents.size() - 2, &lightViewDir](const auto & near, const auto & far) mutable {
-				const auto extents_minmax = [extents = std::span {near.begin(), far.end()}](auto && comp) {
-					const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
-					return std::make_pair(comp.get(*mm.first), comp.get(*mm.second));
-				};
+			[bands = bandViewExtents.size() - 2, &lightViewDir, &sizes](const auto & near, const auto & far) mutable {
+				const auto extents_minmax
+						= [extents = std::span {near.begin(), far.end()}](auto && comp, RelativeDistance extra) {
+							  const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
+							  return std::make_pair(comp.get(*mm.first) - extra, comp.get(*mm.second) + extra);
+						  };
+				const std::array extents = {extents_minmax(CompareBy {0}, 0), extents_minmax(CompareBy {1}, 0),
+						extents_minmax(CompareBy {2}, 10'000)};
 
 				const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
 					return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
-				}(extents_minmax(CompareBy {0}), extents_minmax(CompareBy {1}), extents_minmax(CompareBy {2}));
+				}(extents[0], extents[1], extents[2]);
 
+				sizes.emplace_back(extents[0].second - extents[0].first, extents[1].second - extents[1].first,
+						extents[2].second - extents[2].first);
 				return lightProjection * lightViewDir;
 			});
 	for (const auto p : std::initializer_list<const ShadowProgram *> {
-				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures}) {
-		p->setView(out, lightViewPoint);
+				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures, &stencilShadowProgram}) {
+		p->setView(out, sizes, lightViewPoint);
 	}
 	scene.shadows(*this);
 
@@ -116,12 +140,15 @@ ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs, const Shader & gs,
 }
 
 void
-ShadowMapper::ShadowProgram::setView(
-		const std::span<const glm::mat4> viewProjection, const GlobalPosition3D viewPoint) const
+ShadowMapper::ShadowProgram::setView(const std::span<const glm::mat4x4> viewProjection,
+		const std::span<const RelativePosition3D> sizes, const GlobalPosition3D viewPoint) const
 {
 	use();
 	glUniform(viewPointLoc, viewPoint);
 	glUniform(viewProjectionLoc, viewProjection);
+	if (sizesLoc) {
+		glUniform(sizesLoc, sizes);
+	}
 	glUniform(viewProjectionsLoc, static_cast<GLint>(viewProjection.size()));
 }
 
@@ -145,4 +172,17 @@ ShadowMapper::DynamicPoint::setModel(const Location & location) const
 {
 	glUniform(modelLoc, location.getRotationTransform());
 	glUniform(modelPosLoc, location.pos);
+}
+
+ShadowMapper::StencilShadowProgram::StencilShadowProgram() :
+	ShadowProgram {shadowDynamicPointStencil_vs, shadowDynamicPointStencil_gs, shadowDynamicPointStencil_fs}
+{
+}
+
+void
+ShadowMapper::StencilShadowProgram::use(const RelativePosition3D & centre, const float size) const
+{
+	Program::use();
+	glUniform(centreLoc, centre);
+	glUniform(sizeLoc, size);
 }

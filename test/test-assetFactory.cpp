@@ -54,7 +54,7 @@ public:
 	environment(const SceneShader &, const SceneRenderer & sceneRenderer) const override
 	{
 		sceneRenderer.setAmbientLight({.4, .4, .4});
-		sceneRenderer.setDirectionalLight({.6, .6, .6}, east + south + south + down, *this);
+		sceneRenderer.setDirectionalLight({.6, .6, .6}, {{0.9, 0.5}}, *this);
 	}
 
 	void
@@ -97,6 +97,7 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/brush47.xml");
 	BOOST_REQUIRE(mf);
+	gameState.assets = mf->assets;
 	BOOST_REQUIRE_GE(mf->shapes.size(), 6);
 	BOOST_CHECK(mf->shapes.at("plane"));
 	BOOST_CHECK(mf->shapes.at("cylinder"));
@@ -126,6 +127,7 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/foliage.xml");
 	BOOST_REQUIRE(mf);
+	gameState.assets = mf->assets;
 	auto tree_01_1 = mf->assets.at("Tree-01-1");
 	BOOST_REQUIRE(tree_01_1);
 	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
@@ -144,6 +146,7 @@ BOOST_AUTO_TEST_CASE(lights, *boost::unit_test::timeout(5))
 {
 	auto mf = AssetFactory::loadXML(RESDIR "/lights.xml");
 	BOOST_REQUIRE(mf);
+	gameState.assets = mf->assets;
 	auto rlight = mf->assets.at("r-light");
 	BOOST_REQUIRE(rlight);
 	auto oldlamp = mf->assets.at("old-lamp");

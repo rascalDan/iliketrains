@@ -24,6 +24,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp> // IWYU pragma: keep
 #include <memory>
+#include <random>
 #include <special_members.h>
 #include <ui/applicationBase.h>
 #include <ui/gameMainWindow.h>
@@ -79,10 +80,18 @@ public:
 					&train->orders, l3->ends[1], l3->length, rl->findNodeAt({-1100000, -450000, 15000}));
 			train->currentActivity = train->orders.current()->createActivity();
 
-			auto foliage = std::dynamic_pointer_cast<Foliage>(assets.at("Tree-01-1"));
+			std::random_device randomdev {};
+			std::uniform_real_distribution<Angle> rotationDistribution {0, two_pi};
+			std::uniform_int_distribution<GlobalDistance> positionOffsetDistribution {-1500, +1500};
+			std::uniform_int_distribution<int> treeDistribution {1, 3};
+			std::uniform_int_distribution<int> treeVariantDistribution {1, 4};
 			for (auto x = 311000000; x < 311830000; x += 5000) {
 				for (auto y = 491100000; y < 491130000; y += 5000) {
-					world.create<Plant>(foliage, Location {geoData->positionAt({{x, y}})});
+					world.create<Plant>(std::dynamic_pointer_cast<Foliage>(assets.at(std::format("Tree-{:#02}-{}",
+												treeDistribution(randomdev), treeVariantDistribution(randomdev)))),
+							Location {geoData->positionAt({{x + positionOffsetDistribution(randomdev),
+											  y + positionOffsetDistribution(randomdev)}}),
+									{0, rotationDistribution(randomdev), 0}});
 				}
 			}
 		}
