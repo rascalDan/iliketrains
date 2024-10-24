@@ -422,3 +422,9 @@ kph_to_ms(T v)
 // ... literals are handy for now, probably go away when we load stuff externally
 float operator"" _mph(const long double v);
 float operator"" _kph(const long double v);
+
+constexpr float
+operator"" _degrees(long double degrees)
+{
+	return static_cast<float>(degrees) * degreesToRads;
+}

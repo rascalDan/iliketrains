@@ -12,7 +12,7 @@
 #include <maths.h>
 
 using sunPosTestData = std::tuple<Direction2D, time_t, Direction2D>;
-using sunDirTestData = std::tuple<Direction2D, Direction3D, float>;
+using sunDirTestData = std::tuple<Direction2D, Direction3D, float, float>;
 constexpr Direction2D Doncaster = {-1.1, 53.5};
 constexpr Direction2D NewYork = {74.0, 40.7};
 constexpr Direction2D Syndey = {-151.2, -33.9};
@@ -40,23 +40,24 @@ BOOST_DATA_TEST_CASE(sun_position,
 
 BOOST_DATA_TEST_CASE(sun_direction,
 		boost::unit_test::data::make<sunDirTestData>({
-				{{0.F, 0.F}, south, 0.1F},
-				{{90.F, 0.F}, west, 0.1F},
-				{{-90.F, 0.F}, east, 0.1F},
+				{{0.F, 0.F}, south, 0.314F, 0.0087F},
+				{{90.F, 0.F}, west, 0.314F, 0.0087F},
+				{{-90.F, 0.F}, east, 0.314F, 0.0087F},
 				// From above
 				// EqGM midnight, sun below horizon, shining upwards
-				{{181.52F, -66.86F}, {-0.01F, 0.39F, 0.919F}, 0},
+				{{181.52F, -66.86F}, {-0.01F, 0.39F, 0.919F}, 0, 0.F},
 				// EqGM just before sunrise, mostly west, north a bit, up a bit
-				{{113.12F, -0.85F}, {-0.92F, 0.39F, 0.015F}, 0.085F},
+				{{113.12F, -0.85F}, {-0.92F, 0.39F, 0.015F}, 0.299F, 0.F},
 				// EqGM just after sunrise, mostly west, north a bit, down a bit
-				{{113.12F, 6.05F}, {-0.92F, 0.39F, -0.015F}, 0.205F},
+				{{113.12F, 6.05F}, {-0.92F, 0.39F, -0.015F}, 0.42F, 0.114F},
 				// Doncaster noon, roughly from south to north, high in the sky, downward
-				{{176.34F, 59.64F}, {-0.03F, 0.5F, -0.86F}, 0.96F},
+				{{176.34F, 59.64F}, {-0.03F, 0.5F, -0.86F}, 1, 1},
 		}),
-		position, direction, vert)
+		position, direction, amb, dir)
 {
 	const LightDirection ld {position * degreesToRads};
 	BOOST_CHECK_CLOSE_VEC(ld.vector(), direction);
 	BOOST_CHECK_CLOSE(glm::length(ld.vector()), 1.F, 1);
-	BOOST_CHECK_CLOSE(ld.vertical(), vert, 5);
+	BOOST_CHECK_CLOSE(ld.ambient(), amb, 5);
+	BOOST_CHECK_CLOSE(ld.directional(), dir, 5);
 }

@@ -20,13 +20,20 @@ public:
 	}
 
 	[[nodiscard]] float
-	vertical() const noexcept
+	ambient() const noexcept
 	{
-		return vert;
+		return amb;
+	}
+
+	[[nodiscard]] float
+	directional() const noexcept
+	{
+		return dir;
 	}
 
 private:
 	Direction2D pos;
 	Direction3D vec;
-	float vert;
+	float amb;
+	float dir;
 };

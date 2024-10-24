@@ -18,8 +18,8 @@ Environment::render(const SceneRenderer & renderer, const SceneProvider & scene)
 	constexpr RGB relativeAmbient {0.3F, 0.3F, 0.4F}, relativeDirectional {0.6F, 0.6F, 0.5F};
 
 	const LightDirection sunPos = getSunPos({}, worldTime);
-	const auto ambient = baseAmbient + relativeAmbient * sunPos.vertical();
-	const auto directional = baseDirectional + relativeDirectional * sunPos.vertical();
+	const auto ambient = baseAmbient + relativeAmbient * sunPos.ambient();
+	const auto directional = baseDirectional + relativeDirectional * sunPos.directional();
 
 	renderer.setAmbientLight(ambient);
 	renderer.setDirectionalLight(directional, sunPos, scene);
