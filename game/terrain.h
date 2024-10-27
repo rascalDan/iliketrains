@@ -27,9 +27,9 @@ public:
 		RGB colourBias;
 	};
 
-private:
 	void generateMeshes();
 
+private:
 	std::shared_ptr<GeoData> geoData;
 	Collection<MeshT<Vertex>, false> meshes;
 	Texture::Ptr grass;

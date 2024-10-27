@@ -33,6 +33,7 @@ VertexArrayObject::addAttribsFor<Terrain::Vertex>(const GLuint arrayBuffer, cons
 void
 Terrain::generateMeshes()
 {
+	meshes.removeAll();
 	std::vector<unsigned int> indices;
 	indices.reserve(geoData->n_faces() * 3);
 	std::vector<Vertex> vertices;
