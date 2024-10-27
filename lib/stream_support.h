@@ -6,6 +6,7 @@
 #include <maths.h>
 #include <span>
 #include <sstream>
+#include <tuple>
 #include <type_traits>
 
 template<typename S>
@@ -47,6 +48,22 @@ namespace std {
 	operator<<(std::ostream & s, const std::pair<First, Second> & v)
 	{
 		return (s << '(' << v.first << ", " << v.second << ')');
+	}
+
+	namespace {
+		template<typename... T, size_t... Idx>
+		std::ostream &
+		printTuple(std::ostream & s, const std::tuple<T...> & v, std::integer_sequence<size_t, Idx...>)
+		{
+			return ((s << (Idx ? ", " : "") << std::get<Idx>(v)), ...);
+		}
+	}
+
+	template<typename... T>
+	std::ostream &
+	operator<<(std::ostream & s, const std::tuple<T...> & v)
+	{
+		return printTuple(s << '{', v, std::make_index_sequence<sizeof...(T)>()) << '}';
 	}
 
 	inline std::ostream &
