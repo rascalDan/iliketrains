@@ -17,14 +17,14 @@ concept NonStringIterableCollection
 
 namespace std {
 	std::ostream &
-	operator<<(std::ostream & s, const NonStringIterableCollection auto & v)
+	operator<<(std::ostream & s, const NonStringIterableCollection auto & collection)
 	{
 		s << '(';
-		for (const auto & i : v) {
-			if (&i != &*v.begin()) {
+		for (size_t nth {}; const auto & element : collection) {
+			if (nth++) {
 				s << ", ";
 			}
-			s << i;
+			s << element;
 		}
 		return s << ')';
 	}
