@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <maths.h>
+#include <source_location>
 #include <span>
 #include <sstream>
 #include <tuple>
@@ -92,4 +93,14 @@ streamed_string(const T & v)
 	return std::move(ss).str();
 }
 
-#define CLOG(x) std::cerr << __LINE__ << " : " #x " : " << x << "\n";
+namespace {
+	template<typename T>
+	void
+	clogImpl(const T & value, const std::string_view name,
+			const std::source_location loc = std::source_location::current())
+	{
+		std::cerr << loc.line() << " : " << name << " : " << value << "\n";
+	}
+}
+
+#define CLOG(x) clogImpl(x, #x)
