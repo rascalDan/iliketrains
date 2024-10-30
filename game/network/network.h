@@ -16,7 +16,7 @@
 class SceneShader;
 template<typename> class Ray;
 
-template<size_t... n> using GenDef = std::tuple<glm::vec<n, Distance>...>;
+template<size_t... n> using GenDef = std::tuple<glm::vec<n, GlobalDistance>...>;
 using GenCurveDef = GenDef<3, 3, 2>;
 
 class Network {
