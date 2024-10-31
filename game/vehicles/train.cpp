@@ -2,7 +2,6 @@
 #include "game/vehicles/linkHistory.h"
 #include "game/vehicles/railVehicle.h"
 #include "game/vehicles/railVehicleClass.h"
-#include "gfx/renderable.h"
 #include "location.h"
 #include <algorithm>
 #include <functional>
@@ -10,6 +9,9 @@
 #include <utility>
 
 template<typename> class Ray;
+
+constexpr auto DECELERATION_RATE = 60000.F;
+constexpr auto ACCELERATIONS_RATE = 30000.F;
 
 Location
 Train::getBogiePosition(float linkDist, float dist) const
@@ -41,8 +43,8 @@ Train::doActivity(Go * go, TickDuration dur)
 	const auto maxSpeed = objects.front()->rvClass->maxSpeed;
 	if (go->dist) {
 		*go->dist -= speed * dur.count();
-		if (*go->dist < (speed * speed) / 60.F) {
-			speed -= std::min(speed, 30.F * dur.count());
+		if (*go->dist < (speed * speed) / DECELERATION_RATE) {
+			speed -= std::min(speed, ACCELERATIONS_RATE * dur.count());
 		}
 		else {
 			if (speed != maxSpeed) {
@@ -61,6 +63,6 @@ void
 Train::doActivity(Idle *, TickDuration dur)
 {
 	if (speed != 0.F) {
-		speed -= std::min(speed, 30.F * dur.count());
+		speed -= std::min(speed, DECELERATION_RATE * dur.count());
 	}
 }
