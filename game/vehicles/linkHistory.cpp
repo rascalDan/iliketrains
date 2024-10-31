@@ -1,18 +1,27 @@
 #include "linkHistory.h"
 #include "game/network/link.h"
 #include <memory>
+#include <optional>
 
 LinkHistory::Entry
 LinkHistory::add(const Link::WPtr & l, unsigned char d)
 {
+	constexpr auto HISTORY_KEEP_LENGTH = 500'000.F;
+	while (const auto newLength = [this]() -> std::optional<decltype(totalLen)> {
+		if (!links.empty()) {
+			const auto newLength = totalLen - links.back().first.lock()->length;
+			if (newLength >= HISTORY_KEEP_LENGTH) {
+				return newLength;
+			}
+		}
+		return std::nullopt;
+	}()) {
+		totalLen = newLength.value();
+		links.pop_back();
+	}
 	links.insert(links.begin(), {l, d});
 	const auto lp = l.lock();
 	totalLen += lp->length;
-	constexpr auto HISTORY_KEEP_LENGTH = 1'000'000.F;
-	while (totalLen >= HISTORY_KEEP_LENGTH && !links.empty()) {
-		totalLen -= links.back().first.lock()->length;
-		links.pop_back();
-	}
 	return {lp, d};
 }
 
