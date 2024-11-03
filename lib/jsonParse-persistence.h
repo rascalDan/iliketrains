@@ -15,6 +15,9 @@ namespace Persistence {
 		inline T
 		loadState(std::istream & in)
 		{
+			if (!in.good()) {
+				throw std::runtime_error("Input stream not in good state");
+			}
 			T t {};
 			stk.push(std::make_unique<SelectionT<T>>(std::ref(t)));
 			loadState(in);
