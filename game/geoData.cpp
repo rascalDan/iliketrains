@@ -558,6 +558,14 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 							doExtrusion(extrusionVertex, direction, p1, -MAX_SLOPE),
 							doExtrusion(extrusionVertex, direction, p1, MAX_SLOPE));
 					assert(extrusionVertex.is_valid());
+					if (extrusionExtents.size() >= 2) {
+						const auto & last = *extrusionExtents.rbegin();
+						const auto & prev = *++extrusionExtents.rbegin();
+						if (last.boundaryVertex == prev.boundaryVertex
+								&& last.extrusionVertex == prev.extrusionVertex) {
+							extrusionExtents.pop_back();
+						}
+					}
 				};
 				if (const Arc arc {e0, e1}; arc.length() < MIN_ARC) {
 					addExtrusionFor(normalize(e0 + e1) / cosf(arc.length() / 2.F));

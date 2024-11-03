@@ -276,3 +276,15 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		Texture::save(tro.outImage, cam.second.c_str());
 	});
 }
+
+BOOST_DATA_TEST_CASE(
+		deformMulti, loadFixtureJson<std::vector<std::vector<GlobalPosition3D>>>("geoData/deform/multi1.json"), points)
+{
+	BOOST_REQUIRE(!points.empty());
+	Surface surface;
+	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
+	for (const auto & strip : points) {
+		BOOST_REQUIRE_GE(strip.size(), 3);
+		BOOST_CHECK_NO_THROW(gd->setHeights(strip, surface));
+	}
+}
