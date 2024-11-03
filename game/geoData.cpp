@@ -524,21 +524,29 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					const auto doExtrusion = [this](VertexHandle & extrusionVertex, Direction2D direction,
 													 GlobalPosition3D boundaryVertex, RelativeDistance vert) {
 						const auto extrusionDir = glm::normalize(direction || vert);
+						const auto intersectAsNeeded = [this, &extrusionVertex](FaceHandle face, GlobalPosition3D pos) {
+							if (const auto closeVertex = std::find_if(fv_begin(face), fv_end(face),
+										[this, pos](const auto & vertex) {
+											return glm::length(::difference(pos, this->point(vertex))) < 10.F;
+										});
+									closeVertex != fv_end(face)) {
+								extrusionVertex = *closeVertex;
+								return;
+							}
+							extrusionVertex = split(face, pos);
+						};
 
 						if (!extrusionVertex.is_valid()) {
 							if (const auto intersect = intersectRay({boundaryVertex, extrusionDir})) {
-								auto splitVertex = split(intersect->second, intersect->first);
-								extrusionVertex = splitVertex;
+								intersectAsNeeded(intersect->second, intersect->first);
 							}
 							else if (const auto intersect
 									= intersectRay({boundaryVertex + GlobalPosition3D {1, 1, 0}, extrusionDir})) {
-								auto splitVertex = split(intersect->second, intersect->first);
-								extrusionVertex = splitVertex;
+								intersectAsNeeded(intersect->second, intersect->first);
 							}
 							else if (const auto intersect
 									= intersectRay({boundaryVertex + GlobalPosition3D {1, 0, 0}, extrusionDir})) {
-								auto splitVertex = split(intersect->second, intersect->first);
-								extrusionVertex = splitVertex;
+								intersectAsNeeded(intersect->second, intersect->first);
 							}
 						}
 
