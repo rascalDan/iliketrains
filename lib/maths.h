@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <numeric>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 
@@ -324,6 +325,34 @@ normalize(T ang)
 		ang += glm::two_pi<T>();
 	}
 	return ang;
+}
+
+template<typename T> using CalcType = std::conditional_t<std::is_floating_point_v<T>, T, int64_t>;
+
+template<typename T, glm::qualifier Q = glm::defaultp>
+[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
+linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, const glm::vec<2, T, Q> Cabs,
+		const glm::vec<2, T, Q> Dabs)
+{
+	using CT = CalcType<T>;
+	using CVec = glm::vec<2, CT, Q>;
+	// Line AB represented as a1x + b1y = c1
+	const CVec Brel = Babs - Aabs;
+	const CT a1 = Brel.y;
+	const CT b1 = -Brel.x;
+
+	// Line CD represented as a2x + b2y = c2
+	const CVec Crel = Cabs - Aabs, Del = Dabs - Aabs;
+	const CT a2 = Del.y - Crel.y;
+	const CT b2 = Crel.x - Del.x;
+	const CT c2 = (a2 * Crel.x) + (b2 * Crel.y);
+
+	const auto determinant = (a1 * b2) - (a2 * b1);
+
+	if (determinant == 0) {
+		return std::nullopt;
+	}
+	return Aabs + CVec {(b1 * c2) / -determinant, (a1 * c2) / determinant};
 }
 
 template<typename T, glm::qualifier Q>

@@ -333,3 +333,11 @@ BOOST_DATA_TEST_CASE(rayLineDistance,
 		BOOST_CHECK_LE(Ray<RelativePosition3D>(c, direction).distanceToLine(n1, n2), 0.01F);
 	}
 }
+
+static_assert(linesIntersectAt(glm::ivec2 {10, 10}, {40, 40}, {10, 80}, {20, 40}).value().x == 24);
+static_assert(linesIntersectAt(glm::vec2 {10, 10}, {40, 40}, {10, 80}, {20, 40}).value().y == 24);
+static_assert(linesIntersectAt(GlobalPosition2D {311000100, 491100100}, {311050000, 491150000}, {312000100, 491200100},
+					  {311000100, 491100100})
+					  .value()
+		== GlobalPosition2D {311000100, 491100100});
+static_assert(!linesIntersectAt(glm::dvec2 {0, 1}, {0, 4}, {1, 8}, {1, 4}).has_value());
