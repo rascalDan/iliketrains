@@ -536,7 +536,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		triangle++;
 	};
 	std::ranges::for_each(newVerts | std::views::adjacent<3>, doBoundary);
-	doBoundaryPart(newVerts.back(), *++newVerts.rbegin(), *strip.rbegin());
+	doBoundaryPart(*++newVerts.rbegin(), newVerts.back(), *strip.rbegin());
 
 	std::set<HalfedgeHandle> done;
 	std::set<HalfedgeHandle> todo;
