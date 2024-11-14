@@ -506,27 +506,35 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart
-			= [this, &boundaryTriangles](VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
-				  boundaryTriangles.emplace(start, &triangle);
-				  const auto endPoint = point(end);
-				  while (!std::ranges::contains(vv_range(start), end)
-						  && std::ranges::any_of(voh_range(start), [&](const auto & outHalf) {
-								 const auto next = next_halfedge_handle(outHalf);
-								 const auto startPoint = point(start);
-								 const auto nextStartPoint = point(from_vertex_handle(next));
-								 const auto nextEndPoint = point(to_vertex_handle(next));
-								 if (linesCross(startPoint, endPoint, nextStartPoint, nextEndPoint)) {
-									 if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
-												 nextStartPoint.xy(), nextEndPoint.xy())) {
-										 start = split(edge_handle(next), positionOnTriangle(*intersection, triangle));
-										 boundaryTriangles.emplace(start, &triangle);
-										 return true;
-									 }
-								 }
-								 return false;
-							 })) { }
-			  };
+	auto doBoundaryPart = [this, &boundaryTriangles](
+								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
+		boundaryTriangles.emplace(start, &triangle);
+		const auto endPoint = point(end);
+		while (!std::ranges::contains(vv_range(start), end)
+				&& std::ranges::any_of(voh_range(start), [&](const auto & outHalf) {
+					   const auto next = next_halfedge_handle(outHalf);
+					   const auto startPoint = point(start);
+					   const auto nextStartPoint = point(from_vertex_handle(next));
+					   const auto nextEndPoint = point(to_vertex_handle(next));
+					   if (linesCross(startPoint, endPoint, nextStartPoint, nextEndPoint)) {
+						   if (const auto intersection = linesIntersectAt(
+									   startPoint.xy(), endPoint.xy(), nextStartPoint.xy(), nextEndPoint.xy())) {
+							   const auto distS = glm::length(difference(*intersection, nextStartPoint.xy()));
+							   const auto distE = glm::length(difference(*intersection, nextEndPoint.xy()));
+							   if (const auto mdist = std::min({distS, distE}); mdist < 500.F) {
+								   start = (mdist == distS) ? from_vertex_handle(next) : to_vertex_handle(next);
+								   point(start) = positionOnTriangle(*intersection, triangle);
+							   }
+							   else {
+								   start = split(edge_handle(next), positionOnTriangle(*intersection, triangle));
+							   }
+							   boundaryTriangles.emplace(start, &triangle);
+							   return true;
+						   }
+					   }
+					   return false;
+				   })) { }
+	};
 	auto doBoundary = [&doBoundaryPart, triangle = strip.begin()](const auto & verts) mutable {
 		const auto & [a, b, c] = verts;
 		doBoundaryPart(a, b, *triangle);
