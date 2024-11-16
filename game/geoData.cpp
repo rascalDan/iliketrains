@@ -481,9 +481,23 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	// New vertices for each vertex in triangleStrip
 	std::vector<VertexHandle> newVerts;
 	newVerts.reserve(newVerts.size());
-	std::transform(
-			triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts), [this](const auto tsPoint) {
-				return split(findPoint(tsPoint), tsPoint);
+	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts),
+			[this, &newVerts](const auto tsPoint) {
+				const auto face = findPoint(tsPoint);
+				if (const auto nearest = std::ranges::min(std::views::iota(fv_begin(face), fv_end(face))
+									| std::views::filter([&newVerts](const auto v) {
+										  return !std::ranges::contains(newVerts, *v);
+									  })
+									| std::views::transform([this, &tsPoint](const auto v) {
+										  return std::make_pair(
+												  *v, glm::length(difference(this->point(*v).xy(), tsPoint.xy())));
+									  }),
+							{}, &std::pair<VertexHandle, float>::second);
+						nearest.second < 500.F) {
+					point(nearest.first) = tsPoint;
+					return nearest.first;
+				}
+				return split(face, tsPoint);
 			});
 
 	// Create temporary triangles from triangleStrip
