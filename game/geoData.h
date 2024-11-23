@@ -142,7 +142,16 @@ public:
 
 	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
 
-	void setHeights(const std::span<const GlobalPosition3D> triangleStrip, const Surface &);
+	struct SetHeightsOpts {
+		static constexpr auto DEFAULT_NEAR_NODE_TOLERANACE = 500.F;
+		static constexpr auto DEFAULT_MAX_SLOPE = 0.5F;
+
+		const Surface & surface;
+		RelativeDistance nearNodeTolerance = DEFAULT_NEAR_NODE_TOLERANACE;
+		RelativeDistance maxSlope = DEFAULT_MAX_SLOPE;
+	};
+
+	void setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
 
 	[[nodiscard]] auto
 	getExtents() const

@@ -410,10 +410,8 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 	return triangleContainsPoint(a.x, b) && triangleContainsPoint(a.y, b) && triangleContainsPoint(a.z, b);
 }
 
-static constexpr RelativeDistance MAX_SLOPE = .5F;
-
 void
-GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const Surface &)
+GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts & opts)
 {
 	if (triangleStrip.size() < 3) {
 		return;
@@ -434,12 +432,12 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	std::vector<VertexHandle> newVerts;
 	newVerts.reserve(newVerts.size());
 	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts),
-			[this, &newVerts, &vertexDistFrom](const auto tsPoint) {
+			[this, &newVerts, &vertexDistFrom, &opts](const auto tsPoint) {
 				const auto face = findPoint(tsPoint);
 				if (const auto nearest = std::ranges::min(std::views::iota(fv_begin(face), fv_end(face))
 									| std::views::transform(vertexDistFrom(tsPoint)),
 							{}, &std::pair<VertexHandle, float>::second);
-						nearest.second < 500.F && !std::ranges::contains(newVerts, nearest.first)) {
+						nearest.second < opts.nearNodeTolerance && !std::ranges::contains(newVerts, nearest.first)) {
 					point(nearest.first) = tsPoint;
 					return nearest.first;
 				}
@@ -466,7 +464,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &newVerts, &vertexDistFrom](
+	auto doBoundaryPart = [this, &boundaryTriangles, &newVerts, &vertexDistFrom, &opts](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);
@@ -484,7 +482,8 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 							   if (const auto nextDist
 									   = std::ranges::min(nexts | std::views::transform(vertexDistFrom(*intersection)),
 											   {}, &std::pair<VertexHandle, float>::second);
-									   nextDist.second < 500.F && !boundaryTriangles.contains(nextDist.first)
+									   nextDist.second < opts.nearNodeTolerance
+									   && !boundaryTriangles.contains(nextDist.first)
 									   && !std::ranges::contains(newVerts, nextDist.first)) {
 								   start = nextDist.first;
 								   point(start) = positionOnTriangle(*intersection, triangle);
@@ -534,7 +533,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			todoOutHalfEdges(toVertex);
 		}
 		else if (!toTriangle) { // point without the new strip, adjust vertically by limit
-			const auto maxOffset = static_cast<GlobalDistance>(MAX_SLOPE * glm::length(difference(heh).xy()));
+			const auto maxOffset = static_cast<GlobalDistance>(opts.maxSlope * glm::length(difference(heh).xy()));
 			const auto newHeight = std::clamp(toPoint.z, fromPoint.z - maxOffset, fromPoint.z + maxOffset);
 			if (newHeight != toPoint.z) {
 				toPoint.z = newHeight;

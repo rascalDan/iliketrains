@@ -232,7 +232,7 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	Surface surface;
 	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	BOOST_CHECK_NO_THROW(gd->setHeights(points, surface));
+	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = surface}));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;
