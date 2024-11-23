@@ -478,22 +478,22 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	const auto initialVertexCount = static_cast<unsigned int>(n_vertices());
 
+	const auto vertexDistFrom = [this](GlobalPosition2D p) {
+		return [p, this](const VertexHandle v) {
+			return std::make_pair(v, glm::length(difference(this->point(v).xy(), p)));
+		};
+	};
+
 	// New vertices for each vertex in triangleStrip
 	std::vector<VertexHandle> newVerts;
 	newVerts.reserve(newVerts.size());
 	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts),
-			[this, &newVerts](const auto tsPoint) {
+			[this, &newVerts, &vertexDistFrom](const auto tsPoint) {
 				const auto face = findPoint(tsPoint);
 				if (const auto nearest = std::ranges::min(std::views::iota(fv_begin(face), fv_end(face))
-									| std::views::filter([&newVerts](const auto v) {
-										  return !std::ranges::contains(newVerts, *v);
-									  })
-									| std::views::transform([this, &tsPoint](const auto v) {
-										  return std::make_pair(
-												  *v, glm::length(difference(this->point(*v).xy(), tsPoint.xy())));
-									  }),
+									| std::views::transform(vertexDistFrom(tsPoint)),
 							{}, &std::pair<VertexHandle, float>::second);
-						nearest.second < 500.F) {
+						nearest.second < 500.F && !std::ranges::contains(newVerts, nearest.first)) {
 					point(nearest.first) = tsPoint;
 					return nearest.first;
 				}
@@ -520,7 +520,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles](
+	auto doBoundaryPart = [this, &boundaryTriangles, &newVerts, &vertexDistFrom](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);
@@ -528,15 +528,19 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 				&& std::ranges::any_of(voh_range(start), [&](const auto & outHalf) {
 					   const auto next = next_halfedge_handle(outHalf);
 					   const auto startPoint = point(start);
-					   const auto nextStartPoint = point(from_vertex_handle(next));
-					   const auto nextEndPoint = point(to_vertex_handle(next));
-					   if (linesCross(startPoint, endPoint, nextStartPoint, nextEndPoint)) {
-						   if (const auto intersection = linesIntersectAt(
-									   startPoint.xy(), endPoint.xy(), nextStartPoint.xy(), nextEndPoint.xy())) {
-							   const auto distS = glm::length(difference(*intersection, nextStartPoint.xy()));
-							   const auto distE = glm::length(difference(*intersection, nextEndPoint.xy()));
-							   if (const auto mdist = std::min({distS, distE}); mdist < 500.F) {
-								   start = (mdist == distS) ? from_vertex_handle(next) : to_vertex_handle(next);
+					   const auto nexts = std::array {from_vertex_handle(next), to_vertex_handle(next)};
+					   const auto nextPoints = nexts | std::views::transform([this](const auto v) {
+						   return std::make_pair(v, this->point(v));
+					   });
+					   if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
+						   if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
+									   nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
+							   if (const auto nextDist
+									   = std::ranges::min(nexts | std::views::transform(vertexDistFrom(*intersection)),
+											   {}, &std::pair<VertexHandle, float>::second);
+									   nextDist.second < 500.F && !boundaryTriangles.contains(nextDist.first)
+									   && !std::ranges::contains(newVerts, nextDist.first)) {
+								   start = nextDist.first;
 								   point(start) = positionOnTriangle(*intersection, triangle);
 							   }
 							   else {
