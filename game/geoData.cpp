@@ -545,5 +545,19 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		done.insert(heh);
 	}
+
+	auto surfaceStripWalk = [this, &getTriangle, &opts](const auto & surfaceStripWalk, const auto & face) -> void {
+		if (!property(surface, face)) {
+			property(surface, face) = &opts.surface;
+			std::ranges::for_each(
+					ff_range(face), [this, &getTriangle, &surfaceStripWalk](const auto & adjacentFaceHandle) {
+						if (getTriangle(this->triangle<2>(adjacentFaceHandle).centroid())) {
+							surfaceStripWalk(surfaceStripWalk, adjacentFaceHandle);
+						}
+					});
+		}
+	};
+	surfaceStripWalk(surfaceStripWalk, findPoint(strip.front().centroid()));
+
 	update_vertex_normals_only(VertexIter {*this, vertex_handle(initialVertexCount), true});
 }
