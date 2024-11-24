@@ -53,7 +53,8 @@ public:
 	};
 
 	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, GlobalDistance>> {
-		using base = glm::vec<3, glm::vec<Dim, GlobalDistance>>;
+		using Point = glm::vec<Dim, GlobalDistance>;
+		using base = glm::vec<3, Point>;
 		using base::base;
 
 		template<IterableCollection Range> Triangle(const GeoData * m, Range range)
@@ -64,10 +65,18 @@ public:
 			});
 		}
 
-		[[nodiscard]] glm::vec<Dim, GlobalDistance>
+		[[nodiscard]] Point
 		operator*(BaryPosition bari) const
 		{
 			return p(0) + (difference(p(0), p(1)) * bari.x) + (difference(p(0), p(2)) * bari.y);
+		}
+
+		[[nodiscard]] Point
+		centroid() const
+		{
+			return [this]<glm::length_t... axis>(std::integer_sequence<glm::length_t, axis...>) {
+				return Point {(p(0)[axis] + p(1)[axis] + p(2)[axis]) / 3 ...};
+			}(std::make_integer_sequence<glm::length_t, Dim>());
 		}
 
 		[[nodiscard]] auto
