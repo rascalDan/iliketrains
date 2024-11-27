@@ -31,11 +31,9 @@ BOOST_AUTO_TEST_CASE(loadSuccess)
 
 BOOST_AUTO_TEST_CASE(normalsAllPointUp)
 {
-	BOOST_CHECK_EQUAL(std::count_if(vertices_begin(), vertices_end(),
-							  [this](auto && vh) {
-								  return normal(vh).z > 0;
-							  }),
-			n_vertices());
+	BOOST_CHECK(std::ranges::all_of(vertices(), [this](auto && vertex) {
+		return normal(vertex).z > 0;
+	}));
 }
 
 BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
@@ -233,6 +231,9 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
 	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = surface}));
+	BOOST_CHECK(std::ranges::all_of(gd->vertices(), [&gd](auto && vertex) {
+		return gd->normal(vertex).z > 0;
+	}));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;

@@ -66,7 +66,7 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 			});
 		}
 	}
-	mesh.update_vertex_normals_only();
+	mesh.updateAllVertexNormals();
 
 	return mesh;
 };
@@ -105,7 +105,7 @@ GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistan
 		}
 	}
 
-	mesh.update_vertex_normals_only();
+	mesh.updateAllVertexNormals();
 
 	return mesh;
 }
@@ -377,21 +377,26 @@ GeoData::centre(const HalfedgeHandle heh) const
 }
 
 void
-GeoData::update_vertex_normals_only()
+GeoData::updateAllVertexNormals()
 {
-	update_vertex_normals_only(vertices_sbegin());
+	updateAllVertexNormals(vertices());
+}
+
+template<std::ranges::range R>
+void
+GeoData::updateAllVertexNormals(const R & range)
+{
+	std::ranges::for_each(range, [this](const auto vertex) {
+		updateVertexNormal(vertex);
+	});
 }
 
 void
-GeoData::update_vertex_normals_only(VertexIter start)
+GeoData::updateVertexNormal(VertexHandle vertex)
 {
-	std::for_each(start, vertices_end(), [this](const auto vh) {
-		if (normal(vh) == Normal3D {}) {
-			Normal3D n;
-			calc_vertex_normal_correct(vh, n);
-			this->set_normal(vh, glm::normalize(n));
-		}
-	});
+	Normal3D n;
+	calc_vertex_normal_correct(vertex, n);
+	set_normal(vertex, glm::normalize(n));
 }
 
 bool
@@ -420,12 +425,16 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	lowerExtent.z = std::min(upperExtent.z, stripMinMax.min.z);
 	upperExtent.z = std::max(upperExtent.z, stripMinMax.max.z);
 
-	const auto initialVertexCount = static_cast<unsigned int>(n_vertices());
-
 	const auto vertexDistFrom = [this](GlobalPosition2D p) {
 		return [p, this](const VertexHandle v) {
 			return std::make_pair(v, glm::length(difference(this->point(v).xy(), p)));
 		};
+	};
+
+	std::set<VertexHandle> newOrChangedVerts;
+	auto addVertexForNormalUpdate = [this, &newOrChangedVerts](const VertexHandle vertex) {
+		newOrChangedVerts.emplace(vertex);
+		std::ranges::copy(vv_range(vertex), std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
 	};
 
 	// New vertices for each vertex in triangleStrip
@@ -443,6 +452,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 				}
 				return split(face, tsPoint);
 			});
+	std::ranges::for_each(newVerts, addVertexForNormalUpdate);
 
 	// Create temporary triangles from triangleStrip
 	std::vector<Triangle<3>> strip;
@@ -464,7 +474,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &newVerts, &vertexDistFrom, &opts](
+	auto doBoundaryPart = [this, &boundaryTriangles, &newVerts, &vertexDistFrom, &opts, &addVertexForNormalUpdate](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);
@@ -491,6 +501,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 							   else {
 								   start = split(edge_handle(next), positionOnTriangle(*intersection, triangle));
 							   }
+							   addVertexForNormalUpdate(start);
 							   boundaryTriangles.emplace(start, &triangle);
 							   return true;
 						   }
@@ -530,6 +541,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		if (toTriangle) { // point within the new strip, adjust vertically by triangle
 			toPoint.z = positionOnTriangle(toPoint, *toTriangle).z;
+			addVertexForNormalUpdate(toVertex);
 			todoOutHalfEdges(toVertex);
 		}
 		else if (!toTriangle) { // point without the new strip, adjust vertically by limit
@@ -537,6 +549,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			const auto newHeight = std::clamp(toPoint.z, fromPoint.z - maxOffset, fromPoint.z + maxOffset);
 			if (newHeight != toPoint.z) {
 				toPoint.z = newHeight;
+				addVertexForNormalUpdate(toVertex);
 				std::copy_if(voh_begin(toVertex), voh_end(toVertex), std::inserter(todo, todo.end()),
 						[this, &boundaryTriangles](const auto & heh) {
 							return !boundaryTriangles.contains(to_vertex_handle(heh));
@@ -559,5 +572,5 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	};
 	surfaceStripWalk(surfaceStripWalk, findPoint(strip.front().centroid()));
 
-	update_vertex_normals_only(VertexIter {*this, vertex_handle(initialVertexCount), true});
+	updateAllVertexNormals(newOrChangedVerts);
 }
