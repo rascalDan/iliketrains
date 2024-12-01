@@ -4,6 +4,7 @@
 #include "config/types.h"
 #include "ray.h"
 #include "surface.h"
+#include "triangle.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
 #include <glm/vec2.hpp>
@@ -52,85 +53,7 @@ public:
 		mutable FaceHandle _face {};
 	};
 
-	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, GlobalDistance>> {
-		using Point = glm::vec<Dim, GlobalDistance>;
-		using base = glm::vec<3, Point>;
-		using base::base;
-
-		template<IterableCollection Range> Triangle(const GeoData * m, Range range)
-		{
-			assert(std::distance(range.begin(), range.end()) == 3);
-			std::transform(range.begin(), range.end(), &base::operator[](0), [m](auto vh) {
-				return m->point(vh);
-			});
-		}
-
-		[[nodiscard]] Point
-		operator*(BaryPosition bari) const
-		{
-			return p(0) + (::difference(p(1), p(0)) * bari.x) + (::difference(p(2), p(0)) * bari.y);
-		}
-
-		[[nodiscard]] Point
-		centroid() const
-		{
-			return [this]<glm::length_t... axis>(std::integer_sequence<glm::length_t, axis...>) {
-				return Point {(p(0)[axis] + p(1)[axis] + p(2)[axis]) / 3 ...};
-			}(std::make_integer_sequence<glm::length_t, Dim>());
-		}
-
-		[[nodiscard]] auto
-		area() const
-			requires(Dim == 3)
-		{
-			return glm::length(crossProduct(::difference(p(1), p(0)), ::difference(p(2), p(0)))) / 2.F;
-		}
-
-		[[nodiscard]] Normal3D
-		normal() const
-			requires(Dim == 3)
-		{
-			return crossProduct(::difference(p(1), p(0)), ::difference(p(2), p(0)));
-		}
-
-		[[nodiscard]] Normal3D
-		nnormal() const
-			requires(Dim == 3)
-		{
-			return glm::normalize(normal());
-		}
-
-		[[nodiscard]] auto
-		angle(glm::length_t c) const
-		{
-			return Arc {P(c), P(c + 2), P(c + 1)}.length();
-		}
-
-		template<glm::length_t D = Dim>
-		[[nodiscard]] auto
-		angleAt(const GlobalPosition<D> pos) const
-			requires(D <= Dim)
-		{
-			for (glm::length_t i {}; i < 3; ++i) {
-				if (GlobalPosition<D> {p(i)} == pos) {
-					return angle(i);
-				}
-			}
-			return 0.F;
-		}
-
-		[[nodiscard]] inline auto
-		p(const glm::length_t i) const
-		{
-			return base::operator[](i);
-		}
-
-		[[nodiscard]] inline auto
-		P(const glm::length_t i) const
-		{
-			return base::operator[](i % 3);
-		}
-	};
+	template<glm::length_t Dim> using Triangle = ::Triangle<Dim, GlobalDistance>;
 
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D) const;
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D, FaceHandle start) const;
@@ -178,9 +101,13 @@ public:
 protected:
 	template<glm::length_t Dim>
 	[[nodiscard]] Triangle<Dim>
-	triangle(FaceHandle f) const
+	triangle(FaceHandle face) const
 	{
-		return {this, fv_range(f)};
+		Triangle<Dim> triangle;
+		std::ranges::transform(fv_range(face), triangle.begin(), [this](auto vertex) {
+			return point(vertex);
+		});
+		return triangle;
 	}
 
 	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
