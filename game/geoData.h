@@ -68,7 +68,7 @@ public:
 		[[nodiscard]] Point
 		operator*(BaryPosition bari) const
 		{
-			return p(0) + (difference(p(0), p(1)) * bari.x) + (difference(p(0), p(2)) * bari.y);
+			return p(0) + (::difference(p(1), p(0)) * bari.x) + (::difference(p(2), p(0)) * bari.y);
 		}
 
 		[[nodiscard]] Point
@@ -83,14 +83,14 @@ public:
 		area() const
 			requires(Dim == 3)
 		{
-			return glm::length(crossProduct(difference(p(0), p(1)), difference(p(0), p(2)))) / 2.F;
+			return glm::length(crossProduct(::difference(p(1), p(0)), ::difference(p(2), p(0)))) / 2.F;
 		}
 
 		[[nodiscard]] Normal3D
 		normal() const
 			requires(Dim == 3)
 		{
-			return crossProduct(difference(p(0), p(1)), difference(p(0), p(2)));
+			return crossProduct(::difference(p(1), p(0)), ::difference(p(2), p(0)));
 		}
 
 		[[nodiscard]] Normal3D
@@ -189,13 +189,6 @@ protected:
 	[[nodiscard]] static bool triangleContainsTriangle(const Triangle<2> &, const Triangle<2> &);
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 	[[nodiscard]] RelativePosition3D difference(const HalfedgeHandle) const;
-
-	template<glm::length_t D>
-	[[nodiscard]] static RelativePosition<D>
-	difference(const GlobalPosition<D> a, const GlobalPosition<D> b)
-	{
-		return b - a;
-	}
 
 	[[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
 	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;

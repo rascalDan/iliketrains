@@ -361,7 +361,7 @@ GeoData::findBoundaryStart() const
 [[nodiscard]] RelativePosition3D
 GeoData::difference(const HalfedgeHandle heh) const
 {
-	return point(to_vertex_handle(heh)) - point(from_vertex_handle(heh));
+	return ::difference(point(to_vertex_handle(heh)), point(from_vertex_handle(heh)));
 }
 
 [[nodiscard]] RelativeDistance
@@ -427,7 +427,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	const auto vertexDistFrom = [this](GlobalPosition2D p) {
 		return [p, this](const VertexHandle v) {
-			return std::make_pair(v, glm::length(difference(this->point(v).xy(), p)));
+			return std::make_pair(v, glm::length(::difference(p, this->point(v).xy())));
 		};
 	};
 
