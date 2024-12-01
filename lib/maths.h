@@ -5,11 +5,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <numeric>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 
+template<typename T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+
 struct Arc : public std::pair<Angle, Angle> {
-	template<glm::length_t Lc, glm::length_t Le, typename T, glm::qualifier Q>
+	template<glm::length_t Lc, glm::length_t Le, Arithmetic T, glm::qualifier Q>
 		requires(Lc >= 2, Le >= 2)
 	Arc(const glm::vec<Lc, T, Q> & centre, const glm::vec<Le, T, Q> & e0p, const glm::vec<Le, T, Q> & e1p) :
 		Arc {RelativePosition2D {e0p.xy() - centre.xy()}, RelativePosition2D {e1p.xy() - centre.xy()}}
@@ -118,7 +122,7 @@ namespace {
 	}
 
 	// Helper to lookup into a matrix given an xy vector coordinate
-	template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q, std::integral I = glm::length_t>
+	template<glm::length_t C, glm::length_t R, Arithmetic T, glm::qualifier Q, std::integral I = glm::length_t>
 	constexpr auto &
 	operator^(glm::mat<C, R, T, Q> & matrix, const glm::vec<2, I> rowCol)
 	{
@@ -200,7 +204,7 @@ rotate_yp(const glm::vec<2, T, Q> & angles)
 	return rotate_yp<D>(angles.y, angles.x);
 }
 
-template<glm::length_t D, glm::qualifier Q = glm::qualifier::defaultp, typename T>
+template<glm::length_t D, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
 	requires(D >= 2)
 constexpr auto
 vector_yaw(const glm::vec<D, T, Q> & diff)
@@ -208,7 +212,7 @@ vector_yaw(const glm::vec<D, T, Q> & diff)
 	return std::atan2(diff.x, diff.y);
 }
 
-template<glm::length_t D, glm::qualifier Q = glm::qualifier::defaultp, typename T>
+template<glm::length_t D, glm::qualifier Q = glm::qualifier::defaultp, std::floating_point T>
 	requires(D >= 3)
 constexpr auto
 vector_pitch(const glm::vec<D, T, Q> & diff)
@@ -216,7 +220,7 @@ vector_pitch(const glm::vec<D, T, Q> & diff)
 	return std::atan(diff.z);
 }
 
-template<typename T, glm::qualifier Q>
+template<std::floating_point T, glm::qualifier Q>
 constexpr glm::vec<2, T, Q>
 vector_normal(const glm::vec<2, T, Q> & vector)
 {
@@ -230,7 +234,7 @@ round_frac(const T value, const T frac)
 	return std::round(value / frac) * frac;
 }
 
-template<typename T>
+template<Arithmetic T>
 	requires requires(T value) { value * value; }
 constexpr auto
 sq(T value)
@@ -263,14 +267,15 @@ crossProduct(const glm::vec<3, T, Q> & valueA, const glm::vec<3, T, Q> & valueB)
 	return glm::cross(valueA, valueB);
 }
 
-template<typename R = float, typename Ta, typename Tb>
+template<Arithmetic R = float, Arithmetic Ta, Arithmetic Tb>
 constexpr auto
 ratio(const Ta valueA, const Tb valueB)
 {
-	return (static_cast<R>(valueA) / static_cast<R>(valueB));
+	using Common = std::common_type_t<Ta, Ta>;
+	return static_cast<R>((static_cast<Common>(valueA) / static_cast<Common>(valueB)));
 }
 
-template<typename R = float, typename T, glm::qualifier Q>
+template<Arithmetic R = float, Arithmetic T, glm::qualifier Q>
 constexpr auto
 ratio(const glm::vec<2, T, Q> & value)
 {
@@ -284,14 +289,14 @@ perspective_divide(const glm::vec<4, T, Q> & value)
 	return value / value.w;
 }
 
-template<glm::length_t L1, glm::length_t L2, typename T, glm::qualifier Q>
+template<glm::length_t L1, glm::length_t L2, Arithmetic T, glm::qualifier Q>
 constexpr glm::vec<L1 + L2, T, Q>
 operator||(const glm::vec<L1, T, Q> valueA, const glm::vec<L2, T, Q> valueB)
 {
 	return {valueA, valueB};
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
+template<glm::length_t L, Arithmetic T, glm::qualifier Q>
 constexpr glm::vec<L + 1, T, Q>
 operator||(const glm::vec<L, T, Q> valueA, const T valueB)
 {
@@ -326,7 +331,35 @@ normalize(T ang)
 	return ang;
 }
 
-template<typename T, glm::qualifier Q>
+template<Arithmetic T> using CalcType = std::conditional_t<std::is_floating_point_v<T>, T, int64_t>;
+
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
+[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
+linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, const glm::vec<2, T, Q> Cabs,
+		const glm::vec<2, T, Q> Dabs)
+{
+	using CT = CalcType<T>;
+	using CVec = glm::vec<2, CT, Q>;
+	// Line AB represented as a1x + b1y = c1
+	const CVec Brel = Babs - Aabs;
+	const CT a1 = Brel.y;
+	const CT b1 = -Brel.x;
+
+	// Line CD represented as a2x + b2y = c2
+	const CVec Crel = Cabs - Aabs, Del = Dabs - Aabs;
+	const CT a2 = Del.y - Crel.y;
+	const CT b2 = Crel.x - Del.x;
+	const CT c2 = (a2 * Crel.x) + (b2 * Crel.y);
+
+	const auto determinant = (a1 * b2) - (a2 * b1);
+
+	if (determinant == 0) {
+		return std::nullopt;
+	}
+	return Aabs + CVec {(b1 * c2) / -determinant, (a1 * c2) / determinant};
+}
+
+template<Arithmetic T, glm::qualifier Q>
 std::pair<glm::vec<2, T, Q>, bool>
 find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> end, Rotation2D endDir)
 {
@@ -339,7 +372,7 @@ find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> 
 	throw std::runtime_error("no intersection");
 }
 
-template<typename T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q>
 std::pair<glm::vec<2, T, Q>, bool>
 find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
 {
@@ -349,7 +382,7 @@ find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, An
 	return find_arc_centre(start, sincos(entrys + half_pi), end, sincos(entrye - half_pi));
 }
 
-template<typename T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q>
 Angle
 find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, Rotation2D bd)
 {
@@ -374,7 +407,7 @@ find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, 
 			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
 }
 
-template<typename T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q>
 std::pair<Angle, Angle>
 find_arcs_radius(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
 {
@@ -384,7 +417,7 @@ find_arcs_radius(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, A
 	return {getrad(-half_pi), getrad(half_pi)};
 }
 
-template<typename T>
+template<Arithmetic T>
 auto
 midpoint(const std::pair<T, T> & v)
 {
@@ -392,7 +425,7 @@ midpoint(const std::pair<T, T> & v)
 }
 
 // std::pow is not constexpr
-template<typename T>
+template<Arithmetic T>
 	requires requires(T n) { n *= n; }
 constexpr T
 pow(const T base, std::integral auto exp)
@@ -405,14 +438,14 @@ pow(const T base, std::integral auto exp)
 }
 
 // Conversions
-template<typename T>
+template<Arithmetic T>
 constexpr auto
 mph_to_ms(T v)
 {
 	return v / 2.237L;
 }
 
-template<typename T>
+template<Arithmetic T>
 constexpr auto
 kph_to_ms(T v)
 {

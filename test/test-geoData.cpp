@@ -31,18 +31,16 @@ BOOST_AUTO_TEST_CASE(loadSuccess)
 
 BOOST_AUTO_TEST_CASE(normalsAllPointUp)
 {
-	BOOST_CHECK_EQUAL(std::count_if(vertices_begin(), vertices_end(),
-							  [this](auto && vh) {
-								  return normal(vh).z > 0;
-							  }),
-			n_vertices());
+	BOOST_CHECK(std::ranges::all_of(vertices(), [this](auto && vertex) {
+		return normal(vertex).z > 0;
+	}));
 }
 
 BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
 {
 	const auto face = face_handle(0);
 
-	BOOST_TEST_CONTEXT(GeoData::Triangle<2>(this, fv_range(face))) {
+	BOOST_TEST_CONTEXT(this->triangle<2>(face)) {
 		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner, yllcorner}, face));
 		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + cellsize, yllcorner + cellsize}, face));
 		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner, yllcorner + cellsize}, face));
@@ -232,7 +230,10 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	Surface surface;
 	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	BOOST_CHECK_NO_THROW(gd->setHeights(points, surface));
+	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = surface}));
+	BOOST_CHECK(std::ranges::all_of(gd->vertices(), [&gd](auto && vertex) {
+		return gd->normal(vertex).z > 0;
+	}));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;

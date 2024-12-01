@@ -4,6 +4,7 @@
 #include "config/types.h"
 #include "ray.h"
 #include "surface.h"
+#include "triangle.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <filesystem>
 #include <glm/vec2.hpp>
@@ -52,76 +53,7 @@ public:
 		mutable FaceHandle _face {};
 	};
 
-	template<glm::length_t Dim> struct Triangle : public glm::vec<3, glm::vec<Dim, GlobalDistance>> {
-		using base = glm::vec<3, glm::vec<Dim, GlobalDistance>>;
-		using base::base;
-
-		template<IterableCollection Range> Triangle(const GeoData * m, Range range)
-		{
-			assert(std::distance(range.begin(), range.end()) == 3);
-			std::transform(range.begin(), range.end(), &base::operator[](0), [m](auto vh) {
-				return m->point(vh);
-			});
-		}
-
-		[[nodiscard]] glm::vec<Dim, GlobalDistance>
-		operator*(BaryPosition bari) const
-		{
-			return p(0) + (difference(p(0), p(1)) * bari.x) + (difference(p(0), p(2)) * bari.y);
-		}
-
-		[[nodiscard]] auto
-		area() const
-			requires(Dim == 3)
-		{
-			return glm::length(crossProduct(difference(p(0), p(1)), difference(p(0), p(2)))) / 2.F;
-		}
-
-		[[nodiscard]] Normal3D
-		normal() const
-			requires(Dim == 3)
-		{
-			return crossProduct(difference(p(0), p(1)), difference(p(0), p(2)));
-		}
-
-		[[nodiscard]] Normal3D
-		nnormal() const
-			requires(Dim == 3)
-		{
-			return glm::normalize(normal());
-		}
-
-		[[nodiscard]] auto
-		angle(glm::length_t c) const
-		{
-			return Arc {P(c), P(c + 2), P(c + 1)}.length();
-		}
-
-		template<glm::length_t D = Dim>
-		[[nodiscard]] auto
-		angleAt(const GlobalPosition<D> pos) const
-			requires(D <= Dim)
-		{
-			for (glm::length_t i {}; i < 3; ++i) {
-				if (GlobalPosition<D> {p(i)} == pos) {
-					return angle(i);
-				}
-			}
-			return 0.F;
-		}
-
-		[[nodiscard]] inline auto
-		p(const glm::length_t i) const
-		{
-			return base::operator[](i);
-		}
-
-		[[nodiscard]] inline auto
-		P(const glm::length_t i) const
-		{
-			return base::operator[](i % 3);
-		}
-	};
+	template<glm::length_t Dim> using Triangle = ::Triangle<Dim, GlobalDistance>;
 
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D) const;
 	[[nodiscard]] FaceHandle findPoint(GlobalPosition2D, FaceHandle start) const;
@@ -142,7 +74,16 @@ public:
 
 	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
 
-	void setHeights(const std::span<const GlobalPosition3D> triangleStrip, const Surface &);
+	struct SetHeightsOpts {
+		static constexpr auto DEFAULT_NEAR_NODE_TOLERANACE = 500.F;
+		static constexpr auto DEFAULT_MAX_SLOPE = 0.5F;
+
+		const Surface & surface;
+		RelativeDistance nearNodeTolerance = DEFAULT_NEAR_NODE_TOLERANACE;
+		RelativeDistance maxSlope = DEFAULT_MAX_SLOPE;
+	};
+
+	void setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
 
 	[[nodiscard]] auto
 	getExtents() const
@@ -160,9 +101,13 @@ public:
 protected:
 	template<glm::length_t Dim>
 	[[nodiscard]] Triangle<Dim>
-	triangle(FaceHandle f) const
+	triangle(FaceHandle face) const
 	{
-		return {this, fv_range(f)};
+		Triangle<Dim> triangle;
+		std::ranges::transform(fv_range(face), triangle.begin(), [this](auto vertex) {
+			return point(vertex);
+		});
+		return triangle;
 	}
 
 	[[nodiscard]] static bool triangleContainsPoint(const GlobalPosition2D, const Triangle<2> &);
@@ -172,21 +117,12 @@ protected:
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 	[[nodiscard]] RelativePosition3D difference(const HalfedgeHandle) const;
 
-	template<glm::length_t D>
-	[[nodiscard]] static RelativePosition<D>
-	difference(const GlobalPosition<D> a, const GlobalPosition<D> b)
-	{
-		return b - a;
-	}
-
 	[[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
 	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;
 
-	void update_vertex_normals_only();
-	void update_vertex_normals_only(VertexIter start);
-
-	using OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits>::split;
-	void split(FaceHandle);
+	void updateAllVertexNormals();
+	template<std::ranges::range R> void updateAllVertexNormals(const R &);
+	void updateVertexNormal(VertexHandle);
 
 private:
 	GlobalPosition3D lowerExtent {}, upperExtent {};
