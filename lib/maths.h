@@ -79,8 +79,11 @@ operator-(const GlobalPosition<D> & global, const CalcPosition<D> & relative)
 	return global - GlobalPosition<D>(relative);
 }
 
-template<glm::length_t D, std::integral T, glm::qualifier Q>
-constexpr RelativePosition<D>
+template<glm::length_t D, Arithmetic T, glm::qualifier Q>
+using DifferenceVector = glm::vec<D, std::conditional_t<std::is_floating_point_v<T>, T, float>, Q>;
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q>
+constexpr DifferenceVector<D, T, Q>
 difference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
 {
 	return globalA - globalB;
