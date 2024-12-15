@@ -45,6 +45,12 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 		return crossProduct(sideDifference(1), sideDifference(2));
 	}
 
+	[[nodiscard]] constexpr auto
+	height()
+	{
+		return (area() * 2) / glm::length(difference(p(0), p(1)));
+	}
+
 	[[nodiscard]] constexpr Normal3D
 	nnormal() const
 		requires(Dim == 3)
