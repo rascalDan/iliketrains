@@ -190,23 +190,6 @@ BOOST_DATA_TEST_CASE(walkTerrainUntil,
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
 
-BOOST_AUTO_TEST_CASE(triangle_helpers)
-{
-	constexpr static GeoData::Triangle<3> t {{0, 0, 0}, {5, 0, 0}, {5, 5, 0}};
-
-	BOOST_CHECK_EQUAL(t.nnormal(), up);
-	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angleAt({0, 0, 0}), quarter_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angleAt({5, 0, 0}), half_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angleAt({5, 5, 0}), quarter_pi, 0.01F);
-
-	BOOST_CHECK_CLOSE(t.angleAt({0, 1, 0}), 0.F, 0.01F);
-
-	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
-}
-
 using FindEntiesData = std::tuple<GlobalPosition2D, GlobalPosition2D, int>;
 
 BOOST_DATA_TEST_CASE(findEntries,

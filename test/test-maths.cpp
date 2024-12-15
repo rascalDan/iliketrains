@@ -12,6 +12,7 @@
 #include <gfx/gl/camera.h>
 #include <glm/glm.hpp>
 #include <maths.h>
+#include <triangle.h>
 #include <tuple>
 
 using vecter_and_angle = std::tuple<glm::vec3, float>;
@@ -341,3 +342,36 @@ static_assert(linesIntersectAt(GlobalPosition2D {311000100, 491100100}, {3110500
 					  .value()
 		== GlobalPosition2D {311000100, 491100100});
 static_assert(!linesIntersectAt(glm::dvec2 {0, 1}, {0, 4}, {1, 8}, {1, 4}).has_value());
+
+BOOST_AUTO_TEST_CASE(triangle2d_helpers)
+{
+	constexpr static Triangle<2, float> t {{0, 0}, {5, 0}, {5, 5}};
+
+	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({0, 0}), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 0}), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 5}), quarter_pi, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.angleAt({0, 1}), 0.F, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
+}
+
+BOOST_AUTO_TEST_CASE(triangle3d_helpers)
+{
+	constexpr static Triangle<3, float> t {{0, 0, 0}, {5, 0, 0}, {5, 5, 0}};
+
+	BOOST_CHECK_EQUAL(t.nnormal(), up);
+	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({0, 0, 0}), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 0, 0}), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 5, 0}), quarter_pi, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.angleAt({0, 1, 0}), 0.F, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
+}
