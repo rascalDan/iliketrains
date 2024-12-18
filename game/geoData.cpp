@@ -537,12 +537,12 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 	};
 	auto doBoundary = [&doBoundaryPart, triangle = strip.begin()](const auto & verts) mutable {
-		const auto & [a, b, c] = verts;
-		doBoundaryPart(a, b, *triangle);
+		const auto & [a, _, c] = verts;
 		doBoundaryPart(a, c, *triangle);
 		triangle++;
 	};
 	std::ranges::for_each(newVerts | std::views::adjacent<3>, doBoundary);
+	doBoundaryPart(*++newVerts.begin(), newVerts.front(), *strip.rbegin());
 	doBoundaryPart(*++newVerts.rbegin(), newVerts.back(), *strip.rbegin());
 
 	std::set<HalfedgeHandle> done;
