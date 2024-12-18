@@ -84,6 +84,14 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 	}
 
 	[[nodiscard]] constexpr auto
+	isUp() const
+	{
+		const auto edgeAB = sideDifference(1);
+		const auto edgeAC = sideDifference(2);
+		return edgeAB.x * edgeAC.y >= edgeAB.y * edgeAC.x;
+	}
+
+	[[nodiscard]] constexpr auto
 	p(const glm::length_t idx) const
 	{
 		return Base::operator[](idx);

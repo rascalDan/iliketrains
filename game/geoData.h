@@ -98,6 +98,8 @@ public:
 		return property(surface, h);
 	}
 
+	void sanityCheck() const;
+
 protected:
 	template<glm::length_t Dim>
 	[[nodiscard]] Triangle<Dim>

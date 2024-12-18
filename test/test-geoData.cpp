@@ -29,11 +29,9 @@ BOOST_AUTO_TEST_CASE(loadSuccess)
 	BOOST_CHECK_EQUAL(upper, GlobalPosition3D(319950000, 499950000, 571600));
 }
 
-BOOST_AUTO_TEST_CASE(normalsAllPointUp)
+BOOST_AUTO_TEST_CASE(sanityCheck)
 {
-	BOOST_CHECK(std::ranges::all_of(vertices(), [this](auto && vertex) {
-		return normal(vertex).z > 0;
-	}));
+	BOOST_CHECK_NO_THROW(sanityCheck());
 }
 
 BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
@@ -214,9 +212,7 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
 	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = surface}));
-	BOOST_CHECK(std::ranges::all_of(gd->vertices(), [&gd](auto && vertex) {
-		return gd->normal(vertex).z > 0;
-	}));
+	BOOST_CHECK_NO_THROW(gd->sanityCheck());
 
 	ApplicationBase ab;
 	TestMainWindow tmw;

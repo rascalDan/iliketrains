@@ -601,3 +601,13 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	updateAllVertexNormals(newOrChangedVerts);
 }
+
+void
+GeoData::sanityCheck() const
+{
+	if (!std::ranges::all_of(faces(), [this](const auto face) {
+			return triangle<2>(face).isUp();
+		})) {
+		throw std::logic_error("Upside down faces detected");
+	}
+}
