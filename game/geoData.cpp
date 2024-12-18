@@ -437,12 +437,6 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			return std::make_pair(e, Triangle<2> {fromPoint, toPoint, p}.height());
 		};
 	};
-	const auto notBoundary = std::views::filter([this](auto handleItr) {
-		return !is_boundary(*handleItr);
-	});
-	const auto notEdgeBoundary = std::views::filter([this](auto handleItr) {
-		return !is_boundary(edge_handle(*handleItr));
-	});
 
 	std::set<VertexHandle> newOrChangedVerts;
 	auto addVertexForNormalUpdate = [this, &newOrChangedVerts](const VertexHandle vertex) {
@@ -450,31 +444,36 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		std::ranges::copy(vv_range(vertex), std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
 	};
 
-	std::vector<VertexHandle> newVerts;
-	auto newVertexOnFace = [this, &vertexDistFrom, &opts, &vertexDistFromE, &newVerts, &notBoundary, &notEdgeBoundary](
-								   GlobalPosition3D tsPoint) {
+	auto newVertexOnFace = [this, &vertexDistFrom, &opts, &vertexDistFromE](GlobalPosition3D tsPoint) {
 		const auto face = findPoint(tsPoint);
 		// Check vertices
-		if (const auto nearest = std::ranges::min(std::views::iota(fv_begin(face), fv_end(face)) | notBoundary
-							| std::views::transform(vertexDistFrom(tsPoint)),
-					{}, &std::pair<VertexHandle, float>::second);
-				nearest.second < opts.nearNodeTolerance && !std::ranges::contains(newVerts, nearest.first)) {
-			point(nearest.first) = tsPoint;
+		if (const auto nearest = std::ranges::min(
+					std::views::iota(fv_begin(face), fv_end(face)) | std::views::transform(vertexDistFrom(tsPoint)), {},
+					&std::pair<VertexHandle, float>::second);
+				nearest.second < opts.nearNodeTolerance) {
 			return nearest.first;
 		}
 		// Check edges
-		if (const auto nearest = std::ranges::min(std::views::iota(fh_begin(face), fh_end(face)) | notEdgeBoundary
-							| std::views::transform(vertexDistFromE(tsPoint)),
+		if (const auto nearest = std::ranges::min(
+					std::views::iota(fh_begin(face), fh_end(face)) | std::views::transform(vertexDistFromE(tsPoint)),
 					{}, &std::pair<HalfedgeHandle, float>::second);
 				nearest.second < opts.nearNodeTolerance) {
-			return split(edge_handle(nearest.first), tsPoint);
+			const auto from = point(from_vertex_handle(nearest.first)).xy();
+			const auto to = point(to_vertex_handle(nearest.first)).xy();
+			const auto v = vector_normal(from - to);
+			const auto inter = linesIntersectAt(from, to, tsPoint.xy(), tsPoint.xy() + v);
+			if (!inter) {
+				throw std::runtime_error("Perpendicular lines do not cross");
+			}
+			return split(edge_handle(nearest.first), *inter || tsPoint.z);
 		}
 		// Nothing close, split face
 		return split(face, tsPoint);
 	};
 
 	// New vertices for each vertex in triangleStrip
-	newVerts.reserve(newVerts.size());
+	std::vector<VertexHandle> newVerts;
+	newVerts.reserve(triangleStrip.size());
 	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts), newVertexOnFace);
 	std::ranges::for_each(newVerts, addVertexForNormalUpdate);
 
