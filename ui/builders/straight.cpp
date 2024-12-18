@@ -1,4 +1,5 @@
 #include "straight.h"
+#include "stream_support.h"
 #include <game/geoData.h>
 
 std::string
@@ -48,8 +49,8 @@ BuilderStraight::click(
 	}
 }
 
-void
+Link::CCollection
 BuilderStraight::create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
-	network->addStraight(p1, p2);
+	return network->addStraight(p1, p2);
 }

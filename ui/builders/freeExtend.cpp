@@ -38,11 +38,11 @@ BuilderFreeExtend::click(
 		case SDL_BUTTON_LEFT:
 			if (p1) {
 				if (const auto p = network->intersectRayNodes(ray)) {
-					network->addJoins(*p1, p->pos);
+					createJoin(network, *p1, p->pos);
 					p1 = p->pos;
 				}
 				else if (const auto p = geoData->intersectRay(ray)) {
-					network->addExtend(*p1, p->first);
+					createExtend(network, *p1, p->first);
 					p1 = p->first;
 				}
 			}
@@ -56,4 +56,16 @@ BuilderFreeExtend::click(
 			p1.reset();
 			return;
 	}
+}
+
+Link::CCollection
+BuilderFreeExtend::createJoin(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
+{
+	return network->addJoins(p1, p2);
+}
+
+Link::CCollection
+BuilderFreeExtend::createExtend(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
+{
+	return network->addExtend(p1, p2);
 }

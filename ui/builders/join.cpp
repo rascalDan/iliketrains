@@ -46,8 +46,8 @@ BuilderJoin::click(
 	}
 }
 
-void
+Link::CCollection
 BuilderJoin::create(Network * network, const Node::Ptr & p1, const Node::Ptr & p2) const
 {
-	network->addJoins(p1->pos, p2->pos);
+	return network->addJoins(p1->pos, p2->pos);
 }
