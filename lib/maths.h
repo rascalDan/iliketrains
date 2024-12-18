@@ -427,6 +427,13 @@ midpoint(const std::pair<T, T> & v)
 	return std::midpoint(v.first, v.second);
 }
 
+template<glm::length_t D, std::integral T, glm::qualifier Q>
+auto
+midpoint(const glm::vec<D, T, Q> & valueA, const glm::vec<D, T, Q> & valueB)
+{
+	return valueA + (valueB - valueA) / 2;
+}
+
 // std::pow is not constexpr
 template<Arithmetic T>
 	requires requires(T n) { n *= n; }
