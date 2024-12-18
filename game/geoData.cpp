@@ -497,40 +497,44 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &newVerts, &vertexDistFrom, &opts, &addVertexForNormalUpdate](
+	auto doBoundaryPart = [this, &boundaryTriangles, &vertexDistFrom, &opts, &addVertexForNormalUpdate](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);
-		while (!std::ranges::contains(vv_range(start), end)
-				&& std::ranges::any_of(voh_range(start), [&](const auto & outHalf) {
-					   const auto next = next_halfedge_handle(outHalf);
-					   const auto startPoint = point(start);
-					   const auto nexts = std::array {from_vertex_handle(next), to_vertex_handle(next)};
-					   const auto nextPoints = nexts | std::views::transform([this](const auto v) {
-						   return std::make_pair(v, this->point(v));
-					   });
-					   if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
-						   if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
-									   nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
-							   if (const auto nextDist
-									   = std::ranges::min(nexts | std::views::transform(vertexDistFrom(*intersection)),
-											   {}, &std::pair<VertexHandle, float>::second);
-									   nextDist.second < opts.nearNodeTolerance
-									   && !boundaryTriangles.contains(nextDist.first)
-									   && !std::ranges::contains(newVerts, nextDist.first)) {
-								   start = nextDist.first;
-								   point(start) = positionOnTriangle(*intersection, triangle);
-							   }
-							   else {
-								   start = split(edge_handle(next), positionOnTriangle(*intersection, triangle));
-							   }
-							   addVertexForNormalUpdate(start);
-							   boundaryTriangles.emplace(start, &triangle);
-							   return true;
-						   }
-					   }
-					   return false;
-				   })) { }
+		while (!std::ranges::contains(vv_range(start), end)) {
+			const auto startPoint = point(start);
+			if (std::ranges::none_of(voh_range(start), [&](const auto & outHalf) {
+					const auto next = next_halfedge_handle(outHalf);
+					const auto nexts = std::array {from_vertex_handle(next), to_vertex_handle(next)};
+					const auto nextPoints = nexts | std::views::transform([this](const auto v) {
+						return std::make_pair(v, this->point(v));
+					});
+					if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
+						if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
+									nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
+							const auto newPosition = positionOnTriangle(*intersection, triangle);
+							if (const auto nextDist
+									= std::ranges::min(nexts | std::views::transform(vertexDistFrom(*intersection)), {},
+											&std::pair<VertexHandle, float>::second);
+									nextDist.second < opts.nearNodeTolerance) {
+								start = nextDist.first;
+								return true;
+							}
+							else {
+								start = split(edge_handle(next), newPosition);
+							}
+							addVertexForNormalUpdate(start);
+							boundaryTriangles.emplace(start, &triangle);
+							return true;
+						}
+						throw std::runtime_error("Crossing lines don't intersect");
+					}
+					return false;
+				})) {
+				throw std::runtime_error(
+						std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
+			}
+		}
 	};
 	auto doBoundary = [&doBoundaryPart, triangle = strip.begin()](const auto & verts) mutable {
 		const auto & [a, b, c] = verts;

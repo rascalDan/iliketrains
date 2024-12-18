@@ -269,6 +269,6 @@ BOOST_DATA_TEST_CASE(
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
 	for (const auto & strip : points) {
 		BOOST_REQUIRE_GE(strip.size(), 3);
-		BOOST_CHECK_NO_THROW(gd->setHeights(strip, {.surface = surface}));
+		BOOST_CHECK_NO_THROW(gd->setHeights(strip, {.surface = surface, .nearNodeTolerance = 50}));
 	}
 }
