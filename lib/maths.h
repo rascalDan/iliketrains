@@ -223,7 +223,7 @@ vector_pitch(const glm::vec<D, T, Q> & diff)
 	return std::atan(diff.z);
 }
 
-template<std::floating_point T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q>
 constexpr glm::vec<2, T, Q>
 vector_normal(const glm::vec<2, T, Q> & vector)
 {
