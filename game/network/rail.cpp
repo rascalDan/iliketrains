@@ -108,16 +108,17 @@ RailLinkStraight::RailLinkStraight(
 {
 }
 
-RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
-		GlobalPosition2D c) : RailLinkCurve(instances, a, b, c || a->pos.z, {c, a->pos, b->pos})
+RailLinkCurve::RailLinkCurve(
+		NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
+	RailLinkCurve(instances, a, b, c || a->pos.z, glm::length(difference(a->pos.xy(), c)), {c, a->pos, b->pos})
 {
 }
 
 RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
-		GlobalPosition3D c, const Arc arc) :
+		GlobalPosition3D c, RelativeDistance radius, const Arc arc) :
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
-			glm::length(RelativePosition3D(a->pos - c)) * arc.length()),
-	LinkCurve {c, glm::length(RelativePosition3D(ends[0].node->pos - c)), arc},
+			glm::length(RelativePosition2D {radius * arc.length(), difference(a->pos, b->pos).z})),
+	LinkCurve {c, radius, arc},
 	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2000.F),
 			half_pi - arc.first, half_pi - arc.second, radius)}
 {

@@ -16,7 +16,7 @@ template<typename> class Ray;
 // it has location
 class Node : public StdTypeDefs<Node> {
 public:
-	explicit Node(GlobalPosition3D p) noexcept : pos(p) {};
+	explicit Node(GlobalPosition3D p) noexcept : pos(p) { };
 	virtual ~Node() noexcept = default;
 	NO_COPY(Node);
 	NO_MOVE(Node);
@@ -38,7 +38,7 @@ public:
 		Nexts nexts {};
 	};
 
-	Link(End, End, float);
+	Link(End, End, RelativeDistance length);
 	virtual ~Link() = default;
 	NO_COPY(Link);
 	NO_MOVE(Link);
@@ -76,7 +76,7 @@ LinkStraight::~LinkStraight() = default;
 class LinkCurve : public virtual Link {
 public:
 	inline ~LinkCurve() override = 0;
-	LinkCurve(GlobalPosition3D, RelativeDistance, Arc);
+	LinkCurve(GlobalPosition3D centreBase, RelativeDistance radius, Arc);
 	NO_COPY(LinkCurve);
 	NO_MOVE(LinkCurve);
 
