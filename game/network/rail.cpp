@@ -8,7 +8,7 @@
 template class NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>;
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
-constexpr Size3D RAIL_HEIGHT {0, 0, 250.F};
+constexpr Size3D RAIL_HEIGHT {0, 0, 50.F};
 
 RailLinks::RailLinks() : NetworkOf<RailLink, RailLinkStraight, RailLinkCurve> {"rails.jpg"} { }
 
@@ -74,11 +74,11 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 }
 
 constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
-		{-1900.F, 0.F, 0.F},
+		{-1900.F, 0.F, -RAIL_HEIGHT.z * 2},
 		{-608.F, 0.F, RAIL_HEIGHT.z},
-		{0, 0.F, RAIL_HEIGHT.z * .7F},
+		{0, 0.F, RAIL_HEIGHT.z / 2},
 		{608.F, 0.F, RAIL_HEIGHT.z},
-		{1900.F, 0.F, 0.F},
+		{1900.F, 0.F, -RAIL_HEIGHT.z * 2},
 }};
 constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> railTexturePos {
 		0.F,
