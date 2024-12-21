@@ -451,6 +451,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					std::views::iota(fv_begin(face), fv_end(face)) | std::views::transform(vertexDistFrom(tsPoint)), {},
 					&std::pair<VertexHandle, float>::second);
 				nearest.second < opts.nearNodeTolerance) {
+			point(nearest.first).z = tsPoint.z;
 			return nearest.first;
 		}
 		// Check edges
@@ -512,16 +513,16 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
 						if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
 									nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
-							const auto newPosition = positionOnTriangle(*intersection, triangle);
 							if (const auto nextDist
 									= std::ranges::min(nexts | std::views::transform(vertexDistFrom(*intersection)), {},
 											&std::pair<VertexHandle, float>::second);
 									nextDist.second < opts.nearNodeTolerance) {
+								point(nextDist.first).z = positionOnTriangle(point(nextDist.first), triangle).z;
 								start = nextDist.first;
 								return true;
 							}
 							else {
-								start = split(edge_handle(next), newPosition);
+								start = split(edge_handle(next), positionOnTriangle(*intersection, triangle));
 							}
 							addVertexForNormalUpdate(start);
 							boundaryTriangles.emplace(start, &triangle);
