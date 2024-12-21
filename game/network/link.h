@@ -45,6 +45,7 @@ public:
 
 	[[nodiscard]] virtual Location positionAt(RelativeDistance dist, unsigned char start) const = 0;
 	[[nodiscard]] virtual bool intersectRay(const Ray<GlobalPosition3D> &) const = 0;
+	[[nodiscard]] virtual std::vector<GlobalPosition3D> getBase(RelativeDistance width) const = 0;
 
 	std::array<End, 2> ends;
 	float length;
@@ -69,6 +70,7 @@ public:
 
 	[[nodiscard]] Location positionAt(RelativeDistance dist, unsigned char start) const override;
 	[[nodiscard]] bool intersectRay(const Ray<GlobalPosition3D> &) const override;
+	[[nodiscard]] std::vector<GlobalPosition3D> getBase(RelativeDistance width) const override;
 };
 
 LinkStraight::~LinkStraight() = default;
@@ -82,6 +84,7 @@ public:
 
 	[[nodiscard]] Location positionAt(RelativeDistance dist, unsigned char start) const override;
 	[[nodiscard]] bool intersectRay(const Ray<GlobalPosition3D> &) const override;
+	[[nodiscard]] std::vector<GlobalPosition3D> getBase(RelativeDistance width) const override;
 
 	GlobalPosition3D centreBase;
 	RelativeDistance radius;

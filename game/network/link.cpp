@@ -38,6 +38,20 @@ LinkStraight::intersectRay(const Ray<GlobalPosition3D> & ray) const
 			std::array {GlobalPosition3D {ends.front().node->pos}, GlobalPosition3D {ends.back().node->pos}}, 1000);
 }
 
+std::vector<GlobalPosition3D>
+LinkStraight::getBase(RelativeDistance width) const
+{
+	const auto start = ends.front().node->pos;
+	const auto end = ends.back().node->pos;
+	const auto direction = (vector_normal(normalize(::difference(start, end).xy())) * width / 2.F) || 0.F;
+	return {
+			start - direction,
+			start + direction,
+			end - direction,
+			end + direction,
+	};
+}
+
 Location
 LinkCurve::positionAt(float dist, unsigned char start) const
 {
@@ -72,4 +86,25 @@ LinkCurve::intersectRay(const Ray<GlobalPosition3D> & ray) const
 		points.emplace_back(centreBase + ((sincos(swing.x) * radius) || swing.y));
 	}
 	return ray.passesCloseToEdges(points, 1.F);
+}
+
+std::vector<GlobalPosition3D>
+LinkCurve::getBase(RelativeDistance width) const
+{
+	const auto start = ends.front().node->pos;
+	const auto end = ends.back().node->pos;
+	const auto segs = std::ceil(15.F * arc.length());
+	const auto step {glm::vec<2, RelativeDistance> {arc.length(), end.z - start.z} / segs};
+
+	auto segCount = static_cast<size_t>(segs) + 1;
+	std::vector<GlobalPosition3D> out;
+	out.reserve(segCount);
+	for (RelativePosition2D swing = {arc.first, centreBase.z - start.z}; segCount != 0U; swing += step, --segCount) {
+		const auto direction = sincos(swing.x);
+		const auto linkCentre = centreBase + ((direction * radius) || swing.y);
+		const auto toEdge = (direction * width / 2.F) || 0.F;
+		out.emplace_back(linkCentre + toEdge);
+		out.emplace_back(linkCentre - toEdge);
+	}
+	return out;
 }
