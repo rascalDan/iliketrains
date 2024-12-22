@@ -61,11 +61,15 @@ BuilderFreeExtend::click(
 Link::CCollection
 BuilderFreeExtend::createJoin(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
-	return network->addJoins(p1, p2);
+	const auto links = network->addJoins(p1, p2);
+	setHeightsFor(network, links);
+	return links;
 }
 
 Link::CCollection
 BuilderFreeExtend::createExtend(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
-	return network->addExtend(p1, p2);
+	const auto links = network->addExtend(p1, p2);
+	setHeightsFor(network, links);
+	return links;
 }

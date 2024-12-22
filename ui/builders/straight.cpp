@@ -52,5 +52,7 @@ BuilderStraight::click(
 Link::CCollection
 BuilderStraight::create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
-	return network->addStraight(p1, p2);
+	const auto links = network->addStraight(p1, p2);
+	setHeightsFor(network, links);
+	return links;
 }

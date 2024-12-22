@@ -64,6 +64,17 @@ EditNetwork::Builder::render(const SceneShader & shader) const
 }
 
 void
+EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection & links, GeoData::SetHeightsOpts opts)
+{
+	opts.surface = network->getBaseSurface();
+	const auto width = network->getBaseWidth();
+
+	for (const auto & link : links) {
+		gameState->geoData->setHeights(link->getBase(width), opts);
+	}
+}
+
+void
 EditNetwork::render(const UIShader & shader, const UIComponent::Position & parentPos) const
 {
 	if (builder) {

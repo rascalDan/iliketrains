@@ -49,5 +49,7 @@ BuilderJoin::click(
 Link::CCollection
 BuilderJoin::create(Network * network, const Node::Ptr & p1, const Node::Ptr & p2) const
 {
-	return network->addJoins(p1->pos, p2->pos);
+	const auto links = network->addJoins(p1->pos, p2->pos);
+	setHeightsFor(network, links);
+	return links;
 }
