@@ -84,6 +84,7 @@ public:
 	};
 
 	void setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
+	[[nodiscard]] size_t getGeneration() const;
 
 	[[nodiscard]] auto
 	getExtents() const
@@ -128,4 +129,5 @@ protected:
 
 private:
 	GlobalPosition3D lowerExtent {}, upperExtent {};
+	size_t generation {};
 };

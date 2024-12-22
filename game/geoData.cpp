@@ -66,6 +66,7 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 			});
 		}
 	}
+	mesh.generation++;
 	mesh.updateAllVertexNormals();
 
 	return mesh;
@@ -106,6 +107,7 @@ GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistan
 	}
 
 	mesh.updateAllVertexNormals();
+	mesh.generation++;
 
 	return mesh;
 }
@@ -601,6 +603,13 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	surfaceStripWalk(surfaceStripWalk, findPoint(strip.front().centroid()));
 
 	updateAllVertexNormals(newOrChangedVerts);
+	generation++;
+}
+
+size_t
+GeoData::getGeneration() const
+{
+	return generation;
 }
 
 void
