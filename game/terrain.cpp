@@ -66,6 +66,10 @@ Terrain::generateMeshes()
 void
 Terrain::tick(TickDuration)
 {
+	if (const auto newGeneration = geoData->getGeneration(); newGeneration != geoGeneration) {
+		generateMeshes();
+		geoGeneration = newGeneration;
+	}
 }
 
 void
