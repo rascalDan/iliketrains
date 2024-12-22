@@ -591,7 +591,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	auto surfaceStripWalk = [this, &getTriangle, &opts](const auto & surfaceStripWalk, const auto & face) -> void {
 		if (!property(surface, face)) {
-			property(surface, face) = &opts.surface;
+			property(surface, face) = opts.surface;
 			std::ranges::for_each(
 					ff_range(face), [this, &getTriangle, &surfaceStripWalk](const auto & adjacentFaceHandle) {
 						if (getTriangle(this->triangle<2>(adjacentFaceHandle).centroid())) {

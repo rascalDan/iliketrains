@@ -211,7 +211,7 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	Surface surface;
 	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = surface}));
+	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = &surface}));
 	BOOST_CHECK_NO_THROW(gd->sanityCheck());
 
 	ApplicationBase ab;
@@ -265,6 +265,6 @@ BOOST_DATA_TEST_CASE(
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
 	for (const auto & strip : points) {
 		BOOST_REQUIRE_GE(strip.size(), 3);
-		BOOST_CHECK_NO_THROW(gd->setHeights(strip, {.surface = surface, .nearNodeTolerance = 50}));
+		BOOST_CHECK_NO_THROW(gd->setHeights(strip, {.surface = &surface, .nearNodeTolerance = 50}));
 	}
 }

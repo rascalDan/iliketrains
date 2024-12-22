@@ -78,7 +78,7 @@ public:
 		static constexpr auto DEFAULT_NEAR_NODE_TOLERANACE = 500.F;
 		static constexpr auto DEFAULT_MAX_SLOPE = 0.5F;
 
-		const Surface & surface;
+		const Surface * surface = nullptr;
 		RelativeDistance nearNodeTolerance = DEFAULT_NEAR_NODE_TOLERANACE;
 		RelativeDistance maxSlope = DEFAULT_MAX_SLOPE;
 	};
