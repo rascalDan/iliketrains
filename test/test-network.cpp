@@ -73,6 +73,18 @@ struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
 	render(const SceneShader &) const override
 	{
 	}
+
+	const Surface *
+	getBaseSurface() const override
+	{
+		return nullptr;
+	}
+
+	RelativeDistance
+	getBaseWidth() const override
+	{
+		return 5'700;
+	}
 };
 
 const auto VALID_NODES = boost::unit_test::data::make<GlobalPosition3D>({

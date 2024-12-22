@@ -14,6 +14,7 @@
 #include <utility>
 
 class SceneShader;
+class Surface;
 template<typename> class Ray;
 
 template<size_t... n> using GenDef = std::tuple<glm::vec<n, GlobalDistance>...>;
@@ -46,6 +47,9 @@ public:
 	virtual Link::CCollection addExtend(GlobalPosition3D, GlobalPosition3D) = 0;
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
+
+	[[nodiscard]] virtual const Surface * getBaseSurface() const = 0;
+	[[nodiscard]] virtual RelativeDistance getBaseWidth() const = 0;
 
 protected:
 	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);

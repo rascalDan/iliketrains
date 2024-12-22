@@ -77,6 +77,9 @@ public:
 	std::shared_ptr<RailLink> addLinksBetween(GlobalPosition3D start, GlobalPosition3D end);
 	void render(const SceneShader &) const override;
 
+	[[nodiscard]] const Surface * getBaseSurface() const override;
+	[[nodiscard]] RelativeDistance getBaseWidth() const override;
+
 private:
 	void tick(TickDuration elapsed) override;
 };

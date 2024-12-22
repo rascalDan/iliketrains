@@ -1,4 +1,6 @@
 #include "rail.h"
+#include "game/gamestate.h"
+#include "game/geoData.h"
 #include "network.h"
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/gl/sceneShader.h>
@@ -168,4 +170,16 @@ RailLinks::render(const SceneShader & shader) const
 		renderType<RailLinkCurve>(*this, shader.networkCurve);
 		glBindVertexArray(0);
 	}
+}
+
+const Surface *
+RailLinks::getBaseSurface() const
+{
+	return std::dynamic_pointer_cast<Surface>(gameState->assets.at("terrain.surface.gravel")).get();
+}
+
+RelativeDistance
+RailLinks::getBaseWidth() const
+{
+	return 5'700;
 }
