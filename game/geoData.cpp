@@ -468,10 +468,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			if (!inter) {
 				throw std::runtime_error("Perpendicular lines do not cross");
 			}
-			return split(edge_handle(nearest.first), *inter || tsPoint.z);
+			return split_copy(edge_handle(nearest.first), *inter || tsPoint.z);
 		}
 		// Nothing close, split face
-		return split(face, tsPoint);
+		return split_copy(face, tsPoint);
 	};
 
 	// New vertices for each vertex in triangleStrip
@@ -524,7 +524,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 								return true;
 							}
 							else {
-								start = split(edge_handle(next), positionOnTriangle(*intersection, triangle));
+								start = split_copy(edge_handle(next), positionOnTriangle(*intersection, triangle));
 							}
 							addVertexForNormalUpdate(start);
 							boundaryTriangles.emplace(start, &triangle);
