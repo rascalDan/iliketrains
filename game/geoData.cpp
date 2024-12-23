@@ -600,7 +600,9 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					});
 		}
 	};
-	surfaceStripWalk(surfaceStripWalk, findPoint(strip.front().centroid()));
+	for (const auto & triangle : strip) {
+		surfaceStripWalk(surfaceStripWalk, findPoint(triangle.centroid()));
+	}
 
 	updateAllVertexNormals(newOrChangedVerts);
 	generation++;
