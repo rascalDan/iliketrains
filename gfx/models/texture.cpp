@@ -50,6 +50,16 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 	glTexParameter(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
 	glTexParameter(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
 	glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	auto isMimmap = [](auto value) {
+		auto eqAnyOf = [value](auto... test) {
+			return (... || (value == test));
+		};
+		return eqAnyOf(
+				GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
+	};
+	if (isMimmap(to.minFilter) || isMimmap(to.magFilter)) {
+		glGenerateMipmap(type);
+	}
 }
 
 void
