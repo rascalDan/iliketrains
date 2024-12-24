@@ -8,7 +8,13 @@
 #include <stdexcept>
 #include <utility>
 
-Network::Network(const std::string & tn) : texture {std::make_shared<Texture>(tn)} { }
+Network::Network(const std::string & tn) :
+	texture {std::make_shared<Texture>(tn,
+			TextureOptions {
+					.minFilter = GL_NEAREST_MIPMAP_LINEAR,
+			})}
+{
+}
 
 Node::Ptr
 Network::nodeAt(GlobalPosition3D pos)
