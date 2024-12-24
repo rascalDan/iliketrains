@@ -91,10 +91,17 @@ constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> railTexturePos {
 };
 constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
 
-inline auto
-round_sleepers(const float v)
-{
-	return round_frac(v, sleepers);
+namespace {
+	template<std::floating_point T> constexpr T SLEEPERS_PER_TEXTURE {5};
+	template<std::floating_point T> constexpr T TEXTURE_LENGTH {2'000};
+	template<std::floating_point T> constexpr T SLEEPER_LENGTH {T {1} / SLEEPERS_PER_TEXTURE<T>};
+
+	template<std::floating_point T>
+	constexpr auto
+	roundSleepers(const T length)
+	{
+		return round_frac(length / TEXTURE_LENGTH<T>, SLEEPER_LENGTH<T>);
+	}
 }
 
 RailLinkStraight::RailLinkStraight(NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & a,
@@ -106,7 +113,7 @@ RailLinkStraight::RailLinkStraight(
 		NetworkLinkHolder<RailLinkStraight> & instances, Node::Ptr a, Node::Ptr b, const RelativePosition3D & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff)),
 	instance {instances.vertices.acquire(
-			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), round_sleepers(length / 2000.F))}
+			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), roundSleepers(length))}
 {
 }
 
@@ -120,9 +127,8 @@ RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const
 		GlobalPosition3D c, RelativeDistance radius, const Arc arc) :
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
 			glm::length(RelativePosition2D {radius * arc.length(), difference(a->pos, b->pos).z})),
-	LinkCurve {c, radius, arc},
-	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2000.F),
-			half_pi - arc.first, half_pi - arc.second, radius)}
+	LinkCurve {c, radius, arc}, instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c,
+										roundSleepers(length), half_pi - arc.first, half_pi - arc.second, radius)}
 {
 }
 
