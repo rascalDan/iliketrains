@@ -75,23 +75,21 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	return addLink<RailLinkCurve>(start, end, centre.first);
 }
 
-constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
-		{-1900.F, 0.F, -RAIL_HEIGHT.z * 2},
-		{-608.F, 0.F, RAIL_HEIGHT.z},
-		{0, 0.F, RAIL_HEIGHT.z / 2},
-		{608.F, 0.F, RAIL_HEIGHT.z},
-		{1900.F, 0.F, -RAIL_HEIGHT.z * 2},
-}};
-constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> railTexturePos {
-		0.F,
-		.34F,
-		.5F,
-		.66F,
-		1.F,
-};
-constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
-
 namespace {
+	constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> RAIL_CROSS_SECTION {{
+			{-1330.F, 0.F, 0},
+			{-608.F, 0.F, RAIL_HEIGHT.z},
+			{0, 0.F, RAIL_HEIGHT.z / 2},
+			{608.F, 0.F, RAIL_HEIGHT.z},
+			{1330.F, 0.F, 0},
+	}};
+	constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> RAIL_TEXTURE_POS {
+			0.15F,
+			.34F,
+			.5F,
+			.66F,
+			0.85F,
+	};
 	template<std::floating_point T> constexpr T SLEEPERS_PER_TEXTURE {5};
 	template<std::floating_point T> constexpr T TEXTURE_LENGTH {2'000};
 	template<std::floating_point T> constexpr T SLEEPER_LENGTH {T {1} / SLEEPERS_PER_TEXTURE<T>};
@@ -160,7 +158,7 @@ namespace {
 	renderType(const NetworkLinkHolder<LinkType> & n, auto & s)
 	{
 		if (auto count = n.vertices.size()) {
-			s.use(railCrossSection, railTexturePos);
+			s.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
 			glBindVertexArray(n.vao);
 			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
 		}
@@ -172,8 +170,11 @@ RailLinks::render(const SceneShader & shader) const
 {
 	if (!links.objects.empty()) {
 		texture->bind();
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(-1, 0);
 		renderType<RailLinkStraight>(*this, shader.networkStraight);
 		renderType<RailLinkCurve>(*this, shader.networkCurve);
+		glDisable(GL_POLYGON_OFFSET_FILL);
 		glBindVertexArray(0);
 	}
 }
