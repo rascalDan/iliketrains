@@ -64,13 +64,23 @@ public:
 	[[nodiscard]] IntersectionResult intersectRay(const Ray<GlobalPosition3D> &) const;
 	[[nodiscard]] IntersectionResult intersectRay(const Ray<GlobalPosition3D> &, FaceHandle start) const;
 
-	void walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const;
-	void walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const;
+	struct WalkStep {
+		FaceHandle current;
+		FaceHandle previous {};
+		HalfedgeHandle exitHalfedge {};
+		GlobalPosition2D exitPosition {};
+	};
 
-	void boundaryWalk(const std::function<void(HalfedgeHandle)> &) const;
-	void boundaryWalk(const std::function<void(HalfedgeHandle)> &, HalfedgeHandle start) const;
-	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &) const;
-	void boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> &, HalfedgeHandle start) const;
+	template<typename T> using Consumer = const std::function<void(const T &)> &;
+	template<typename T> using Tester = const std::function<bool(const T &)> &;
+
+	void walk(const PointFace & from, const GlobalPosition2D to, Consumer<WalkStep> op) const;
+	void walkUntil(const PointFace & from, const GlobalPosition2D to, Tester<WalkStep> op) const;
+
+	void boundaryWalk(Consumer<HalfedgeHandle>) const;
+	void boundaryWalk(Consumer<HalfedgeHandle>, HalfedgeHandle start) const;
+	void boundaryWalkUntil(Tester<HalfedgeHandle>) const;
+	void boundaryWalkUntil(Tester<HalfedgeHandle>, HalfedgeHandle start) const;
 
 	[[nodiscard]] HalfedgeHandle findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const;
 

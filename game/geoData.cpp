@@ -236,12 +236,12 @@ GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 	GeoData::IntersectionResult out;
 	walkUntil(PointFace {ray.start, face},
 			ray.start.xy() + (ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
-			[&out, &ray, this](FaceHandle face) {
+			[&out, &ray, this](const auto & step) {
 				BaryPosition bari {};
 				RelativeDistance dist {};
-				const auto t = triangle<3>(face);
+				const auto t = triangle<3>(step.current);
 				if (ray.intersectTriangle(t.x, t.y, t.z, bari, dist)) {
-					out.emplace(t * bari, face);
+					out.emplace(t * bari, step.current);
 					return true;
 				}
 				return false;
@@ -250,7 +250,7 @@ GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 }
 
 void
-GeoData::walk(const PointFace & from, const GlobalPosition2D to, const std::function<void(FaceHandle)> & op) const
+GeoData::walk(const PointFace & from, const GlobalPosition2D to, Consumer<WalkStep> op) const
 {
 	walkUntil(from, to, [&op](const auto & fh) {
 		op(fh);
@@ -259,41 +259,44 @@ GeoData::walk(const PointFace & from, const GlobalPosition2D to, const std::func
 }
 
 void
-GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, const std::function<bool(FaceHandle)> & op) const
+GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, Tester<WalkStep> op) const
 {
-	auto f = from.face(this);
-	if (!f.is_valid()) {
+	WalkStep step {
+			.current = from.face(this),
+	};
+	if (!step.current.is_valid()) {
 		const auto entryEdge = findEntry(from.point, to);
 		if (!entryEdge.is_valid()) {
 			return;
 		}
-		f = opposite_face_handle(entryEdge);
+		step.current = opposite_face_handle(entryEdge);
 	}
-	FaceHandle previousFace;
-	while (f.is_valid() && !op(f)) {
-		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
-			f = opposite_face_handle(*next);
-			if (f.is_valid() && f != previousFace) {
-				const auto e1 = point(to_vertex_handle(*next));
-				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
+	while (step.current.is_valid() && !op(step)) {
+		step.previous = step.current;
+		for (const auto next : fh_range(step.current)) {
+			step.current = opposite_face_handle(next);
+			if (step.current.is_valid() && step.current != step.previous) {
+				const auto e1 = point(to_vertex_handle(next));
+				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(next)));
 				if (linesCrossLtR(from.point, to, e1, e2)) {
-					previousFace = f;
+					step.exitHalfedge = next;
+					step.exitPosition = linesIntersectAt(from.point.xy(), to.xy(), e1.xy(), e2.xy()).value();
 					break;
 				}
 			}
-			f.reset();
+			step.current.reset();
 		}
 	}
 }
 
 void
-GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op) const
+GeoData::boundaryWalk(Consumer<HalfedgeHandle> op) const
 {
 	boundaryWalk(op, findBoundaryStart());
 }
 
 void
-GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op, HalfedgeHandle start) const
+GeoData::boundaryWalk(Consumer<HalfedgeHandle> op, HalfedgeHandle start) const
 {
 	assert(is_boundary(start));
 	boundaryWalkUntil(
@@ -305,13 +308,13 @@ GeoData::boundaryWalk(const std::function<void(HalfedgeHandle)> & op, HalfedgeHa
 }
 
 void
-GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op) const
+GeoData::boundaryWalkUntil(Tester<HalfedgeHandle> op) const
 {
 	boundaryWalkUntil(op, findBoundaryStart());
 }
 
 void
-GeoData::boundaryWalkUntil(const std::function<bool(HalfedgeHandle)> & op, HalfedgeHandle start) const
+GeoData::boundaryWalkUntil(Tester<HalfedgeHandle> op, HalfedgeHandle start) const
 {
 	assert(is_boundary(start));
 	if (!op(start)) {

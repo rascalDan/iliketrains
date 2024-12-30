@@ -148,8 +148,11 @@ BOOST_DATA_TEST_CASE(walkTerrain,
 		from, to, visits)
 {
 	std::vector<int> visited;
-	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, [&visited](auto fh) {
-		visited.emplace_back(fh.idx());
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, [&visited](auto step) {
+		if (!visited.empty()) {
+			BOOST_CHECK_EQUAL(step.previous.idx(), visited.back());
+		}
+		visited.emplace_back(step.current.idx());
 	}));
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
@@ -181,8 +184,8 @@ BOOST_DATA_TEST_CASE(walkTerrainUntil,
 		from, to, visits)
 {
 	std::vector<int> visited;
-	BOOST_CHECK_NO_THROW(fixedTerrtain.walkUntil(from, to, [&visited](auto fh) {
-		visited.emplace_back(fh.idx());
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walkUntil(from, to, [&visited](const auto & step) {
+		visited.emplace_back(step.current.idx());
 		return visited.size() >= 5;
 	}));
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
