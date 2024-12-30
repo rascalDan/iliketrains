@@ -43,7 +43,7 @@ Terrain::generateMeshes()
 			[this, &vertexIndex, &vertices](const GeoData::VertexHandle v) {
 				std::for_each(geoData->vf_begin(v), geoData->vf_end(v),
 						[&vertexIndex, v, this, &vertices](const GeoData::FaceHandle f) {
-							const auto surface = geoData->get_surface(f);
+							const auto surface = geoData->getSurface(f);
 							if (const auto vertexIndexRef = vertexIndex.emplace(std::make_pair(v, surface), 0);
 									vertexIndexRef.second) {
 								vertexIndexRef.first->second = vertices.size();
@@ -57,7 +57,7 @@ Terrain::generateMeshes()
 			geoData->faces_sbegin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
 				std::transform(geoData->fv_begin(f), geoData->fv_end(f), std::back_inserter(indices),
 						[&vertexIndex, f, this](const GeoData::VertexHandle v) {
-							return vertexIndex[std::make_pair(v, geoData->get_surface(f))];
+							return vertexIndex[std::make_pair(v, geoData->getSurface(f))];
 						});
 			});
 	meshes.create<MeshT<Vertex>>(vertices, indices);

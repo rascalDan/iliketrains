@@ -94,9 +94,9 @@ public:
 
 	template<typename HandleT>
 	[[nodiscard]] auto
-	get_surface(const HandleT h)
+	getSurface(const HandleT handle) const
 	{
-		return property(surface, h);
+		return property(surface, handle);
 	}
 
 	void sanityCheck() const;
