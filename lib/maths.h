@@ -1,6 +1,8 @@
 #pragma once
 
 #include "config/types.h"
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
@@ -33,6 +35,26 @@ struct Arc : public std::pair<Angle, Angle> {
 	length() const
 	{
 		return second - first;
+	}
+};
+
+template<typename T, glm::qualifier Q = glm::defaultp> struct ArcSegment : public Arc {
+	using PointType = glm::vec<2, T, Q>;
+
+	constexpr ArcSegment(PointType centre, PointType ep0, PointType ep1);
+
+	PointType centre;
+	PointType ep0;
+	PointType ep1;
+	RelativeDistance radius;
+
+	[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>> crossesLineAt(
+			const glm::vec<2, T, Q> & lineStart, const glm::vec<2, T, Q> & lineEnd) const;
+
+	[[nodiscard]] constexpr bool
+	angleWithinArc(Angle angle) const
+	{
+		return first <= angle && angle <= second;
 	}
 };
 
@@ -470,4 +492,50 @@ constexpr float
 operator"" _degrees(long double degrees)
 {
 	return static_cast<float>(degrees) * degreesToRads;
+}
+
+// Late implementations due to dependencies
+template<typename T, glm::qualifier Q>
+constexpr ArcSegment<T, Q>::ArcSegment(PointType centre, PointType ep0, PointType ep1) :
+	Arc {centre, ep0, ep1}, centre {centre}, ep0 {ep0}, ep1 {ep1}, radius {glm::length(difference(centre, ep0))}
+{
+}
+
+template<typename T, glm::qualifier Q>
+[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
+ArcSegment<T, Q>::crossesLineAt(const glm::vec<2, T, Q> & lineStart, const glm::vec<2, T, Q> & lineEnd) const
+{
+	// Based on formulas from https://mathworld.wolfram.com/Circle-LineIntersection.html
+	const auto lineDiff = difference(lineEnd, lineStart);
+	const auto lineLen = glm::length(lineDiff);
+	const auto lineRelStart = difference(lineStart, centre);
+	const auto lineRelEnd = difference(lineEnd, centre);
+	const auto determinant = (lineRelStart.x * lineRelEnd.y) - (lineRelEnd.x * lineRelStart.y);
+	const auto discriminant = (radius * radius * lineLen * lineLen) - (determinant * determinant);
+	if (discriminant < 0) {
+		return std::nullopt;
+	}
+
+	const auto rootDiscriminant = std::sqrt(discriminant);
+	const auto drdr = lineLen * lineLen;
+	const RelativeDistance sgn = (lineDiff.y < 0 ? -1 : 1);
+	std::array points {
+			RelativePosition2D {((determinant * lineDiff.y) + sgn * lineDiff.x * rootDiscriminant),
+					((-determinant * lineDiff.x) + std::abs(lineDiff.y) * rootDiscriminant)}
+					/ drdr,
+			RelativePosition2D {((determinant * lineDiff.y) - sgn * lineDiff.x * rootDiscriminant),
+					((-determinant * lineDiff.x) - std::abs(lineDiff.y) * rootDiscriminant)}
+					/ drdr,
+	};
+	const auto end
+			= std::remove_if(points.begin(), points.end(), [this, lineRelStart, lineDiff, drdr](const auto point) {
+				  const auto dot = glm::dot(lineDiff, point - lineRelStart);
+				  return !angleWithinArc(vector_yaw(point)) || dot < 0 || dot > drdr;
+	});
+	if (points.begin() == end) {
+		return std::nullopt;
+	}
+	return centre + *std::ranges::min_element(points.begin(), end, {}, [lineRelStart](const auto point) {
+		return glm::distance(lineRelStart, point);
+	});
 }
