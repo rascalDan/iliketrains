@@ -376,33 +376,39 @@ BOOST_AUTO_TEST_CASE(triangle3d_helpers)
 	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
 }
 
+using ArcLineIntersectExp = std::pair<GlobalPosition2D, Angle>;
 using ArcLineIntersectData = std::tuple<GlobalPosition2D, GlobalPosition2D, GlobalPosition2D, GlobalPosition2D,
-		GlobalPosition2D, std::optional<GlobalPosition2D>>;
+		GlobalPosition2D, std::optional<ArcLineIntersectExp>>;
 
 BOOST_DATA_TEST_CASE(arcline_intersection,
 		boost::unit_test::data::make<ArcLineIntersectData>({
 				{{0, 0}, {0, 100}, {100, 0}, {200, 0}, {0, 200}, std::nullopt},
 				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {10, 10}, std::nullopt},
-				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {100, 100}, GlobalPosition2D {71, 71}},
-				{{15, 27}, {15, 127}, {115, 27}, {15, 27}, {115, 127}, GlobalPosition2D {86, 98}},
+				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {100, 100}, ArcLineIntersectExp {{71, 71}, quarter_pi}},
+				{{15, 27}, {15, 127}, {115, 27}, {15, 27}, {115, 127}, ArcLineIntersectExp {{86, 98}, quarter_pi}},
 				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {-100, -100}, std::nullopt},
-				{{0, 0}, {0, 100}, {100, 0}, {-10, 125}, {125, -10}, GlobalPosition2D {16, 99}},
-				{{0, 0}, {0, 100}, {100, 0}, {125, -10}, {-10, 125}, GlobalPosition2D {99, 16}},
-				{{0, 0}, {0, 100}, {100, 0}, {10, 125}, {125, -10}, GlobalPosition2D {38, 93}},
-				{{0, 0}, {0, 100}, {100, 0}, {12, 80}, {125, -10}, GlobalPosition2D {99, 10}},
-				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {125, -10}, GlobalPosition2D {98, 18}},
+				{{0, 0}, {0, 100}, {100, 0}, {-10, 125}, {125, -10}, ArcLineIntersectExp {{16, 99}, 0.164F}},
+				{{0, 0}, {0, 100}, {100, 0}, {125, -10}, {-10, 125}, ArcLineIntersectExp {{99, 16}, 1.407F}},
+				{{0, 0}, {0, 100}, {100, 0}, {10, 125}, {125, -10}, ArcLineIntersectExp {{38, 93}, 0.385F}},
+				{{0, 0}, {0, 100}, {100, 0}, {12, 80}, {125, -10}, ArcLineIntersectExp {{99, 10}, 1.467F}},
+				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {125, -10}, ArcLineIntersectExp {{98, 18}, 1.387F}},
 				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {80, 20}, std::nullopt},
-				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {80, 80}, GlobalPosition2D {60, 80}},
-				{{0, 0}, {0, 100}, {100, 0}, {80, 40}, {80, 80}, GlobalPosition2D {80, 60}},
+				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {80, 80}, ArcLineIntersectExp {{60, 80}, 0.6435F}},
+				{{0, 0}, {0, 100}, {100, 0}, {80, 40}, {80, 80}, ArcLineIntersectExp {{80, 60}, 0.9273F}},
 				{{310002000, 490203000}, {310202000, 490203000}, {310002000, 490003000}, {310200000, 490150000},
-						{310150000, 490150000}, GlobalPosition2D {310194850, 490150000}},
+						{310150000, 490150000}, ArcLineIntersectExp {{310194850, 490150000}, 1.839F}},
 		}),
-		centre, arcStart, arcEnd, lineStart, lineEnd, intersection)
+		centre, arcStart, arcEnd, lineStart, lineEnd, expected)
 {
 	const ArcSegment arc {centre, arcStart, arcEnd};
 	BOOST_TEST_INFO(arc.first);
 	BOOST_TEST_INFO(arc.second);
 	BOOST_TEST_INFO(arc.length());
 
-	BOOST_CHECK_EQUAL(arc.crossesLineAt(lineStart, lineEnd), intersection);
+	const auto intersection = arc.crossesLineAt(lineStart, lineEnd);
+	BOOST_REQUIRE_EQUAL(expected.has_value(), intersection.has_value());
+	if (expected.has_value()) {
+		BOOST_CHECK_EQUAL(expected->first, intersection->first);
+		BOOST_CHECK_CLOSE(expected->second, intersection->second, 1.F);
+	}
 }

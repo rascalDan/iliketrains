@@ -48,7 +48,7 @@ template<typename T, glm::qualifier Q = glm::defaultp> struct ArcSegment : publi
 	PointType ep1;
 	RelativeDistance radius;
 
-	[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>> crossesLineAt(
+	[[nodiscard]] constexpr std::optional<std::pair<glm::vec<2, T, Q>, Angle>> crossesLineAt(
 			const glm::vec<2, T, Q> & lineStart, const glm::vec<2, T, Q> & lineEnd) const;
 
 	[[nodiscard]] constexpr bool
@@ -502,7 +502,7 @@ constexpr ArcSegment<T, Q>::ArcSegment(PointType centre, PointType ep0, PointTyp
 }
 
 template<typename T, glm::qualifier Q>
-[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
+[[nodiscard]] constexpr std::optional<std::pair<glm::vec<2, T, Q>, Angle>>
 ArcSegment<T, Q>::crossesLineAt(const glm::vec<2, T, Q> & lineStart, const glm::vec<2, T, Q> & lineEnd) const
 {
 	// Based on formulas from https://mathworld.wolfram.com/Circle-LineIntersection.html
@@ -519,23 +519,23 @@ ArcSegment<T, Q>::crossesLineAt(const glm::vec<2, T, Q> & lineStart, const glm::
 	const auto rootDiscriminant = std::sqrt(discriminant);
 	const auto drdr = lineLen * lineLen;
 	const RelativeDistance sgn = (lineDiff.y < 0 ? -1 : 1);
-	std::array points {
-			RelativePosition2D {((determinant * lineDiff.y) + sgn * lineDiff.x * rootDiscriminant),
-					((-determinant * lineDiff.x) + std::abs(lineDiff.y) * rootDiscriminant)}
-					/ drdr,
-			RelativePosition2D {((determinant * lineDiff.y) - sgn * lineDiff.x * rootDiscriminant),
-					((-determinant * lineDiff.x) - std::abs(lineDiff.y) * rootDiscriminant)}
-					/ drdr,
-	};
+	std::array<std::pair<RelativePosition2D, Angle>, 2> points;
+	std::ranges::transform(std::initializer_list {1, -1}, points.begin(), [&](RelativeDistance N) {
+		const auto point = RelativePosition2D {((determinant * lineDiff.y) + sgn * lineDiff.x * rootDiscriminant * N),
+								   ((-determinant * lineDiff.x) + std::abs(lineDiff.y) * rootDiscriminant * N)}
+				/ drdr;
+		return std::make_pair(point, vector_yaw(point));
+	});
 	const auto end
 			= std::remove_if(points.begin(), points.end(), [this, lineRelStart, lineDiff, drdr](const auto point) {
-				  const auto dot = glm::dot(lineDiff, point - lineRelStart);
-				  return !angleWithinArc(vector_yaw(point)) || dot < 0 || dot > drdr;
-	});
+				  const auto dot = glm::dot(lineDiff, point.first - lineRelStart);
+				  return !angleWithinArc(point.second) || dot < 0 || dot > drdr;
+			  });
 	if (points.begin() == end) {
 		return std::nullopt;
 	}
-	return centre + *std::ranges::min_element(points.begin(), end, {}, [lineRelStart](const auto point) {
-		return glm::distance(lineRelStart, point);
+	const auto first = *std::ranges::min_element(points.begin(), end, {}, [lineRelStart](const auto point) {
+		return glm::distance(lineRelStart, point.first);
 	});
+	return std::make_pair(centre + first.first, first.second);
 }

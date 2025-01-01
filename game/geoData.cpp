@@ -324,7 +324,7 @@ GeoData::walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D
 				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(next)));
 				if (const auto intersect = arc.crossesLineAt(e1, e2)) {
 					step.exitHalfedge = next;
-					step.exitPosition = intersect.value();
+					step.exitPosition = intersect.value().first;
 					break;
 				}
 			}
