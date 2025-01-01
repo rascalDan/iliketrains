@@ -191,6 +191,46 @@ BOOST_DATA_TEST_CASE(walkTerrainUntil,
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
 
+using WalkTerrainCurveData = std::tuple<GlobalPosition2D, GlobalPosition2D, GlobalPosition2D, std::vector<int>,
+		std::vector<GlobalPosition2D>>;
+
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+
+BOOST_DATA_TEST_CASE(walkTerrainCurveSetsFromFace,
+		boost::unit_test::data::make<WalkTerrainCurveData>({
+				{{310002000, 490003000}, {310002000, 490003000}, {310002000, 490003000}, {0}, {}},
+				{{310003000, 490002000}, {310003000, 490002000}, {310003000, 490002000}, {1}, {}},
+				{{310202000, 490203000}, {310002000, 490003000}, {310002000, 490203000},
+						{1600, 1601, 1202, 1201, 802, 803, 404, 403, 4, 3, 2, 1, 0},
+						{
+								{310201997, 490201997},
+								{310201977, 490200000},
+								{310200000, 490174787},
+								{310194850, 490150000},
+								{310192690, 490142690},
+								{310173438, 490100000},
+								{310150000, 490068479},
+								{310130806, 490050000},
+								{310100000, 490028656},
+								{310062310, 490012310},
+								{310050000, 490008845},
+								{310003003, 490003003},
+						}},
+		}),
+		from, to, centre, visits, exits)
+{
+	BOOST_REQUIRE_EQUAL(visits.size(), exits.size() + 1);
+
+	std::vector<int> visited;
+	std::vector<GlobalPosition2D> exited;
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, centre, [&](const auto & step) {
+		visited.emplace_back(step.current.idx());
+		exited.emplace_back(step.exitPosition);
+	}));
+	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(exited.begin() + 1, exited.end(), exits.begin(), exits.end());
+}
+
 using FindEntiesData = std::tuple<GlobalPosition2D, GlobalPosition2D, int>;
 
 BOOST_DATA_TEST_CASE(findEntries,
