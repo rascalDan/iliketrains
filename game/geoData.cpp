@@ -315,16 +315,14 @@ GeoData::walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D
 	while (step.current.is_valid() && !op(step)) {
 		step.previous = step.current;
 		for (const auto next : fh_range(step.current)) {
-			if (opposite_halfedge_handle(next) == step.exitHalfedge) {
-				continue;
-			}
 			step.current = opposite_face_handle(next);
 			if (step.current.is_valid()) {
 				const auto e1 = point(to_vertex_handle(next));
 				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(next)));
 				if (const auto intersect = arc.crossesLineAt(e1, e2)) {
 					step.exitHalfedge = next;
-					step.exitPosition = intersect.value().first;
+					arc.ep0 = step.exitPosition = intersect.value().first;
+					arc.first = std::nextafter(intersect.value().second, INFINITY);
 					break;
 				}
 			}

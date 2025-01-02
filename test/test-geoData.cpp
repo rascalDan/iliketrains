@@ -216,6 +216,11 @@ BOOST_DATA_TEST_CASE(walkTerrainCurveSetsFromFace,
 								{310050000, 490008845},
 								{310003003, 490003003},
 						}},
+				{{310999999, 490205000}, {310999999, 490203000}, {310999000, 490204000}, {1631, 1632, 1631},
+						{
+								{311000000, 490204999},
+								{311000000, 490203001},
+						}},
 		}),
 		from, to, centre, visits, exits)
 {
@@ -225,6 +230,7 @@ BOOST_DATA_TEST_CASE(walkTerrainCurveSetsFromFace,
 	std::vector<GlobalPosition2D> exited;
 	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, centre, [&](const auto & step) {
 		visited.emplace_back(step.current.idx());
+		BOOST_REQUIRE(!std::ranges::contains(exited, step.exitPosition));
 		exited.emplace_back(step.exitPosition);
 	}));
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
