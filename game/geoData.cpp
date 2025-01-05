@@ -457,11 +457,11 @@ GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
 	return triangleContainsPoint(a.x, b) && triangleContainsPoint(a.y, b) && triangleContainsPoint(a.z, b);
 }
 
-void
+std::vector<GeoData::FaceHandle>
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts & opts)
 {
 	if (triangleStrip.size() < 3) {
-		return;
+		return {};
 	}
 	const auto stripMinMax = std::ranges::minmax(triangleStrip, {}, &GlobalPosition3D::z);
 	lowerExtent.z = std::min(upperExtent.z, stripMinMax.min.z);
@@ -629,9 +629,12 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		done.insert(heh);
 	}
 
-	auto surfaceStripWalk = [this, &getTriangle, &opts](const auto & surfaceStripWalk, const auto & face) -> void {
+	std::vector<FaceHandle> out;
+	auto surfaceStripWalk
+			= [this, &getTriangle, &opts, &out](const auto & surfaceStripWalk, const auto & face) -> void {
 		if (!property(surface, face)) {
 			property(surface, face) = opts.surface;
+			out.emplace_back(face);
 			std::ranges::for_each(
 					ff_range(face), [this, &getTriangle, &surfaceStripWalk](const auto & adjacentFaceHandle) {
 						if (getTriangle(this->triangle<2>(adjacentFaceHandle).centroid())) {
@@ -646,6 +649,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	updateAllVertexNormals(newOrChangedVerts);
 	generation++;
+	return out;
 }
 
 size_t
