@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <glm/fwd.hpp>
 #include <type_traits>
 
@@ -27,6 +28,14 @@ template<typename T, auto M> struct PtrMemberSorter : public PtrSorter<T> {
 	operator()(const T & a, const MT & b) const
 	{
 		return (*a).*M < b;
+	}
+};
+
+template<auto Proj> struct SortedBy {
+	auto
+	operator()(const auto & left, const auto & right) const
+	{
+		return (std::invoke(Proj, left) < std::invoke(Proj, right));
 	}
 };
 
