@@ -285,7 +285,7 @@ GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, Tester<Wal
 }
 
 void
-GeoData::walk(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Consumer<WalkStep> op) const
+GeoData::walk(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Consumer<WalkStepCurve> op) const
 {
 	walkUntil(from, to, centre, [&op](const auto & fh) {
 		op(fh);
@@ -294,11 +294,9 @@ GeoData::walk(const PointFace & from, GlobalPosition2D to, GlobalPosition2D cent
 }
 
 void
-GeoData::walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Tester<WalkStep> op) const
+GeoData::walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Tester<WalkStepCurve> op) const
 {
-	WalkStep step {
-			.current = from.face(this),
-	};
+	WalkStepCurve step {WalkStep {.current = from.face(this)}};
 	if (!step.current.is_valid()) {
 		const auto entryEdge = findEntry(from.point, to);
 		if (!entryEdge.is_valid()) {
@@ -307,6 +305,7 @@ GeoData::walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D
 		step.current = opposite_face_handle(entryEdge);
 	}
 	ArcSegment arc {centre, from.point, to};
+	step.angle = arc.first;
 	while (step.current.is_valid() && !op(step)) {
 		step.previous = step.current;
 		for (const auto next : fh_range(step.current)) {
@@ -317,7 +316,7 @@ GeoData::walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D
 				if (const auto intersect = arc.crossesLineAt(e1, e2)) {
 					step.exitHalfedge = next;
 					arc.ep0 = step.exitPosition = intersect.value().first;
-					arc.first = std::nextafter(intersect.value().second, INFINITY);
+					arc.first = std::nextafter(step.angle = intersect.value().second, INFINITY);
 					break;
 				}
 			}

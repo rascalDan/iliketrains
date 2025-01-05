@@ -70,13 +70,18 @@ public:
 		GlobalPosition2D exitPosition {};
 	};
 
+	struct WalkStepCurve : public WalkStep {
+		Angle angle {};
+	};
+
 	template<typename T> using Consumer = const std::function<void(const T &)> &;
 	template<typename T> using Tester = const std::function<bool(const T &)> &;
 
 	void walk(const PointFace & from, GlobalPosition2D to, Consumer<WalkStep> op) const;
 	void walkUntil(const PointFace & from, GlobalPosition2D to, Tester<WalkStep> op) const;
-	void walk(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Consumer<WalkStep> op) const;
-	void walkUntil(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Tester<WalkStep> op) const;
+	void walk(const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Consumer<WalkStepCurve> op) const;
+	void walkUntil(
+			const PointFace & from, GlobalPosition2D to, GlobalPosition2D centre, Tester<WalkStepCurve> op) const;
 
 	void boundaryWalk(Consumer<HalfedgeHandle>) const;
 	void boundaryWalk(Consumer<HalfedgeHandle>, HalfedgeHandle start) const;
