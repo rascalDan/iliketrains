@@ -10,6 +10,7 @@
 #include <glm/vec2.hpp>
 #include <optional>
 #include <thirdparty/openmesh/glmcompat.h>
+#include <thirdparty/openmesh/helpers.h>
 
 struct GeoDataTraits : public OpenMesh::DefaultTraits {
 	FaceAttributes(OpenMesh::Attributes::Status);
@@ -22,9 +23,7 @@ struct GeoDataTraits : public OpenMesh::DefaultTraits {
 
 class GeoData : public OpenMesh::TriMesh_ArrayKernelT<GeoDataTraits> {
 private:
-	GeoData();
-
-	OpenMesh::FPropHandleT<const Surface *> surface;
+	const OpenMesh::Helpers::Property<const Surface *, OpenMesh::FPropHandleT> surface {this};
 
 public:
 	static GeoData loadFromAsciiGrid(const std::filesystem::path &);
