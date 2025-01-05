@@ -1,8 +1,8 @@
 #define BOOST_TEST_MODULE test_lib
 
-#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
+#include <stream_support.h>
 
 #include <collections.h>
 #include <glArrays.h>
@@ -68,4 +68,36 @@ BOOST_AUTO_TEST_CASE(triangle_strip_iter)
 	BOOST_REQUIRE_EQUAL(out.size(), (TRIANGLE_STRIP_IN.size() - 2) * 3);
 	BOOST_CHECK_EQUAL_COLLECTIONS(
 			out.begin(), out.end(), TRIANGLE_STRIP_EXPECTED.begin(), TRIANGLE_STRIP_EXPECTED.end());
+}
+
+using MergeCloseData = std::tuple<std::vector<int>, int, std::vector<int>>;
+
+BOOST_DATA_TEST_CASE(mergeCloseInts,
+		boost::unit_test::data::make<MergeCloseData>({
+				{{0}, 0, {0}},
+				{{0, 1}, 0, {0, 1}},
+				{{0, 1}, 2, {0, 1}},
+				{{0, 1, 2}, 2, {0, 2}},
+				{{0, 1, 4}, 2, {0, 4}},
+				{{0, 1, 2}, 4, {0, 2}},
+				{{0, 4, 8}, 4, {0, 8}},
+				{{0, 4, 10, 14}, 4, {0, 14}},
+				{{0, 3, 6}, 2, {0, 3, 6}},
+				{{0, 3, 4}, 2, {0, 4}},
+				{{0, 5, 7, 12}, 4, {0, 6, 12}},
+				{{0, 3, 4, 5, 10, 17, 18, 19}, 2, {0, 4, 10, 19}},
+		}),
+		collection, tolerance, expected)
+{
+	auto mutableCollection {collection};
+	BOOST_REQUIRE_NO_THROW((mergeClose(
+			mutableCollection,
+			[](int left, int right) {
+				return std::abs(left - right);
+			},
+			[](int left, int right) {
+				return (left + right) / 2;
+			},
+			tolerance)));
+	BOOST_CHECK_EQUAL_COLLECTIONS(mutableCollection.begin(), mutableCollection.end(), expected.begin(), expected.end());
 }

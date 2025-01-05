@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <ranges>
 #include <span>
 #include <tuple>
 #include <utility>
@@ -223,4 +224,41 @@ constexpr auto
 strip_end(IterableCollection auto & cont)
 {
 	return stripiter {cont.end()};
+}
+
+template<typename T, typename Dist, typename Merger>
+void
+mergeClose(std::vector<T> & range, const Dist & dist, const Merger & merger,
+		decltype(dist(range.front(), range.front())) tolerance)
+{
+	using DistanceType = decltype(tolerance);
+	std::vector<DistanceType> distances;
+	distances.reserve(range.size() - 1);
+	std::ranges::transform(range | std::views::pairwise, std::back_inserter(distances), [&dist](const auto & pair) {
+		return (std::apply(dist, pair));
+	});
+	while (distances.size() > 1) {
+		const auto closestPair = std::ranges::min_element(distances);
+		if (*closestPair > tolerance) {
+			return;
+		}
+		const auto offset = std::distance(distances.begin(), closestPair);
+		const auto idx = static_cast<std::size_t>(offset);
+		if (closestPair == distances.begin()) {
+			// Remove second element
+			range.erase(range.begin() + 1);
+			distances.erase(distances.begin());
+		}
+		else if (closestPair == --distances.end()) {
+			// Remove second from last element
+			range.erase(range.end() - 2);
+			distances.erase(distances.end() - 1);
+		}
+		else {
+			range[idx] = merger(range[idx], range[idx + 1]);
+			range.erase(range.begin() + offset + 1);
+			distances.erase(distances.begin() + offset);
+		}
+		distances[idx] = dist(range[idx], range[idx + 1]);
+	}
 }
