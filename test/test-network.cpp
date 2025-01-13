@@ -241,7 +241,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 	//    --------
 	auto l0 = addLinksBetween(p000, p100);
 	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l0.get()));
-	BOOST_CHECK_EQUAL(l0->length, glm::length(difference(p000, p100)));
+	BOOST_CHECK_EQUAL(l0->length, ::distance(p000, p100));
 	BOOST_CHECK_CLOSE(l0->ends[0].dir, half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l0->ends[1].dir, -half_pi, 0.1F);
 	BOOST_CHECK(l0->ends[0].nexts.empty());
@@ -249,7 +249,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 
 	auto l1 = addLinksBetween(p200, p100);
 	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l1.get()));
-	BOOST_CHECK_EQUAL(l1->length, glm::length(difference(p200, p100)));
+	BOOST_CHECK_EQUAL(l1->length, ::distance(p200, p100));
 	BOOST_CHECK_CLOSE(l1->ends[0].dir, half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l1->ends[1].dir, -half_pi, 0.1F);
 	BOOST_CHECK(l0->ends[0].nexts.empty());
@@ -261,7 +261,7 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 
 	auto l2 = addLinksBetween(p200, p300);
 	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l2.get()));
-	BOOST_CHECK_EQUAL(l2->length, glm::length(difference(p200, p300)));
+	BOOST_CHECK_EQUAL(l2->length, ::distance(p200, p300));
 	BOOST_CHECK_CLOSE(l2->ends[0].dir, half_pi, 0.1F);
 	BOOST_CHECK_CLOSE(l2->ends[1].dir, -half_pi, 0.1F);
 	BOOST_CHECK(l0->ends[0].nexts.empty());

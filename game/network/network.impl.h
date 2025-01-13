@@ -52,7 +52,7 @@ template<typename T, typename... Links>
 Link::CCollection
 NetworkOf<T, Links...>::candidateJoins(GlobalPosition3D start, GlobalPosition3D end)
 {
-	if (glm::length(RelativePosition3D(start - end)) < 2000.F) {
+	if (::distance(start, end) < 2000.F) {
 		return {};
 	}
 	const auto defs = genCurveDef(
@@ -81,7 +81,7 @@ template<typename T, typename... Links>
 Link::CCollection
 NetworkOf<T, Links...>::addJoins(GlobalPosition3D start, GlobalPosition3D end)
 {
-	if (glm::length(RelativePosition3D(start - end)) < 2000.F) {
+	if (::distance(start, end) < 2000.F) {
 		return {};
 	}
 	const auto defs = genCurveDef(start, end, findNodeDirection(nodeAt(start)), findNodeDirection(nodeAt(end)));

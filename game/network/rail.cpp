@@ -40,8 +40,8 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	if (node2ins.second == NodeIs::InNetwork) {
 		auto midheight = [&](auto mid) {
-			const auto sm = glm::length(RelativePosition2D(flatStart - mid)),
-					   em = glm::length(RelativePosition2D(flatEnd - mid));
+			const auto sm = ::distance<2>(flatStart, mid);
+			const auto em = ::distance<2>(flatEnd, mid);
 			return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (sm / (sm + em)));
 		};
 		const float dir2 = pi + findNodeDirection(node2ins.first);
@@ -117,7 +117,7 @@ RailLinkStraight::RailLinkStraight(
 
 RailLinkCurve::RailLinkCurve(
 		NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
-	RailLinkCurve(instances, a, b, c || a->pos.z, glm::length(difference(a->pos.xy(), c)), {c, a->pos, b->pos})
+	RailLinkCurve(instances, a, b, c || a->pos.z, ::distance<2>(a->pos.xy(), c), {c, a->pos, b->pos})
 {
 }
 

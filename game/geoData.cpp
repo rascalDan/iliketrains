@@ -405,10 +405,11 @@ GeoData::difference(const HalfedgeHandle heh) const
 	return ::difference(point(to_vertex_handle(heh)), point(from_vertex_handle(heh)));
 }
 
+template<glm::length_t D>
 [[nodiscard]] RelativeDistance
 GeoData::length(const HalfedgeHandle heh) const
 {
-	return glm::length(difference(heh));
+	return ::distance<D, GlobalDistance, glm::defaultp>(point(to_vertex_handle(heh)), point(from_vertex_handle(heh)));
 }
 
 [[nodiscard]] GlobalPosition3D
@@ -468,7 +469,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	const auto vertexDistFrom = [this](GlobalPosition2D p) {
 		return [p, this](const VertexHandle v) {
-			return std::make_pair(v, glm::length(::difference(p, this->point(v).xy())));
+			return std::make_pair(v, ::distance(p, this->point(v).xy()));
 		};
 	};
 	const auto vertexDistFromE = [this](GlobalPosition2D p) {
@@ -614,7 +615,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			todoOutHalfEdges(toVertex);
 		}
 		else if (!toTriangle) { // point without the new strip, adjust vertically by limit
-			const auto maxOffset = static_cast<GlobalDistance>(opts.maxSlope * glm::length(difference(heh).xy()));
+			const auto maxOffset = static_cast<GlobalDistance>(opts.maxSlope * length<2>(heh));
 			const auto newHeight = std::clamp(toPoint.z, fromPoint.z - maxOffset, fromPoint.z + maxOffset);
 			if (newHeight != toPoint.z) {
 				toPoint.z = newHeight;

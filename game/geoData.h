@@ -136,7 +136,7 @@ protected:
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;
 	[[nodiscard]] RelativePosition3D difference(const HalfedgeHandle) const;
 
-	[[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
+	template<glm::length_t D> [[nodiscard]] RelativeDistance length(const HalfedgeHandle) const;
 	[[nodiscard]] GlobalPosition3D centre(const HalfedgeHandle) const;
 
 	void updateAllVertexNormals();

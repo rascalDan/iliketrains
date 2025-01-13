@@ -111,6 +111,13 @@ difference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
 	return globalA - globalB;
 }
 
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+constexpr auto
+distance(const glm::vec<D, T, Q> & pointA, const glm::vec<D, T, Q> & pointB)
+{
+	return glm::length(difference(pointA, pointB));
+}
+
 glm::mat4 flat_orientation(const Rotation3D & diff);
 
 namespace {
@@ -498,7 +505,7 @@ operator"" _degrees(long double degrees)
 // Late implementations due to dependencies
 template<typename T, glm::qualifier Q>
 constexpr ArcSegment<T, Q>::ArcSegment(PointType centre, PointType ep0, PointType ep1) :
-	Arc {centre, ep0, ep1}, centre {centre}, ep0 {ep0}, ep1 {ep1}, radius {glm::length(difference(centre, ep0))}
+	Arc {centre, ep0, ep1}, centre {centre}, ep0 {ep0}, ep1 {ep1}, radius {::distance(centre, ep0)}
 {
 }
 

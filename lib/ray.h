@@ -27,8 +27,7 @@ public:
 		const auto n2 = crossProduct(direction, n);
 		const auto c1 = p1 + PositionType((glm::dot(RelativePosition3D(start - p1), n2) / glm::dot(d1, n2)) * d1);
 		const auto difflength = glm::length(diff);
-		if (glm::length(RelativePosition3D(c1 - p1)) > difflength
-				|| glm::length(RelativePosition3D(c1 - e1)) > difflength) {
+		if (::distance(c1, p1) > difflength || ::distance(c1, e1) > difflength) {
 			return std::numeric_limits<typename PositionType::value_type>::infinity();
 		}
 		return static_cast<PositionType::value_type>(glm::abs(glm::dot(n, RelativePosition3D(p1 - start))));

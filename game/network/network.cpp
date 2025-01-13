@@ -121,8 +121,8 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 	endDir += pi;
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	auto midheight = [&](auto mid) {
-		const auto sm = glm::length(RelativePosition2D(flatStart - mid)),
-				   em = glm::length(RelativePosition2D(flatEnd - mid));
+		const auto sm = ::distance<2>(flatStart, mid);
+		const auto em = ::distance<2>(flatEnd, mid);
 		return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (sm / (sm + em)));
 	};
 	if (const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir); radii.first < radii.second) {
