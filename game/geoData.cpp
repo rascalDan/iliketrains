@@ -537,10 +537,21 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		return nullptr;
 	};
+	const auto shouldFlip
+			= [this](const HalfedgeHandle next, const GlobalPosition2D startPoint) -> std::optional<EdgeHandle> {
+		if (const auto nextEdge = edge_handle(next); is_flip_ok(nextEdge)) {
+			const auto opposite_point
+					= point(to_vertex_handle(next_halfedge_handle(opposite_halfedge_handle(next)))).xy();
+			if (distance<2>(startPoint, opposite_point) < length<2>(next)) {
+				return nextEdge;
+			}
+		}
+		return std::nullopt;
+	};
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &vertexDistFrom, &opts, &addVertexForNormalUpdate](
+	auto doBoundaryPart = [this, &boundaryTriangles, &vertexDistFrom, &opts, &addVertexForNormalUpdate, &shouldFlip](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);
@@ -563,9 +574,11 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 								start = nextDist.first;
 								return true;
 							}
-							else {
-								start = split_copy(edge_handle(next), positionOnTriangle(*intersection, triangle));
+							else if (const auto nextEdge = shouldFlip(next, startPoint)) {
+								flip(*nextEdge);
+								return true;
 							}
+							start = split_copy(edge_handle(next), positionOnTriangle(*intersection, triangle));
 							addVertexForNormalUpdate(start);
 							boundaryTriangles.emplace(start, &triangle);
 							return true;
