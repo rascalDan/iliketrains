@@ -551,13 +551,27 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &vertexDistFrom, &opts, &addVertexForNormalUpdate, &shouldFlip](
+	auto doBoundaryPart = [this, &boundaryTriangles, &opts, &addVertexForNormalUpdate, &shouldFlip](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);
 		while (!std::ranges::contains(vv_range(start), end)) {
 			const auto startPoint = point(start);
-			if (std::ranges::none_of(voh_range(start), [&](const auto & outHalf) {
+			const auto distanceToEndPoint = distance(startPoint.xy(), endPoint.xy());
+			if (std::ranges::any_of(vv_range(start), [&](const auto & adjVertex) {
+					const auto adjPoint = point(adjVertex);
+					if (distance(adjPoint.xy(), endPoint.xy()) < distanceToEndPoint
+							&& (Triangle<2> {startPoint, endPoint, adjPoint}.area()
+									   / distance(startPoint.xy(), endPoint.xy()))
+									< opts.nearNodeTolerance) {
+						start = adjVertex;
+						return true;
+					}
+					return false;
+				})) {
+				continue;
+			}
+			if (std::ranges::any_of(voh_range(start), [&](const auto & outHalf) {
 					const auto next = next_halfedge_handle(outHalf);
 					const auto nexts = std::array {from_vertex_handle(next), to_vertex_handle(next)};
 					const auto nextPoints = nexts | std::views::transform([this](const auto v) {
@@ -566,15 +580,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
 						if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
 									nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
-							if (const auto nextDist
-									= std::ranges::min(nexts | std::views::transform(vertexDistFrom(*intersection)), {},
-											&std::pair<VertexHandle, float>::second);
-									nextDist.second < opts.nearNodeTolerance) {
-								point(nextDist.first).z = positionOnTriangle(point(nextDist.first), triangle).z;
-								start = nextDist.first;
-								return true;
-							}
-							else if (const auto nextEdge = shouldFlip(next, startPoint)) {
+							if (const auto nextEdge = shouldFlip(next, startPoint)) {
 								flip(*nextEdge);
 								return true;
 							}
@@ -587,9 +593,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					}
 					return false;
 				})) {
-				throw std::runtime_error(
-						std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
+				continue;
 			}
+			throw std::runtime_error(
+					std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
 		}
 	};
 	auto doBoundary = [&doBoundaryPart, triangle = strip.begin()](const auto & verts) mutable {
