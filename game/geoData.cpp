@@ -534,9 +534,18 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		return nullptr;
 	};
-	const auto shouldFlip
-			= [this](const HalfedgeHandle next, const GlobalPosition2D startPoint) -> std::optional<EdgeHandle> {
-		if (const auto nextEdge = edge_handle(next); is_flip_ok(nextEdge)) {
+	const auto canFlip = [this](const HalfedgeHandle edge) {
+		const auto opposite = opposite_halfedge_handle(edge);
+		const auto pointA = point(to_vertex_handle(edge));
+		const auto pointB = point(to_vertex_handle(opposite));
+		const auto pointC = point(to_vertex_handle(next_halfedge_handle(edge)));
+		const auto pointD = point(to_vertex_handle(next_halfedge_handle(opposite)));
+
+		return Triangle<2> {pointC, pointB, pointD}.isUp() && Triangle<2> {pointA, pointC, pointD}.isUp();
+	};
+	const auto shouldFlip = [this, &canFlip](const HalfedgeHandle next,
+									const GlobalPosition2D startPoint) -> std::optional<EdgeHandle> {
+		if (const auto nextEdge = edge_handle(next); is_flip_ok(nextEdge) && canFlip(next)) {
 			const auto opposite_point
 					= point(to_vertex_handle(next_halfedge_handle(opposite_halfedge_handle(next)))).xy();
 			if (distance<2>(startPoint, opposite_point) < length<2>(next)) {
