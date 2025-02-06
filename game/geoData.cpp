@@ -126,13 +126,10 @@ GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh, Fa
 GeoData::FaceHandle
 GeoData::PointFace::face(const GeoData * mesh, FaceHandle start) const
 {
-	if (_face.is_valid()) {
-		assert(mesh->triangleContainsPoint(point, _face));
+	if (_face.is_valid() && mesh->triangleContainsPoint(point, _face)) {
 		return _face;
 	}
-	else {
-		return (_face = mesh->findPoint(point, start));
-	}
+	return (_face = mesh->findPoint(point, start));
 }
 
 GeoData::FaceHandle
