@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <glm/vec2.hpp>
 #include <optional>
+#include <source_location>
 #include <thirdparty/openmesh/glmcompat.h>
 #include <thirdparty/openmesh/helpers.h>
 
@@ -115,7 +116,7 @@ public:
 		return property(surface, handle);
 	}
 
-	void sanityCheck() const;
+	void sanityCheck(const std::source_location & = std::source_location::current()) const;
 
 protected:
 	template<glm::length_t Dim>

@@ -6,6 +6,9 @@
 #include <maths.h>
 #include <ranges>
 #include <set>
+#ifndef NDEBUG
+#	include <stream_support.h>
+#endif
 
 GeoData
 GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
@@ -554,6 +557,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		return std::nullopt;
 	};
+	sanityCheck();
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
@@ -602,6 +606,16 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 				})) {
 				continue;
 			}
+#ifndef NDEBUG
+			CLOG(start);
+			CLOG(startPoint);
+			CLOG(end);
+			CLOG(endPoint);
+			for (const auto v : vv_range(start)) {
+				CLOG(point(v));
+			}
+#endif
+			sanityCheck();
 			throw std::runtime_error(
 					std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
 		}
@@ -655,6 +669,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		done.insert(heh);
 	}
+	sanityCheck();
 
 	std::vector<FaceHandle> out;
 	auto surfaceStripWalk
@@ -686,11 +701,20 @@ GeoData::getGeneration() const
 }
 
 void
-GeoData::sanityCheck() const
+GeoData::sanityCheck(const std::source_location & loc) const
 {
-	if (!std::ranges::all_of(faces(), [this](const auto face) {
-			return triangle<2>(face).isUp();
-		})) {
-		throw std::logic_error("Upside down faces detected");
+	if (const auto upSideDown = std::ranges::count_if(faces(), [this](const auto face) {
+			if (!triangle<2>(face).isUp()) {
+#ifndef NDEBUG
+				for (const auto v : fv_range(face)) {
+					CLOG(point(v));
+				}
+#endif
+				return true;
+			}
+			return false;
+		}) > 0) {
+		throw std::logic_error(std::format(
+				"{} upside down faces detected - checked from {}:{}", upSideDown, loc.function_name(), loc.line()));
 	}
 }
