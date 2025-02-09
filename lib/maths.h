@@ -14,6 +14,9 @@
 template<typename T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 
+template<Arithmetic T> using CalcType = std::conditional_t<std::is_floating_point_v<T>, T, int64_t>;
+template<Arithmetic T> using DifferenceType = std::conditional_t<std::is_floating_point_v<T>, T, float>;
+
 struct Arc : public std::pair<Angle, Angle> {
 	template<glm::length_t Lc, glm::length_t Le, Arithmetic T, glm::qualifier Q = glm::defaultp>
 		requires(Lc >= 2, Le >= 2)
@@ -102,11 +105,21 @@ operator-(const GlobalPosition<D> & global, const CalcPosition<D> & relative)
 }
 
 template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
-using DifferenceVector = glm::vec<D, std::conditional_t<std::is_floating_point_v<T>, T, float>, Q>;
+using DifferenceVector = glm::vec<D, DifferenceType<T>, Q>;
 
 template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
 constexpr DifferenceVector<D, T, Q>
 difference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
+{
+	return globalA - globalB;
+}
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+using CalcVector = glm::vec<D, CalcType<T>, Q>;
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+constexpr CalcVector<D, T, Q>
+calcDifference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
 {
 	return globalA - globalB;
 }
@@ -364,8 +377,6 @@ normalize(T ang)
 	return ang;
 }
 
-template<Arithmetic T> using CalcType = std::conditional_t<std::is_floating_point_v<T>, T, int64_t>;
-
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 [[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
 linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, const glm::vec<2, T, Q> Cabs,
@@ -546,4 +557,33 @@ ArcSegment<T, Q>::crossesLineAt(const glm::vec<2, T, Q> & lineStart, const glm::
 		return glm::distance(lineRelStart, point.first);
 	});
 	return std::make_pair(centre + first.first, first.second);
+}
+
+namespace {
+	template<template<typename> typename Op>
+	[[nodiscard]] constexpr auto
+	pointLineOp(const GlobalPosition2D point, const GlobalPosition2D end1, const GlobalPosition2D end2)
+	{
+		return Op {}(CalcDistance(end2.x - end1.x) * CalcDistance(point.y - end1.y),
+				CalcDistance(end2.y - end1.y) * CalcDistance(point.x - end1.x));
+	}
+}
+
+constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
+constexpr auto pointLeftOfOrOnLine = pointLineOp<std::greater_equal>;
+
+[[nodiscard]] constexpr bool
+linesCross(const GlobalPosition2D lineAend1, const GlobalPosition2D lineAend2, const GlobalPosition2D lineBend1,
+		const GlobalPosition2D lineBend2)
+{
+	return (pointLeftOfLine(lineAend2, lineBend1, lineBend2) == pointLeftOfLine(lineAend1, lineBend2, lineBend1))
+			&& (pointLeftOfLine(lineBend1, lineAend1, lineAend2) == pointLeftOfLine(lineBend2, lineAend2, lineAend1));
+}
+
+[[nodiscard]] constexpr bool
+linesCrossLtR(const GlobalPosition2D lineAend1, const GlobalPosition2D lineAend2, const GlobalPosition2D lineBend1,
+		const GlobalPosition2D lineBend2)
+{
+	return pointLeftOfLine(lineAend2, lineBend1, lineBend2) && pointLeftOfLine(lineAend1, lineBend2, lineBend1)
+			&& pointLeftOfLine(lineBend1, lineAend1, lineAend2) && pointLeftOfLine(lineBend2, lineAend2, lineAend1);
 }

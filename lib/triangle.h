@@ -65,6 +65,12 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 	}
 
 	[[nodiscard]] constexpr auto
+	calcSideDifference(glm::length_t side) const
+	{
+		return calcDifference(p(side), p(0));
+	}
+
+	[[nodiscard]] constexpr auto
 	angle(glm::length_t corner) const
 	{
 		return Arc {P(corner), P(corner + 2), P(corner + 1)}.length();
@@ -125,5 +131,26 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 	end() const
 	{
 		return begin() + 3;
+	}
+
+	[[nodiscard]]
+	constexpr auto
+	positionOnPlane(const glm::vec<2, T, Q> coord2d) const
+		requires(Dim == 3)
+	{
+		const auto edgeCrossProduct = crossProduct(calcSideDifference(1), calcSideDifference(2));
+		return coord2d
+				|| static_cast<T>(
+						((edgeCrossProduct.x * p(0).x) + (edgeCrossProduct.y * p(0).y) + (edgeCrossProduct.z * p(0).z)
+								- (edgeCrossProduct.x * coord2d.x) - (edgeCrossProduct.y * coord2d.y))
+						/ edgeCrossProduct.z);
+	}
+
+	[[nodiscard]]
+	constexpr bool
+	containsPoint(const GlobalPosition2D coord) const
+	{
+		return pointLeftOfOrOnLine(coord, p(0), p(1)) && pointLeftOfOrOnLine(coord, p(1), p(2))
+				&& pointLeftOfOrOnLine(coord, p(2), p(0));
 	}
 };

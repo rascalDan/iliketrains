@@ -142,47 +142,6 @@ GeoData::PointFace::face(const GeoData * mesh) const
 }
 
 namespace {
-	template<template<typename> typename Op>
-	[[nodiscard]] constexpr inline auto
-	pointLineOp(const GlobalPosition2D p, const GlobalPosition2D e1, const GlobalPosition2D e2)
-	{
-		return Op {}(CalcDistance(e2.x - e1.x) * CalcDistance(p.y - e1.y),
-				CalcDistance(e2.y - e1.y) * CalcDistance(p.x - e1.x));
-	}
-
-	constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
-	constexpr auto pointLeftOfOrOnLine = pointLineOp<std::greater_equal>;
-
-	static_assert(pointLeftOfLine({1, 2}, {1, 1}, {2, 2}));
-	static_assert(pointLeftOfLine({2, 1}, {2, 2}, {1, 1}));
-	static_assert(pointLeftOfLine({2, 2}, {1, 2}, {2, 1}));
-	static_assert(pointLeftOfLine({1, 1}, {2, 1}, {1, 2}));
-	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490000000}, {310050000, 490050000}));
-	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310050000, 490050000}, {310000000, 490050000}));
-	static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490050000}, {310000000, 490000000}));
-
-	[[nodiscard]] constexpr inline bool
-	linesCross(
-			const GlobalPosition2D a1, const GlobalPosition2D a2, const GlobalPosition2D b1, const GlobalPosition2D b2)
-	{
-		return (pointLeftOfLine(a2, b1, b2) == pointLeftOfLine(a1, b2, b1))
-				&& (pointLeftOfLine(b1, a1, a2) == pointLeftOfLine(b2, a2, a1));
-	}
-
-	static_assert(linesCross({1, 1}, {2, 2}, {1, 2}, {2, 1}));
-	static_assert(linesCross({2, 2}, {1, 1}, {1, 2}, {2, 1}));
-
-	[[nodiscard]] constexpr inline bool
-	linesCrossLtR(
-			const GlobalPosition2D a1, const GlobalPosition2D a2, const GlobalPosition2D b1, const GlobalPosition2D b2)
-	{
-		return pointLeftOfLine(a2, b1, b2) && pointLeftOfLine(a1, b2, b1) && pointLeftOfLine(b1, a1, a2)
-				&& pointLeftOfLine(b2, a2, a1);
-	}
-
-	static_assert(linesCrossLtR({1, 1}, {2, 2}, {1, 2}, {2, 1}));
-	static_assert(!linesCrossLtR({2, 2}, {1, 1}, {1, 2}, {2, 1}));
-
 	constexpr GlobalPosition3D
 	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
 	{

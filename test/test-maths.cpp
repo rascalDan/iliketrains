@@ -412,3 +412,28 @@ BOOST_DATA_TEST_CASE(arcline_intersection,
 		BOOST_CHECK_CLOSE(expected->second, intersection->second, 1.F);
 	}
 }
+
+static_assert(pointLeftOfLine({1, 2}, {1, 1}, {2, 2}));
+static_assert(pointLeftOfLine({2, 1}, {2, 2}, {1, 1}));
+static_assert(pointLeftOfLine({2, 2}, {1, 2}, {2, 1}));
+static_assert(pointLeftOfLine({1, 1}, {2, 1}, {1, 2}));
+static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490000000}, {310050000, 490050000}));
+static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310050000, 490050000}, {310000000, 490050000}));
+static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490050000}, {310000000, 490000000}));
+
+static_assert(linesCross({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+static_assert(linesCross({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+static_assert(linesCrossLtR({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+static_assert(!linesCrossLtR({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+static_assert(Triangle<3, GlobalDistance> {{1, 2, 3}, {1, 0, 1}, {-2, 1, 0}}.positionOnPlane({7, -2})
+		== GlobalPosition3D {7, -2, 3});
+static_assert(Triangle<3, GlobalDistance> {
+					  {310000000, 490000000, 32800}, {310050000, 490050000, 33000}, {310000000, 490050000, 32700}}
+					  .positionOnPlane({310000000, 490000000})
+		== GlobalPosition3D {310000000, 490000000, 32800});
+static_assert(Triangle<3, GlobalDistance> {
+					  {310750000, 490150000, 58400}, {310800000, 490200000, 55500}, {310750000, 490200000, 57600}}
+					  .positionOnPlane({310751000, 490152000})
+		== GlobalPosition3D {310751000, 490152000, 58326});
