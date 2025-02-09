@@ -4,7 +4,7 @@
 #include "builders/straight.h"
 #include "text.h"
 #include <game/gamestate.h>
-#include <game/geoData.h>
+#include <game/terrain.h>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
@@ -26,7 +26,7 @@ bool
 EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	if (builder && (e.button == SDL_BUTTON_LEFT || e.button == SDL_BUTTON_MIDDLE)) {
-		builder->click(network, gameState->geoData.get(), e, ray);
+		builder->click(network, gameState->terrain.get(), e, ray);
 		return true;
 	}
 	return false;
@@ -36,7 +36,7 @@ bool
 EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	if (builder) {
-		builder->move(network, gameState->geoData.get(), e, ray);
+		builder->move(network, gameState->terrain.get(), e, ray);
 	}
 	return false;
 }
@@ -70,7 +70,7 @@ EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection &
 	const auto width = network->getBaseWidth();
 
 	for (const auto & link : links) {
-		gameState->geoData->setHeights(link->getBase(width), opts);
+		gameState->terrain->setHeights(link->getBase(width), opts);
 	}
 }
 

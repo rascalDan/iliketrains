@@ -4,8 +4,8 @@
 #include "ui/uiComponent.h"
 #include <SDL2/SDL.h>
 #include <game/gamestate.h>
-#include <game/geoData.h>
 #include <game/selectable.h>
+#include <game/terrain.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/gl/camera.h>
 #include <optional>
@@ -83,7 +83,7 @@ GameMainSelector::defaultClick(const Ray<GlobalPosition3D> & ray)
 		const auto & ref = *selected.base()->get();
 		clicked = typeid(ref).name();
 	}
-	else if (const auto pos = gameState->geoData->intersectRay(ray)) {
+	else if (const auto pos = gameState->terrain->intersectRay(ray)) {
 		clicked = streamed_string(*pos);
 	}
 	else {

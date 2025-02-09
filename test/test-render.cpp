@@ -30,11 +30,10 @@ class TestScene : public SceneProvider {
 	RailVehicleClassPtr brush47rvc;
 	std::shared_ptr<RailVehicle> train1, train2;
 	RailLinks rail;
-	std::shared_ptr<GeoData> gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
 	std::shared_ptr<Environment> env = std::make_shared<Environment>();
 
-	Terrain terrain {gd};
-	Water water {gd};
+	std::shared_ptr<Terrain> terrain = std::make_shared<Terrain>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
+	Water water {terrain};
 
 public:
 	TestScene()
@@ -71,7 +70,7 @@ public:
 	void
 	content(const SceneShader & shader) const override
 	{
-		terrain.render(shader);
+		terrain->render(shader);
 		water.render(shader);
 		rail.render(shader);
 		std::ranges::for_each(gameState->assets, [&shader](const auto & asset) {
@@ -95,7 +94,7 @@ public:
 	void
 	shadows(const ShadowMapper & shadowMapper) const override
 	{
-		terrain.shadows(shadowMapper);
+		terrain->shadows(shadowMapper);
 		std::ranges::for_each(gameState->assets, [&shadowMapper](const auto & asset) {
 			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
 				renderable->shadows(shadowMapper);
@@ -167,15 +166,14 @@ BOOST_AUTO_TEST_CASE(terrain)
 	ss.camera.setView({310000000, 490000000, 600000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 
 	class TestTerrain : public SceneProvider {
-		std::shared_ptr<GeoData> gd
-				= std::make_shared<GeoData>(GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc"));
-		Terrain terrain {gd};
-		Water water {gd};
+		std::shared_ptr<Terrain> terrain
+				= std::make_shared<Terrain>(GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc"));
+		Water water {terrain};
 
 		void
 		content(const SceneShader & shader) const override
 		{
-			terrain.render(shader);
+			terrain->render(shader);
 			water.render(shader);
 		}
 
@@ -194,7 +192,7 @@ BOOST_AUTO_TEST_CASE(terrain)
 		void
 		shadows(const ShadowMapper & shadowMapper) const override
 		{
-			terrain.shadows(shadowMapper);
+			terrain->shadows(shadowMapper);
 		}
 	};
 

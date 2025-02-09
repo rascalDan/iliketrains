@@ -38,12 +38,10 @@ public:
 	int
 	run()
 	{
-		geoData = std::make_shared<GeoData>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
-
 		windows.create<MainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT)->setContent<GameMainWindow>();
 
-		world.create<Terrain>(geoData);
-		world.create<Water>(geoData);
+		terrain = world.create<Terrain>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
+		world.create<Water>(terrain);
 		assets = AssetFactory::loadAll("res");
 
 		{
@@ -89,7 +87,7 @@ public:
 				for (auto y = 491100000; y < 491130000; y += 5000) {
 					world.create<Plant>(std::dynamic_pointer_cast<Foliage>(assets.at(std::format("Tree-{:#02}-{}",
 												treeDistribution(randomdev), treeVariantDistribution(randomdev)))),
-							Location {geoData->positionAt({{x + positionOffsetDistribution(randomdev),
+							Location {terrain->positionAt({{x + positionOffsetDistribution(randomdev),
 											  y + positionOffsetDistribution(randomdev)}}),
 									{0, rotationDistribution(randomdev), 0}});
 				}

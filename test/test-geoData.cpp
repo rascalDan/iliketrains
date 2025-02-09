@@ -244,15 +244,13 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 {
 	Surface surface;
 	surface.colorBias = RGB {0, 0, 1};
-	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = &surface}));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;
 	TestRenderOutput tro {{640, 480}};
 
 	struct TestTerrain : public SceneProvider {
-		explicit TestTerrain(std::shared_ptr<GeoData> gd) : terrain(std::move(gd)) { }
+		explicit TestTerrain(GeoData gd) : terrain(std::move(gd)) { }
 
 		const Terrain terrain;
 
@@ -281,7 +279,11 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		}
 	};
 
-	TestTerrain t {gd};
+	TestTerrain t {[&points, &surface]() {
+		auto gd = GeoData::createFlat({0, 0}, {1000000, 1000000}, 100);
+		BOOST_CHECK_NO_THROW(gd.setHeights(points, {.surface = &surface}));
+		return gd;
+	}()};
 	SceneRenderer ss {tro.size, tro.output};
 	std::for_each(cams.begin(), cams.end(), [&ss, &t, &tro](const auto & cam) {
 		ss.camera.setView(cam.first.first, glm::normalize(cam.first.second));
