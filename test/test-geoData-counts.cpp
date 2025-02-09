@@ -60,5 +60,4 @@ BOOST_DATA_TEST_CASE(deformLogical,
 	BOOST_CHECK_EQUAL(geoData.n_vertices(), expVertices);
 	BOOST_CHECK_EQUAL(geoData.n_edges(), expEdges);
 	BOOST_CHECK_EQUAL(geoData.n_faces(), expFaces);
-	BOOST_CHECK_NO_THROW(geoData.sanityCheck());
 }

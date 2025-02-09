@@ -34,21 +34,6 @@ BOOST_AUTO_TEST_CASE(sanityCheck)
 	BOOST_CHECK_NO_THROW(sanityCheck());
 }
 
-BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
-{
-	const auto face = face_handle(0);
-
-	BOOST_TEST_CONTEXT(this->triangle<2>(face)) {
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner, yllcorner}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + cellsize, yllcorner + cellsize}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner, yllcorner + cellsize}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + 1, yllcorner + 1}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + 1, yllcorner + 2}, face));
-		BOOST_CHECK(!triangleContainsPoint(GlobalPosition2D {xllcorner + 3, yllcorner + 2}, face));
-		BOOST_CHECK(!triangleContainsPoint(GlobalPosition2D {xllcorner + cellsize, yllcorner}, face));
-	}
-}
-
 BOOST_AUTO_TEST_SUITE_END();
 
 static const TestTerrainMesh fixedTerrtain;
@@ -103,7 +88,7 @@ BOOST_DATA_TEST_CASE(findPositionAt,
 		}),
 		p, h)
 {
-	BOOST_CHECK_EQUAL(fixedTerrtain.positionAt(p), GlobalPosition3D(p, h));
+	BOOST_CHECK_EQUAL(fixedTerrtain.positionAt(p), p || h);
 }
 
 using FindRayIntersectData = std::tuple<GlobalPosition3D, Direction3D, GlobalPosition3D>;
@@ -261,7 +246,6 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	surface.colorBias = RGB {0, 0, 1};
 	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
 	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = &surface}));
-	BOOST_CHECK_NO_THROW(gd->sanityCheck());
 
 	ApplicationBase ab;
 	TestMainWindow tmw;

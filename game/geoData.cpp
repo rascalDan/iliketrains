@@ -110,74 +110,6 @@ GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistan
 	return mesh;
 }
 
-OpenMesh::FaceHandle
-GeoData::findPoint(GlobalPosition2D p) const
-{
-	return findPoint(p, *faces_sbegin());
-}
-
-GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh) :
-	PointFace {p, mesh, *mesh->faces_sbegin()}
-{
-}
-
-GeoData::PointFace::PointFace(const GlobalPosition2D p, const GeoData * mesh, FaceHandle start) :
-	PointFace {p, mesh->findPoint(p, start)}
-{
-}
-
-GeoData::FaceHandle
-GeoData::PointFace::face(const GeoData * mesh, FaceHandle start) const
-{
-	if (_face.is_valid() && mesh->triangleContainsPoint(point, _face)) {
-		return _face;
-	}
-	return (_face = mesh->findPoint(point, start));
-}
-
-GeoData::FaceHandle
-GeoData::PointFace::face(const GeoData * mesh) const
-{
-	return face(mesh, *mesh->faces_sbegin());
-}
-
-namespace {
-	constexpr GlobalPosition3D
-	positionOnTriangle(const GlobalPosition2D point, const GeoData::Triangle<3> & t)
-	{
-		const CalcPosition3D a = t[1] - t[0], b = t[2] - t[0];
-		const auto n = crossProduct(a, b);
-		return {point, ((n.x * t[0].x) + (n.y * t[0].y) + (n.z * t[0].z) - (n.x * point.x) - (n.y * point.y)) / n.z};
-	}
-
-	static_assert(positionOnTriangle({7, -2}, {{1, 2, 3}, {1, 0, 1}, {-2, 1, 0}}) == GlobalPosition3D {7, -2, 3});
-}
-
-OpenMesh::FaceHandle
-GeoData::findPoint(GlobalPosition2D p, OpenMesh::FaceHandle f) const
-{
-	while (f.is_valid() && !triangleContainsPoint(p, triangle<2>(f))) {
-		for (auto next = cfh_iter(f); next.is_valid(); ++next) {
-			f = opposite_face_handle(*next);
-			if (f.is_valid()) {
-				const auto e1 = point(to_vertex_handle(*next));
-				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(*next)));
-				if (pointLeftOfLine(p, e1, e2)) {
-					break;
-				}
-			}
-			f.reset();
-		}
-	}
-	return f;
-}
-
-GlobalPosition3D
-GeoData::positionAt(const PointFace & p) const
-{
-	return positionOnTriangle(p.point, triangle<3>(p.face(this)));
-}
-
 [[nodiscard]] GeoData::IntersectionResult
 GeoData::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
@@ -230,11 +162,12 @@ GeoData::walkUntil(const PointFace & from, const GlobalPosition2D to, Tester<Wal
 		for (const auto next : fh_range(step.current)) {
 			step.current = opposite_face_handle(next);
 			if (step.current.is_valid() && step.current != step.previous) {
-				const auto e1 = point(to_vertex_handle(next));
-				const auto e2 = point(to_vertex_handle(opposite_halfedge_handle(next)));
-				if (linesCrossLtR(from.point, to, e1, e2)) {
+				const auto nextPoints = points(toVertexHandles(next));
+				if (linesCrossLtR(from.point, to, nextPoints.second, nextPoints.first)) {
 					step.exitHalfedge = next;
-					step.exitPosition = linesIntersectAt(from.point.xy(), to.xy(), e1.xy(), e2.xy()).value();
+					step.exitPosition
+							= linesIntersectAt(from.point.xy(), to.xy(), nextPoints.second.xy(), nextPoints.first.xy())
+									  .value();
 					break;
 				}
 			}
@@ -337,46 +270,6 @@ GeoData::findEntry(const GlobalPosition2D from, const GlobalPosition2D to) const
 	return entry;
 }
 
-bool
-GeoData::triangleContainsPoint(const GlobalPosition2D p, const Triangle<2> & t)
-{
-	return pointLeftOfOrOnLine(p, t[0], t[1]) && pointLeftOfOrOnLine(p, t[1], t[2])
-			&& pointLeftOfOrOnLine(p, t[2], t[0]);
-}
-
-bool
-GeoData::triangleContainsPoint(const GlobalPosition2D p, FaceHandle face) const
-{
-	return triangleContainsPoint(p, triangle<2>(face));
-}
-
-GeoData::HalfedgeHandle
-GeoData::findBoundaryStart() const
-{
-	return *std::find_if(halfedges_sbegin(), halfedges_end(), [this](const auto heh) {
-		return is_boundary(heh);
-	});
-}
-
-[[nodiscard]] RelativePosition3D
-GeoData::difference(const HalfedgeHandle heh) const
-{
-	return ::difference(point(to_vertex_handle(heh)), point(from_vertex_handle(heh)));
-}
-
-template<glm::length_t D>
-[[nodiscard]] RelativeDistance
-GeoData::length(const HalfedgeHandle heh) const
-{
-	return ::distance<D, GlobalDistance, glm::defaultp>(point(to_vertex_handle(heh)), point(from_vertex_handle(heh)));
-}
-
-[[nodiscard]] GlobalPosition3D
-GeoData::centre(const HalfedgeHandle heh) const
-{
-	return point(from_vertex_handle(heh)) + (difference(heh) / 2.F);
-}
-
 void
 GeoData::updateAllVertexNormals()
 {
@@ -398,22 +291,6 @@ GeoData::updateVertexNormal(VertexHandle vertex)
 	Normal3D n;
 	calc_vertex_normal_correct(vertex, n);
 	set_normal(vertex, glm::normalize(n));
-}
-
-bool
-GeoData::triangleOverlapsTriangle(const Triangle<2> & a, const Triangle<2> & b)
-{
-	return triangleContainsPoint(a.x, b) || triangleContainsPoint(a.y, b) || triangleContainsPoint(a.z, b)
-			|| triangleContainsPoint(b.x, a) || triangleContainsPoint(b.y, a) || triangleContainsPoint(b.z, a)
-			|| linesCross(a.x, a.y, b.x, b.y) || linesCross(a.x, a.y, b.y, b.z) || linesCross(a.x, a.y, b.z, b.x)
-			|| linesCross(a.y, a.z, b.x, b.y) || linesCross(a.y, a.z, b.y, b.z) || linesCross(a.y, a.z, b.z, b.x)
-			|| linesCross(a.z, a.x, b.x, b.y) || linesCross(a.z, a.x, b.y, b.z) || linesCross(a.z, a.x, b.z, b.x);
-}
-
-bool
-GeoData::triangleContainsTriangle(const Triangle<2> & a, const Triangle<2> & b)
-{
-	return triangleContainsPoint(a.x, b) && triangleContainsPoint(a.y, b) && triangleContainsPoint(a.z, b);
 }
 
 std::vector<GeoData::FaceHandle>
@@ -489,7 +366,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	auto getTriangle = [&strip](const auto point) -> const Triangle<3> * {
 		if (const auto t = std::ranges::find_if(strip,
 					[point](const auto & triangle) {
-						return triangleContainsPoint(point, triangle);
+						return triangle.containsPoint(point);
 					});
 				t != strip.end()) {
 			return &*t;
@@ -534,7 +411,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 									   / distance(startPoint.xy(), endPoint.xy()))
 									< opts.nearNodeTolerance) {
 						start = adjVertex;
-						point(start).z = positionOnTriangle(adjPoint, triangle).z;
+						point(start).z = triangle.positionOnPlane(adjPoint).z;
 						return true;
 					}
 					return false;
@@ -554,7 +431,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 								flip(*nextEdge);
 								return true;
 							}
-							start = split_copy(edge_handle(next), positionOnTriangle(*intersection, triangle));
+							start = split_copy(edge_handle(next), triangle.positionOnPlane(*intersection));
 							addVertexForNormalUpdate(start);
 							boundaryTriangles.emplace(start, &triangle);
 							return true;
@@ -610,7 +487,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			}
 		}
 		if (toTriangle) { // point within the new strip, adjust vertically by triangle
-			toPoint.z = positionOnTriangle(toPoint, *toTriangle).z;
+			toPoint.z = toTriangle->positionOnPlane(toPoint).z;
 			addVertexForNormalUpdate(toVertex);
 			todoOutHalfEdges(toVertex);
 		}
@@ -657,23 +534,4 @@ size_t
 GeoData::getGeneration() const
 {
 	return generation;
-}
-
-void
-GeoData::sanityCheck(const std::source_location & loc) const
-{
-	if (const auto upSideDown = std::ranges::count_if(faces(), [this](const auto face) {
-			if (!triangle<2>(face).isUp()) {
-#ifndef NDEBUG
-				for (const auto v : fv_range(face)) {
-					CLOG(point(v));
-				}
-#endif
-				return true;
-			}
-			return false;
-		}) > 0) {
-		throw std::logic_error(std::format(
-				"{} upside down faces detected - checked from {}:{}", upSideDown, loc.function_name(), loc.line()));
-	}
 }
