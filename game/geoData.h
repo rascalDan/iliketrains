@@ -110,9 +110,11 @@ public:
 	}
 
 	template<typename HandleT>
+		requires(std::derived_from<HandleT, OpenMesh::BaseHandle>)
 	[[nodiscard]] auto
 	getSurface(const HandleT handle) const
 	{
+		assert(handle.is_valid());
 		return property(surface, handle);
 	}
 
