@@ -33,7 +33,7 @@ BuilderStraight::click(
 		case SDL_BUTTON_LEFT:
 			if (const auto p = geoData->intersectRay(ray)) {
 				if (p1) {
-					create(network, *p1, p->first);
+					create(network, geoData, *p1, p->first);
 					candidateLinks.removeAll();
 					p1.reset();
 				}
@@ -50,9 +50,9 @@ BuilderStraight::click(
 }
 
 Link::CCollection
-BuilderStraight::create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
+BuilderStraight::create(Network * network, const GeoData * geoData, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
-	const auto links = network->addStraight(p1, p2);
+	const auto links = network->addStraight(geoData, p1, p2);
 	setHeightsFor(network, links);
 	return links;
 }

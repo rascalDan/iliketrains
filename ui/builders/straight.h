@@ -13,7 +13,7 @@ private:
 			const Ray<GlobalPosition3D> & ray) override;
 
 public:
-	Link::CCollection create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const;
+	Link::CCollection create(Network * network, const GeoData *, GlobalPosition3D p1, GlobalPosition3D p2) const;
 
 private:
 	std::optional<GlobalPosition3D> p1;

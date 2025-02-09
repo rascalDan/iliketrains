@@ -14,7 +14,8 @@
 #include <utility>
 
 class SceneShader;
-class Surface;
+struct Surface;
+class GeoData;
 template<typename> class Ray;
 
 template<size_t... n> using GenDef = std::tuple<glm::vec<n, GlobalDistance>...>;
@@ -42,9 +43,9 @@ public:
 	virtual Link::CCollection candidateStraight(GlobalPosition3D, GlobalPosition3D) = 0;
 	virtual Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) = 0;
 	virtual Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection addStraight(GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection addJoins(GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection addExtend(GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection addStraight(const GeoData *, GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection addJoins(const GeoData *, GlobalPosition3D, GlobalPosition3D) = 0;
+	virtual Link::CCollection addExtend(const GeoData *, GlobalPosition3D, GlobalPosition3D) = 0;
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
@@ -106,12 +107,12 @@ public:
 	Link::CCollection candidateStraight(GlobalPosition3D n1, GlobalPosition3D n2) override;
 	Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) override;
 	Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection addStraight(GlobalPosition3D n1, GlobalPosition3D n2) override;
-	Link::CCollection addJoins(GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection addExtend(GlobalPosition3D, GlobalPosition3D) override;
+	Link::CCollection addStraight(const GeoData *, GlobalPosition3D n1, GlobalPosition3D n2) override;
+	Link::CCollection addJoins(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
+	Link::CCollection addExtend(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
 
 	[[nodiscard]] float findNodeDirection(Node::AnyCPtr) const override;
 
 protected:
-	Link::CCollection addJoins();
+	Link::CCollection addCurve(const GeoData *, const GenCurveDef &);
 };

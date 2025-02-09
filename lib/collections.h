@@ -107,6 +107,15 @@ operator+=(std::vector<T...> & in, std::vector<T...> && src)
 	return in;
 }
 
+template<typename... T>
+constexpr auto
+operator+(std::vector<T...> in1, std::vector<T...> in2)
+{
+	in1.reserve(in1.size() + in2.size());
+	std::move(in2.begin(), in2.end(), std::back_inserter(in1));
+	return in1;
+}
+
 template<typename... T, typename Vn>
 [[nodiscard]] constexpr auto
 operator+(const std::vector<T...> & in, Vn && vn)

@@ -77,7 +77,9 @@ Terrain::render(const SceneShader & shader) const
 {
 	shader.landmass.use();
 	grass->bind();
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	meshes.apply(&Mesh::Draw);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void
