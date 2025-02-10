@@ -56,7 +56,6 @@ public:
 	};
 
 	std::vector<FaceHandle> setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
-	[[nodiscard]] size_t getGeneration() const;
 
 	[[nodiscard]] auto
 	getExtents() const
@@ -77,8 +76,8 @@ protected:
 	void updateAllVertexNormals();
 	template<std::ranges::range R> void updateAllVertexNormals(const R &);
 	void updateVertexNormal(VertexHandle);
+	virtual void afterChange();
 
 private:
 	GlobalPosition3D lowerExtent {}, upperExtent {};
-	size_t generation {};
 };

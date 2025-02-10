@@ -30,6 +30,7 @@ public:
 	};
 
 private:
+	void afterChange() override;
 	void generateMeshes();
 
 	Collection<MeshT<Vertex>, false> meshes;

@@ -56,10 +56,12 @@ Terrain::generateMeshes()
 void
 Terrain::tick(TickDuration)
 {
-	if (const auto newGeneration = getGeneration(); newGeneration != geoGeneration) {
+}
+
+void
+Terrain::afterChange()
+{
 		generateMeshes();
-		geoGeneration = newGeneration;
-	}
 }
 
 void
