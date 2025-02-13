@@ -1,7 +1,6 @@
 #pragma once
 
 #include "config/types.h"
-#include "ray.h"
 #include "triangle.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <source_location>
@@ -59,6 +58,36 @@ protected:
 	[[nodiscard]] HalfEdgeVertices toVertexHandles(HalfedgeHandle) const;
 	using HalfEdgePoints = std::pair<GlobalPosition3D, GlobalPosition3D>;
 	[[nodiscard]] HalfEdgePoints points(HalfEdgeVertices) const;
+
+	template<glm::length_t D>
+	[[nodiscard]] auto
+	vertexDistanceFunction(GlobalPosition<D> point) const
+	{
+		struct DistanceCalculator {
+			[[nodiscard]] std::pair<VertexHandle, float>
+			operator()(VertexHandle compVertex) const
+			{
+				return std::make_pair(
+						compVertex, ::distance<D, GlobalDistance, glm::defaultp>(point, mesh->point(compVertex)));
+			}
+
+			[[nodiscard]]
+			std::pair<HalfedgeHandle, float>
+			operator()(const HalfedgeHandle compHalfedge) const
+			{
+				const auto edgePoints = mesh->points(mesh->toVertexHandles(compHalfedge));
+				return std::make_pair(compHalfedge, Triangle<2> {edgePoints.second, edgePoints.first, point}.height());
+			};
+
+			const GeoDataMesh * mesh;
+			GlobalPosition<D> point;
+		};
+
+		return DistanceCalculator {this, point};
+	}
+
+	[[nodiscard]] bool canFlip(HalfedgeHandle edge) const;
+	[[nodiscard]] std::optional<EdgeHandle> shouldFlip(HalfedgeHandle next, GlobalPosition2D startPoint) const;
 
 	template<glm::length_t D>
 	[[nodiscard]] RelativeDistance

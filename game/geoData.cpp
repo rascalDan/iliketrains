@@ -291,6 +291,37 @@ GeoData::updateVertexNormal(VertexHandle vertex)
 	set_normal(vertex, glm::normalize(n));
 }
 
+OpenMesh::VertexHandle
+GeoData::setPoint(GlobalPosition3D tsPoint, const SetHeightsOpts & opts)
+{
+	const auto face = findPoint(tsPoint);
+	const auto distFromTsPoint = vertexDistanceFunction<2>(tsPoint);
+	// Check vertices
+	if (const auto nearest
+			= std::ranges::min(std::views::iota(fv_begin(face), fv_end(face)) | std::views::transform(distFromTsPoint),
+					{}, &std::pair<VertexHandle, float>::second);
+			nearest.second < opts.nearNodeTolerance) {
+		point(nearest.first).z = tsPoint.z;
+		return nearest.first;
+	}
+	// Check edges
+	if (const auto nearest
+			= std::ranges::min(std::views::iota(fh_begin(face), fh_end(face)) | std::views::transform(distFromTsPoint),
+					{}, &std::pair<HalfedgeHandle, float>::second);
+			nearest.second < opts.nearNodeTolerance) {
+		const auto from = point(from_vertex_handle(nearest.first)).xy();
+		const auto to = point(to_vertex_handle(nearest.first)).xy();
+		const auto v = vector_normal(from - to);
+		const auto inter = linesIntersectAt(from, to, tsPoint.xy(), tsPoint.xy() + v);
+		if (!inter) {
+			throw std::runtime_error("Perpendicular lines do not cross");
+		}
+		return split_copy(edge_handle(nearest.first), *inter || tsPoint.z);
+	}
+	// Nothing close, split face
+	return split_copy(face, tsPoint);
+};
+
 std::vector<GeoData::FaceHandle>
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts & opts)
 {
@@ -301,57 +332,18 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	lowerExtent.z = std::min(upperExtent.z, stripMinMax.min.z);
 	upperExtent.z = std::max(upperExtent.z, stripMinMax.max.z);
 
-	const auto vertexDistFrom = [this](GlobalPosition2D p) {
-		return [p, this](const VertexHandle v) {
-			return std::make_pair(v, ::distance(p, this->point(v).xy()));
-		};
-	};
-	const auto vertexDistFromE = [this](GlobalPosition2D p) {
-		return [p, this](const HalfedgeHandle e) {
-			const auto fromPoint = point(from_vertex_handle(e)).xy();
-			const auto toPoint = point(to_vertex_handle(e)).xy();
-			return std::make_pair(e, Triangle<2> {fromPoint, toPoint, p}.height());
-		};
-	};
-
 	std::set<VertexHandle> newOrChangedVerts;
 	auto addVertexForNormalUpdate = [this, &newOrChangedVerts](const VertexHandle vertex) {
 		newOrChangedVerts.emplace(vertex);
 		std::ranges::copy(vv_range(vertex), std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
 	};
 
-	auto newVertexOnFace = [this, &vertexDistFrom, &opts, &vertexDistFromE](GlobalPosition3D tsPoint) {
-		const auto face = findPoint(tsPoint);
-		// Check vertices
-		if (const auto nearest = std::ranges::min(
-					std::views::iota(fv_begin(face), fv_end(face)) | std::views::transform(vertexDistFrom(tsPoint)), {},
-					&std::pair<VertexHandle, float>::second);
-				nearest.second < opts.nearNodeTolerance) {
-			point(nearest.first).z = tsPoint.z;
-			return nearest.first;
-		}
-		// Check edges
-		if (const auto nearest = std::ranges::min(
-					std::views::iota(fh_begin(face), fh_end(face)) | std::views::transform(vertexDistFromE(tsPoint)),
-					{}, &std::pair<HalfedgeHandle, float>::second);
-				nearest.second < opts.nearNodeTolerance) {
-			const auto from = point(from_vertex_handle(nearest.first)).xy();
-			const auto to = point(to_vertex_handle(nearest.first)).xy();
-			const auto v = vector_normal(from - to);
-			const auto inter = linesIntersectAt(from, to, tsPoint.xy(), tsPoint.xy() + v);
-			if (!inter) {
-				throw std::runtime_error("Perpendicular lines do not cross");
-			}
-			return split_copy(edge_handle(nearest.first), *inter || tsPoint.z);
-		}
-		// Nothing close, split face
-		return split_copy(face, tsPoint);
-	};
-
 	// New vertices for each vertex in triangleStrip
 	std::vector<VertexHandle> newVerts;
 	newVerts.reserve(triangleStrip.size());
-	std::transform(triangleStrip.begin(), triangleStrip.end(), std::back_inserter(newVerts), newVertexOnFace);
+	std::ranges::transform(triangleStrip, std::back_inserter(newVerts), [this, &opts](auto v) {
+		return setPoint(v, opts);
+	});
 	std::ranges::for_each(newVerts, addVertexForNormalUpdate);
 
 	// Create temporary triangles from triangleStrip
@@ -371,31 +363,11 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 		return nullptr;
 	};
-	const auto canFlip = [this](const HalfedgeHandle edge) {
-		const auto opposite = opposite_halfedge_handle(edge);
-		const auto pointA = point(to_vertex_handle(edge));
-		const auto pointB = point(to_vertex_handle(opposite));
-		const auto pointC = point(to_vertex_handle(next_halfedge_handle(edge)));
-		const auto pointD = point(to_vertex_handle(next_halfedge_handle(opposite)));
-
-		return Triangle<2> {pointC, pointB, pointD}.isUp() && Triangle<2> {pointA, pointC, pointD}.isUp();
-	};
-	const auto shouldFlip = [this, &canFlip](const HalfedgeHandle next,
-									const GlobalPosition2D startPoint) -> std::optional<EdgeHandle> {
-		if (const auto nextEdge = edge_handle(next); is_flip_ok(nextEdge) && canFlip(next)) {
-			const auto opposite_point
-					= point(to_vertex_handle(next_halfedge_handle(opposite_halfedge_handle(next)))).xy();
-			if (distance<2>(startPoint, opposite_point) < length<2>(next)) {
-				return nextEdge;
-			}
-		}
-		return std::nullopt;
-	};
 	sanityCheck();
 
 	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
 	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &opts, &addVertexForNormalUpdate, &shouldFlip](
+	auto doBoundaryPart = [this, &boundaryTriangles, &opts, &addVertexForNormalUpdate](
 								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
 		boundaryTriangles.emplace(start, &triangle);
 		const auto endPoint = point(end);

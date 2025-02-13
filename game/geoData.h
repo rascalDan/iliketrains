@@ -73,6 +73,7 @@ public:
 	}
 
 protected:
+	[[nodiscard]] VertexHandle setPoint(GlobalPosition3D point, const SetHeightsOpts &);
 	void updateAllVertexNormals();
 	template<std::ranges::range R> void updateAllVertexNormals(const R &);
 	void updateVertexNormal(VertexHandle);
