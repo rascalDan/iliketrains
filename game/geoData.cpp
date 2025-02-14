@@ -1,6 +1,7 @@
 #include "geoData.h"
 #include "collections.h"
 #include "geometricPlane.h"
+#include "util.h"
 #include <fstream>
 #include <glm/gtx/intersect.hpp>
 #include <maths.h>
@@ -297,23 +298,19 @@ GeoData::setPoint(GlobalPosition3D tsPoint, const SetHeightsOpts & opts)
 	const auto face = findPoint(tsPoint);
 	const auto distFromTsPoint = vertexDistanceFunction<2>(tsPoint);
 	// Check vertices
-	if (const auto nearest
-			= std::ranges::min(std::views::iota(fv_begin(face), fv_end(face)) | std::views::transform(distFromTsPoint),
-					{}, &std::pair<VertexHandle, float>::second);
+	if (const auto nearest = std::ranges::min(fv_range(face) | std::views::transform(distFromTsPoint), {}, GetSecond);
 			nearest.second < opts.nearNodeTolerance) {
 		point(nearest.first).z = tsPoint.z;
 		return nearest.first;
 	}
 	// Check edges
-	if (const auto nearest
-			= std::ranges::min(std::views::iota(fh_begin(face), fh_end(face)) | std::views::transform(distFromTsPoint),
-					{}, &std::pair<HalfedgeHandle, float>::second);
+	if (const auto nearest = std::ranges::min(fh_range(face) | std::views::transform(distFromTsPoint), {}, GetSecond);
 			nearest.second < opts.nearNodeTolerance) {
 		const auto from = point(from_vertex_handle(nearest.first)).xy();
 		const auto to = point(to_vertex_handle(nearest.first)).xy();
 		const auto v = vector_normal(from - to);
 		const auto inter = linesIntersectAt(from, to, tsPoint.xy(), tsPoint.xy() + v);
-		if (!inter) {
+		if (!inter) [[unlikely]] {
 			throw std::runtime_error("Perpendicular lines do not cross");
 		}
 		return split_copy(edge_handle(nearest.first), *inter || tsPoint.z);
