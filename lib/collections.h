@@ -197,12 +197,28 @@ template<typename iter> struct stripiter {
 		return *this;
 	}
 
+	constexpr stripiter
+	operator++(int)
+	{
+		auto out {*this};
+		++*this;
+		return out;
+	}
+
 	constexpr stripiter &
 	operator--()
 	{
 		--current;
 		off = 1 - off;
 		return *this;
+	}
+
+	constexpr stripiter
+	operator--(int)
+	{
+		auto out {*this};
+		--*this;
+		return out;
 	}
 
 	constexpr auto
@@ -234,6 +250,16 @@ strip_end(IterableCollection auto & cont)
 {
 	return stripiter {cont.end()};
 }
+
+struct TriangleTriplesImpl : public std::ranges::range_adaptor_closure<TriangleTriplesImpl> {
+	decltype(auto)
+	operator()(const auto & triangleStrip) const
+	{
+		return std::views::iota(strip_begin(triangleStrip), strip_end(triangleStrip));
+	}
+};
+
+constexpr TriangleTriplesImpl TriangleTriples;
 
 template<typename T, typename Dist, typename Merger>
 void

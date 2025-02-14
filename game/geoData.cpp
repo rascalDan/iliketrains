@@ -344,12 +344,10 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	std::ranges::for_each(newVerts, addVertexForNormalUpdate);
 
 	// Create temporary triangles from triangleStrip
-	std::vector<Triangle<3>> strip;
-	std::transform(
-			strip_begin(triangleStrip), strip_end(triangleStrip), std::back_inserter(strip), [](const auto & newVert) {
-				const auto [a, b, c] = newVert;
-				return Triangle<3> {a, b, c};
-			});
+	const auto strip
+			= materializeRange(triangleStrip | TriangleTriples | std::views::transform([](const auto & newVert) {
+				  return std::make_from_tuple<Triangle<3>>(*newVert);
+			  }));
 	auto getTriangle = [&strip](const auto point) -> const Triangle<3> * {
 		if (const auto t = std::ranges::find_if(strip,
 					[point](const auto & triangle) {
