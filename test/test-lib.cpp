@@ -1,5 +1,6 @@
 #define BOOST_TEST_MODULE test_lib
 
+#include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <stream_support.h>
@@ -66,8 +67,16 @@ BOOST_AUTO_TEST_CASE(triangle_strip_iter)
 		out.push_back(c);
 	});
 	BOOST_REQUIRE_EQUAL(out.size(), (TRIANGLE_STRIP_IN.size() - 2) * 3);
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-			out.begin(), out.end(), TRIANGLE_STRIP_EXPECTED.begin(), TRIANGLE_STRIP_EXPECTED.end());
+	BOOST_CHECK_EQUAL_COLCOL(out, TRIANGLE_STRIP_EXPECTED);
+}
+
+BOOST_AUTO_TEST_CASE(triangle_strip_range_adapter)
+{
+	using TriTuple = std::tuple<int, int, int>;
+	std::vector<TriTuple> outRange;
+	std::ranges::copy(TRIANGLE_STRIP_IN | triangleTriples, std::back_inserter(outRange));
+	constexpr std::array<TriTuple, 4> TRIANGLE_STRIP_EXPECTED_TUPLES {{{0, 1, 2}, {2, 1, 3}, {2, 3, 4}, {4, 3, 5}}};
+	BOOST_CHECK_EQUAL_COLCOL(outRange, TRIANGLE_STRIP_EXPECTED_TUPLES);
 }
 
 using MergeCloseData = std::tuple<std::vector<int>, int, std::vector<int>>;
@@ -99,5 +108,5 @@ BOOST_DATA_TEST_CASE(mergeCloseInts,
 				return (left + right) / 2;
 			},
 			tolerance)));
-	BOOST_CHECK_EQUAL_COLLECTIONS(mutableCollection.begin(), mutableCollection.end(), expected.begin(), expected.end());
+	BOOST_CHECK_EQUAL_COLCOL(mutableCollection, expected);
 }

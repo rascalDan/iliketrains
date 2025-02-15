@@ -29,7 +29,7 @@ namespace {
 	};
 }
 
-template<size_t... N> constexpr auto Nth = GetNth<N...> {};
-constexpr auto GetFirst = Nth<0>;
-constexpr auto GetSecond = Nth<1>;
-constexpr auto GetSwapped = Nth<0, 1>;
+template<size_t... N> inline constexpr auto Nth = GetNth<N...> {};
+inline constexpr auto GetFirst = Nth<0>;
+inline constexpr auto GetSecond = Nth<1>;
+inline constexpr auto GetSwapped = Nth<0, 1>;

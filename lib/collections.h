@@ -251,15 +251,19 @@ strip_end(IterableCollection auto & cont)
 	return stripiter {cont.end()};
 }
 
-struct TriangleTriplesImpl : public std::ranges::range_adaptor_closure<TriangleTriplesImpl> {
+inline constexpr auto dereference = std::views::transform([](const auto & iter) -> decltype(auto) {
+	return *iter;
+});
+
+struct TriangleTriples : public std::ranges::range_adaptor_closure<TriangleTriples> {
 	decltype(auto)
 	operator()(const auto & triangleStrip) const
 	{
-		return std::views::iota(strip_begin(triangleStrip), strip_end(triangleStrip));
+		return std::views::iota(strip_begin(triangleStrip), strip_end(triangleStrip)) | dereference;
 	}
 };
 
-constexpr TriangleTriplesImpl TriangleTriples;
+inline constexpr TriangleTriples triangleTriples;
 
 template<typename T, typename Dist, typename Merger>
 void
