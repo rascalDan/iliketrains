@@ -350,7 +350,9 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			std::ranges::for_each(newVerts, [this](auto vertex) {
 				addVertexForNormalUpdate(vertex);
 			});
+#ifndef NDEBUG
 			geoData->sanityCheck();
+#endif
 			return newVerts;
 		}
 
@@ -431,8 +433,8 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 				for (const auto v : geoData->vv_range(start)) {
 					CLOG(geoData->point(v));
 				}
-#endif
 				geoData->sanityCheck();
+#endif
 				throw std::runtime_error(
 						std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
 			}
@@ -499,7 +501,9 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 				addVertexForNormalUpdate(ends.first);
 				addVertexForNormalUpdate(ends.second);
 			});
+#ifndef NDEBUG
 			geoData->sanityCheck();
+#endif
 		}
 
 		std::vector<FaceHandle>

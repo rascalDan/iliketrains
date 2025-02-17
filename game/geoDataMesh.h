@@ -49,7 +49,9 @@ public:
 	[[nodiscard]] GlobalPosition3D positionAt(const PointFace &) const;
 
 protected:
+#ifndef NDEBUG
 	void sanityCheck(const std::source_location & = std::source_location::current()) const;
+#endif
 
 	[[nodiscard]] bool faceContainsPoint(GlobalPosition2D, FaceHandle) const;
 	[[nodiscard]] HalfedgeHandle findBoundaryStart() const;

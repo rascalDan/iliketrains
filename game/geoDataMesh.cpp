@@ -98,16 +98,15 @@ GeoDataMesh::centre(const HalfedgeHandle heh) const
 	return midpoint(hehPoints.first, hehPoints.second);
 }
 
+#ifndef NDEBUG
 void
 GeoDataMesh::sanityCheck(const std::source_location & loc) const
 {
 	if (const auto upSideDown = std::ranges::count_if(faces(), [this](const auto face) {
 			if (!triangle<2>(face).isUp()) {
-#ifndef NDEBUG
 				for (const auto vertex : fv_range(face)) {
 					CLOG(point(vertex));
 				}
-#endif
 				return true;
 			}
 			return false;
@@ -116,6 +115,7 @@ GeoDataMesh::sanityCheck(const std::source_location & loc) const
 				"{} upside down faces detected - checked from {}:{}", upSideDown, loc.function_name(), loc.line()));
 	}
 }
+#endif
 
 bool
 GeoDataMesh::canFlip(const HalfedgeHandle edge) const
