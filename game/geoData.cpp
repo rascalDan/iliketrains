@@ -293,19 +293,19 @@ GeoData::updateVertexNormal(VertexHandle vertex)
 }
 
 OpenMesh::VertexHandle
-GeoData::setPoint(GlobalPosition3D tsPoint, const SetHeightsOpts & opts)
+GeoData::setPoint(GlobalPosition3D tsPoint, const RelativeDistance nearNodeTolerance)
 {
 	const auto face = findPoint(tsPoint);
 	const auto distFromTsPoint = vertexDistanceFunction<2>(tsPoint);
 	// Check vertices
 	if (const auto nearest = std::ranges::min(fv_range(face) | std::views::transform(distFromTsPoint), {}, GetSecond);
-			nearest.second < opts.nearNodeTolerance) {
+			nearest.second < nearNodeTolerance) {
 		point(nearest.first).z = tsPoint.z;
 		return nearest.first;
 	}
 	// Check edges
 	if (const auto nearest = std::ranges::min(fh_range(face) | std::views::transform(distFromTsPoint), {}, GetSecond);
-			nearest.second < opts.nearNodeTolerance) {
+			nearest.second < nearNodeTolerance) {
 		const auto from = point(from_vertex_handle(nearest.first)).xy();
 		const auto to = point(to_vertex_handle(nearest.first)).xy();
 		const auto v = vector_normal(from - to);
@@ -329,170 +329,224 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	lowerExtent.z = std::min(upperExtent.z, stripMinMax.min.z);
 	upperExtent.z = std::max(upperExtent.z, stripMinMax.max.z);
 
-	std::set<VertexHandle> newOrChangedVerts;
-	auto addVertexForNormalUpdate = [this, &newOrChangedVerts](const VertexHandle vertex) {
-		newOrChangedVerts.emplace(vertex);
-		std::ranges::copy(vv_range(vertex), std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
-	};
-
-	// New vertices for each vertex in triangleStrip
-	std::vector<VertexHandle> newVerts;
-	newVerts.reserve(triangleStrip.size());
-	std::ranges::transform(triangleStrip, std::back_inserter(newVerts), [this, &opts](auto v) {
-		return setPoint(v, opts);
-	});
-	std::ranges::for_each(newVerts, addVertexForNormalUpdate);
-
-	// Create temporary triangles from triangleStrip
-	const auto strip
-			= materializeRange(triangleStrip | triangleTriples | std::views::transform([](const auto & newVert) {
-				  return std::make_from_tuple<Triangle<3>>(newVert);
-			  }));
-	auto getTriangle = [&strip](const auto point) -> const Triangle<3> * {
-		if (const auto t = std::ranges::find_if(strip,
-					[point](const auto & triangle) {
-						return triangle.containsPoint(point);
-					});
-				t != strip.end()) {
-			return &*t;
+	class SetHeights {
+	public:
+		SetHeights(GeoData * geoData, const std::span<const GlobalPosition3D> triangleStrip) :
+			geoData(geoData), triangleStrip {triangleStrip},
+			strip {materializeRange(triangleStrip | triangleTriples | std::views::transform([](const auto & newVert) {
+				return std::make_from_tuple<Triangle<3>>(newVert);
+			}))}
+		{
 		}
-		return nullptr;
-	};
-	sanityCheck();
 
-	// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
-	std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
-	auto doBoundaryPart = [this, &boundaryTriangles, &opts, &addVertexForNormalUpdate](
-								  VertexHandle start, VertexHandle end, const Triangle<3> & triangle) {
-		boundaryTriangles.emplace(start, &triangle);
-		const auto endPoint = point(end);
-		while (!std::ranges::contains(vv_range(start), end)) {
-			const auto startPoint = point(start);
-			const auto distanceToEndPoint = distance(startPoint.xy(), endPoint.xy());
-			if (std::ranges::any_of(vv_range(start), [&](const auto & adjVertex) {
-					const auto adjPoint = point(adjVertex);
-					if (distance(adjPoint.xy(), endPoint.xy()) < distanceToEndPoint
-							&& (Triangle<2> {startPoint, endPoint, adjPoint}.area()
-									   / distance(startPoint.xy(), endPoint.xy()))
-									< opts.nearNodeTolerance) {
-						start = adjVertex;
-						point(start).z = triangle.positionOnPlane(adjPoint).z;
-						return true;
-					}
-					return false;
-				})) {
-				continue;
+		std::vector<VertexHandle>
+		createVerticesForStrip(RelativeDistance nearNodeTolerance)
+		{
+			// New vertices for each vertex in triangleStrip
+			const auto newVerts
+					= materializeRange(triangleStrip | std::views::transform([this, nearNodeTolerance](auto v) {
+						  return geoData->setPoint(v, nearNodeTolerance);
+					  }));
+			std::ranges::for_each(newVerts, [this](auto vertex) {
+				addVertexForNormalUpdate(vertex);
+			});
+			geoData->sanityCheck();
+			return newVerts;
+		}
+
+		void
+		addVertexForNormalUpdate(const VertexHandle vertex)
+		{
+			newOrChangedVerts.emplace(vertex);
+			std::ranges::copy(geoData->vv_range(vertex), std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
+		}
+
+		const Triangle<3> *
+		getTriangle(const GlobalPosition2D point) const
+		{
+			if (const auto t = std::ranges::find_if(strip,
+						[point](const auto & triangle) {
+							return triangle.containsPoint(point);
+						});
+					t != strip.end()) {
+				return &*t;
 			}
-			if (std::ranges::any_of(voh_range(start), [&](const auto & outHalf) {
-					const auto next = next_halfedge_handle(outHalf);
-					const auto nexts = std::array {from_vertex_handle(next), to_vertex_handle(next)};
-					const auto nextPoints = nexts | std::views::transform([this](const auto v) {
-						return std::make_pair(v, this->point(v));
-					});
-					if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
-						if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
-									nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
-							if (const auto nextEdge = shouldFlip(next, startPoint)) {
-								flip(*nextEdge);
-								return true;
-							}
-							start = split_copy(edge_handle(next), triangle.positionOnPlane(*intersection));
-							addVertexForNormalUpdate(start);
-							boundaryTriangles.emplace(start, &triangle);
+			return nullptr;
+		}
+
+		void
+		doBoundaryPart(VertexHandle start, VertexHandle end, const Triangle<3> & triangle,
+				const RelativeDistance nearNodeTolerance)
+		{
+			boundaryTriangles.emplace(start, &triangle);
+			const auto endPoint = geoData->point(end);
+			while (!std::ranges::contains(geoData->vv_range(start), end)) {
+				const auto startPoint = geoData->point(start);
+				const auto distanceToEndPoint = distance(startPoint.xy(), endPoint.xy());
+				if (std::ranges::any_of(geoData->vv_range(start), [&](const auto & adjVertex) {
+						const auto adjPoint = geoData->point(adjVertex);
+						if (distance(adjPoint.xy(), endPoint.xy()) < distanceToEndPoint
+								&& (Triangle<2> {startPoint, endPoint, adjPoint}.area()
+										   / distance(startPoint.xy(), endPoint.xy()))
+										< nearNodeTolerance) {
+							start = adjVertex;
+							geoData->point(start).z = triangle.positionOnPlane(adjPoint).z;
 							return true;
 						}
-						throw std::runtime_error("Crossing lines don't intersect");
-					}
-					return false;
-				})) {
-				continue;
-			}
-#ifndef NDEBUG
-			CLOG(start);
-			CLOG(startPoint);
-			CLOG(end);
-			CLOG(endPoint);
-			for (const auto v : vv_range(start)) {
-				CLOG(point(v));
-			}
-#endif
-			sanityCheck();
-			throw std::runtime_error(
-					std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
-		}
-	};
-	auto doBoundary = [&doBoundaryPart, triangle = strip.begin()](const auto & verts) mutable {
-		const auto & [a, _, c] = verts;
-		doBoundaryPart(a, c, *triangle);
-		triangle++;
-	};
-	std::ranges::for_each(newVerts | std::views::adjacent<3>, doBoundary);
-	doBoundaryPart(*++newVerts.begin(), newVerts.front(), strip.front());
-	doBoundaryPart(*++newVerts.rbegin(), newVerts.back(), strip.back());
-
-	std::set<HalfedgeHandle> done;
-	std::set<HalfedgeHandle> todo;
-	auto todoOutHalfEdges = [&todo, &done, this](const VertexHandle v) {
-		std::copy_if(voh_begin(v), voh_end(v), std::inserter(todo, todo.end()), [&done](const auto & h) {
-			return !done.contains(h);
-		});
-	};
-	std::ranges::for_each(newVerts, todoOutHalfEdges);
-	while (!todo.empty()) {
-		const auto heh = todo.extract(todo.begin()).value();
-		const auto fromVertex = from_vertex_handle(heh);
-		const auto toVertex = to_vertex_handle(heh);
-		const auto & fromPoint = point(fromVertex);
-		auto & toPoint = point(toVertex);
-		auto toTriangle = getTriangle(toPoint);
-		if (!toTriangle) {
-			if (const auto boundaryVertex = boundaryTriangles.find(toVertex);
-					boundaryVertex != boundaryTriangles.end()) {
-				toTriangle = boundaryVertex->second;
-			}
-		}
-		if (toTriangle) { // point within the new strip, adjust vertically by triangle
-			toPoint.z = toTriangle->positionOnPlane(toPoint).z;
-			addVertexForNormalUpdate(toVertex);
-			todoOutHalfEdges(toVertex);
-		}
-		else if (!toTriangle) { // point without the new strip, adjust vertically by limit
-			const auto maxOffset = static_cast<GlobalDistance>(opts.maxSlope * length<2>(heh));
-			const auto newHeight = std::clamp(toPoint.z, fromPoint.z - maxOffset, fromPoint.z + maxOffset);
-			if (newHeight != toPoint.z) {
-				toPoint.z = newHeight;
-				addVertexForNormalUpdate(toVertex);
-				std::copy_if(voh_begin(toVertex), voh_end(toVertex), std::inserter(todo, todo.end()),
-						[this, &boundaryTriangles](const auto & heh) {
-							return !boundaryTriangles.contains(to_vertex_handle(heh));
+						return false;
+					})) {
+					continue;
+				}
+				if (std::ranges::any_of(geoData->voh_range(start), [&](const auto & outHalf) {
+						const auto next = geoData->next_halfedge_handle(outHalf);
+						const auto nexts
+								= std::array {geoData->from_vertex_handle(next), geoData->to_vertex_handle(next)};
+						const auto nextPoints = nexts | std::views::transform([this](const auto v) {
+							return std::make_pair(v, geoData->point(v));
 						});
+						if (linesCross(startPoint, endPoint, nextPoints.front().second, nextPoints.back().second)) {
+							if (const auto intersection = linesIntersectAt(startPoint.xy(), endPoint.xy(),
+										nextPoints.front().second.xy(), nextPoints.back().second.xy())) {
+								if (const auto nextEdge = geoData->shouldFlip(next, startPoint)) {
+									geoData->flip(*nextEdge);
+									return true;
+								}
+								start = geoData->split_copy(
+										geoData->edge_handle(next), triangle.positionOnPlane(*intersection));
+								addVertexForNormalUpdate(start);
+								boundaryTriangles.emplace(start, &triangle);
+								return true;
+							}
+							throw std::runtime_error("Crossing lines don't intersect");
+						}
+						return false;
+					})) {
+					continue;
+				}
+#ifndef NDEBUG
+				CLOG(start);
+				CLOG(startPoint);
+				CLOG(end);
+				CLOG(endPoint);
+				for (const auto v : geoData->vv_range(start)) {
+					CLOG(geoData->point(v));
+				}
+#endif
+				geoData->sanityCheck();
+				throw std::runtime_error(
+						std::format("Could not navigate to ({}, {}, {})", endPoint.x, endPoint.y, endPoint.z));
 			}
 		}
-		done.insert(heh);
-	}
-	sanityCheck();
 
-	std::vector<FaceHandle> out;
-	auto surfaceStripWalk
-			= [this, &getTriangle, &opts, &out](const auto & surfaceStripWalk, const auto & face) -> void {
-		if (!property(surface, face)) {
-			property(surface, face) = opts.surface;
-			out.emplace_back(face);
-			std::ranges::for_each(
-					ff_range(face), [this, &getTriangle, &surfaceStripWalk](const auto & adjacentFaceHandle) {
-						if (getTriangle(this->triangle<2>(adjacentFaceHandle).centroid())) {
-							surfaceStripWalk(surfaceStripWalk, adjacentFaceHandle);
-						}
+		void
+		cutBoundary(const std::vector<VertexHandle> & newVerts, RelativeDistance nearNodeTolerance)
+		{
+			// Cut along each edge of triangleStrip AB, AC, BC, BD, CD, CE etc
+			std::ranges::for_each(newVerts | std::views::adjacent<3>,
+					[this, nearNodeTolerance, triangle = strip.begin()](const auto & verts) mutable {
+						const auto & [a, _, c] = verts;
+						doBoundaryPart(a, c, *triangle, nearNodeTolerance);
+						triangle++;
 					});
+			doBoundaryPart(*++newVerts.begin(), newVerts.front(), strip.front(), nearNodeTolerance);
+			doBoundaryPart(*++newVerts.rbegin(), newVerts.back(), strip.back(), nearNodeTolerance);
 		}
-	};
-	for (const auto & triangle : strip) {
-		surfaceStripWalk(surfaceStripWalk, findPoint(triangle.centroid()));
-	}
 
-	updateAllVertexNormals(newOrChangedVerts);
-	afterChange();
-	return out;
+		void
+		setHeights(const std::vector<VertexHandle> & newVerts, RelativeDistance maxSlope)
+		{
+			std::set<HalfedgeHandle> done;
+			std::set<HalfedgeHandle> todo;
+			auto todoOutHalfEdges = [&todo, &done, this](const VertexHandle v) {
+				std::ranges::copy_if(geoData->voh_range(v), std::inserter(todo, todo.end()), [&done](const auto & h) {
+					return !done.contains(h);
+				});
+			};
+			std::ranges::for_each(newVerts, todoOutHalfEdges);
+			auto setHalfedgeToHeight = [this, &todoOutHalfEdges, maxSlope, &done](
+											   const auto & setHalfedgeToHeight, const HalfedgeHandle heh) -> void {
+				const auto [fromVertex, toVertex] = geoData->toVertexHandles(heh);
+				auto & toPoint = geoData->point(toVertex);
+				auto toTriangle = getTriangle(toPoint);
+				if (!toTriangle) {
+					if (const auto boundaryVertex = boundaryTriangles.find(toVertex);
+							boundaryVertex != boundaryTriangles.end()) {
+						toTriangle = boundaryVertex->second;
+					}
+				}
+				if (toTriangle) { // point within the new strip, adjust vertically by triangle
+					toPoint.z = toTriangle->positionOnPlane(toPoint).z;
+					todoOutHalfEdges(toVertex);
+				}
+				else { // point without the new strip, adjust vertically by limit
+					const auto maxOffset = static_cast<GlobalDistance>(maxSlope * geoData->length<2>(heh));
+					const auto fromHeight = geoData->point(fromVertex).z;
+					const auto newHeight = std::clamp(toPoint.z, fromHeight - maxOffset, fromHeight + maxOffset);
+					if (newHeight != toPoint.z) {
+						toPoint.z = newHeight;
+						std::ranges::for_each(geoData->voh_range(toVertex), [&setHalfedgeToHeight](const auto heh) {
+							setHalfedgeToHeight(setHalfedgeToHeight, heh);
+						});
+					}
+				}
+				done.insert(heh);
+			};
+			while (!todo.empty()) {
+				setHalfedgeToHeight(setHalfedgeToHeight, todo.extract(todo.begin()).value());
+			}
+			std::ranges::for_each(done, [this](const auto heh) {
+				const auto ends = geoData->toVertexHandles(heh);
+				addVertexForNormalUpdate(ends.first);
+				addVertexForNormalUpdate(ends.second);
+			});
+			geoData->sanityCheck();
+		}
+
+		std::vector<FaceHandle>
+		setSurface(const Surface * surface)
+		{
+			std::vector<FaceHandle> out;
+			auto surfaceStripWalk = [this, surface, &out](const auto & surfaceStripWalk, const auto & face) -> void {
+				if (!geoData->property(geoData->surface, face)) {
+					geoData->property(geoData->surface, face) = surface;
+					out.emplace_back(face);
+					std::ranges::for_each(
+							geoData->ff_range(face), [this, &surfaceStripWalk](const auto & adjacentFaceHandle) {
+								if (getTriangle(geoData->triangle<2>(adjacentFaceHandle).centroid())) {
+									surfaceStripWalk(surfaceStripWalk, adjacentFaceHandle);
+								}
+							});
+				}
+			};
+			for (const auto & triangle : strip) {
+				surfaceStripWalk(surfaceStripWalk, geoData->findPoint(triangle.centroid()));
+			}
+			return out;
+		}
+
+		std::vector<GeoData::FaceHandle>
+		run(const SetHeightsOpts & opts)
+		{
+			const std::vector<VertexHandle> newVerts = createVerticesForStrip(opts.nearNodeTolerance);
+			cutBoundary(newVerts, opts.nearNodeTolerance);
+			setHeights(newVerts, opts.maxSlope);
+			const auto out = setSurface(opts.surface);
+
+			geoData->updateAllVertexNormals(newOrChangedVerts);
+			geoData->afterChange();
+
+			return out;
+		}
+
+	private:
+		GeoData * geoData;
+		const std::span<const GlobalPosition3D> triangleStrip;
+		const std::vector<Triangle<3>> strip;
+		std::set<VertexHandle> newOrChangedVerts;
+		std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
+	};
+
+	return SetHeights {this, triangleStrip}.run(opts);
 }
 
 void
