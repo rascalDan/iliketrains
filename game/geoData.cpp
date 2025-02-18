@@ -347,20 +347,11 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 					= materializeRange(triangleStrip | std::views::transform([this, nearNodeTolerance](auto v) {
 						  return geoData->setPoint(v, nearNodeTolerance);
 					  }));
-			std::ranges::for_each(newVerts, [this](auto vertex) {
-				addVertexForNormalUpdate(vertex);
-			});
+			std::ranges::copy(newVerts, std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
 #ifndef NDEBUG
 			geoData->sanityCheck();
 #endif
 			return newVerts;
-		}
-
-		void
-		addVertexForNormalUpdate(const VertexHandle vertex)
-		{
-			newOrChangedVerts.emplace(vertex);
-			std::ranges::copy(geoData->vv_range(vertex), std::inserter(newOrChangedVerts, newOrChangedVerts.end()));
 		}
 
 		const Triangle<3> *
@@ -415,7 +406,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 								}
 								start = geoData->split_copy(
 										geoData->edge_handle(next), triangle.positionOnPlane(*intersection));
-								addVertexForNormalUpdate(start);
+								newOrChangedVerts.emplace(start);
 								boundaryTriangles.emplace(start, &triangle);
 								return true;
 							}
@@ -498,8 +489,8 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			}
 			std::ranges::for_each(done, [this](const auto heh) {
 				const auto ends = geoData->toVertexHandles(heh);
-				addVertexForNormalUpdate(ends.first);
-				addVertexForNormalUpdate(ends.second);
+				newOrChangedVerts.emplace(ends.first);
+				newOrChangedVerts.emplace(ends.second);
 			});
 #ifndef NDEBUG
 			geoData->sanityCheck();
@@ -536,6 +527,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			setHeights(newVerts, opts.maxSlope);
 			const auto out = setSurface(opts.surface);
 
+			geoData->expandVerts(newOrChangedVerts);
 			geoData->updateAllVertexNormals(newOrChangedVerts);
 			geoData->afterChange();
 

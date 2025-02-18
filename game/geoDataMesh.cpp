@@ -140,3 +140,11 @@ GeoDataMesh::shouldFlip(const HalfedgeHandle next, const GlobalPosition2D startP
 	}
 	return std::nullopt;
 };
+
+void
+GeoDataMesh::expandVerts(std::set<VertexHandle> & verts) const
+{
+	std::ranges::for_each(std::vector<VertexHandle>(verts.begin(), verts.end()), [&verts, this](auto vertex) {
+		std::ranges::copy(vv_range(vertex), std::inserter(verts, verts.end()));
+	});
+}

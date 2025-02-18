@@ -3,6 +3,7 @@
 #include "config/types.h"
 #include "triangle.h"
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
+#include <set>
 #include <source_location>
 #include <thirdparty/openmesh/glmcompat.h>
 #include <thirdparty/openmesh/helpers.h>
@@ -90,6 +91,7 @@ protected:
 
 	[[nodiscard]] bool canFlip(HalfedgeHandle edge) const;
 	[[nodiscard]] std::optional<EdgeHandle> shouldFlip(HalfedgeHandle next, GlobalPosition2D startPoint) const;
+	void expandVerts(std::set<VertexHandle> & verts) const;
 
 	template<glm::length_t D>
 	[[nodiscard]] RelativeDistance
