@@ -115,3 +115,4 @@ namespace {
 }
 
 #define CLOG(x) clogImpl(x, #x)
+#define CLOGf(...) clogImpl(std::format(__VA_ARGS__), "msg")
