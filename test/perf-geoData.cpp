@@ -33,10 +33,25 @@ namespace {
 			});
 		}
 	}
+
+	void
+	terrain_deform(benchmark::State & state)
+	{
+		std::array<GlobalPosition3D, 3> points {{
+				{315555000, 495556000, 0},
+				{315655000, 495556000, 0},
+				{315655000, 495557000, 0},
+		}};
+		for (auto _ : state) {
+			auto geoData {tm};
+			benchmark::DoNotOptimize(geoData.setHeights(points, GeoData::SetHeightsOpts {.surface = nullptr}));
+		}
+	}
 }
 
 BENCHMARK(terrain_findPoint);
 BENCHMARK(terrain_walk);
 BENCHMARK(terrain_walkBoundary);
+BENCHMARK(terrain_deform);
 
 BENCHMARK_MAIN();
