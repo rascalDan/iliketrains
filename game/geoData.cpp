@@ -383,6 +383,8 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 										   / distance(startPoint.xy(), endPoint.xy()))
 										< nearNodeTolerance) {
 							start = adjVertex;
+							newOrChangedVerts.emplace(start);
+							boundaryTriangles.emplace(start, &triangle);
 							geoData->point(start).z = triangle.positionOnPlane(adjPoint).z;
 							return true;
 						}
