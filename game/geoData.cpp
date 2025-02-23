@@ -485,31 +485,48 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		}
 
 		void
-		setHeightsAsRequired(HeightSetTodo starts, RelativeDistance maxSlope)
+		setHalfedgeToHeight(HeightSetTodo & nexts, HeightSetTodo::const_iterator verticesBegin,
+				HeightSetTodo::const_iterator verticesEnd, const RelativeDistance maxSlope)
 		{
-			auto setHalfedgeToHeight = [this, maxSlope](HeightSetTodo & nexts, const VertexHandle vertex,
-											   const VertexHandle previousVertex) -> void {
-				const auto & fromPoint = geoData->point(previousVertex);
-				auto & point = geoData->point(vertex);
-				const auto maxOffset
-						= static_cast<GlobalDistance>(std::round(maxSlope * ::distance<2>(fromPoint.xy(), point.xy())));
-				const auto newHeight = std::clamp(point.z, fromPoint.z - maxOffset, fromPoint.z + maxOffset);
-				if (newHeight != point.z) {
-					point.z = newHeight;
-					newOrChangedVerts.emplace(vertex);
-					for (const auto nextVertex : geoData->vv_range(vertex)) {
-						if (nextVertex != previousVertex && !boundaryTriangles.contains(nextVertex)) {
-							nexts.emplace(nextVertex, vertex);
-						}
+			const auto vertex = verticesBegin->first;
+			auto & point = geoData->point(vertex);
+			const auto minMaxHeight = std::accumulate(verticesBegin, verticesEnd,
+					std::pair<GlobalDistance, GlobalDistance> {
+							std::numeric_limits<GlobalDistance>::min(),
+							std::numeric_limits<GlobalDistance>::max(),
+					},
+					[this, maxSlope, point](auto limit, auto previousVertexItr) {
+						const auto & fromPoint = geoData->point(previousVertexItr.second);
+						const auto maxOffset = static_cast<GlobalDistance>(
+								std::round(maxSlope * ::distance<2>(fromPoint.xy(), point.xy())));
+						limit.first = std::max(limit.first, fromPoint.z - maxOffset);
+						limit.second = std::min(limit.second, fromPoint.z + maxOffset);
+						return limit;
+					});
+
+			const auto newHeight = std::clamp(point.z, minMaxHeight.first, minMaxHeight.second);
+			if (newHeight != point.z) {
+				point.z = newHeight;
+				newOrChangedVerts.emplace(vertex);
+				for (const auto nextVertex : geoData->vv_range(vertex)) {
+					if (!std::ranges::contains(verticesBegin, verticesEnd, nextVertex, GetSecond)
+							&& !boundaryTriangles.contains(nextVertex)) {
+						nexts.emplace(nextVertex, vertex);
 					}
 				}
-			};
+			}
+		}
+
+		void
+		setHeightsAsRequired(HeightSetTodo starts, RelativeDistance maxSlope)
+		{
 			while (!starts.empty()) {
 				HeightSetTodo nexts;
 
-				for (const auto & start : starts) {
-					const auto & [toVertex, previousVertex] = start;
-					setHalfedgeToHeight(nexts, toVertex, previousVertex);
+				for (const auto chunk : starts | std::views::chunk_by([](const auto a, const auto b) {
+						 return a.first == b.first;
+					 })) {
+					setHalfedgeToHeight(nexts, chunk.begin(), chunk.end(), maxSlope);
 				}
 				starts = std::move(nexts);
 			}
