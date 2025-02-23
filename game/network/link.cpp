@@ -93,7 +93,7 @@ LinkCurve::getBase(RelativeDistance width) const
 {
 	const auto start = ends.front().node->pos;
 	const auto end = ends.back().node->pos;
-	const auto segs = std::ceil(15.F * arc.length());
+	const auto segs = std::ceil(std::sqrt(radius) * 0.02F * arc.length());
 	const auto step {glm::vec<2, RelativeDistance> {arc.length(), end.z - start.z} / segs};
 
 	auto segCount = static_cast<size_t>(segs) + 1;
