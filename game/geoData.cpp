@@ -447,56 +447,72 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			doBoundaryPart(*++newVerts.rbegin(), newVerts.back(), strip.back(), nearNodeTolerance);
 		}
 
-		void
-		setHeights(const std::vector<VertexHandle> & newVerts, RelativeDistance maxSlope)
+		using HeightSetTodo = std::multimap<VertexHandle, VertexHandle>;
+
+		HeightSetTodo
+		setSurfaceHeights(const std::span<const VertexHandle> newVerts)
 		{
-			std::set<HalfedgeHandle> done;
-			std::set<HalfedgeHandle> todo;
-			auto todoOutHalfEdges = [&todo, &done, this](const VertexHandle v) {
-				std::ranges::copy_if(geoData->voh_range(v), std::inserter(todo, todo.end()), [&done](const auto & h) {
-					return !done.contains(h);
-				});
-			};
-			std::ranges::for_each(newVerts, todoOutHalfEdges);
-			auto setHalfedgeToHeight = [this, &todoOutHalfEdges, maxSlope, &done](
-											   const auto & setHalfedgeToHeight, const HalfedgeHandle heh) -> void {
-				const auto [fromVertex, toVertex] = geoData->toVertexHandles(heh);
-				auto & toPoint = geoData->point(toVertex);
-				auto toTriangle = getTriangle(toPoint);
-				if (!toTriangle) {
-					if (const auto boundaryVertex = boundaryTriangles.find(toVertex);
+			HeightSetTodo out;
+			auto setSurfaceVertexHeight = [this, &out](const auto & setSurfaceVertexHeight, const VertexHandle vertex,
+												  const VertexHandle previousVertex) -> void {
+				if (surfaceVerts.contains(vertex)) {
+					return;
+				}
+				auto & point = geoData->point(vertex);
+				auto triangle = getTriangle(point);
+				if (!triangle) {
+					if (const auto boundaryVertex = boundaryTriangles.find(vertex);
 							boundaryVertex != boundaryTriangles.end()) {
-						toTriangle = boundaryVertex->second;
+						triangle = boundaryVertex->second;
 					}
 				}
-				if (toTriangle) { // point within the new strip, adjust vertically by triangle
-					toPoint.z = toTriangle->positionOnPlane(toPoint).z;
-					todoOutHalfEdges(toVertex);
-				}
-				else { // point without the new strip, adjust vertically by limit
-					const auto maxOffset = static_cast<GlobalDistance>(maxSlope * geoData->length<2>(heh));
-					const auto fromHeight = geoData->point(fromVertex).z;
-					const auto newHeight = std::clamp(toPoint.z, fromHeight - maxOffset, fromHeight + maxOffset);
-					if (newHeight != toPoint.z) {
-						toPoint.z = newHeight;
-						std::ranges::for_each(geoData->voh_range(toVertex), [&setHalfedgeToHeight](const auto heh) {
-							setHalfedgeToHeight(setHalfedgeToHeight, heh);
-						});
+				if (triangle) { // point within the new strip, adjust vertically by triangle
+					point.z = triangle->positionOnPlane(point).z;
+					newOrChangedVerts.emplace(vertex);
+					surfaceVerts.emplace(vertex);
+					for (const auto nextVertex : geoData->vv_range(vertex)) {
+						setSurfaceVertexHeight(setSurfaceVertexHeight, nextVertex, vertex);
 					}
 				}
-				done.insert(heh);
+				else if (previousVertex.is_valid()) {
+					out.emplace(vertex, previousVertex);
+				}
 			};
-			while (!todo.empty()) {
-				setHalfedgeToHeight(setHalfedgeToHeight, todo.extract(todo.begin()).value());
+			for (const auto vertex : newVerts) {
+				setSurfaceVertexHeight(setSurfaceVertexHeight, vertex, VertexHandle {});
 			}
-			std::ranges::for_each(done, [this](const auto heh) {
-				const auto ends = geoData->toVertexHandles(heh);
-				newOrChangedVerts.emplace(ends.first);
-				newOrChangedVerts.emplace(ends.second);
-			});
-#ifndef NDEBUG
-			geoData->sanityCheck();
-#endif
+			return out;
+		}
+
+		void
+		setHeightsAsRequired(HeightSetTodo starts, RelativeDistance maxSlope)
+		{
+			auto setHalfedgeToHeight = [this, maxSlope](HeightSetTodo & nexts, const VertexHandle vertex,
+											   const VertexHandle previousVertex) -> void {
+				const auto & fromPoint = geoData->point(previousVertex);
+				auto & point = geoData->point(vertex);
+				const auto maxOffset
+						= static_cast<GlobalDistance>(std::round(maxSlope * ::distance<2>(fromPoint.xy(), point.xy())));
+				const auto newHeight = std::clamp(point.z, fromPoint.z - maxOffset, fromPoint.z + maxOffset);
+				if (newHeight != point.z) {
+					point.z = newHeight;
+					newOrChangedVerts.emplace(vertex);
+					for (const auto nextVertex : geoData->vv_range(vertex)) {
+						if (nextVertex != previousVertex && !boundaryTriangles.contains(nextVertex)) {
+							nexts.emplace(nextVertex, vertex);
+						}
+					}
+				}
+			};
+			while (!starts.empty()) {
+				HeightSetTodo nexts;
+
+				for (const auto & start : starts) {
+					const auto & [toVertex, previousVertex] = start;
+					setHalfedgeToHeight(nexts, toVertex, previousVertex);
+				}
+				starts = std::move(nexts);
+			}
 		}
 
 		std::vector<FaceHandle>
@@ -526,7 +542,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		{
 			const std::vector<VertexHandle> newVerts = createVerticesForStrip(opts.nearNodeTolerance);
 			cutBoundary(newVerts, opts.nearNodeTolerance);
-			setHeights(newVerts, opts.maxSlope);
+			setHeightsAsRequired(setSurfaceHeights(newVerts), opts.maxSlope);
 			const auto out = setSurface(opts.surface);
 
 			geoData->expandVerts(newOrChangedVerts);
@@ -541,6 +557,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 		const std::span<const GlobalPosition3D> triangleStrip;
 		const std::vector<Triangle<3>> strip;
 		std::set<VertexHandle> newOrChangedVerts;
+		std::set<VertexHandle> surfaceVerts;
 		std::map<VertexHandle, const Triangle<3> *> boundaryTriangles;
 	};
 
