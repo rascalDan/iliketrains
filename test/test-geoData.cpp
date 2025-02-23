@@ -292,6 +292,8 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	});
 }
 
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
+
 BOOST_DATA_TEST_CASE(
 		deformMulti, loadFixtureJson<std::vector<std::vector<GlobalPosition3D>>>("geoData/deform/multi1.json"), points)
 {

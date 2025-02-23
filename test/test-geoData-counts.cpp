@@ -9,6 +9,8 @@ using GeoMutation = std::function<void(GeoData &)>;
 using Something = std::tuple<const char *, GeoMutation, size_t, size_t, size_t>;
 BOOST_TEST_DONT_PRINT_LOG_VALUE(GeoMutation);
 
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
+
 BOOST_DATA_TEST_CASE(deformLogical,
 		boost::unit_test::data::make<Something>({
 				{"nochange", [](GeoData &) {}, 16, 33, 18}, // No change base case
