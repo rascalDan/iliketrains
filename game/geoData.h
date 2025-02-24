@@ -55,7 +55,7 @@ public:
 		RelativeDistance maxSlope = DEFAULT_MAX_SLOPE;
 	};
 
-	std::vector<FaceHandle> setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
+	std::set<FaceHandle> setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
 
 	[[nodiscard]] auto
 	getExtents() const

@@ -319,7 +319,7 @@ GeoData::setPoint(GlobalPosition3D tsPoint, const RelativeDistance nearNodeToler
 	return split_copy(face, tsPoint);
 };
 
-std::vector<GeoData::FaceHandle>
+std::set<GeoData::FaceHandle>
 GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts & opts)
 {
 	if (triangleStrip.size() < 3) {
@@ -532,14 +532,14 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			}
 		}
 
-		std::vector<FaceHandle>
+		std::set<FaceHandle>
 		setSurface(const Surface * surface)
 		{
-			std::vector<FaceHandle> out;
+			std::set<FaceHandle> out;
 			auto surfaceStripWalk = [this, surface, &out](const auto & surfaceStripWalk, const auto & face) -> void {
-				if (!geoData->property(geoData->surface, face)) {
+				if (!out.contains(face)) {
 					geoData->property(geoData->surface, face) = surface;
-					out.emplace_back(face);
+					out.emplace(face);
 					std::ranges::for_each(
 							geoData->ff_range(face), [this, &surfaceStripWalk](const auto & adjacentFaceHandle) {
 								if (getTriangle(geoData->triangle<2>(adjacentFaceHandle).centroid())) {
@@ -554,7 +554,7 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 			return out;
 		}
 
-		std::vector<GeoData::FaceHandle>
+		std::set<GeoData::FaceHandle>
 		run(const SetHeightsOpts & opts)
 		{
 			const std::vector<VertexHandle> newVerts = createVerticesForStrip(opts.nearNodeTolerance);
