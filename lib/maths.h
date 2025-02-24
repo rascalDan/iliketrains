@@ -1,6 +1,8 @@
 #pragma once
 
 #include "config/types.h"
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
@@ -12,8 +14,11 @@
 template<typename T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 
+template<Arithmetic T> using CalcType = std::conditional_t<std::is_floating_point_v<T>, T, int64_t>;
+template<Arithmetic T> using DifferenceType = std::conditional_t<std::is_floating_point_v<T>, T, float>;
+
 struct Arc : public std::pair<Angle, Angle> {
-	template<glm::length_t Lc, glm::length_t Le, Arithmetic T, glm::qualifier Q>
+	template<glm::length_t Lc, glm::length_t Le, Arithmetic T, glm::qualifier Q = glm::defaultp>
 		requires(Lc >= 2, Le >= 2)
 	Arc(const glm::vec<Lc, T, Q> & centre, const glm::vec<Le, T, Q> & e0p, const glm::vec<Le, T, Q> & e1p) :
 		Arc {RelativePosition2D {e0p.xy() - centre.xy()}, RelativePosition2D {e1p.xy() - centre.xy()}}
@@ -33,6 +38,26 @@ struct Arc : public std::pair<Angle, Angle> {
 	length() const
 	{
 		return second - first;
+	}
+};
+
+template<typename T, glm::qualifier Q = glm::defaultp> struct ArcSegment : public Arc {
+	using PointType = glm::vec<2, T, Q>;
+
+	constexpr ArcSegment(PointType centre, PointType ep0, PointType ep1);
+
+	PointType centre;
+	PointType ep0;
+	PointType ep1;
+	RelativeDistance radius;
+
+	[[nodiscard]] constexpr std::optional<std::pair<glm::vec<2, T, Q>, Angle>> crossesLineAt(
+			const glm::vec<2, T, Q> & lineStart, const glm::vec<2, T, Q> & lineEnd) const;
+
+	[[nodiscard]] constexpr bool
+	angleWithinArc(Angle angle) const
+	{
+		return first <= angle && angle <= second;
 	}
 };
 
@@ -79,11 +104,31 @@ operator-(const GlobalPosition<D> & global, const CalcPosition<D> & relative)
 	return global - GlobalPosition<D>(relative);
 }
 
-template<glm::length_t D, std::integral T, glm::qualifier Q>
-constexpr RelativePosition<D>
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+using DifferenceVector = glm::vec<D, DifferenceType<T>, Q>;
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+constexpr DifferenceVector<D, T, Q>
 difference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
 {
 	return globalA - globalB;
+}
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+using CalcVector = glm::vec<D, CalcType<T>, Q>;
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+constexpr CalcVector<D, T, Q>
+calcDifference(const glm::vec<D, T, Q> & globalA, const glm::vec<D, T, Q> & globalB)
+{
+	return globalA - globalB;
+}
+
+template<glm::length_t D, Arithmetic T, glm::qualifier Q = glm::defaultp>
+constexpr auto
+distance(const glm::vec<D, T, Q> & pointA, const glm::vec<D, T, Q> & pointB)
+{
+	return glm::length(difference(pointA, pointB));
 }
 
 glm::mat4 flat_orientation(const Rotation3D & diff);
@@ -122,7 +167,8 @@ namespace {
 	}
 
 	// Helper to lookup into a matrix given an xy vector coordinate
-	template<glm::length_t C, glm::length_t R, Arithmetic T, glm::qualifier Q, std::integral I = glm::length_t>
+	template<glm::length_t C, glm::length_t R, Arithmetic T, glm::qualifier Q = glm::defaultp,
+			std::integral I = glm::length_t>
 	constexpr auto &
 	operator^(glm::mat<C, R, T, Q> & matrix, const glm::vec<2, I> rowCol)
 	{
@@ -130,7 +176,7 @@ namespace {
 	}
 
 	// Create a matrix for the angle, given the targets into the matrix
-	template<glm::length_t D, std::floating_point T, glm::qualifier Q, std::integral I = glm::length_t>
+	template<glm::length_t D, std::floating_point T, glm::qualifier Q = glm::defaultp, std::integral I = glm::length_t>
 	constexpr auto
 	rotation(const T angle, const glm::vec<2, I> cos1, const glm::vec<2, I> sin1, const glm::vec<2, I> cos2,
 			const glm::vec<2, I> negSin1)
@@ -220,7 +266,7 @@ vector_pitch(const glm::vec<D, T, Q> & diff)
 	return std::atan(diff.z);
 }
 
-template<std::floating_point T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<2, T, Q>
 vector_normal(const glm::vec<2, T, Q> & vector)
 {
@@ -242,7 +288,7 @@ sq(T value)
 	return value * value;
 }
 
-template<glm::qualifier Q>
+template<glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<3, int64_t, Q>
 crossProduct(const glm::vec<3, int64_t, Q> & valueA, const glm::vec<3, int64_t, Q> & valueB)
 {
@@ -253,14 +299,14 @@ crossProduct(const glm::vec<3, int64_t, Q> & valueA, const glm::vec<3, int64_t, 
 	};
 }
 
-template<std::integral T, glm::qualifier Q>
+template<std::integral T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<3, T, Q>
 crossProduct(const glm::vec<3, T, Q> & valueA, const glm::vec<3, T, Q> & valueB)
 {
 	return crossProduct<Q>(valueA, valueB);
 }
 
-template<std::floating_point T, glm::qualifier Q>
+template<std::floating_point T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<3, T, Q>
 crossProduct(const glm::vec<3, T, Q> & valueA, const glm::vec<3, T, Q> & valueB)
 {
@@ -275,35 +321,35 @@ ratio(const Ta valueA, const Tb valueB)
 	return static_cast<R>((static_cast<Common>(valueA) / static_cast<Common>(valueB)));
 }
 
-template<Arithmetic R = float, Arithmetic T, glm::qualifier Q>
+template<Arithmetic R = float, Arithmetic T, glm::qualifier Q = glm::defaultp>
 constexpr auto
 ratio(const glm::vec<2, T, Q> & value)
 {
 	return ratio<R>(value.x, value.y);
 }
 
-template<glm::length_t L = 3, std::floating_point T, glm::qualifier Q>
+template<glm::length_t L = 3, std::floating_point T, glm::qualifier Q = glm::defaultp>
 constexpr auto
 perspective_divide(const glm::vec<4, T, Q> & value)
 {
 	return value / value.w;
 }
 
-template<glm::length_t L1, glm::length_t L2, Arithmetic T, glm::qualifier Q>
+template<glm::length_t L1, glm::length_t L2, Arithmetic T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<L1 + L2, T, Q>
 operator||(const glm::vec<L1, T, Q> valueA, const glm::vec<L2, T, Q> valueB)
 {
 	return {valueA, valueB};
 }
 
-template<glm::length_t L, Arithmetic T, glm::qualifier Q>
+template<glm::length_t L, Arithmetic T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<L + 1, T, Q>
 operator||(const glm::vec<L, T, Q> valueA, const T valueB)
 {
 	return {valueA, valueB};
 }
 
-template<glm::length_t L, std::floating_point T, glm::qualifier Q>
+template<glm::length_t L, std::floating_point T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<L, T, Q>
 perspectiveMultiply(const glm::vec<L, T, Q> & base, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
@@ -311,7 +357,7 @@ perspectiveMultiply(const glm::vec<L, T, Q> & base, const glm::mat<L + 1, L + 1,
 	return mutated / mutated.w;
 }
 
-template<glm::length_t L, std::floating_point T, glm::qualifier Q>
+template<glm::length_t L, std::floating_point T, glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<L, T, Q>
 perspectiveApply(glm::vec<L, T, Q> & base, const glm::mat<L + 1, L + 1, T, Q> & mutation)
 {
@@ -330,8 +376,6 @@ normalize(T ang)
 	}
 	return ang;
 }
-
-template<Arithmetic T> using CalcType = std::conditional_t<std::is_floating_point_v<T>, T, int64_t>;
 
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 [[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
@@ -359,7 +403,7 @@ linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, con
 	return Aabs + CVec {(b1 * c2) / -determinant, (a1 * c2) / determinant};
 }
 
-template<Arithmetic T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 std::pair<glm::vec<2, T, Q>, bool>
 find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> end, Rotation2D endDir)
 {
@@ -372,7 +416,7 @@ find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> 
 	throw std::runtime_error("no intersection");
 }
 
-template<Arithmetic T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 std::pair<glm::vec<2, T, Q>, bool>
 find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
 {
@@ -382,7 +426,7 @@ find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, An
 	return find_arc_centre(start, sincos(entrys + half_pi), end, sincos(entrye - half_pi));
 }
 
-template<Arithmetic T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 Angle
 find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, Rotation2D bd)
 {
@@ -407,7 +451,7 @@ find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, 
 			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
 }
 
-template<Arithmetic T, glm::qualifier Q>
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 std::pair<Angle, Angle>
 find_arcs_radius(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
 {
@@ -422,6 +466,13 @@ auto
 midpoint(const std::pair<T, T> & v)
 {
 	return std::midpoint(v.first, v.second);
+}
+
+template<glm::length_t D, std::integral T, glm::qualifier Q = glm::defaultp>
+auto
+midpoint(const glm::vec<D, T, Q> & valueA, const glm::vec<D, T, Q> & valueB)
+{
+	return valueA + (valueB - valueA) / 2;
 }
 
 // std::pow is not constexpr
@@ -460,4 +511,79 @@ constexpr float
 operator"" _degrees(long double degrees)
 {
 	return static_cast<float>(degrees) * degreesToRads;
+}
+
+// Late implementations due to dependencies
+template<typename T, glm::qualifier Q>
+constexpr ArcSegment<T, Q>::ArcSegment(PointType centre, PointType ep0, PointType ep1) :
+	Arc {centre, ep0, ep1}, centre {centre}, ep0 {ep0}, ep1 {ep1}, radius {::distance(centre, ep0)}
+{
+}
+
+template<typename T, glm::qualifier Q>
+[[nodiscard]] constexpr std::optional<std::pair<glm::vec<2, T, Q>, Angle>>
+ArcSegment<T, Q>::crossesLineAt(const glm::vec<2, T, Q> & lineStart, const glm::vec<2, T, Q> & lineEnd) const
+{
+	// Based on formulas from https://mathworld.wolfram.com/Circle-LineIntersection.html
+	const auto lineDiff = difference(lineEnd, lineStart);
+	const auto lineLen = glm::length(lineDiff);
+	const auto lineRelStart = difference(lineStart, centre);
+	const auto lineRelEnd = difference(lineEnd, centre);
+	const auto determinant = (lineRelStart.x * lineRelEnd.y) - (lineRelEnd.x * lineRelStart.y);
+	const auto discriminant = (radius * radius * lineLen * lineLen) - (determinant * determinant);
+	if (discriminant < 0) {
+		return std::nullopt;
+	}
+
+	const auto rootDiscriminant = std::sqrt(discriminant);
+	const auto drdr = lineLen * lineLen;
+	const RelativeDistance sgn = (lineDiff.y < 0 ? -1 : 1);
+	std::array<std::pair<RelativePosition2D, Angle>, 2> points;
+	std::ranges::transform(std::initializer_list {1, -1}, points.begin(), [&](RelativeDistance N) {
+		const auto point = RelativePosition2D {((determinant * lineDiff.y) + sgn * lineDiff.x * rootDiscriminant * N),
+								   ((-determinant * lineDiff.x) + std::abs(lineDiff.y) * rootDiscriminant * N)}
+				/ drdr;
+		return std::make_pair(point, vector_yaw(point));
+	});
+	const auto end
+			= std::remove_if(points.begin(), points.end(), [this, lineRelStart, lineDiff, drdr](const auto point) {
+				  const auto dot = glm::dot(lineDiff, point.first - lineRelStart);
+				  return !angleWithinArc(point.second) || dot < 0 || dot > drdr;
+			  });
+	if (points.begin() == end) {
+		return std::nullopt;
+	}
+	const auto first = *std::ranges::min_element(points.begin(), end, {}, [lineRelStart](const auto point) {
+		return glm::distance(lineRelStart, point.first);
+	});
+	return std::make_pair(centre + first.first, first.second);
+}
+
+namespace {
+	template<template<typename> typename Op>
+	[[nodiscard]] constexpr auto
+	pointLineOp(const GlobalPosition2D point, const GlobalPosition2D end1, const GlobalPosition2D end2)
+	{
+		return Op {}(CalcDistance(end2.x - end1.x) * CalcDistance(point.y - end1.y),
+				CalcDistance(end2.y - end1.y) * CalcDistance(point.x - end1.x));
+	}
+}
+
+constexpr auto pointLeftOfLine = pointLineOp<std::greater>;
+constexpr auto pointLeftOfOrOnLine = pointLineOp<std::greater_equal>;
+
+[[nodiscard]] constexpr bool
+linesCross(const GlobalPosition2D lineAend1, const GlobalPosition2D lineAend2, const GlobalPosition2D lineBend1,
+		const GlobalPosition2D lineBend2)
+{
+	return (pointLeftOfLine(lineAend2, lineBend1, lineBend2) == pointLeftOfLine(lineAend1, lineBend2, lineBend1))
+			&& (pointLeftOfLine(lineBend1, lineAend1, lineAend2) == pointLeftOfLine(lineBend2, lineAend2, lineAend1));
+}
+
+[[nodiscard]] constexpr bool
+linesCrossLtR(const GlobalPosition2D lineAend1, const GlobalPosition2D lineAend2, const GlobalPosition2D lineBend1,
+		const GlobalPosition2D lineBend2)
+{
+	return pointLeftOfLine(lineAend2, lineBend1, lineBend2) && pointLeftOfLine(lineAend1, lineBend2, lineBend1)
+			&& pointLeftOfLine(lineBend1, lineAend1, lineAend2) && pointLeftOfLine(lineBend2, lineAend2, lineAend1);
 }

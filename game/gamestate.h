@@ -6,7 +6,7 @@
 #include <special_members.h>
 
 class WorldObject;
-class GeoData;
+class Terrain;
 class Environment;
 
 class GameState {
@@ -17,7 +17,7 @@ public:
 	NO_COPY(GameState);
 
 	Collection<WorldObject> world;
-	std::shared_ptr<GeoData> geoData;
+	std::shared_ptr<Terrain> terrain;
 	std::shared_ptr<Environment> environment;
 	AssetFactory::Assets assets;
 };

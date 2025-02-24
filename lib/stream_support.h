@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <maths.h>
+#include <optional>
 #include <source_location>
 #include <span>
 #include <sstream>
@@ -82,6 +83,16 @@ namespace std {
 	{
 		return s << EnumTypeDetails<E>::typeName << "::" << EnumDetails<E>::to_string(e).value();
 	}
+
+	template<typename T>
+	inline std::ostream &
+	operator<<(std::ostream & s, const std::optional<T> & v)
+	{
+		if (v) {
+			return s << *v;
+		}
+		return s << "nullopt";
+	}
 }
 
 template<typename T>
@@ -104,3 +115,4 @@ namespace {
 }
 
 #define CLOG(x) clogImpl(x, #x)
+#define CLOGf(...) clogImpl(std::format(__VA_ARGS__), "msg")

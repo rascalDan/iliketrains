@@ -25,13 +25,13 @@ BuilderJoin::move(Network * network, const GeoData *, const SDL_MouseMotionEvent
 
 void
 BuilderJoin::click(
-		Network * network, const GeoData *, const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
+		Network * network, const GeoData * geoData, const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
 {
 	switch (e.button) {
 		case SDL_BUTTON_LEFT:
 			if (const auto p = network->intersectRayNodes(ray)) {
 				if (p1) {
-					create(network, p1, p);
+					create(network, geoData, p1, p);
 					p1.reset();
 					candidateLinks.removeAll();
 				}
@@ -46,8 +46,10 @@ BuilderJoin::click(
 	}
 }
 
-void
-BuilderJoin::create(Network * network, const Node::Ptr & p1, const Node::Ptr & p2) const
+Link::CCollection
+BuilderJoin::create(Network * network, const GeoData * geoData, const Node::Ptr & p1, const Node::Ptr & p2) const
 {
-	network->addJoins(p1->pos, p2->pos);
+	const auto links = network->addJoins(geoData, p1->pos, p2->pos);
+	setHeightsFor(network, links);
+	return links;
 }

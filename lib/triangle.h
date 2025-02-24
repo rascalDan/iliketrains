@@ -31,11 +31,24 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 		return glm::length(crossProduct(sideDifference(1), sideDifference(2))) / T {2};
 	}
 
+	[[nodiscard]] constexpr auto
+	area() const
+		requires(Dim == 2)
+	{
+		return std::abs((sideDifference(1).x * sideDifference(2).y) - (sideDifference(2).x * sideDifference(1).y)) / 2;
+	}
+
 	[[nodiscard]] constexpr Normal3D
 	normal() const
 		requires(Dim == 3)
 	{
 		return crossProduct(sideDifference(1), sideDifference(2));
+	}
+
+	[[nodiscard]] constexpr auto
+	height()
+	{
+		return (area() * 2) / ::distance(p(0), p(1));
 	}
 
 	[[nodiscard]] constexpr Normal3D
@@ -49,6 +62,12 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 	sideDifference(glm::length_t side) const
 	{
 		return difference(p(side), p(0));
+	}
+
+	[[nodiscard]] constexpr auto
+	calcSideDifference(glm::length_t side) const
+	{
+		return calcDifference(p(side), p(0));
 	}
 
 	[[nodiscard]] constexpr auto
@@ -68,6 +87,14 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 			}
 		}
 		return 0.F;
+	}
+
+	[[nodiscard]] constexpr auto
+	isUp() const
+	{
+		const auto edgeAB = sideDifference(1);
+		const auto edgeAC = sideDifference(2);
+		return edgeAB.x * edgeAC.y >= edgeAB.y * edgeAC.x;
 	}
 
 	[[nodiscard]] constexpr auto
@@ -104,5 +131,26 @@ struct Triangle : public glm::vec<3, glm::vec<Dim, T, Q>> {
 	end() const
 	{
 		return begin() + 3;
+	}
+
+	[[nodiscard]]
+	constexpr auto
+	positionOnPlane(const glm::vec<2, T, Q> coord2d) const
+		requires(Dim == 3)
+	{
+		const auto edgeCrossProduct = crossProduct(calcSideDifference(1), calcSideDifference(2));
+		return coord2d
+				|| static_cast<T>(
+						((edgeCrossProduct.x * p(0).x) + (edgeCrossProduct.y * p(0).y) + (edgeCrossProduct.z * p(0).z)
+								- (edgeCrossProduct.x * coord2d.x) - (edgeCrossProduct.y * coord2d.y))
+						/ edgeCrossProduct.z);
+	}
+
+	[[nodiscard]]
+	constexpr bool
+	containsPoint(const GlobalPosition2D coord) const
+	{
+		return pointLeftOfOrOnLine(coord, p(0), p(1)) && pointLeftOfOrOnLine(coord, p(1), p(2))
+				&& pointLeftOfOrOnLine(coord, p(2), p(0));
 	}
 };

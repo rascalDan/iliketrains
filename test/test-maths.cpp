@@ -12,6 +12,7 @@
 #include <gfx/gl/camera.h>
 #include <glm/glm.hpp>
 #include <maths.h>
+#include <triangle.h>
 #include <tuple>
 
 using vecter_and_angle = std::tuple<glm::vec3, float>;
@@ -341,3 +342,98 @@ static_assert(linesIntersectAt(GlobalPosition2D {311000100, 491100100}, {3110500
 					  .value()
 		== GlobalPosition2D {311000100, 491100100});
 static_assert(!linesIntersectAt(glm::dvec2 {0, 1}, {0, 4}, {1, 8}, {1, 4}).has_value());
+
+BOOST_AUTO_TEST_CASE(triangle2d_helpers)
+{
+	constexpr static Triangle<2, float> t {{0, 0}, {5, 0}, {5, 5}};
+
+	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({0, 0}), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 0}), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 5}), quarter_pi, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.angleAt({0, 1}), 0.F, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
+}
+
+BOOST_AUTO_TEST_CASE(triangle3d_helpers)
+{
+	constexpr static Triangle<3, float> t {{0, 0, 0}, {5, 0, 0}, {5, 5, 0}};
+
+	BOOST_CHECK_EQUAL(t.nnormal(), up);
+	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({0, 0, 0}), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 0, 0}), half_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
+	BOOST_CHECK_CLOSE(t.angleAt({5, 5, 0}), quarter_pi, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.angleAt({0, 1, 0}), 0.F, 0.01F);
+
+	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
+}
+
+using ArcLineIntersectExp = std::pair<GlobalPosition2D, Angle>;
+using ArcLineIntersectData = std::tuple<GlobalPosition2D, GlobalPosition2D, GlobalPosition2D, GlobalPosition2D,
+		GlobalPosition2D, std::optional<ArcLineIntersectExp>>;
+
+BOOST_DATA_TEST_CASE(arcline_intersection,
+		boost::unit_test::data::make<ArcLineIntersectData>({
+				{{0, 0}, {0, 100}, {100, 0}, {200, 0}, {0, 200}, std::nullopt},
+				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {10, 10}, std::nullopt},
+				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {100, 100}, ArcLineIntersectExp {{71, 71}, quarter_pi}},
+				{{15, 27}, {15, 127}, {115, 27}, {15, 27}, {115, 127}, ArcLineIntersectExp {{86, 98}, quarter_pi}},
+				{{0, 0}, {0, 100}, {100, 0}, {0, 0}, {-100, -100}, std::nullopt},
+				{{0, 0}, {0, 100}, {100, 0}, {-10, 125}, {125, -10}, ArcLineIntersectExp {{16, 99}, 0.164F}},
+				{{0, 0}, {0, 100}, {100, 0}, {125, -10}, {-10, 125}, ArcLineIntersectExp {{99, 16}, 1.407F}},
+				{{0, 0}, {0, 100}, {100, 0}, {10, 125}, {125, -10}, ArcLineIntersectExp {{38, 93}, 0.385F}},
+				{{0, 0}, {0, 100}, {100, 0}, {12, 80}, {125, -10}, ArcLineIntersectExp {{99, 10}, 1.467F}},
+				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {125, -10}, ArcLineIntersectExp {{98, 18}, 1.387F}},
+				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {80, 20}, std::nullopt},
+				{{0, 0}, {0, 100}, {100, 0}, {40, 80}, {80, 80}, ArcLineIntersectExp {{60, 80}, 0.6435F}},
+				{{0, 0}, {0, 100}, {100, 0}, {80, 40}, {80, 80}, ArcLineIntersectExp {{80, 60}, 0.9273F}},
+				{{310002000, 490203000}, {310202000, 490203000}, {310002000, 490003000}, {310200000, 490150000},
+						{310150000, 490150000}, ArcLineIntersectExp {{310194850, 490150000}, 1.839F}},
+		}),
+		centre, arcStart, arcEnd, lineStart, lineEnd, expected)
+{
+	const ArcSegment arc {centre, arcStart, arcEnd};
+	BOOST_TEST_INFO(arc.first);
+	BOOST_TEST_INFO(arc.second);
+	BOOST_TEST_INFO(arc.length());
+
+	const auto intersection = arc.crossesLineAt(lineStart, lineEnd);
+	BOOST_REQUIRE_EQUAL(expected.has_value(), intersection.has_value());
+	if (expected.has_value()) {
+		BOOST_CHECK_EQUAL(expected->first, intersection->first);
+		BOOST_CHECK_CLOSE(expected->second, intersection->second, 1.F);
+	}
+}
+
+static_assert(pointLeftOfLine({1, 2}, {1, 1}, {2, 2}));
+static_assert(pointLeftOfLine({2, 1}, {2, 2}, {1, 1}));
+static_assert(pointLeftOfLine({2, 2}, {1, 2}, {2, 1}));
+static_assert(pointLeftOfLine({1, 1}, {2, 1}, {1, 2}));
+static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490000000}, {310050000, 490050000}));
+static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310050000, 490050000}, {310000000, 490050000}));
+static_assert(pointLeftOfOrOnLine({310000000, 490000000}, {310000000, 490050000}, {310000000, 490000000}));
+
+static_assert(linesCross({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+static_assert(linesCross({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+static_assert(linesCrossLtR({1, 1}, {2, 2}, {1, 2}, {2, 1}));
+static_assert(!linesCrossLtR({2, 2}, {1, 1}, {1, 2}, {2, 1}));
+
+static_assert(Triangle<3, GlobalDistance> {{1, 2, 3}, {1, 0, 1}, {-2, 1, 0}}.positionOnPlane({7, -2})
+		== GlobalPosition3D {7, -2, 3});
+static_assert(Triangle<3, GlobalDistance> {
+					  {310000000, 490000000, 32800}, {310050000, 490050000, 33000}, {310000000, 490050000, 32700}}
+					  .positionOnPlane({310000000, 490000000})
+		== GlobalPosition3D {310000000, 490000000, 32800});
+static_assert(Triangle<3, GlobalDistance> {
+					  {310750000, 490150000, 58400}, {310800000, 490200000, 55500}, {310750000, 490200000, 57600}}
+					  .positionOnPlane({310751000, 490152000})
+		== GlobalPosition3D {310751000, 490152000, 58326});

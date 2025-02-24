@@ -1,4 +1,5 @@
 #include "straight.h"
+#include "stream_support.h"
 #include <game/geoData.h>
 
 std::string
@@ -32,7 +33,7 @@ BuilderStraight::click(
 		case SDL_BUTTON_LEFT:
 			if (const auto p = geoData->intersectRay(ray)) {
 				if (p1) {
-					create(network, *p1, p->first);
+					create(network, geoData, *p1, p->first);
 					candidateLinks.removeAll();
 					p1.reset();
 				}
@@ -48,8 +49,10 @@ BuilderStraight::click(
 	}
 }
 
-void
-BuilderStraight::create(Network * network, GlobalPosition3D p1, GlobalPosition3D p2) const
+Link::CCollection
+BuilderStraight::create(Network * network, const GeoData * geoData, GlobalPosition3D p1, GlobalPosition3D p2) const
 {
-	network->addStraight(p1, p2);
+	const auto links = network->addStraight(geoData, p1, p2);
+	setHeightsFor(network, links);
+	return links;
 }

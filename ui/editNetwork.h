@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/geoData.h"
 #include "gameMainSelector.h"
 #include "modeHelper.h"
 #include "toolbar.h"
@@ -29,6 +30,8 @@ public:
 		virtual std::string hint() const = 0;
 		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &) = 0;
 		virtual void move(Network *, const GeoData *, const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &) = 0;
+
+		static void setHeightsFor(Network *, const Link::CCollection &, GeoData::SetHeightsOpts = {});
 
 		using Ptr = std::unique_ptr<Builder>;
 

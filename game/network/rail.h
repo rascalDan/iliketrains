@@ -62,8 +62,8 @@ public:
 	};
 
 private:
-	RailLinkCurve(
-			NetworkLinkHolder<RailLinkCurve> &, const Node::Ptr &, const Node::Ptr &, GlobalPosition3D, const Arc);
+	RailLinkCurve(NetworkLinkHolder<RailLinkCurve> &, const Node::Ptr &, const Node::Ptr &, GlobalPosition3D centreBase,
+			RelativeDistance radius, Arc);
 	InstanceVertices<Vertex>::InstanceProxy instance;
 };
 
@@ -76,6 +76,9 @@ public:
 
 	std::shared_ptr<RailLink> addLinksBetween(GlobalPosition3D start, GlobalPosition3D end);
 	void render(const SceneShader &) const override;
+
+	[[nodiscard]] const Surface * getBaseSurface() const override;
+	[[nodiscard]] RelativeDistance getBaseWidth() const override;
 
 private:
 	void tick(TickDuration elapsed) override;

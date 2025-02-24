@@ -1,6 +1,5 @@
 #include "terrain.h"
 #include "game/geoData.h"
-#include "gfx/models/texture.h"
 #include <algorithm>
 #include <cstddef>
 #include <gfx/gl/sceneShader.h>
@@ -15,12 +14,7 @@
 #include <utility>
 #include <vector>
 
-static constexpr RGB openSurface {-1};
-
-Terrain::Terrain(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, grass {std::make_shared<Texture>("grass.png")}
-{
-	generateMeshes();
-}
+static constexpr RGB OPEN_SURFACE {-1};
 
 template<>
 VertexArrayObject &
@@ -35,37 +29,39 @@ Terrain::generateMeshes()
 {
 	meshes.removeAll();
 	std::vector<unsigned int> indices;
-	indices.reserve(geoData->n_faces() * 3);
+	indices.reserve(n_faces() * 3);
 	std::vector<Vertex> vertices;
-	vertices.reserve(geoData->n_vertices());
-	std::map<std::pair<GeoData::VertexHandle, const Surface *>, size_t> vertexIndex;
-	std::for_each(geoData->vertices_sbegin(), geoData->vertices_end(),
-			[this, &vertexIndex, &vertices](const GeoData::VertexHandle v) {
-				std::for_each(geoData->vf_begin(v), geoData->vf_end(v),
-						[&vertexIndex, v, this, &vertices](const GeoData::FaceHandle f) {
-							const auto surface = geoData->get_surface(f);
-							if (const auto vertexIndexRef = vertexIndex.emplace(std::make_pair(v, surface), 0);
-									vertexIndexRef.second) {
-								vertexIndexRef.first->second = vertices.size();
+	vertices.reserve(n_vertices());
+	std::map<std::pair<VertexHandle, const Surface *>, size_t> vertexIndex;
+	std::ranges::for_each(this->vertices(), [this, &vertexIndex, &vertices](const auto vertex) {
+		std::ranges::for_each(vf_range(vertex), [&vertexIndex, vertex, this, &vertices](const auto face) {
+			const auto * const surface = getSurface(face);
+			if (const auto vertexIndexRef = vertexIndex.emplace(std::make_pair(vertex, surface), 0);
+					vertexIndexRef.second) {
+				vertexIndexRef.first->second = vertices.size();
 
-								vertices.emplace_back(geoData->point(v), geoData->normal(v),
-										surface ? surface->colorBias : openSurface);
-							}
-						});
-			});
-	std::for_each(
-			geoData->faces_sbegin(), geoData->faces_end(), [this, &vertexIndex, &indices](const GeoData::FaceHandle f) {
-				std::transform(geoData->fv_begin(f), geoData->fv_end(f), std::back_inserter(indices),
-						[&vertexIndex, f, this](const GeoData::VertexHandle v) {
-							return vertexIndex[std::make_pair(v, geoData->get_surface(f))];
-						});
-			});
+				vertices.emplace_back(point(vertex), normal(vertex), surface ? surface->colorBias : OPEN_SURFACE);
+			}
+		});
+	});
+	std::ranges::for_each(faces(), [this, &vertexIndex, &indices](const auto face) {
+		std::ranges::transform(
+				fv_range(face), std::back_inserter(indices), [&vertexIndex, face, this](const auto vertex) {
+					return vertexIndex[std::make_pair(vertex, getSurface(face))];
+				});
+	});
 	meshes.create<MeshT<Vertex>>(vertices, indices);
 }
 
 void
 Terrain::tick(TickDuration)
 {
+}
+
+void
+Terrain::afterChange()
+{
+		generateMeshes();
 }
 
 void

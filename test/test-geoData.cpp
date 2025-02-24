@@ -29,26 +29,9 @@ BOOST_AUTO_TEST_CASE(loadSuccess)
 	BOOST_CHECK_EQUAL(upper, GlobalPosition3D(319950000, 499950000, 571600));
 }
 
-BOOST_AUTO_TEST_CASE(normalsAllPointUp)
+BOOST_AUTO_TEST_CASE(sanityCheck)
 {
-	BOOST_CHECK(std::ranges::all_of(vertices(), [this](auto && vertex) {
-		return normal(vertex).z > 0;
-	}));
-}
-
-BOOST_AUTO_TEST_CASE(trianglesContainsPoints)
-{
-	const auto face = face_handle(0);
-
-	BOOST_TEST_CONTEXT(this->triangle<2>(face)) {
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner, yllcorner}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + cellsize, yllcorner + cellsize}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner, yllcorner + cellsize}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + 1, yllcorner + 1}, face));
-		BOOST_CHECK(triangleContainsPoint(GlobalPosition2D {xllcorner + 1, yllcorner + 2}, face));
-		BOOST_CHECK(!triangleContainsPoint(GlobalPosition2D {xllcorner + 3, yllcorner + 2}, face));
-		BOOST_CHECK(!triangleContainsPoint(GlobalPosition2D {xllcorner + cellsize, yllcorner}, face));
-	}
+	BOOST_CHECK_NO_THROW(sanityCheck());
 }
 
 BOOST_AUTO_TEST_SUITE_END();
@@ -105,7 +88,7 @@ BOOST_DATA_TEST_CASE(findPositionAt,
 		}),
 		p, h)
 {
-	BOOST_CHECK_EQUAL(fixedTerrtain.positionAt(p), GlobalPosition3D(p, h));
+	BOOST_CHECK_EQUAL(fixedTerrtain.positionAt(p), p || h);
 }
 
 using FindRayIntersectData = std::tuple<GlobalPosition3D, Direction3D, GlobalPosition3D>;
@@ -150,8 +133,11 @@ BOOST_DATA_TEST_CASE(walkTerrain,
 		from, to, visits)
 {
 	std::vector<int> visited;
-	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, [&visited](auto fh) {
-		visited.emplace_back(fh.idx());
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, [&visited](auto step) {
+		if (!visited.empty()) {
+			BOOST_CHECK_EQUAL(step.previous.idx(), visited.back());
+		}
+		visited.emplace_back(step.current.idx());
 	}));
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
@@ -183,28 +169,57 @@ BOOST_DATA_TEST_CASE(walkTerrainUntil,
 		from, to, visits)
 {
 	std::vector<int> visited;
-	BOOST_CHECK_NO_THROW(fixedTerrtain.walkUntil(from, to, [&visited](auto fh) {
-		visited.emplace_back(fh.idx());
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walkUntil(from, to, [&visited](const auto & step) {
+		visited.emplace_back(step.current.idx());
 		return visited.size() >= 5;
 	}));
 	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
 }
 
-BOOST_AUTO_TEST_CASE(triangle_helpers)
+using WalkTerrainCurveData = std::tuple<GlobalPosition2D, GlobalPosition2D, GlobalPosition2D, std::vector<int>,
+		std::vector<GlobalPosition2D>>;
+
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(1))
+
+BOOST_DATA_TEST_CASE(walkTerrainCurveSetsFromFace,
+		boost::unit_test::data::make<WalkTerrainCurveData>({
+				{{310002000, 490003000}, {310002000, 490003000}, {310002000, 490003000}, {0}, {}},
+				{{310003000, 490002000}, {310003000, 490002000}, {310003000, 490002000}, {1}, {}},
+				{{310202000, 490203000}, {310002000, 490003000}, {310002000, 490203000},
+						{1600, 1601, 1202, 1201, 802, 803, 404, 403, 4, 3, 2, 1, 0},
+						{
+								{310201997, 490201997},
+								{310201977, 490200000},
+								{310200000, 490174787},
+								{310194850, 490150000},
+								{310192690, 490142690},
+								{310173438, 490100000},
+								{310150000, 490068479},
+								{310130806, 490050000},
+								{310100000, 490028656},
+								{310062310, 490012310},
+								{310050000, 490008845},
+								{310003003, 490003003},
+						}},
+				{{310999999, 490205000}, {310999999, 490203000}, {310999000, 490204000}, {1631, 1632, 1631},
+						{
+								{311000000, 490204999},
+								{311000000, 490203001},
+						}},
+		}),
+		from, to, centre, visits, exits)
 {
-	constexpr static GeoData::Triangle<3> t {{0, 0, 0}, {5, 0, 0}, {5, 5, 0}};
+	BOOST_REQUIRE_EQUAL(visits.size(), exits.size() + 1);
 
-	BOOST_CHECK_EQUAL(t.nnormal(), up);
-	BOOST_CHECK_CLOSE(t.angle(0), quarter_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angleAt({0, 0, 0}), quarter_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angle(1), half_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angleAt({5, 0, 0}), half_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angle(2), quarter_pi, 0.01F);
-	BOOST_CHECK_CLOSE(t.angleAt({5, 5, 0}), quarter_pi, 0.01F);
-
-	BOOST_CHECK_CLOSE(t.angleAt({0, 1, 0}), 0.F, 0.01F);
-
-	BOOST_CHECK_CLOSE(t.area(), 12.5F, 0.01F);
+	std::vector<int> visited;
+	std::vector<GlobalPosition2D> exited;
+	BOOST_CHECK_NO_THROW(fixedTerrtain.walk(from, to, centre, [&](const auto & step) {
+		visited.emplace_back(step.current.idx());
+		BOOST_REQUIRE(!std::ranges::contains(exited, step.exitPosition));
+		exited.emplace_back(step.exitPosition);
+	}));
+	BOOST_CHECK_EQUAL_COLLECTIONS(visited.begin(), visited.end(), visits.begin(), visits.end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(exited.begin() + 1, exited.end(), exits.begin(), exits.end());
 }
 
 using FindEntiesData = std::tuple<GlobalPosition2D, GlobalPosition2D, int>;
@@ -229,18 +244,13 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 {
 	Surface surface;
 	surface.colorBias = RGB {0, 0, 1};
-	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
-	BOOST_CHECK_NO_THROW(gd->setHeights(points, {.surface = surface}));
-	BOOST_CHECK(std::ranges::all_of(gd->vertices(), [&gd](auto && vertex) {
-		return gd->normal(vertex).z > 0;
-	}));
 
 	ApplicationBase ab;
 	TestMainWindow tmw;
 	TestRenderOutput tro {{640, 480}};
 
 	struct TestTerrain : public SceneProvider {
-		explicit TestTerrain(std::shared_ptr<GeoData> gd) : terrain(std::move(gd)) { }
+		explicit TestTerrain(GeoData gd) : terrain(std::move(gd)) { }
 
 		const Terrain terrain;
 
@@ -269,11 +279,29 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		}
 	};
 
-	TestTerrain t {gd};
+	TestTerrain t {[&points, &surface]() {
+		auto gd = GeoData::createFlat({0, 0}, {1000000, 1000000}, 100);
+		BOOST_CHECK_NO_THROW(gd.setHeights(points, {.surface = &surface}));
+		return gd;
+	}()};
 	SceneRenderer ss {tro.size, tro.output};
 	std::for_each(cams.begin(), cams.end(), [&ss, &t, &tro](const auto & cam) {
 		ss.camera.setView(cam.first.first, glm::normalize(cam.first.second));
 		BOOST_CHECK_NO_THROW(ss.render(t));
 		Texture::save(tro.outImage, cam.second.c_str());
 	});
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
+
+BOOST_DATA_TEST_CASE(
+		deformMulti, loadFixtureJson<std::vector<std::vector<GlobalPosition3D>>>("geoData/deform/multi1.json"), points)
+{
+	BOOST_REQUIRE(!points.empty());
+	Surface surface;
+	auto gd = std::make_shared<GeoData>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 100));
+	for (const auto & strip : points) {
+		BOOST_REQUIRE_GE(strip.size(), 3);
+		BOOST_CHECK_NO_THROW(gd->setHeights(strip, {.surface = &surface, .nearNodeTolerance = 50}));
+	}
 }

@@ -1,13 +1,5 @@
 #include "modelFactoryMesh.h"
 
-ModelFactoryMesh::ModelFactoryMesh()
-{
-	add_property(smoothFaceProperty);
-	add_property(materialFaceProperty);
-	add_property(nameFaceProperty);
-	add_property(nameAdjFaceProperty);
-}
-
 void
 ModelFactoryMesh::configNamedFace(const std::string & name, OpenMesh::FaceHandle handle)
 {

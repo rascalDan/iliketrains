@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <ranges>
 #include <span>
 #include <tuple>
 #include <utility>
@@ -106,6 +107,15 @@ operator+=(std::vector<T...> & in, std::vector<T...> && src)
 	return in;
 }
 
+template<typename... T>
+constexpr auto
+operator+(std::vector<T...> in1, std::vector<T...> in2)
+{
+	in1.reserve(in1.size() + in2.size());
+	std::move(in2.begin(), in2.end(), std::back_inserter(in1));
+	return in1;
+}
+
 template<typename... T, typename Vn>
 [[nodiscard]] constexpr auto
 operator+(const std::vector<T...> & in, Vn && vn)
@@ -187,12 +197,28 @@ template<typename iter> struct stripiter {
 		return *this;
 	}
 
+	constexpr stripiter
+	operator++(int)
+	{
+		auto out {*this};
+		++*this;
+		return out;
+	}
+
 	constexpr stripiter &
 	operator--()
 	{
 		--current;
 		off = 1 - off;
 		return *this;
+	}
+
+	constexpr stripiter
+	operator--(int)
+	{
+		auto out {*this};
+		--*this;
+		return out;
 	}
 
 	constexpr auto
@@ -223,4 +249,55 @@ constexpr auto
 strip_end(IterableCollection auto & cont)
 {
 	return stripiter {cont.end()};
+}
+
+inline constexpr auto dereference = std::views::transform([](const auto & iter) -> decltype(auto) {
+	return *iter;
+});
+
+struct TriangleTriples : public std::ranges::range_adaptor_closure<TriangleTriples> {
+	decltype(auto)
+	operator()(const auto & triangleStrip) const
+	{
+		return std::views::iota(strip_begin(triangleStrip), strip_end(triangleStrip)) | dereference;
+	}
+};
+
+inline constexpr TriangleTriples triangleTriples;
+
+template<typename T, typename Dist, typename Merger>
+void
+mergeClose(std::vector<T> & range, const Dist & dist, const Merger & merger,
+		decltype(dist(range.front(), range.front())) tolerance)
+{
+	using DistanceType = decltype(tolerance);
+	std::vector<DistanceType> distances;
+	distances.reserve(range.size() - 1);
+	std::ranges::transform(range | std::views::pairwise, std::back_inserter(distances), [&dist](const auto & pair) {
+		return (std::apply(dist, pair));
+	});
+	while (distances.size() > 1) {
+		const auto closestPair = std::ranges::min_element(distances);
+		if (*closestPair > tolerance) {
+			return;
+		}
+		const auto offset = std::distance(distances.begin(), closestPair);
+		const auto idx = static_cast<std::size_t>(offset);
+		if (closestPair == distances.begin()) {
+			// Remove second element
+			range.erase(range.begin() + 1);
+			distances.erase(distances.begin());
+		}
+		else if (closestPair == --distances.end()) {
+			// Remove second from last element
+			range.erase(range.end() - 2);
+			distances.erase(distances.end() - 1);
+		}
+		else {
+			range[idx] = merger(range[idx], range[idx + 1]);
+			range.erase(range.begin() + offset + 1);
+			distances.erase(distances.begin() + offset);
+		}
+		distances[idx] = dist(range[idx], range[idx + 1]);
+	}
 }

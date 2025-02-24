@@ -8,6 +8,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <thirdparty/openmesh/glmcompat.h>
+#include <thirdparty/openmesh/helpers.h>
 
 struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 	FaceAttributes(OpenMesh::Attributes::Normal | OpenMesh::Attributes::Status | OpenMesh::Attributes::Color);
@@ -21,13 +22,11 @@ struct ModelFactoryTraits : public OpenMesh::DefaultTraits {
 };
 
 struct ModelFactoryMesh : public OpenMesh::PolyMesh_ArrayKernelT<ModelFactoryTraits> {
-	ModelFactoryMesh();
-
 	bool normalsProvidedProperty {};
-	OpenMesh::FPropHandleT<bool> smoothFaceProperty;
-	OpenMesh::FPropHandleT<GLuint> materialFaceProperty;
-	OpenMesh::FPropHandleT<std::string> nameFaceProperty;
-	OpenMesh::HPropHandleT<std::string> nameAdjFaceProperty;
+	const OpenMesh::Helpers::Property<bool, OpenMesh::FPropHandleT> smoothFaceProperty {this};
+	const OpenMesh::Helpers::Property<GLuint, OpenMesh::FPropHandleT> materialFaceProperty {this};
+	const OpenMesh::Helpers::Property<std::string, OpenMesh::FPropHandleT> nameFaceProperty {this};
+	const OpenMesh::Helpers::Property<std::string, OpenMesh::HPropHandleT> nameAdjFaceProperty {this};
 
 	template<typename... Vs>
 	std::pair<std::string, OpenMesh::FaceHandle>

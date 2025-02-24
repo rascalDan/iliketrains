@@ -1,4 +1,6 @@
 #include "rail.h"
+#include "game/gamestate.h"
+#include "game/geoData.h"
 #include "network.h"
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/gl/sceneShader.h>
@@ -8,7 +10,7 @@
 template class NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>;
 
 constexpr auto RAIL_CROSSSECTION_VERTICES {5U};
-constexpr Size3D RAIL_HEIGHT {0, 0, 250.F};
+constexpr Size3D RAIL_HEIGHT {0, 0, 50.F};
 
 RailLinks::RailLinks() : NetworkOf<RailLink, RailLinkStraight, RailLinkCurve> {"rails.jpg"} { }
 
@@ -38,8 +40,8 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	if (node2ins.second == NodeIs::InNetwork) {
 		auto midheight = [&](auto mid) {
-			const auto sm = glm::length(RelativePosition2D(flatStart - mid)),
-					   em = glm::length(RelativePosition2D(flatEnd - mid));
+			const auto sm = ::distance<2>(flatStart, mid);
+			const auto em = ::distance<2>(flatEnd, mid);
 			return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (sm / (sm + em)));
 		};
 		const float dir2 = pi + findNodeDirection(node2ins.first);
@@ -73,26 +75,31 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	return addLink<RailLinkCurve>(start, end, centre.first);
 }
 
-constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> railCrossSection {{
-		{-1900.F, 0.F, 0.F},
-		{-608.F, 0.F, RAIL_HEIGHT.z},
-		{0, 0.F, RAIL_HEIGHT.z * .7F},
-		{608.F, 0.F, RAIL_HEIGHT.z},
-		{1900.F, 0.F, 0.F},
-}};
-constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> railTexturePos {
-		0.F,
-		.34F,
-		.5F,
-		.66F,
-		1.F,
-};
-constexpr auto sleepers {5.F}; // There are 5 repetitions of sleepers in the texture
+namespace {
+	constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> RAIL_CROSS_SECTION {{
+			{-1330.F, 0.F, 0},
+			{-608.F, 0.F, RAIL_HEIGHT.z},
+			{0, 0.F, RAIL_HEIGHT.z / 2},
+			{608.F, 0.F, RAIL_HEIGHT.z},
+			{1330.F, 0.F, 0},
+	}};
+	constexpr const std::array<float, RAIL_CROSSSECTION_VERTICES> RAIL_TEXTURE_POS {
+			0.15F,
+			.34F,
+			.5F,
+			.66F,
+			0.85F,
+	};
+	template<std::floating_point T> constexpr T SLEEPERS_PER_TEXTURE {5};
+	template<std::floating_point T> constexpr T TEXTURE_LENGTH {2'000};
+	template<std::floating_point T> constexpr T SLEEPER_LENGTH {T {1} / SLEEPERS_PER_TEXTURE<T>};
 
-inline auto
-round_sleepers(const float v)
-{
-	return round_frac(v, sleepers);
+	template<std::floating_point T>
+	constexpr auto
+	roundSleepers(const T length)
+	{
+		return round_frac(length / TEXTURE_LENGTH<T>, SLEEPER_LENGTH<T>);
+	}
 }
 
 RailLinkStraight::RailLinkStraight(NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & a,
@@ -104,22 +111,22 @@ RailLinkStraight::RailLinkStraight(
 		NetworkLinkHolder<RailLinkStraight> & instances, Node::Ptr a, Node::Ptr b, const RelativePosition3D & diff) :
 	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff)),
 	instance {instances.vertices.acquire(
-			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), round_sleepers(length / 2000.F))}
+			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), roundSleepers(length))}
+{
+}
+
+RailLinkCurve::RailLinkCurve(
+		NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
+	RailLinkCurve(instances, a, b, c || a->pos.z, ::distance<2>(a->pos.xy(), c), {c, a->pos, b->pos})
 {
 }
 
 RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
-		GlobalPosition2D c) : RailLinkCurve(instances, a, b, c || a->pos.z, {c, a->pos, b->pos})
-{
-}
-
-RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
-		GlobalPosition3D c, const Arc arc) :
+		GlobalPosition3D c, RelativeDistance radius, const Arc arc) :
 	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
-			glm::length(RelativePosition3D(a->pos - c)) * arc.length()),
-	LinkCurve {c, glm::length(RelativePosition3D(ends[0].node->pos - c)), arc},
-	instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c, round_sleepers(length / 2000.F),
-			half_pi - arc.first, half_pi - arc.second, radius)}
+			glm::length(RelativePosition2D {radius * arc.length(), difference(a->pos, b->pos).z})),
+	LinkCurve {c, radius, arc}, instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c,
+										roundSleepers(length), half_pi - arc.first, half_pi - arc.second, radius)}
 {
 }
 
@@ -151,7 +158,7 @@ namespace {
 	renderType(const NetworkLinkHolder<LinkType> & n, auto & s)
 	{
 		if (auto count = n.vertices.size()) {
-			s.use(railCrossSection, railTexturePos);
+			s.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
 			glBindVertexArray(n.vao);
 			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
 		}
@@ -163,8 +170,23 @@ RailLinks::render(const SceneShader & shader) const
 {
 	if (!links.objects.empty()) {
 		texture->bind();
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(-1, 0);
 		renderType<RailLinkStraight>(*this, shader.networkStraight);
 		renderType<RailLinkCurve>(*this, shader.networkCurve);
+		glDisable(GL_POLYGON_OFFSET_FILL);
 		glBindVertexArray(0);
 	}
+}
+
+const Surface *
+RailLinks::getBaseSurface() const
+{
+	return std::dynamic_pointer_cast<Surface>(gameState->assets.at("terrain.surface.gravel")).get();
+}
+
+RelativeDistance
+RailLinks::getBaseWidth() const
+{
+	return 5'700;
 }
