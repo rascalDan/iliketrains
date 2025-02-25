@@ -21,14 +21,15 @@ public:
 	NO_COPY(VertexArrayObject);
 
 	template<typename m, typename T> struct MP {
-		constexpr MP(m T::*p) : P {p} { }
+		constexpr MP(m T::* p) : P {p} { }
 
+		constexpr
 		operator void *() const
 		{
 			return &(static_cast<T *>(nullptr)->*P);
 		}
 
-		m T::*P;
+		m T::* P;
 		using value_type = m;
 	};
 
@@ -66,6 +67,13 @@ public:
 	addIndices(const GLuint arrayBuffer)
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, arrayBuffer);
+		return *this;
+	}
+
+	VertexArrayObject &
+	data(const GLuint arrayBuffer, GLenum target)
+	{
+		glBindBuffer(target, arrayBuffer);
 		return *this;
 	}
 
