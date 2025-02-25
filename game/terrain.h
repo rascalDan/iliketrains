@@ -1,11 +1,9 @@
 #pragma once
 
 #include "chronology.h"
-#include "collection.h"
 #include "config/types.h"
 #include "game/worldobject.h"
 #include "geoData.h"
-#include "gfx/models/mesh.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
@@ -26,14 +24,20 @@ public:
 	struct Vertex {
 		GlobalPosition3D pos;
 		Normal3D normal;
-		RGB colourBias;
 	};
+
+	void generateMeshes();
 
 private:
 	void afterChange() override;
-	void generateMeshes();
 
-	Collection<MeshT<Vertex>, false> meshes;
+	struct SurfaceArrayBuffer {
+		glVertexArray vertexArray;
+		glBuffer indicesBuffer;
+		GLsizei count;
+	};
+
+	glBuffer verticesBuffer;
+	std::multimap<const Surface *, SurfaceArrayBuffer> meshes;
 	Texture::Ptr grass = std::make_shared<Texture>("grass.png");
-	size_t geoGeneration {};
 };

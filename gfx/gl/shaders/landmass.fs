@@ -3,10 +3,10 @@
 include(`materialOut.glsl')
 in vec3 FragPos;
 in vec3 Normal;
-flat in vec3 ColourBias;
 
 uniform sampler2D texture0;
 uniform ivec3 viewPoint;
+uniform vec3 colourBias;
 
 const vec3 grass = vec3(.1, .4, .05);
 const vec3 slope = vec3(.6, .6, .4);
@@ -35,8 +35,8 @@ main()
 	vec3 color = texture(texture0, vec2(position.xy % 10000) / 10000.0).rgb;
 
 	int height = position.z;
-	if (ColourBias.r >= 0) {
-		color *= ColourBias;
+	if (colourBias.r >= 0) {
+		color *= colourBias;
 	}
 	else if (height < beachline) { // Sandy beach
 		color *= sand;

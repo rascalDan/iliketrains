@@ -50,6 +50,15 @@ class SceneShader {
 		RequiredUniformLocation profileLengthLoc {*this, "profileLength"};
 	};
 
+	class LandmassProgram : public AbsolutePosProgram {
+	public:
+		using AbsolutePosProgram::AbsolutePosProgram;
+		void use(const glm::vec3) const;
+
+	private:
+		RequiredUniformLocation colourBiasLos {*this, "colourBias"};
+	};
+
 	class WaterProgram : public SceneProgram {
 	public:
 		WaterProgram();
@@ -64,7 +73,8 @@ public:
 
 	BasicProgram basic;
 	WaterProgram water;
-	AbsolutePosProgram basicInst, landmass, absolute, spotLightInst, pointLightInst;
+	AbsolutePosProgram basicInst, absolute, spotLightInst, pointLightInst;
+	LandmassProgram landmass;
 	NetworkProgram networkStraight, networkCurve;
 
 	void setViewProjection(const GlobalPosition3D & viewPoint, const glm::mat4 & viewProjection) const;

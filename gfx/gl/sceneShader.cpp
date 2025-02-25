@@ -34,9 +34,9 @@ SceneShader::allPrograms(auto member, auto &&... ps) const
 }
 
 SceneShader::SceneShader() :
-	basicInst {dynamicPointInst_vs, material_fs}, landmass {landmass_vs, landmass_fs},
-	absolute {fixedPoint_vs, material_fs}, spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
-	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs},
+	basicInst {dynamicPointInst_vs, material_fs}, absolute {fixedPoint_vs, material_fs},
+	spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
+	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs}, landmass {landmass_vs, landmass_fs},
 	networkStraight {networkStraight_vs, networkStraight_gs, network_fs},
 	networkCurve {networkCurve_vs, networkCurve_gs, network_fs}
 {
@@ -85,6 +85,13 @@ SceneShader::BasicProgram::use(Location const & location) const
 {
 	Program::use();
 	setModel(location);
+}
+
+void
+SceneShader::LandmassProgram::use(const glm::vec3 colourBias) const
+{
+	Program::use();
+	glUniform(colourBiasLos, colourBias);
 }
 
 void
