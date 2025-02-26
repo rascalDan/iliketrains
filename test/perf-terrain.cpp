@@ -3,10 +3,11 @@
 #include <benchmark/benchmark.h>
 
 namespace {
+	const TestMainWindowAppBase window;
+
 	void
 	terrainMeshgen(benchmark::State & state)
 	{
-		TestMainWindowAppBase window;
 		Terrain terrain {GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")};
 
 		for (auto _ : state) {
