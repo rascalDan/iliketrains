@@ -37,7 +37,13 @@ private:
 		GLsizei count;
 	};
 
+	struct SurfaceKey {
+		const Surface * surface;
+		GlobalPosition2D basePosition;
+		bool operator<(const SurfaceKey &) const;
+	};
+
 	glBuffer verticesBuffer;
-	std::multimap<const Surface *, SurfaceArrayBuffer> meshes;
+	std::map<SurfaceKey, SurfaceArrayBuffer> meshes;
 	Texture::Ptr grass = std::make_shared<Texture>("grass.png");
 };

@@ -7,7 +7,6 @@
 #include <gfx/models/vertex.h>
 #include <glMappedBufferWriter.h>
 #include <glm/glm.hpp>
-#include <iterator>
 #include <location.h>
 #include <maths.h>
 #include <utility>
@@ -22,31 +21,51 @@ VertexArrayObject::addAttribsFor<Terrain::Vertex>(const GLuint arrayBuffer, cons
 	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(arrayBuffer, divisor);
 }
 
+bool
+Terrain::SurfaceKey::operator<(const SurfaceKey & other) const
+{
+	return std::tie(surface, basePosition.x, basePosition.y)
+			< std::tie(other.surface, other.basePosition.x, other.basePosition.y);
+}
+
 void
 Terrain::generateMeshes()
 {
+	constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
+
 	std::ranges::transform(all_vertices(), glMappedBufferWriter<Vertex> {GL_ARRAY_BUFFER, verticesBuffer, n_vertices()},
 			[this](const auto & vertex) {
 				return Vertex {point(vertex), normal(vertex)};
 			});
 
-	std::map<const Surface *, std::vector<GLuint>> surfaceIndices;
-	for (const auto face : faces()) {
-		const auto * const surface = getSurface(face);
-		auto indexItr = surfaceIndices.find(surface);
+	std::map<SurfaceKey, std::vector<GLuint>> surfaceIndices;
+	const auto getTile = [this](FaceHandle face) {
+		return point(*fv_begin(face)).xy() / TILE_SIZE;
+	};
+	const auto indexBySurfaceAndTile = std::views::transform([this, &getTile](const auto & faceItr) {
+		return std::pair<SurfaceKey, FaceHandle> {{getSurface(*faceItr), getTile(*faceItr)}, *faceItr};
+	});
+	const auto chunkBySurfaceAndTile = std::views::chunk_by([](const auto & face1, const auto & face2) {
+		return face1.first.surface == face2.first.surface && face1.first.basePosition == face2.first.basePosition;
+	});
+	for (const auto & faceRange : faces() | indexBySurfaceAndTile | chunkBySurfaceAndTile) {
+		const SurfaceKey & surfaceKey = faceRange.front().first;
+		auto indexItr = surfaceIndices.find(surfaceKey);
 		if (indexItr == surfaceIndices.end()) {
-			indexItr = surfaceIndices.emplace(surface, std::vector<GLuint> {}).first;
-			if (!surface) {
-				indexItr->second.reserve(n_vertices() * 3);
+			indexItr = surfaceIndices.emplace(surfaceKey, std::vector<GLuint> {}).first;
+			if (auto existing = meshes.find(surfaceKey); existing != meshes.end()) {
+				indexItr->second.reserve(static_cast<size_t>(existing->second.count));
 			}
 		}
-		std::ranges::transform(fv_range(face), std::back_inserter(indexItr->second), &OpenMesh::VertexHandle::idx);
+		for (auto push = std::back_inserter(indexItr->second); const auto & [_, face] : faceRange) {
+			std::ranges::transform(fv_range(face), push, &OpenMesh::VertexHandle::idx);
+		}
 	}
 
-	for (const auto & [surface, indices] : surfaceIndices) {
-		auto meshItr = meshes.find(surface);
+	for (const auto & [surfaceKey, indices] : surfaceIndices) {
+		auto meshItr = meshes.find(surfaceKey);
 		if (meshItr == meshes.end()) {
-			meshItr = meshes.emplace(surface, SurfaceArrayBuffer {});
+			meshItr = meshes.emplace(surfaceKey, SurfaceArrayBuffer {}).first;
 			VertexArrayObject {meshItr->second.vertexArray}
 					.addAttribsFor<Vertex>(verticesBuffer)
 					.addIndices(meshItr->second.indicesBuffer, indices)
@@ -81,10 +100,16 @@ void
 Terrain::render(const SceneShader & shader) const
 {
 	grass->bind();
-	for (const auto & [surface, sab] : meshes) {
+	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
+		return itr1.first.surface == itr2.first.surface;
+	});
+	for (const auto & surfaceRange : meshes | chunkBySurface) {
+		const auto surface = surfaceRange.front().first.surface;
 		shader.landmass.use(surface ? surface->colorBias : OPEN_SURFACE);
-		glBindVertexArray(sab.vertexArray);
-		glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
+		for (const auto & sab : surfaceRange) {
+			glBindVertexArray(sab.second.vertexArray);
+			glDrawElements(GL_TRIANGLES, sab.second.count, GL_UNSIGNED_INT, nullptr);
+		}
 	}
 	glBindVertexArray(0);
 }
