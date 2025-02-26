@@ -10,6 +10,11 @@ Worker::Worker() : todoLen {0}
 	std::generate_n(std::back_inserter(threads), std::thread::hardware_concurrency(), [this]() {
 		return std::jthread {&Worker::worker, this};
 	});
+	if constexpr (requires { pthread_setname_np(std::declval<std::jthread>().native_handle(), ""); }) {
+		for (auto & thread : threads) {
+			pthread_setname_np(thread.native_handle(), "ilt-worker");
+		}
+	}
 }
 
 Worker::~Worker()
