@@ -118,7 +118,7 @@ NetworkOf<T, Links...>::addCurve(const GeoData * geoData, const GenCurveDef & cu
 	mergeClose(points, ::distance<3, GlobalDistance>, ::midpoint<3, GlobalDistance>, 2'000.F);
 	std::ranges::transform(points | std::views::pairwise, std::back_inserter(out), [this, centre](const auto pair) {
 		const auto [a, b] = pair;
-		return addLink<typename T::CurveLink>(a, b, centre);
+		return this->addLink<typename T::CurveLink>(a, b, centre);
 	});
 	return out;
 }

@@ -109,7 +109,7 @@ protected:
 	{
 		Triangle<Dim> triangle;
 		std::ranges::transform(fv_range(face), triangle.begin(), [this](auto vertex) {
-			return point(vertex);
+			return this->point(vertex);
 		});
 		return triangle;
 	}
