@@ -5,7 +5,7 @@
 #include <ray.h>
 
 Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance zNear, GlobalDistance zFar) :
-	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar},
+	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar}, view {},
 	projection {
 			glm::perspective(fov, aspect, static_cast<RelativeDistance>(zNear), static_cast<RelativeDistance>(zFar))},
 	viewProjection {}, inverseViewProjection {}
@@ -16,15 +16,18 @@ Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance zNe
 Ray<GlobalPosition3D>
 Camera::unProject(const ScreenRelCoord & mouse) const
 {
-	static constexpr const glm::vec4 screen {0, 0, 1, 1};
-	const auto mouseProjection = glm::lookAt({}, forward, up);
-	return {position, glm::normalize(glm::unProject(mouse || 1.F, mouseProjection, projection, screen))};
+	static constexpr const glm::vec4 SCREEN {0, 0, 1, 1};
+	return {
+			.start = position,
+			.direction = glm::normalize(glm::unProject(mouse || 1.F, view, projection, SCREEN)),
+	};
 }
 
 void
 Camera::updateView()
 {
-	viewProjection = projection * glm::lookAt({}, forward, up);
+	view = glm::lookAt({}, forward, up);
+	viewProjection = projection * view;
 	inverseViewProjection = glm::inverse(viewProjection);
 }
 

@@ -82,6 +82,6 @@ private:
 	Direction3D up;
 
 	GlobalDistance near, far;
-	glm::mat4 projection;
+	glm::mat4 view, projection;
 	glm::mat4 viewProjection, inverseViewProjection;
 };
