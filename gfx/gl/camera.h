@@ -70,6 +70,12 @@ public:
 		return position;
 	}
 
+	[[nodiscard]] auto &
+	getFrustumPlanes() const
+	{
+		return frustumPlanes;
+	}
+
 	[[nodiscard]] std::array<GlobalPosition4D, 4> extentsAtDist(GlobalDistance) const;
 
 	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
@@ -84,4 +90,5 @@ private:
 	GlobalDistance near, far;
 	glm::mat4 view, projection;
 	glm::mat4 viewProjection, inverseViewProjection;
+	std::array<glm::vec4, 6> frustumPlanes;
 };

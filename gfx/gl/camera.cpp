@@ -29,6 +29,11 @@ Camera::updateView()
 	view = glm::lookAt({}, forward, up);
 	viewProjection = projection * view;
 	inverseViewProjection = glm::inverse(viewProjection);
+	static constexpr auto PLANES = std::array {0, 1, 2} * std::array {1.F, -1.F};
+	std::ranges::transform(PLANES, frustumPlanes.begin(), [vpt = glm::transpose(viewProjection)](const auto & idxs) {
+		const auto [idx, sgn] = idxs;
+		return vpt[3] + (vpt[idx] * sgn);
+	});
 }
 
 Direction3D
