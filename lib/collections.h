@@ -45,6 +45,7 @@ operator*(const std::array<T, first> & a, const std::array<V, second> & b)
 template<typename T, std::size_t N>
 [[nodiscard]] constexpr auto
 operator*(const std::array<T, N> & in, auto && f)
+	requires requires { f(in.front()); }
 {
 	std::array<decltype(f(in[0])), N> out;
 
