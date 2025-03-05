@@ -1,19 +1,14 @@
 #pragma once
 
 #include "config/types.h"
+#include "frustum.h"
 #include <glm/glm.hpp>
 #include <maths.h>
 #include <ray.h>
 
-class Camera {
+class Camera : public Frustum {
 public:
-	Camera(GlobalPosition3D, Angle fov, Angle aspect, GlobalDistance zNear, GlobalDistance zFar);
-
-	[[nodiscard]] glm::mat4
-	getViewProjection() const
-	{
-		return viewProjection;
-	}
+	Camera(GlobalPosition3D position, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far);
 
 	[[nodiscard]] Ray<GlobalPosition3D> unProject(const ScreenRelCoord &) const;
 
@@ -70,25 +65,17 @@ public:
 		return position;
 	}
 
-	[[nodiscard]] auto &
-	getFrustumPlanes() const
-	{
-		return frustumPlanes;
-	}
-
 	[[nodiscard]] std::array<GlobalPosition4D, 4> extentsAtDist(GlobalDistance) const;
 
 	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
 
 private:
+	Camera(GlobalPosition3D position, GlobalDistance near, GlobalDistance far, const glm::mat4 & view,
+			const glm::mat4 & projection);
 	void updateView();
 
 	GlobalPosition3D position;
 	Direction3D forward;
 	Direction3D up;
-
 	GlobalDistance near, far;
-	glm::mat4 view, projection;
-	glm::mat4 viewProjection, inverseViewProjection;
-	std::array<glm::vec4, 6> frustumPlanes;
 };

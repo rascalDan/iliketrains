@@ -4,13 +4,16 @@
 #include <maths.h>
 #include <ray.h>
 
-Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance zNear, GlobalDistance zFar) :
-	position {pos}, forward {::north}, up {::up}, near {zNear}, far {zFar}, view {},
-	projection {
-			glm::perspective(fov, aspect, static_cast<RelativeDistance>(zNear), static_cast<RelativeDistance>(zFar))},
-	viewProjection {}, inverseViewProjection {}
+Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far) :
+	Camera {pos, near, far, glm::lookAt({}, ::north, ::up),
+			glm::perspective(fov, aspect, static_cast<RelativeDistance>(near), static_cast<RelativeDistance>(far))}
 {
-	updateView();
+}
+
+Camera::Camera(GlobalPosition3D pos, GlobalDistance near, GlobalDistance far, const glm::mat4 & view,
+		const glm::mat4 & projection) :
+	Frustum {view, projection}, position {pos}, forward {::north}, up {::up}, near {near}, far {far}
+{
 }
 
 Ray<GlobalPosition3D>
@@ -26,14 +29,7 @@ Camera::unProject(const ScreenRelCoord & mouse) const
 void
 Camera::updateView()
 {
-	view = glm::lookAt({}, forward, up);
-	viewProjection = projection * view;
-	inverseViewProjection = glm::inverse(viewProjection);
-	static constexpr auto PLANES = std::array {0, 1, 2} * std::array {1.F, -1.F};
-	std::ranges::transform(PLANES, frustumPlanes.begin(), [vpt = glm::transpose(viewProjection)](const auto & idxs) {
-		const auto [idx, sgn] = idxs;
-		return vpt[3] + (vpt[idx] * sgn);
-	});
+	Frustum::updateView(glm::lookAt({}, forward, up));
 }
 
 Direction3D
