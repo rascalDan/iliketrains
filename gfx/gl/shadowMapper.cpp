@@ -1,5 +1,4 @@
 #include "shadowMapper.h"
-#include "camera.h"
 #include "collections.h"
 #include "game/gamestate.h"
 #include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
@@ -21,6 +20,7 @@
 #include "sceneProvider.h"
 #include "sceneShader.h"
 #include "sorting.h"
+#include <gfx/camera.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>

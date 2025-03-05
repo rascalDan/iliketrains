@@ -1,6 +1,6 @@
 #include "followCameraController.h"
 #include "game/vehicles/vehicle.h"
-#include <gfx/gl/camera.h>
+#include <gfx/camera.h>
 #include <glm/glm.hpp>
 #include <location.h>
 #include <maths.h>

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "camera.h"
 #include "gfx/lightDirection.h"
 #include "glArrays.h"
 #include "program.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
 #include "shadowMapper.h"
+#include <gfx/camera.h>
 #include <glm/fwd.hpp>
 
 class SceneRenderer {

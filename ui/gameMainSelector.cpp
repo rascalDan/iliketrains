@@ -7,7 +7,7 @@
 #include <game/selectable.h>
 #include <game/terrain.h>
 #include <game/worldobject.h> // IWYU pragma: keep
-#include <gfx/gl/camera.h>
+#include <gfx/camera.h>
 #include <optional>
 #include <stream_support.h>
 #include <typeinfo>

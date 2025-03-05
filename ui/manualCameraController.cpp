@@ -1,7 +1,7 @@
 #include "manualCameraController.h"
 #include <algorithm>
 #include <cmath>
-#include <gfx/gl/camera.h>
+#include <gfx/camera.h>
 #include <maths.h>
 
 bool

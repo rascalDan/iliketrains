@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include <game/network/link.h>
-#include <gfx/gl/camera.h>
+#include <gfx/camera.h>
 #include <glm/glm.hpp>
 #include <maths.h>
 #include <triangle.h>
