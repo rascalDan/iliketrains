@@ -97,7 +97,7 @@ Terrain::afterChange()
 }
 
 void
-Terrain::render(const SceneShader & shader) const
+Terrain::render(const SceneShader & shader, const Frustum &) const
 {
 	grass->bind();
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {

@@ -70,7 +70,7 @@ struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
 	}
 
 	void
-	render(const SceneShader &) const override
+	render(const SceneShader &, const Frustum &) const override
 	{
 	}
 

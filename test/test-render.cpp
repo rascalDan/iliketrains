@@ -68,14 +68,14 @@ public:
 	}
 
 	void
-	content(const SceneShader & shader) const override
+	content(const SceneShader & shader, const Frustum & frustum) const override
 	{
-		terrain->render(shader);
-		water.render(shader);
-		rail.render(shader);
-		std::ranges::for_each(gameState->assets, [&shader](const auto & asset) {
+		terrain->render(shader, frustum);
+		water.render(shader, frustum);
+		rail.render(shader, frustum);
+		std::ranges::for_each(gameState->assets, [&shader, &frustum](const auto & asset) {
 			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
-				renderable->render(shader);
+				renderable->render(shader, frustum);
 			}
 		});
 	}
@@ -171,10 +171,10 @@ BOOST_AUTO_TEST_CASE(terrain)
 		Water water {terrain};
 
 		void
-		content(const SceneShader & shader) const override
+		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
-			terrain->render(shader);
-			water.render(shader);
+			terrain->render(shader, frustum);
+			water.render(shader, frustum);
 		}
 
 		void
@@ -219,9 +219,9 @@ BOOST_AUTO_TEST_CASE(railnet)
 		}
 
 		void
-		content(const SceneShader & shader) const override
+		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
-			net.render(shader);
+			net.render(shader, frustum);
 		}
 
 		void

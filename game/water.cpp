@@ -102,7 +102,7 @@ Water::tick(TickDuration dur)
 }
 
 void
-Water::render(const SceneShader & shader) const
+Water::render(const SceneShader & shader, const Frustum &) const
 {
 	shader.water.use(waveCycle);
 	water->bind();

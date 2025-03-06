@@ -38,10 +38,10 @@ public:
 	}
 
 	void
-	content(const SceneShader & shader) const override
+	content(const SceneShader & shader, const Frustum & frustum) const override
 	{
 		shader.basic.use(Location {{0, 0, 0}, {0, 0, 0}});
-		objects.apply(&Renderable::render, shader);
+		objects.apply(&Renderable::render, shader, frustum);
 	}
 
 	void

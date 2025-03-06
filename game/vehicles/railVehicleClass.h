@@ -14,7 +14,7 @@ class Location;
 
 class RailVehicleClass : public Renderable, public Asset {
 public:
-	void render(const SceneShader & shader) const override;
+	void render(const SceneShader & shader, const Frustum &) const override;
 	void shadows(const ShadowMapper & shadowMapper) const override;
 
 	struct LocationVertex {

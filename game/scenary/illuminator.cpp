@@ -59,7 +59,7 @@ Illuminator::postLoad()
 }
 
 void
-Illuminator::render(const SceneShader & shader) const
+Illuminator::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = instances.size()) {
 		shader.basicInst.use();

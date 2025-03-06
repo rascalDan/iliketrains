@@ -45,7 +45,7 @@ public:
 	mutable InstanceVertices<LocationVertex> instances;
 	mutable InstanceVertices<SpotLightVertex> instancesSpotLight;
 	mutable InstanceVertices<PointLightVertex> instancesPointLight;
-	void render(const SceneShader &) const override;
+	void render(const SceneShader &, const Frustum &) const override;
 	void lights(const SceneShader &) const override;
 
 protected:

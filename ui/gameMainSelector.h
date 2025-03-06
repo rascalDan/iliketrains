@@ -24,13 +24,13 @@ public:
 		virtual bool move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool handleInput(const SDL_Event &, const Position & pos);
 		virtual void render(const UIShader & shader, const Position & pos) const;
-		virtual void render(const SceneShader &) const;
+		virtual void render(const SceneShader &, const Frustum &) const;
 	};
 
 	GameMainSelector(const Camera * c, ScreenAbsCoord size);
 
 	void render(const UIShader & shader, const Position & pos) const override;
-	void render(const SceneShader & shader) const override;
+	void render(const SceneShader & shader, const Frustum &) const override;
 
 	bool handleInput(const SDL_Event & e, const Position &) override;
 

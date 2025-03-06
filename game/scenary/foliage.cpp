@@ -29,7 +29,7 @@ Foliage::updateStencil(const ShadowStenciller & ss) const
 }
 
 void
-Foliage::render(const SceneShader & shader) const
+Foliage::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = instances.size()) {
 		shader.basicInst.use();

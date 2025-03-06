@@ -54,15 +54,15 @@ GameMainWindow::render() const
 }
 
 void
-GameMainWindow::content(const SceneShader & shader) const
+GameMainWindow::content(const SceneShader & shader, const Frustum & frustum) const
 {
 	for (const auto & [id, asset] : gameState->assets) {
 		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
-			r->render(shader);
+			r->render(shader, frustum);
 		}
 	}
-	gameState->world.apply<Renderable>(&Renderable::render, shader);
-	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader);
+	gameState->world.apply<Renderable>(&Renderable::render, shader, frustum);
+	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader, frustum);
 }
 
 void

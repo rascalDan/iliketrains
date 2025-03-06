@@ -166,7 +166,7 @@ namespace {
 }
 
 void
-RailLinks::render(const SceneShader & shader) const
+RailLinks::render(const SceneShader & shader, const Frustum &) const
 {
 	if (!links.objects.empty()) {
 		texture->bind();
