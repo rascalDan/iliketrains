@@ -6,6 +6,7 @@
 #include <stream_support.h>
 
 #include <collections.h>
+#include <gfx/aabb.h>
 #include <glArrays.h>
 #include <glad/gl.h>
 #include <set>
@@ -109,4 +110,15 @@ BOOST_DATA_TEST_CASE(mergeCloseInts,
 			},
 			tolerance)));
 	BOOST_CHECK_EQUAL_COLCOL(mutableCollection, expected);
+}
+
+BOOST_AUTO_TEST_CASE(aabb_from_points)
+{
+	const auto aabb = AxisAlignedBoundingBox::fromPoints(std::vector<GlobalPosition3D> {
+			{1, 2, 3},
+			{4, 2, 1},
+			{9, 1, 7},
+	});
+	BOOST_CHECK_EQUAL(aabb.min, GlobalPosition3D(1, 1, 1));
+	BOOST_CHECK_EQUAL(aabb.max, GlobalPosition3D(9, 2, 7));
 }

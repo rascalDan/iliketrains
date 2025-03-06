@@ -82,7 +82,7 @@ Water::generateMeshes()
 						const auto pos = (p * TILE_SIZE) + GlobalPosition2D {x, y};
 						const auto v = vertexIndex.emplace(pos, vertices.size());
 						if (v.second) {
-							const auto cpos = glm::clamp(pos, std::get<0>(extents).xy(), std::get<1>(extents).xy());
+							const auto cpos = glm::clamp(pos, extents.min.xy(), extents.max.xy());
 							vertices.emplace_back(geoData->positionAt(cpos));
 						}
 						*out++ = static_cast<unsigned int>(v.first->second);

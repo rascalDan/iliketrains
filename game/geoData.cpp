@@ -35,16 +35,16 @@ GeoData::loadFromAsciiGrid(const std::filesystem::path & input)
 	std::vector<VertexHandle> vertices;
 	vertices.reserve(ncols * nrows);
 	GeoData mesh;
-	mesh.lowerExtent = {xllcorner, yllcorner, std::numeric_limits<GlobalDistance>::max()};
-	mesh.upperExtent = {xllcorner + (cellsize * (ncols - 1)), yllcorner + (cellsize * (nrows - 1)),
-			std::numeric_limits<GlobalDistance>::min()};
+	mesh.extents = {{xllcorner, yllcorner, std::numeric_limits<GlobalDistance>::max()},
+			{xllcorner + (cellsize * (ncols - 1)), yllcorner + (cellsize * (nrows - 1)),
+					std::numeric_limits<GlobalDistance>::min()}};
 	for (size_t row = 0; row < nrows; ++row) {
 		for (size_t col = 0; col < ncols; ++col) {
 			float heightf = 0;
 			f >> heightf;
 			const auto height = static_cast<GlobalDistance>(std::round(heightf * 1000.F));
-			mesh.upperExtent.z = std::max(mesh.upperExtent.z, height);
-			mesh.lowerExtent.z = std::min(mesh.lowerExtent.z, height);
+			mesh.extents.max.z = std::max(mesh.extents.max.z, height);
+			mesh.extents.min.z = std::min(mesh.extents.min.z, height);
 			vertices.push_back(mesh.add_vertex({xllcorner + (col * cellsize), yllcorner + (row * cellsize), height}));
 		}
 	}
@@ -78,8 +78,7 @@ GeoData::createFlat(GlobalPosition2D lower, GlobalPosition2D upper, GlobalDistan
 	assert((upper - lower) % GRID_SIZE == GlobalPosition2D {});
 	GeoData mesh;
 
-	mesh.lowerExtent = {lower, h};
-	mesh.upperExtent = {upper, h};
+	mesh.extents = {{lower, h}, {upper, h}};
 
 	std::vector<VertexHandle> vertices;
 	for (GlobalDistance row = lower.x; row <= upper.x; row += GRID_SIZE) {
@@ -120,7 +119,7 @@ GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 {
 	GeoData::IntersectionResult out;
 	walkUntil(PointFace {ray.start, face},
-			ray.start.xy() + (ray.direction.xy() * RelativePosition2D(upperExtent.xy() - lowerExtent.xy())),
+			ray.start.xy() + (ray.direction.xy() * ::difference(extents.max.xy(), extents.min.xy())),
 			[&out, &ray, this](const auto & step) {
 				BaryPosition bari {};
 				RelativeDistance dist {};
@@ -325,9 +324,9 @@ GeoData::setHeights(const std::span<const GlobalPosition3D> triangleStrip, const
 	if (triangleStrip.size() < 3) {
 		return {};
 	}
-	const auto stripMinMax = std::ranges::minmax(triangleStrip, {}, &GlobalPosition3D::z);
-	lowerExtent.z = std::min(upperExtent.z, stripMinMax.min.z);
-	upperExtent.z = std::max(upperExtent.z, stripMinMax.max.z);
+	for (const auto & vertex : triangleStrip) {
+		extents += vertex;
+	}
 
 	class SetHeights {
 	public:
