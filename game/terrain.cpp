@@ -1,4 +1,5 @@
 #include "terrain.h"
+#include "gfx/frustum.h"
 #include <algorithm>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/gl/shadowMapper.h>
@@ -13,6 +14,7 @@
 #include <vector>
 
 static constexpr RGB OPEN_SURFACE {-1};
+static constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
 
 template<>
 VertexArrayObject &
@@ -31,8 +33,6 @@ Terrain::SurfaceKey::operator<(const SurfaceKey & other) const
 void
 Terrain::generateMeshes()
 {
-	constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
-
 	std::ranges::transform(all_vertices(), glMappedBufferWriter<Vertex> {GL_ARRAY_BUFFER, verticesBuffer, n_vertices()},
 			[this](const auto & vertex) {
 				return Vertex {point(vertex), normal(vertex)};
@@ -97,13 +97,22 @@ Terrain::afterChange()
 }
 
 void
-Terrain::render(const SceneShader & shader, const Frustum &) const
+Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 {
 	grass->bind();
+
+	std::ranges::for_each(meshes, [ext = getExtents(), &frustum](const auto & surfaceDef) {
+		const AxisAlignedBoundingBox tileAabb {{surfaceDef.first.basePosition * TILE_SIZE || ext.min.z},
+				{(surfaceDef.first.basePosition + 1) * TILE_SIZE || ext.max.z}};
+		surfaceDef.second.visible = frustum.contains(tileAabb);
+	});
+
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
 		return itr1.first.surface == itr2.first.surface;
 	});
-	for (const auto & surfaceRange : meshes | chunkBySurface) {
+	for (const auto & surfaceRange : meshes | std::views::filter([](const auto & itr) {
+			 return itr.second.visible;
+		 }) | chunkBySurface) {
 		const auto surface = surfaceRange.front().first.surface;
 		shader.landmass.use(surface ? surface->colorBias : OPEN_SURFACE);
 		for (const auto & sab : surfaceRange) {
