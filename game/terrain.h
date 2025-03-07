@@ -35,6 +35,7 @@ private:
 		glVertexArray vertexArray;
 		glBuffer indicesBuffer;
 		GLsizei count;
+		mutable bool visible;
 	};
 
 	struct SurfaceKey {
