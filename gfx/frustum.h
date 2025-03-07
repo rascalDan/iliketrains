@@ -4,6 +4,8 @@
 #include <array>
 #include <glm/mat4x4.hpp>
 
+class AxisAlignedBoundingBox;
+
 class Frustum {
 public:
 	Frustum(const GlobalPosition3D & pos, const glm::mat4 & view, const glm::mat4 & projection);
@@ -27,6 +29,8 @@ public:
 	}
 
 	void updateView(const glm::mat4 & view);
+
+	[[nodiscard]] bool contains(const AxisAlignedBoundingBox &) const;
 
 protected:
 	static constexpr size_t FACES = 6;

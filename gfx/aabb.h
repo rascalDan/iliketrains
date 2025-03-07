@@ -11,6 +11,8 @@ public:
 
 	AxisAlignedBoundingBox & operator+=(const GlobalPosition3D & point);
 
+	AxisAlignedBoundingBox operator-(const GlobalPosition3D & viewPoint) const;
+
 	[[nodiscard]] static AxisAlignedBoundingBox fromPoints(std::span<const GlobalPosition3D> points);
 
 	GlobalPosition3D min, max;

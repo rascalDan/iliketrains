@@ -22,3 +22,9 @@ AxisAlignedBoundingBox::operator+=(const GlobalPosition3D & point)
 	max = glm::max(max, point);
 	return *this;
 }
+
+AxisAlignedBoundingBox
+AxisAlignedBoundingBox::operator-(const GlobalPosition3D & viewPoint) const
+{
+	return {min - viewPoint, max - viewPoint};
+}
