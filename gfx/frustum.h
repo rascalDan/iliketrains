@@ -1,11 +1,12 @@
 #pragma once
 
+#include "config/types.h"
 #include <array>
 #include <glm/mat4x4.hpp>
 
 class Frustum {
 public:
-	Frustum(const glm::mat4 & view, const glm::mat4 & projection);
+	Frustum(const GlobalPosition3D & pos, const glm::mat4 & view, const glm::mat4 & projection);
 
 	[[nodiscard]] auto &
 	getFrustumPlanes() const
@@ -19,12 +20,19 @@ public:
 		return viewProjection;
 	}
 
+	[[nodiscard]] auto
+	getPosition() const
+	{
+		return position;
+	}
+
 	void updateView(const glm::mat4 & view);
 
 protected:
 	static constexpr size_t FACES = 6;
 	void updateCache();
 
+	GlobalPosition3D position;
 	glm::mat4 view, projection;
 	glm::mat4 viewProjection, inverseViewProjection;
 	std::array<glm::vec4, FACES> planes;

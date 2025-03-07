@@ -5,8 +5,8 @@
 
 static constexpr auto PLANES = std::array {0, 1, 2} * std::array {1.F, -1.F};
 
-Frustum::Frustum(const glm::mat4 & view, const glm::mat4 & projection) :
-	view {view}, projection {projection}, viewProjection {}, inverseViewProjection {}, planes {}
+Frustum::Frustum(const GlobalPosition3D & pos, const glm::mat4 & view, const glm::mat4 & projection) :
+	position {pos}, view {view}, projection {projection}, viewProjection {}, inverseViewProjection {}, planes {}
 {
 	updateCache();
 }
