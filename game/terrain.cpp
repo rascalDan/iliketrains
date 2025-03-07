@@ -77,6 +77,16 @@ Terrain::generateMeshes()
 					.data(verticesBuffer, GL_ARRAY_BUFFER);
 		}
 		meshItr->second.count = static_cast<GLsizei>(indices.size());
+		if (!surfaceKey.surface) {
+			meshItr->second.aabb = {{surfaceKey.basePosition * TILE_SIZE || getExtents().min.z},
+					{(surfaceKey.basePosition + 1) * TILE_SIZE || getExtents().max.z}};
+		}
+		else {
+			meshItr->second.aabb = AxisAlignedBoundingBox::fromPoints(
+					indices | std::views::transform([this](const auto vertex) -> GlobalPosition3D {
+						return this->point(VertexHandle {static_cast<int>(vertex)});
+					}));
+		}
 	}
 	if (meshes.size() > surfaceIndices.size()) {
 		std::erase_if(meshes, [&surfaceIndices](const auto & mesh) {
@@ -102,9 +112,7 @@ Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 	grass->bind();
 
 	std::ranges::for_each(meshes, [ext = getExtents(), &frustum](const auto & surfaceDef) {
-		const AxisAlignedBoundingBox tileAabb {{surfaceDef.first.basePosition * TILE_SIZE || ext.min.z},
-				{(surfaceDef.first.basePosition + 1) * TILE_SIZE || ext.max.z}};
-		surfaceDef.second.visible = frustum.contains(tileAabb);
+		surfaceDef.second.visible = frustum.contains(surfaceDef.second.aabb);
 	});
 
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {

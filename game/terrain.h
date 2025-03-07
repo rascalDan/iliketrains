@@ -35,6 +35,7 @@ private:
 		glVertexArray vertexArray;
 		glBuffer indicesBuffer;
 		GLsizei count;
+		AxisAlignedBoundingBox aabb;
 		mutable bool visible;
 	};
 
