@@ -59,12 +59,6 @@ public:
 		return forward;
 	}
 
-	[[nodiscard]] auto
-	getPosition() const
-	{
-		return position;
-	}
-
 	[[nodiscard]] std::array<GlobalPosition4D, 4> extentsAtDist(GlobalDistance) const;
 
 	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
@@ -74,7 +68,6 @@ private:
 			const glm::mat4 & projection);
 	void updateView();
 
-	GlobalPosition3D position;
 	Direction3D forward;
 	Direction3D up;
 	GlobalDistance near, far;

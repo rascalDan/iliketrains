@@ -12,7 +12,7 @@ Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance nea
 
 Camera::Camera(GlobalPosition3D pos, GlobalDistance near, GlobalDistance far, const glm::mat4 & view,
 		const glm::mat4 & projection) :
-	Frustum {view, projection}, position {pos}, forward {::north}, up {::up}, near {near}, far {far}
+	Frustum {pos, view, projection}, forward {::north}, up {::up}, near {near}, far {far}
 {
 }
 
