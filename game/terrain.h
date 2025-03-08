@@ -35,7 +35,7 @@ private:
 		glVertexArray vertexArray;
 		glBuffer indicesBuffer;
 		GLsizei count;
-		AxisAlignedBoundingBox aabb;
+		AxisAlignedBoundingBox<GlobalDistance> aabb;
 	};
 
 	struct SurfaceKey {

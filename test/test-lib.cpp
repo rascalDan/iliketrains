@@ -114,7 +114,7 @@ BOOST_DATA_TEST_CASE(mergeCloseInts,
 
 BOOST_AUTO_TEST_CASE(aabb_from_points)
 {
-	const auto aabb = AxisAlignedBoundingBox::fromPoints(std::vector<GlobalPosition3D> {
+	const auto aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(std::vector<GlobalPosition3D> {
 			{1, 2, 3},
 			{4, 2, 1},
 			{9, 1, 7},

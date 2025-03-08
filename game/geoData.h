@@ -81,5 +81,5 @@ protected:
 	virtual void afterChange();
 
 private:
-	AxisAlignedBoundingBox extents;
+	AxisAlignedBoundingBox<GlobalDistance> extents;
 };

@@ -1,10 +1,9 @@
 #pragma once
 
+#include "aabb.h"
 #include "config/types.h"
 #include <array>
 #include <glm/mat4x4.hpp>
-
-class AxisAlignedBoundingBox;
 
 class Frustum {
 public:
@@ -30,11 +29,13 @@ public:
 
 	void updateView(const glm::mat4 & view);
 
-	[[nodiscard]] bool contains(const AxisAlignedBoundingBox &) const;
+	using BoundingBox = AxisAlignedBoundingBox<GlobalDistance>;
+	[[nodiscard]] bool contains(const BoundingBox &) const;
 
 protected:
 	static constexpr size_t FACES = 6;
 	void updateCache();
+	[[nodiscard]] bool boundByPlanes(const BoundingBox &, size_t nplanes) const;
 
 	GlobalPosition3D position;
 	glm::mat4 view, projection;

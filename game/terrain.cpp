@@ -82,7 +82,7 @@ Terrain::generateMeshes()
 					{(surfaceKey.basePosition + 1) * TILE_SIZE || getExtents().max.z}};
 		}
 		else {
-			meshItr->second.aabb = AxisAlignedBoundingBox::fromPoints(
+			meshItr->second.aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(
 					indices | std::views::transform([this](const auto vertex) -> GlobalPosition3D {
 						return this->point(VertexHandle {static_cast<int>(vertex)});
 					}));

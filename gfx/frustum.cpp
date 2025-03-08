@@ -1,5 +1,4 @@
 #include "frustum.h"
-#include "aabb.h"
 #include <algorithm>
 #include <collections.h>
 #include <glm/ext/matrix_transform.hpp>
@@ -20,11 +19,11 @@ Frustum::updateView(const glm::mat4 & newView)
 }
 
 bool
-Frustum::contains(const AxisAlignedBoundingBox & aabb) const
+Frustum::contains(const BoundingBox & aabb) const
 {
 	static constexpr auto EXTENT_CORNER_IDXS = [] {
-		using Extent = GlobalPosition3D AxisAlignedBoundingBox::*;
-		constexpr auto EXTENTS = std::array {&AxisAlignedBoundingBox::min, &AxisAlignedBoundingBox::max};
+		using Extent = GlobalPosition3D BoundingBox::*;
+		constexpr auto EXTENTS = std::array {&BoundingBox::min, &BoundingBox::max};
 		std::array<glm::vec<3, Extent>, 2ZU * 2ZU * 2ZU> out {};
 		std::ranges::copy(std::views::cartesian_product(EXTENTS, EXTENTS, EXTENTS)
 						| std::views::transform(
