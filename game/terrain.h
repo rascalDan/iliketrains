@@ -36,7 +36,6 @@ private:
 		glBuffer indicesBuffer;
 		GLsizei count;
 		AxisAlignedBoundingBox aabb;
-		mutable bool visible;
 	};
 
 	struct SurfaceKey {

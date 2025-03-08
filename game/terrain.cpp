@@ -111,21 +111,17 @@ Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 {
 	grass->bind();
 
-	std::ranges::for_each(meshes, [ext = getExtents(), &frustum](const auto & surfaceDef) {
-		surfaceDef.second.visible = frustum.contains(surfaceDef.second.aabb);
-	});
-
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
 		return itr1.first.surface == itr2.first.surface;
 	});
-	for (const auto & surfaceRange : meshes | std::views::filter([](const auto & itr) {
-			 return itr.second.visible;
-		 }) | chunkBySurface) {
+	for (const auto & surfaceRange : meshes | chunkBySurface) {
 		const auto surface = surfaceRange.front().first.surface;
 		shader.landmass.use(surface ? surface->colorBias : OPEN_SURFACE);
 		for (const auto & sab : surfaceRange) {
-			glBindVertexArray(sab.second.vertexArray);
-			glDrawElements(GL_TRIANGLES, sab.second.count, GL_UNSIGNED_INT, nullptr);
+			if (frustum.contains(sab.second.aabb)) {
+				glBindVertexArray(sab.second.vertexArray);
+				glDrawElements(GL_TRIANGLES, sab.second.count, GL_UNSIGNED_INT, nullptr);
+			}
 		}
 	}
 	glBindVertexArray(0);

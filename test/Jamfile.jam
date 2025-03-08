@@ -71,5 +71,6 @@ explicit perf-assetFactory ;
 explicit perf-persistence ;
 explicit perf-geoData ;
 explicit perf-instancing ;
-alias perf : perf-assetFactory perf-persistence perf-geoData perf-instancing ;
+explicit perf-terrain ;
+alias perf : perf-assetFactory perf-persistence perf-geoData perf-instancing perf-terrain ;
 explicit perf ;
