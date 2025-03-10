@@ -47,7 +47,7 @@ RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 }
 
 void
-RailVehicleClass::shadows(const ShadowMapper & mapper) const
+RailVehicleClass::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		mapper.dynamicPointInst.use();

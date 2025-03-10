@@ -41,7 +41,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 }
 
 void
-Foliage::shadows(const ShadowMapper & mapper) const
+Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (const auto count = instances.size()) {
 		const auto dimensions = bodyMesh->getDimensions();

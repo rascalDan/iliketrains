@@ -15,7 +15,7 @@ public:
 
 	virtual void render(const SceneShader & shader, const Frustum &) const = 0;
 	virtual void lights(const SceneShader & shader) const;
-	virtual void shadows(const ShadowMapper & shadowMapper) const;
+	virtual void shadows(const ShadowMapper & shadowMapper, const Frustum &) const;
 
 	virtual void updateStencil(const ShadowStenciller & lightDir) const;
 };

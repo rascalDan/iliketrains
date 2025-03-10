@@ -15,7 +15,7 @@ class Location;
 class RailVehicleClass : public Renderable, public Asset {
 public:
 	void render(const SceneShader & shader, const Frustum &) const override;
-	void shadows(const ShadowMapper & shadowMapper) const override;
+	void shadows(const ShadowMapper & shadowMapper, const Frustum &) const override;
 
 	struct LocationVertex {
 		glm::mat3 body, front, back;

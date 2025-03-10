@@ -78,12 +78,12 @@ GameMainWindow::lights(const SceneShader & shader) const
 }
 
 void
-GameMainWindow::shadows(const ShadowMapper & shadowMapper) const
+GameMainWindow::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
 	for (const auto & [id, asset] : gameState->assets) {
 		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
-			r->shadows(shadowMapper);
+			r->shadows(shadowMapper, frustum);
 		}
 	}
-	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper);
+	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper, frustum);
 }

@@ -6,7 +6,7 @@ Renderable::lights(const SceneShader &) const
 }
 
 void
-Renderable::shadows(const ShadowMapper &) const
+Renderable::shadows(const ShadowMapper &, const Frustum &) const
 {
 }
 

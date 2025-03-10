@@ -17,7 +17,7 @@ public:
 	}
 
 	void render(const SceneShader & shader, const Frustum &) const override;
-	void shadows(const ShadowMapper &) const override;
+	void shadows(const ShadowMapper &, const Frustum &) const override;
 
 	void tick(TickDuration) override;
 

@@ -9,6 +9,6 @@ SceneProvider::environment(const SceneShader &, const SceneRenderer & renderer) 
 }
 
 void
-SceneProvider::shadows(const ShadowMapper &) const
+SceneProvider::shadows(const ShadowMapper &, const Frustum &) const
 {
 }

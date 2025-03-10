@@ -128,7 +128,7 @@ Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 }
 
 void
-Terrain::shadows(const ShadowMapper & shadowMapper) const
+Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum &) const
 {
 	shadowMapper.landmess.use();
 	for (const auto & [surface, sab] : meshes) {

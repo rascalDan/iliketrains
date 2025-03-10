@@ -118,7 +118,14 @@ ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, co
 				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures, &stencilShadowProgram}) {
 		p->setView(out, sizes, lightViewPoint);
 	}
-	scene.shadows(*this);
+	ExtentsBoundingBox extents;
+	for (const auto & point : bandViewExtents.back()) {
+		extents += point;
+	}
+	const auto lightProjection
+			= glm::ortho(extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
+	Frustum frustum {lightViewPoint, lightViewDir, lightProjection};
+	scene.shadows(*this, frustum);
 
 	glCullFace(GL_BACK);
 

@@ -58,10 +58,10 @@ public:
 	}
 
 	void
-	shadows(const ShadowMapper & mapper) const override
+	shadows(const ShadowMapper & mapper, const Frustum & frustum) const override
 	{
 		mapper.dynamicPoint.use(Location {{0, 0, 0}, {0, 0, 0}});
-		objects.apply(&Renderable::shadows, mapper);
+		objects.apply(&Renderable::shadows, mapper, frustum);
 	}
 
 	void

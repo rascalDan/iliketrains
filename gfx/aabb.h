@@ -37,5 +37,5 @@ public:
 				}));
 	}
 
-	V min, max;
+	V min {}, max {};
 };

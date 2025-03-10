@@ -92,12 +92,12 @@ public:
 	}
 
 	void
-	shadows(const ShadowMapper & shadowMapper) const override
+	shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const override
 	{
-		terrain->shadows(shadowMapper);
-		std::ranges::for_each(gameState->assets, [&shadowMapper](const auto & asset) {
+		terrain->shadows(shadowMapper, frustum);
+		std::ranges::for_each(gameState->assets, [&shadowMapper, &frustum](const auto & asset) {
 			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
-				renderable->shadows(shadowMapper);
+				renderable->shadows(shadowMapper, frustum);
 			}
 		});
 	}
@@ -190,9 +190,9 @@ BOOST_AUTO_TEST_CASE(terrain)
 		}
 
 		void
-		shadows(const ShadowMapper & shadowMapper) const override
+		shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const override
 		{
-			terrain->shadows(shadowMapper);
+			terrain->shadows(shadowMapper, frustum);
 		}
 	};
 
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(railnet)
 		}
 
 		void
-		shadows(const ShadowMapper &) const override
+		shadows(const ShadowMapper &, const Frustum &) const override
 		{
 		}
 	};
