@@ -3,7 +3,7 @@
 #include <collections.h>
 #include <glm/ext/matrix_transform.hpp>
 
-static constexpr auto PLANES = std::array {0, 1, 2} * std::array {1.F, -1.F};
+static constexpr auto PLANES = std::array {0, 1, 2} * std::array {-1.F, 1.F};
 
 Frustum::Frustum(const GlobalPosition3D & pos, const glm::mat4 & view, const glm::mat4 & projection) :
 	position {pos}, view {view}, projection {projection}, viewProjection {}, inverseViewProjection {}, planes {}
@@ -21,6 +21,18 @@ Frustum::updateView(const glm::mat4 & newView)
 bool
 Frustum::contains(const BoundingBox & aabb) const
 {
+	return boundByPlanes(aabb, FACES);
+}
+
+bool
+Frustum::shadedBy(const BoundingBox & aabb) const
+{
+	return boundByPlanes(aabb, FACES - 1);
+}
+
+bool
+Frustum::boundByPlanes(const BoundingBox & aabb, size_t nplanes) const
+{
 	static constexpr auto EXTENT_CORNER_IDXS = [] {
 		using Extent = GlobalPosition3D BoundingBox::*;
 		constexpr auto EXTENTS = std::array {&BoundingBox::min, &BoundingBox::max};
@@ -36,7 +48,7 @@ Frustum::contains(const BoundingBox & aabb) const
 			= EXTENT_CORNER_IDXS * [relativeAabb = aabb - position](auto idxs) -> glm::vec4 {
 		return {(relativeAabb.*(idxs.x)).x, (relativeAabb.*(idxs.y)).y, (relativeAabb.*(idxs.z)).z, 1.F};
 	};
-	return std::ranges::none_of(planes, [&corners](const auto & frustumPlane) {
+	return std::ranges::none_of(std::span(planes).subspan(0, nplanes), [&corners](const auto & frustumPlane) {
 		return (std::ranges::all_of(corners, [&frustumPlane](const auto & corner) {
 			return glm::dot(frustumPlane, corner) < 0.F;
 		}));

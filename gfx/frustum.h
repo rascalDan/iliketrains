@@ -31,6 +31,7 @@ public:
 
 	using BoundingBox = AxisAlignedBoundingBox<GlobalDistance>;
 	[[nodiscard]] bool contains(const BoundingBox &) const;
+	[[nodiscard]] bool shadedBy(const BoundingBox &) const;
 
 protected:
 	static constexpr size_t FACES = 6;
