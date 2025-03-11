@@ -128,12 +128,14 @@ Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 }
 
 void
-Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum &) const
+Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
 	shadowMapper.landmess.use();
 	for (const auto & [surface, sab] : meshes) {
-		glBindVertexArray(sab.vertexArray);
-		glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
+		if (frustum.shadedBy(sab.aabb)) {
+			glBindVertexArray(sab.vertexArray);
+			glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
+		}
 	}
 	glBindVertexArray(0);
 }
