@@ -56,7 +56,7 @@ constexpr auto shadowBands
 		= []<GlobalDistance... ints>(const float scaleFactor, std::integer_sequence<GlobalDistance, ints...>) {
 			  const auto base = 10'000'000 / pow(scaleFactor, sizeof...(ints) - 1);
 			  return std::array {1, static_cast<GlobalDistance>((base * pow(scaleFactor, ints)))...};
-		  }(6.6F, std::make_integer_sequence<GlobalDistance, ShadowMapper::SHADOW_BANDS>());
+		  }(4.6F, std::make_integer_sequence<GlobalDistance, ShadowMapper::SHADOW_BANDS>());
 
 static_assert(shadowBands.front() == 1);
 static_assert(shadowBands.back() == 10'000'000);
