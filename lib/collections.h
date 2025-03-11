@@ -140,16 +140,16 @@ vectorOfN(std::integral auto N, T start = {}, T step = 1)
 
 template<template<typename...> typename Rtn = std::vector, typename In>
 [[nodiscard]] auto
-materializeRange(const In begin, const In end)
+materializeRange(In && begin, In && end)
 {
-	return Rtn(begin, end);
+	return Rtn(std::forward<In>(begin), std::forward<In>(end));
 }
 
 template<template<typename...> typename Rtn = std::vector, IterableCollection In>
 [[nodiscard]] auto
-materializeRange(const In & in)
+materializeRange(In && in)
 {
-	return materializeRange<Rtn>(in.begin(), in.end());
+	return materializeRange<Rtn>(std::forward<In>(in).begin(), std::forward<In>(in).end());
 }
 
 template<template<typename...> typename Rtn = std::vector, typename In>
