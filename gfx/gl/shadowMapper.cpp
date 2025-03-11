@@ -118,7 +118,7 @@ ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, co
 				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures, &stencilShadowProgram}) {
 		p->setView(out, sizes, lightViewPoint);
 	}
-	ExtentsBoundingBox extents;
+	ExtentsBoundingBox extents {lightViewPoint, lightViewPoint};
 	for (const auto & point : bandViewExtents.back()) {
 		extents += point;
 	}
