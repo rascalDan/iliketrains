@@ -38,6 +38,8 @@ class TestScene : public SceneProvider {
 public:
 	TestScene()
 	{
+		terrain->point(GeoData::VertexHandle {517}).z = 100'000;
+		terrain->generateMeshes();
 		gameState->assets = AssetFactory::loadAll(RESDIR);
 		brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(gameState->assets.at("brush-47"));
 		std::random_device randomdev {};
