@@ -41,8 +41,15 @@ private:
 	struct SurfaceKey {
 		const Surface * surface;
 		GlobalPosition2D basePosition;
-		bool operator<(const SurfaceKey &) const;
+		inline bool operator<(const SurfaceKey &) const;
 	};
+
+	using SurfaceIndices = std::map<SurfaceKey, std::vector<GLuint>>;
+	void copyVerticesToBuffer() const;
+	[[nodiscard]] SurfaceIndices mapSurfaceFacesToIndices() const;
+	void copyIndicesToBuffers(const SurfaceIndices &);
+	void pruneOrphanMeshes(const SurfaceIndices &);
+	[[nodiscard]] inline GlobalPosition2D getTile(const FaceHandle &) const;
 
 	glBuffer verticesBuffer;
 	std::map<SurfaceKey, SurfaceArrayBuffer> meshes;
