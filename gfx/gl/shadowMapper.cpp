@@ -1,6 +1,7 @@
 #include "shadowMapper.h"
 #include "collections.h"
 #include "game/gamestate.h"
+#include "gfx/aabb.h"
 #include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
 #include "gfx/gl/shaders/fs-shadowDynamicPointStencil.h"
 #include "gfx/gl/shaders/gs-commonShadowPoint.h"
@@ -19,7 +20,6 @@
 #include "maths.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
-#include "sorting.h"
 #include <gfx/camera.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
@@ -56,7 +56,7 @@ constexpr auto shadowBands
 		= []<GlobalDistance... ints>(const float scaleFactor, std::integer_sequence<GlobalDistance, ints...>) {
 			  const auto base = 10'000'000 / pow(scaleFactor, sizeof...(ints) - 1);
 			  return std::array {1, static_cast<GlobalDistance>((base * pow(scaleFactor, ints)))...};
-		  }(6.6F, std::make_integer_sequence<GlobalDistance, ShadowMapper::SHADOW_BANDS>());
+		  }(4.6F, std::make_integer_sequence<GlobalDistance, ShadowMapper::SHADOW_BANDS>());
 
 static_assert(shadowBands.front() == 1);
 static_assert(shadowBands.back() == 10'000'000);
@@ -102,30 +102,30 @@ ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, co
 	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
 	Definitions out;
 	Sizes sizes;
-	std::transform(bandViewExtents.begin(), std::prev(bandViewExtents.end()), std::next(bandViewExtents.begin()),
-			std::back_inserter(out),
-			[bands = bandViewExtents.size() - 2, &lightViewDir, &sizes](const auto & near, const auto & far) mutable {
-				const auto extents_minmax
-						= [extents = std::span {near.begin(), far.end()}](auto && comp, RelativeDistance extra) {
-							  const auto mm = std::minmax_element(extents.begin(), extents.end(), comp);
-							  return std::make_pair(comp.get(*mm.first) - extra, comp.get(*mm.second) + extra);
-						  };
-				const std::array extents = {extents_minmax(CompareBy {0}, 0), extents_minmax(CompareBy {1}, 0),
-						extents_minmax(CompareBy {2}, 10'000)};
-
-				const auto lightProjection = [](const auto & x, const auto & y, const auto & z) {
-					return glm::ortho(x.first, x.second, y.first, y.second, -z.second, -z.first);
-				}(extents[0], extents[1], extents[2]);
-
-				sizes.emplace_back(extents[0].second - extents[0].first, extents[1].second - extents[1].first,
-						extents[2].second - extents[2].first);
+	using ExtentsBoundingBox = AxisAlignedBoundingBox<RelativeDistance>;
+	std::ranges::transform(bandViewExtents | std::views::pairwise, std::back_inserter(out),
+			[&lightViewDir, &sizes](const auto & band) mutable {
+				const auto & [near, far] = band;
+				auto extents = ExtentsBoundingBox::fromPoints(std::span {near.begin(), far.end()});
+				extents.min.z -= 10'000.F;
+				extents.max.z += 10'000.F;
+				const auto lightProjection = glm::ortho(
+						extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
+				sizes.emplace_back(extents.max - extents.min);
 				return lightProjection * lightViewDir;
 			});
 	for (const auto p : std::initializer_list<const ShadowProgram *> {
 				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures, &stencilShadowProgram}) {
 		p->setView(out, sizes, lightViewPoint);
 	}
-	scene.shadows(*this);
+	ExtentsBoundingBox extents {lightViewPoint, lightViewPoint};
+	for (const auto & point : bandViewExtents.back()) {
+		extents += point;
+	}
+	const auto lightProjection
+			= glm::ortho(extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
+	Frustum frustum {lightViewPoint, lightViewDir, lightProjection};
+	scene.shadows(*this, frustum);
 
 	glCullFace(GL_BACK);
 

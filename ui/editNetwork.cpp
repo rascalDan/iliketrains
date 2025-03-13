@@ -48,19 +48,19 @@ EditNetwork::handleInput(const SDL_Event & e, const UIComponent::Position & pare
 }
 
 void
-EditNetwork::render(const SceneShader & shader) const
+EditNetwork::render(const SceneShader & shader, const Frustum & frustum) const
 {
 	if (builder) {
 		blue.bind();
 		shader.absolute.use();
-		builder->render(shader);
+		builder->render(shader, frustum);
 	}
 }
 
 void
-EditNetwork::Builder::render(const SceneShader & shader) const
+EditNetwork::Builder::render(const SceneShader & shader, const Frustum & frustum) const
 {
-	candidateLinks.apply<const Renderable>(&Renderable::render, shader);
+	candidateLinks.apply<const Renderable>(&Renderable::render, shader, frustum);
 }
 
 void

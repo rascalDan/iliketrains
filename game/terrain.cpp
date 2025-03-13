@@ -1,4 +1,5 @@
 #include "terrain.h"
+#include "gfx/frustum.h"
 #include <algorithm>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/gl/shadowMapper.h>
@@ -13,6 +14,7 @@
 #include <vector>
 
 static constexpr RGB OPEN_SURFACE {-1};
+static constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
 
 template<>
 VertexArrayObject &
@@ -28,21 +30,26 @@ Terrain::SurfaceKey::operator<(const SurfaceKey & other) const
 			< std::tie(other.surface, other.basePosition.x, other.basePosition.y);
 }
 
-void
-Terrain::generateMeshes()
+inline void
+Terrain::copyVerticesToBuffer() const
 {
-	constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
-
 	std::ranges::transform(all_vertices(), glMappedBufferWriter<Vertex> {GL_ARRAY_BUFFER, verticesBuffer, n_vertices()},
 			[this](const auto & vertex) {
 				return Vertex {point(vertex), normal(vertex)};
 			});
+}
 
-	std::map<SurfaceKey, std::vector<GLuint>> surfaceIndices;
-	const auto getTile = [this](FaceHandle face) {
-		return point(*fv_begin(face)).xy() / TILE_SIZE;
-	};
-	const auto indexBySurfaceAndTile = std::views::transform([this, &getTile](const auto & faceItr) {
+inline GlobalPosition2D
+Terrain::getTile(const FaceHandle & face) const
+{
+	return point(*cfv_begin(face)).xy() / TILE_SIZE;
+};
+
+Terrain::SurfaceIndices
+Terrain::mapSurfaceFacesToIndices() const
+{
+	SurfaceIndices surfaceIndices;
+	const auto indexBySurfaceAndTile = std::views::transform([this](const auto & faceItr) {
 		return std::pair<SurfaceKey, FaceHandle> {{getSurface(*faceItr), getTile(*faceItr)}, *faceItr};
 	});
 	const auto chunkBySurfaceAndTile = std::views::chunk_by([](const auto & face1, const auto & face2) {
@@ -61,7 +68,12 @@ Terrain::generateMeshes()
 			std::ranges::transform(fv_range(face), push, &OpenMesh::VertexHandle::idx);
 		}
 	}
+	return surfaceIndices;
+}
 
+void
+Terrain::copyIndicesToBuffers(const SurfaceIndices & surfaceIndices)
+{
 	for (const auto & [surfaceKey, indices] : surfaceIndices) {
 		auto meshItr = meshes.find(surfaceKey);
 		if (meshItr == meshes.end()) {
@@ -77,12 +89,30 @@ Terrain::generateMeshes()
 					.data(verticesBuffer, GL_ARRAY_BUFFER);
 		}
 		meshItr->second.count = static_cast<GLsizei>(indices.size());
+		meshItr->second.aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(
+				indices | std::views::transform([this](const auto vertex) {
+					return this->point(VertexHandle {static_cast<int>(vertex)});
+				}));
 	}
+}
+
+void
+Terrain::pruneOrphanMeshes(const SurfaceIndices & surfaceIndices)
+{
 	if (meshes.size() > surfaceIndices.size()) {
 		std::erase_if(meshes, [&surfaceIndices](const auto & mesh) {
 			return !surfaceIndices.contains(mesh.first);
 		});
 	}
+}
+
+void
+Terrain::generateMeshes()
+{
+	copyVerticesToBuffer();
+	const auto surfaceIndices = mapSurfaceFacesToIndices();
+	copyIndicesToBuffers(surfaceIndices);
+	pruneOrphanMeshes(surfaceIndices);
 }
 
 void
@@ -97,9 +127,10 @@ Terrain::afterChange()
 }
 
 void
-Terrain::render(const SceneShader & shader) const
+Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 {
 	grass->bind();
+
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
 		return itr1.first.surface == itr2.first.surface;
 	});
@@ -107,20 +138,24 @@ Terrain::render(const SceneShader & shader) const
 		const auto surface = surfaceRange.front().first.surface;
 		shader.landmass.use(surface ? surface->colorBias : OPEN_SURFACE);
 		for (const auto & sab : surfaceRange) {
-			glBindVertexArray(sab.second.vertexArray);
-			glDrawElements(GL_TRIANGLES, sab.second.count, GL_UNSIGNED_INT, nullptr);
+			if (frustum.contains(sab.second.aabb)) {
+				glBindVertexArray(sab.second.vertexArray);
+				glDrawElements(GL_TRIANGLES, sab.second.count, GL_UNSIGNED_INT, nullptr);
+			}
 		}
 	}
 	glBindVertexArray(0);
 }
 
 void
-Terrain::shadows(const ShadowMapper & shadowMapper) const
+Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
 	shadowMapper.landmess.use();
 	for (const auto & [surface, sab] : meshes) {
-		glBindVertexArray(sab.vertexArray);
-		glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
+		if (frustum.shadedBy(sab.aabb)) {
+			glBindVertexArray(sab.vertexArray);
+			glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
+		}
 	}
 	glBindVertexArray(0);
 }

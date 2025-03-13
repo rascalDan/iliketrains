@@ -33,7 +33,7 @@ RailVehicleClass::postLoad()
 }
 
 void
-RailVehicleClass::render(const SceneShader & shader) const
+RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		if (texture) {
@@ -47,7 +47,7 @@ RailVehicleClass::render(const SceneShader & shader) const
 }
 
 void
-RailVehicleClass::shadows(const ShadowMapper & mapper) const
+RailVehicleClass::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		mapper.dynamicPointInst.use();

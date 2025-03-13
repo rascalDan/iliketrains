@@ -24,8 +24,8 @@ public:
 	};
 
 	mutable InstanceVertices<LocationVertex> instances;
-	void render(const SceneShader &) const override;
-	void shadows(const ShadowMapper &) const override;
+	void render(const SceneShader &, const Frustum &) const override;
+	void shadows(const ShadowMapper &, const Frustum &) const override;
 	void updateStencil(const ShadowStenciller &) const override;
 	glTexture shadowStencil = ShadowStenciller::createStencilTexture(256, 256);
 

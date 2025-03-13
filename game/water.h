@@ -16,7 +16,7 @@ class Water : public WorldObject, public Renderable {
 public:
 	explicit Water(std::shared_ptr<GeoData>);
 
-	void render(const SceneShader & shader) const override;
+	void render(const SceneShader & shader, const Frustum &) const override;
 
 	void tick(TickDuration) override;
 	float waveCycle {0.F};

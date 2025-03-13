@@ -2,6 +2,7 @@
 
 #include "collections.h" // IWYU pragma: keep IterableCollection
 #include "geoDataMesh.h"
+#include "gfx/aabb.h"
 #include "surface.h"
 #include <filesystem>
 #include <glm/vec2.hpp>
@@ -57,10 +58,10 @@ public:
 
 	std::set<FaceHandle> setHeights(std::span<const GlobalPosition3D> triangleStrip, const SetHeightsOpts &);
 
-	[[nodiscard]] auto
+	[[nodiscard]] auto &
 	getExtents() const
 	{
-		return std::tie(lowerExtent, upperExtent);
+		return extents;
 	}
 
 	template<typename HandleT>
@@ -80,5 +81,5 @@ protected:
 	virtual void afterChange();
 
 private:
-	GlobalPosition3D lowerExtent {}, upperExtent {};
+	AxisAlignedBoundingBox<GlobalDistance> extents;
 };

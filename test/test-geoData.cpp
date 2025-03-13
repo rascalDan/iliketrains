@@ -255,9 +255,9 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		const Terrain terrain;
 
 		void
-		content(const SceneShader & shader) const override
+		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
-			terrain.render(shader);
+			terrain.render(shader, frustum);
 		}
 
 		void
@@ -273,9 +273,9 @@ BOOST_DATA_TEST_CASE(deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		}
 
 		void
-		shadows(const ShadowMapper & shadowMapper) const override
+		shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const override
 		{
-			terrain.shadows(shadowMapper);
+			terrain.shadows(shadowMapper, frustum);
 		}
 	};
 
