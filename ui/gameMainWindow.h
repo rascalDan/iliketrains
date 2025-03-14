@@ -17,6 +17,8 @@ public:
 	void render() const override;
 
 private:
+	bool handleInput(const SDL_Event &) override;
+
 	void content(const SceneShader &, const Frustum &) const override;
 	void environment(const SceneShader &, const SceneRenderer &) const override;
 	void lights(const SceneShader &) const override;

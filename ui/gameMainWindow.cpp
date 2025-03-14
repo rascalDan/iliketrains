@@ -43,6 +43,25 @@ GameMainWindow::tick(TickDuration)
 	uiComponents.apply<CameraController>(&CameraController::updateCamera, &camera);
 }
 
+bool
+GameMainWindow::handleInput(const SDL_Event & event)
+{
+	switch (event.type) {
+		case SDL_WINDOWEVENT:
+			switch (event.window.event) {
+				case SDL_WINDOWEVENT_RESIZED:
+					SceneRenderer::resize({event.window.data1, event.window.data2});
+					break;
+				default:
+					break;
+			}
+		default:
+			break;
+	}
+
+	return WindowContent::handleInput(event);
+}
+
 void
 GameMainWindow::render() const
 {

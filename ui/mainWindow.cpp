@@ -8,7 +8,10 @@
 #include "backends/imgui_impl_sdl2.h"
 #pragma GCC diagnostic pop
 
-MainWindow::MainWindow(size_t w, size_t h) : MainWindow {w, h, "I Like Trains", SDL_WINDOW_OPENGL} { }
+MainWindow::MainWindow(size_t w, size_t h) :
+	MainWindow {w, h, "I Like Trains", SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL}
+{
+}
 
 MainWindow::MainWindow(size_t w, size_t h, const std::string & title, Uint32 flags) : Window {w, h, title, flags}
 {
