@@ -317,7 +317,7 @@ template<Arithmetic R = float, Arithmetic Ta, Arithmetic Tb>
 constexpr auto
 ratio(const Ta valueA, const Tb valueB)
 {
-	using Common = std::common_type_t<Ta, Ta>;
+	using Common = std::common_type_t<Ta, Ta, R>;
 	return static_cast<R>((static_cast<Common>(valueA) / static_cast<Common>(valueB)));
 }
 
