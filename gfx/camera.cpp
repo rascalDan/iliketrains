@@ -5,15 +5,22 @@
 #include <ray.h>
 
 Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far) :
-	Camera {pos, near, far, glm::lookAt({}, ::north, ::up),
+	Camera {pos, fov, aspect, near, far, glm::lookAt({}, ::north, ::up),
 			glm::perspective(fov, aspect, static_cast<RelativeDistance>(near), static_cast<RelativeDistance>(far))}
 {
 }
 
-Camera::Camera(GlobalPosition3D pos, GlobalDistance near, GlobalDistance far, const glm::mat4 & view,
-		const glm::mat4 & projection) :
-	Frustum {pos, view, projection}, forward {::north}, up {::up}, near {near}, far {far}
+Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far,
+		const glm::mat4 & view, const glm::mat4 & projection) :
+	Frustum {pos, view, projection}, fov {fov}, aspect {aspect}, forward {::north}, up {::up}, near {near}, far {far}
 {
+}
+
+void
+Camera::setAspect(Angle aspect)
+{
+	projection = glm::perspective(fov, aspect, static_cast<RelativeDistance>(near), static_cast<RelativeDistance>(far));
+	Frustum::updateCache();
 }
 
 Ray<GlobalPosition3D>

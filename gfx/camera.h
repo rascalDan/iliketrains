@@ -12,6 +12,8 @@ public:
 
 	[[nodiscard]] Ray<GlobalPosition3D> unProject(const ScreenRelCoord &) const;
 
+	void setAspect(Angle aspect);
+
 	void
 	setPosition(const GlobalPosition3D & p)
 	{
@@ -64,10 +66,11 @@ public:
 	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
 
 private:
-	Camera(GlobalPosition3D position, GlobalDistance near, GlobalDistance far, const glm::mat4 & view,
-			const glm::mat4 & projection);
+	Camera(GlobalPosition3D position, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far,
+			const glm::mat4 & view, const glm::mat4 & projection);
 	void updateView();
 
+	Angle fov, aspect;
 	Direction3D forward;
 	Direction3D up;
 	GlobalDistance near, far;
