@@ -39,7 +39,7 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	configuregdata(gPosition, {GL_RGB32I}, GL_RGB_INTEGER, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
+	normaliFormat = configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
 	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT2);
 	constexpr std::array<unsigned int, 3> attachments {
 			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
@@ -54,6 +54,23 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
+}
+
+void
+SceneRenderer::resize(ScreenAbsCoord newSize)
+{
+	size = newSize;
+	camera.setAspect(ratio(size));
+	const auto configuregdata = [this](const GLuint data, const GLint iformat, const GLenum format) {
+		glBindTexture(GL_TEXTURE_2D, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
+	};
+	configuregdata(gPosition, GL_RGB32I, GL_RGB_INTEGER);
+	configuregdata(gNormal, normaliFormat, GL_RGB);
+	configuregdata(gAlbedoSpec, GL_RGB8, GL_RGB);
+	configuregdata(gIllumination, GL_RGB8, GL_RGB);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 }
 
 void

@@ -13,6 +13,8 @@ class SceneRenderer {
 public:
 	explicit SceneRenderer(ScreenAbsCoord size, GLuint output);
 
+	void resize(ScreenAbsCoord size);
+
 	void render(const SceneProvider &) const;
 	void setAmbientLight(const RGB & colour) const;
 	void setDirectionalLight(const RGB & colour, const LightDirection & direction, const SceneProvider &) const;
@@ -25,6 +27,7 @@ protected:
 	ScreenAbsCoord size;
 	GLuint output;
 	glFrameBuffer gBuffer, gBufferIll;
+	GLint normaliFormat;
 	glTexture gPosition, gNormal, gAlbedoSpec, gIllumination;
 	glRenderBuffer depth;
 
