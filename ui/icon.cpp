@@ -28,3 +28,11 @@ Icon::Bind() const
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }
+
+ImTextureID
+Icon::operator*() const
+{
+	static_assert(sizeof(m_texture) <= sizeof(ImTextureID));
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr) This is how ImGui works
+	return reinterpret_cast<ImTextureID>(*m_texture);
+}

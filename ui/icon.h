@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui_wrap.h"
 #include <filesystem>
 #include <glArrays.h>
 #include <glm/glm.hpp>
@@ -13,6 +14,7 @@ public:
 
 	void Bind() const;
 	const glm::vec2 size;
+	ImTextureID operator*() const;
 
 private:
 	glTexture m_texture;
