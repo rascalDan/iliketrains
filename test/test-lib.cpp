@@ -46,9 +46,9 @@ BOOST_AUTO_TEST_CASE(generate_move_and_delete)
 {
 	{
 		TestArray a;
-		BOOST_CHECK_EQUAL(TestArray::size, active.size());
+		BOOST_CHECK_EQUAL(TestArray::size(), active.size());
 		const TestArray b {std::move(a)};
-		BOOST_CHECK_EQUAL(TestArray::size, active.size());
+		BOOST_CHECK_EQUAL(TestArray::size(), active.size());
 	}
 	BOOST_CHECK(active.empty());
 }
