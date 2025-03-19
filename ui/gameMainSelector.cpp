@@ -110,7 +110,7 @@ GameMainSelector::Component::handleInput(const SDL_Event &, const Position &)
 }
 
 void
-GameMainSelector::Component::render(const UIShader &, const UIComponent::Position &) const
+GameMainSelector::Component::render(const UIShader &, const UIComponent::Position &)
 {
 }
 

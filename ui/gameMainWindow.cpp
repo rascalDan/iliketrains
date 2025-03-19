@@ -1,10 +1,8 @@
 #include "gameMainWindow.h"
 #include "editNetwork.h"
 #include "gameMainSelector.h"
+#include "imgui_extras.h"
 #include "manualCameraController.h"
-#include "modeHelper.h"
-#include "toolbar.h"
-#include "window.h"
 #include <SDL2/SDL.h>
 #include <collection.h>
 #include <game/environment.h>
@@ -17,15 +15,33 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class GameMainToolbar : Mode<decltype(GameMainSelector::target)>, public Toolbar {
+class GameMainToolbar : public UIComponent {
 public:
-	explicit GameMainToolbar(GameMainSelector * gms_) :
-		Mode<decltype(GameMainSelector::target)> {gms_->target},
-		Toolbar {
-				{"ui/icon/network.png", toggle<EditNetworkOf<RailLinks>>()},
-		}
+	static constexpr auto TOOLBAR_HEIGHT = 54.F;
+	static constexpr ImVec2 TOOLBAR_ICON_SIZE {32, 32};
+
+	explicit GameMainToolbar(GameMainSelector * gms) : UIComponent {{{}, {}}}, gms {gms} { }
+
+	void
+	render(const UIShader &, const Position &) const override
 	{
+		if (IltGui::BeginToolbar("bottomBar", ImGuiDir_Down, TOOLBAR_HEIGHT)) {
+			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
+				gms->target = std::make_unique<EditNetworkOf<RailLinks>>();
 	}
+			IltGui::EndToolbar();
+		}
+	}
+
+	bool
+	handleInput(const SDL_Event &, const Position &) override
+	{
+		return false;
+	}
+
+private:
+	Icon buildRailsIcon {"ui/icon/network.png"};
+	GameMainSelector * gms;
 };
 
 GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, SceneRenderer {{w, h}, 0}

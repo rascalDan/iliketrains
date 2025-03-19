@@ -23,7 +23,7 @@ public:
 		virtual bool click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool handleInput(const SDL_Event &, const Position & pos);
-		virtual void render(const UIShader & shader, const Position & pos) const;
+		virtual void render(const UIShader & shader, const Position & pos);
 		virtual void render(const SceneShader &, const Frustum &) const;
 	};
 
