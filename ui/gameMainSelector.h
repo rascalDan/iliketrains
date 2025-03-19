@@ -7,7 +7,6 @@
 #include "worldOverlay.h"
 #include <glm/glm.hpp>
 #include <memory>
-#include <string>
 
 class SceneShader;
 template<typename> class Ray;
@@ -41,5 +40,4 @@ public:
 private:
 	const Camera * camera;
 	const Font font;
-	std::string clicked;
 };

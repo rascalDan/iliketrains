@@ -1,5 +1,4 @@
 #include "gameMainSelector.h"
-#include "collection.h"
 #include "text.h"
 #include "ui/uiComponent.h"
 #include <SDL2/SDL.h>
@@ -8,9 +7,7 @@
 #include <game/terrain.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/camera.h>
-#include <optional>
 #include <stream_support.h>
-#include <typeinfo>
 
 const std::filesystem::path fontpath {"/usr/share/fonts/hack/Hack-Regular.ttf"};
 
@@ -26,9 +23,6 @@ GameMainSelector::render(const UIShader & shader, const Position & parentPos) co
 {
 	if (target) {
 		target->render(shader, parentPos + position + TargetPos);
-	}
-	if (!clicked.empty()) {
-		Text {clicked, font, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
 	}
 }
 
@@ -73,22 +67,8 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 }
 
 void
-GameMainSelector::defaultClick(const Ray<GlobalPosition3D> & ray)
+GameMainSelector::defaultClick(const Ray<GlobalPosition3D> &)
 {
-	BaryPosition baryPos {};
-	RelativeDistance distance {};
-
-	if (const auto selected = gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, baryPos, distance);
-			selected != gameState->world.end()) {
-		const auto & ref = *selected.base()->get();
-		clicked = typeid(ref).name();
-	}
-	else if (const auto pos = gameState->terrain->intersectRay(ray)) {
-		clicked = streamed_string(*pos);
-	}
-	else {
-		clicked.clear();
-	}
 }
 
 bool

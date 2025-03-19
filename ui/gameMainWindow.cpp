@@ -3,6 +3,7 @@
 #include "gameMainSelector.h"
 #include "imgui_extras.h"
 #include "manualCameraController.h"
+#include "queryTool.h"
 #include <SDL2/SDL.h>
 #include <collection.h>
 #include <game/environment.h>
@@ -29,6 +30,9 @@ public:
 			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
 				gms->target = std::make_unique<EditNetworkOf<RailLinks>>();
 	}
+			if (ImGui::ImageButton("Query", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
+				gms->target = std::make_unique<QueryTool>();
+			}
 			IltGui::EndToolbar();
 		}
 	}
