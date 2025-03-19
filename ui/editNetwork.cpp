@@ -3,16 +3,14 @@
 #include "builders/join.h"
 #include "builders/straight.h"
 #include "imgui_wrap.h"
-#include "text.h"
 #include <game/gamestate.h>
 #include <game/terrain.h>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
-const std::filesystem::path fontpath {"/usr/share/fonts/hack/Hack-Regular.ttf"};
 constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
 
-EditNetwork::EditNetwork(Network * n) : network {n}, blue {1, 1, &TRANSPARENT_BLUE}, font {fontpath, 15} { }
+EditNetwork::EditNetwork(Network * n) : network {n}, blue {1, 1, &TRANSPARENT_BLUE} { }
 
 bool
 EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
@@ -34,7 +32,7 @@ EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> & 
 }
 
 bool
-EditNetwork::handleInput(const SDL_Event &, const UIComponent::Position &)
+EditNetwork::handleInput(const SDL_Event &)
 {
 	return false;
 }
@@ -67,7 +65,7 @@ EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection &
 }
 
 void
-EditNetwork::render(const UIShader &, const UIComponent::Position &)
+EditNetwork::render(const UIShader &)
 {
 	ImGui::Begin("Edit Network");
 

@@ -2,7 +2,6 @@
 
 #include "SDL_events.h"
 #include "config/types.h"
-#include "font.h"
 #include "uiComponent.h"
 #include "worldOverlay.h"
 #include <glm/glm.hpp>
@@ -21,17 +20,17 @@ public:
 
 		virtual bool click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &);
-		virtual bool handleInput(const SDL_Event &, const Position & pos);
-		virtual void render(const UIShader & shader, const Position & pos);
+		virtual bool handleInput(const SDL_Event &);
+		virtual void render(const UIShader & shader);
 		virtual void render(const SceneShader &, const Frustum &) const;
 	};
 
-	GameMainSelector(const Camera * c, ScreenAbsCoord size);
+	GameMainSelector(const Camera * c);
 
-	void render(const UIShader & shader, const Position & pos) const override;
+	void render(const UIShader & shader) const override;
 	void render(const SceneShader & shader, const Frustum &) const override;
 
-	bool handleInput(const SDL_Event & e, const Position &) override;
+	bool handleInput(const SDL_Event & e) override;
 
 	void defaultClick(const Ray<GlobalPosition3D> & ray);
 
@@ -39,5 +38,4 @@ public:
 
 private:
 	const Camera * camera;
-	const Font font;
 };

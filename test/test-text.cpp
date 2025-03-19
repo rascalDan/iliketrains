@@ -7,7 +7,6 @@
 
 #include "testMainWindow.h"
 #include "testRenderOutput.h"
-#include "ui/text.h"
 #include <array>
 #include <gfx/models/texture.h>
 #include <glm/glm.hpp>
@@ -110,19 +109,6 @@ BOOST_AUTO_TEST_CASE(render_font)
 		BOOST_CHECK_CLOSE_VEC(v[1][2], glm::vec4(54, 35, 0.42, 0));
 		BOOST_CHECK_CLOSE_VEC(v[1][3], glm::vec4(32, 35, 0.42, 0));
 	}
-}
-
-BOOST_AUTO_TEST_CASE(render_text)
-{
-	TestRenderOutput output;
-	glBindFramebuffer(GL_FRAMEBUFFER, output.output);
-	glViewport(0, 0, 640, 480);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	Text t {"I Like Trains", *this, {{10, 10}, {200, 40}}, {1, 1, 1}};
-	UIShader s {640, 480};
-	t.render(s, {});
-	Texture::save(output.outImage, "/tmp/text.tga");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

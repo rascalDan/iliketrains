@@ -1,6 +1,7 @@
 #include "gameMainWindow.h"
 #include "editNetwork.h"
 #include "gameMainSelector.h"
+#include "icon.h"
 #include "imgui_extras.h"
 #include "manualCameraController.h"
 #include "queryTool.h"
@@ -21,10 +22,10 @@ public:
 	static constexpr auto TOOLBAR_HEIGHT = 54.F;
 	static constexpr ImVec2 TOOLBAR_ICON_SIZE {32, 32};
 
-	explicit GameMainToolbar(GameMainSelector * gms) : UIComponent {{{}, {}}}, gms {gms} { }
+	explicit GameMainToolbar(GameMainSelector * gms) : gms {gms} { }
 
 	void
-	render(const UIShader &, const Position &) const override
+	render(const UIShader &) const override
 	{
 		if (IltGui::BeginToolbar("bottomBar", ImGuiDir_Down, TOOLBAR_HEIGHT)) {
 			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
@@ -38,7 +39,7 @@ public:
 	}
 
 	bool
-	handleInput(const SDL_Event &, const Position &) override
+	handleInput(const SDL_Event &) override
 	{
 		return false;
 	}
@@ -51,7 +52,7 @@ private:
 GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, SceneRenderer {{w, h}, 0}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
-	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
+	auto gms = uiComponents.create<GameMainSelector>(&camera);
 	uiComponents.create<GameMainToolbar>(gms.get());
 }
 
@@ -89,7 +90,7 @@ GameMainWindow::render() const
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-	uiComponents.apply(&UIComponent::render, uiShader, UIComponent::Position {});
+	uiComponents.apply(&UIComponent::render, uiShader);
 }
 
 void

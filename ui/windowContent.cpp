@@ -27,6 +27,6 @@ WindowContent::handleInput(const SDL_Event & e)
 			eAdjusted.motion.y = size.y - e.motion.y;
 			break;
 	}
-	uiComponents.rapplyOne(&UIComponent::handleInput, eAdjusted, UIComponent::Position {{}, size});
+	uiComponents.rapplyOne(&UIComponent::handleInput, eAdjusted);
 	return true;
 }

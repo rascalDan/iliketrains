@@ -31,7 +31,7 @@ QueryTool::click(const SDL_MouseButtonEvent & event, const Ray<GlobalPosition3D>
 }
 
 void
-QueryTool::render(const UIShader &, const UIComponent::Position &)
+QueryTool::render(const UIShader &)
 {
 	ImGui::Begin("Query Tool");
 	ImGui::TextUnformatted(clicked.c_str());

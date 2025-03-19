@@ -7,7 +7,7 @@ protected:
 	using GameMainSelector::Component::render;
 
 	bool click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &) override;
-	void render(const UIShader & shader, const UIComponent::Position & pos) override;
+	void render(const UIShader & shader) override;
 
 private:
 	std::string clicked;

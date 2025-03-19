@@ -22,13 +22,6 @@ Icon::Icon(const Image & tex) : size {tex.width, tex.height}
 			GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
 }
 
-void
-Icon::Bind() const
-{
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-}
-
 ImTextureID
 Icon::operator*() const
 {
