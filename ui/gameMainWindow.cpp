@@ -25,7 +25,7 @@ public:
 	explicit GameMainToolbar(GameMainSelector * gms) : gms {gms} { }
 
 	void
-	render(const UIShader &) const override
+	render() const override
 	{
 		if (IltGui::BeginToolbar("bottomBar", ImGuiDir_Down, TOOLBAR_HEIGHT)) {
 			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
@@ -49,7 +49,7 @@ private:
 	GameMainSelector * gms;
 };
 
-GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, SceneRenderer {{w, h}, 0}
+GameMainWindow::GameMainWindow(size_t w, size_t h) : SceneRenderer {{w, h}, 0}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera);
@@ -90,7 +90,7 @@ GameMainWindow::render() const
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-	uiComponents.apply(&UIComponent::render, uiShader);
+	uiComponents.apply(&UIComponent::render);
 }
 
 void

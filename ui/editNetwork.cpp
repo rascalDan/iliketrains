@@ -65,7 +65,7 @@ EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection &
 }
 
 void
-EditNetwork::render(const UIShader &)
+EditNetwork::render()
 {
 	ImGui::Begin("Edit Network");
 

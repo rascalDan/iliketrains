@@ -17,7 +17,7 @@ public:
 	bool move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> &) override;
 	bool handleInput(const SDL_Event & e) override;
 	void render(const SceneShader &, const Frustum &) const override;
-	void render(const UIShader & shader) override;
+	void render() override;
 
 	using NetworkClickPos = std::variant<GlobalPosition3D, Node::Ptr>;
 

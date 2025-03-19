@@ -1,8 +1,6 @@
 #include "windowContent.h"
 #include "SDL_events.h"
 
-WindowContent::WindowContent(size_t width, size_t height) : uiShader {width, height} { }
-
 void
 WindowContent::tick(TickDuration)
 {

@@ -72,7 +72,7 @@ ManualCameraController::handleInput(const SDL_Event & e)
 }
 
 void
-ManualCameraController::render(const UIShader &) const
+ManualCameraController::render() const
 {
 }
 
