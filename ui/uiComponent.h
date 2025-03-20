@@ -13,6 +13,6 @@ public:
 	NO_MOVE(UIComponent);
 	NO_COPY(UIComponent);
 
-	virtual void render() const = 0;
+	virtual void render() = 0;
 	virtual bool handleInput(const SDL_Event &) = 0;
 };

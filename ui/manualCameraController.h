@@ -13,7 +13,7 @@ public:
 	explicit ManualCameraController(GlobalPosition2D f) : focus {f} { }
 
 	bool handleInput(const SDL_Event & e) override;
-	void render() const override;
+	void render() override;
 
 	void updateCamera(Camera * camera) const override;
 

@@ -65,9 +65,9 @@ EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection &
 }
 
 void
-EditNetwork::render()
+EditNetwork::render(bool & open)
 {
-	ImGui::Begin("Edit Network");
+	ImGui::Begin("Edit Network", &open);
 
 	auto builderChoice = [this]<typename Impl>(const char * name) {
 		if (ImGui::RadioButton(name, dynamic_cast<Impl *>(builder.get()))) {

@@ -25,7 +25,7 @@ public:
 	explicit GameMainToolbar(GameMainSelector * gms) : gms {gms} { }
 
 	void
-	render() const override
+	render() override
 	{
 		if (IltGui::BeginToolbar("bottomBar", ImGuiDir_Down, TOOLBAR_HEIGHT)) {
 			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {

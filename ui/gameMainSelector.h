@@ -20,13 +20,13 @@ public:
 		virtual bool click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &);
 		virtual bool handleInput(const SDL_Event &);
-		virtual void render();
+		virtual void render(bool & open);
 		virtual void render(const SceneShader &, const Frustum &) const;
 	};
 
 	GameMainSelector(const Camera * c);
 
-	void render() const override;
+	void render() override;
 	void render(const SceneShader & shader, const Frustum &) const override;
 
 	bool handleInput(const SDL_Event & e) override;

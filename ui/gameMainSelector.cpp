@@ -13,10 +13,14 @@ GameMainSelector::GameMainSelector(const Camera * c) : camera {c} { }
 constexpr ScreenAbsCoord TargetPos {5, 45};
 
 void
-GameMainSelector::render() const
+GameMainSelector::render()
 {
 	if (target) {
-		target->render();
+		bool open = true;
+		target->render(open);
+		if (!open) {
+			target.reset();
+		}
 	}
 }
 
@@ -86,7 +90,7 @@ GameMainSelector::Component::handleInput(const SDL_Event &)
 }
 
 void
-GameMainSelector::Component::render()
+GameMainSelector::Component::render(bool &)
 {
 }
 
