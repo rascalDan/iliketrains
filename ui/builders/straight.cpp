@@ -17,7 +17,7 @@ BuilderStraight::move(
 {
 	if (p1) {
 		if (const auto p = geoData->intersectRay(ray)) {
-			candidateLinks.objects = network->candidateStraight(*p1, p->first);
+			candidateLinks = network->candidateStraight(*p1, p->first);
 		}
 		else {
 			candidateLinks.removeAll();

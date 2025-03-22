@@ -113,7 +113,7 @@ public:
 
 		mainLoop();
 
-		world.objects.clear();
+		world.removeAll();
 		return 0;
 	}
 };

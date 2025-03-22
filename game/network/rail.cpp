@@ -168,7 +168,7 @@ namespace {
 void
 RailLinks::render(const SceneShader & shader, const Frustum &) const
 {
-	if (!links.objects.empty()) {
+	if (!links.empty()) {
 		texture->bind();
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(-1, 0);

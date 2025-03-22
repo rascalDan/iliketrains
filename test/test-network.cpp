@@ -139,83 +139,83 @@ BOOST_DATA_TEST_CASE(newNodeAt_new, INVALID_NODES, p)
 BOOST_AUTO_TEST_CASE(network_joins)
 {
 	// Ends
-	BOOST_CHECK(links.objects[2]->ends[1].nexts.empty());
+	BOOST_CHECK(links[2]->ends[1].nexts.empty());
 	// Join 0 <-> 1
-	BOOST_REQUIRE_EQUAL(links.objects[0]->ends[1].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links.objects[0]->ends[1].nexts[0].first.lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(links.objects[0]->ends[1].nexts[0].second, 0);
-	BOOST_CHECK_EQUAL(links.objects[0]->ends[1].nexts[1].first.lock().get(), links.objects[5].get());
-	BOOST_CHECK_EQUAL(links.objects[0]->ends[1].nexts[1].second, 0);
-	BOOST_REQUIRE_EQUAL(links.objects[1]->ends[0].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links.objects[1]->ends[0].nexts[0].first.lock().get(), links.objects[0].get());
-	BOOST_CHECK_EQUAL(links.objects[1]->ends[0].nexts[0].second, 1);
-	BOOST_CHECK_EQUAL(links.objects[1]->ends[0].nexts[1].first.lock().get(), links.objects[5].get());
-	BOOST_CHECK_EQUAL(links.objects[1]->ends[0].nexts[1].second, 0);
+	BOOST_REQUIRE_EQUAL(links[0]->ends[1].nexts.size(), 2);
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].second, 0);
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].first.lock().get(), links[5].get());
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].second, 0);
+	BOOST_REQUIRE_EQUAL(links[1]->ends[0].nexts.size(), 2);
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].first.lock().get(), links[0].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].first.lock().get(), links[5].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].second, 0);
 	// Join 1 <-> 2
-	BOOST_REQUIRE_EQUAL(links.objects[1]->ends[1].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links.objects[1]->ends[1].nexts[0].first.lock().get(), links.objects[2].get());
-	BOOST_CHECK_EQUAL(links.objects[1]->ends[1].nexts[0].second, 0);
-	BOOST_REQUIRE_EQUAL(links.objects[2]->ends[0].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links.objects[2]->ends[0].nexts[0].first.lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(links.objects[2]->ends[0].nexts[0].second, 1);
+	BOOST_REQUIRE_EQUAL(links[1]->ends[1].nexts.size(), 2);
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].first.lock().get(), links[2].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].second, 0);
+	BOOST_REQUIRE_EQUAL(links[2]->ends[0].nexts.size(), 2);
+	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].second, 1);
 }
 
 BOOST_DATA_TEST_CASE(routeTo_nodeNotInNetwork, INVALID_NODES, dest)
 {
-	const auto & start = links.objects.front()->ends[1];
+	const auto & start = links[0]->ends[1];
 	BOOST_CHECK_THROW((void)routeFromTo(start, dest), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_noSteps)
 {
-	const auto & start = links.objects.front()->ends[1];
+	const auto & start = links[0]->ends[1];
 	auto r = this->routeFromTo(start, p100);
 	BOOST_CHECK(r.empty());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_upStream_to2)
 {
-	const auto & start = links.objects.front()->ends[1];
+	const auto & start = links[0]->ends[1];
 	auto r = this->routeFromTo(start, p200);
 	BOOST_REQUIRE_EQUAL(r.size(), 1);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[1].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[1].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_upStream_to3)
 {
-	const auto & start = links.objects[0]->ends[1];
+	const auto & start = links[0]->ends[1];
 	auto r = this->routeFromTo(start, p300);
 	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[2].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[2].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_downStream_to0)
 {
-	const auto & start = links.objects[2]->ends[0];
+	const auto & start = links[2]->ends[0];
 	auto r = this->routeFromTo(start, p000);
 	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[0].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[0].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_upStream_3to300)
 {
-	const auto & start = links.objects[3]->ends[1];
+	const auto & start = links[3]->ends[1];
 	auto r = this->routeFromTo(start, p300);
 	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[4].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[2].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[4].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[2].get());
 }
 
 BOOST_AUTO_TEST_CASE(routeTo_downStream_3to300)
 {
-	const auto & start = links.objects[3]->ends[0];
+	const auto & start = links[3]->ends[0];
 	auto r = this->routeFromTo(start, p300);
 	BOOST_REQUIRE_EQUAL(r.size(), 3);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links.objects[0].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links.objects[1].get());
-	BOOST_CHECK_EQUAL(r[2].first.lock().get(), links.objects[2].get());
+	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[0].get());
+	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(r[2].first.lock().get(), links[2].get());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

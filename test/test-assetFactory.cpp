@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 	BOOST_REQUIRE(brush47rvc->bogies.back());
 
 	auto railVehicle = std::make_shared<RailVehicle>(brush47rvc);
-	objects.objects.push_back(brush47rvc);
+	objects.emplace(brush47rvc);
 
 	render(10000);
 }
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	auto plant2 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, -4000, 0}, {0, 1, 0}});
 	auto plant3 = std::make_shared<Plant>(tree_01_1_f, Location {{-2000, -4000, 0}, {0, 2, 0}});
 	auto plant4 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, 2000, 0}, {0, 3, 0}});
-	objects.objects.push_back(tree_01_1_f);
+	objects.emplace(tree_01_1_f);
 
 	render(6000);
 }
@@ -160,13 +160,13 @@ BOOST_AUTO_TEST_CASE(lights, *boost::unit_test::timeout(5))
 	auto light2 = std::make_shared<Light>(rlight_f, Location {{-4000, 0, 0}, {0, 2, 0}});
 	auto light3 = std::make_shared<Light>(rlight_f, Location {{-4000, -4000, 0}, {0, 1, 0}});
 	auto light4 = std::make_shared<Light>(oldlamp_f, Location {{3000, 4600, 0}, {0, 2, 0}});
-	objects.objects.push_back(rlight_f);
-	objects.objects.push_back(oldlamp_f);
+	objects.emplace(rlight_f);
+	objects.emplace(oldlamp_f);
 
 	// yes I'm hacking some floor to light up as though its a bush
 	auto floorf = mf->assets.at("floor").dynamicCast<Foliage>();
 	auto floor = std::make_shared<Plant>(floorf, Location {});
-	objects.objects.push_back(floorf);
+	objects.emplace(floorf);
 
 	render(6000);
 }

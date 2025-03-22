@@ -12,7 +12,19 @@ public:
 
 	using Object = Ptr::element_type;
 	using Objects = std::vector<Ptr>;
-	Objects objects;
+
+	Collection &
+	operator=(Objects && other)
+	{
+		objects = std::move(other);
+		return *this;
+	}
+
+	const Ptr &
+	operator[](size_t idx) const
+	{
+		return objects[idx];
+	}
 
 	template<typename T = Object, typename... Params>
 	auto
@@ -91,19 +103,45 @@ public:
 		});
 	}
 
-	auto
+	[[nodiscard]] auto
+	begin() const
+	{
+		return objects.begin();
+	}
+
+	[[nodiscard]] auto
 	end() const
 	{
 		return objects.end();
 	}
 
-	auto
+	[[nodiscard]] auto
+	rbegin() const
+	{
+		return objects.rbegin();
+	}
+
+	[[nodiscard]] auto
 	rend() const
 	{
 		return objects.rend();
 	}
 
+	[[nodiscard]] bool
+	empty() const
+	{
+		return objects.empty();
+	}
+
+	auto
+	emplace(Ptr && ptr)
+	{
+		return objects.emplace_back(std::move(ptr));
+	}
+
 protected:
+	Objects objects;
+
 	template<typename T = Object, typename... Params>
 	auto
 	apply_internal(const auto begin, const auto end, const auto & m, Params &&... params) const

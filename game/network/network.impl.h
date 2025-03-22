@@ -8,7 +8,7 @@ template<typename T, typename... Links>
 void
 NetworkOf<T, Links...>::joinLinks(const Link::Ptr & l) const
 {
-	for (const auto & ol : links.objects) {
+	for (const auto & ol : links) {
 		Network::joinLinks(l, ol);
 	}
 }
@@ -18,11 +18,11 @@ Link::Ptr
 NetworkOf<T, Links...>::intersectRayLinks(const Ray<GlobalPosition3D> & ray) const
 {
 	// Click link
-	if (const auto link = std::find_if(links.objects.begin(), links.objects.end(),
+	if (const auto link = std::find_if(links.begin(), links.end(),
 				[&ray](const std::shared_ptr<T> & link) {
 					return link->intersectRay(ray);
 				});
-			link != links.objects.end()) {
+			link != links.end()) {
 		return *link;
 	}
 	return {};
@@ -32,7 +32,7 @@ template<typename T, typename... Links>
 float
 NetworkOf<T, Links...>::findNodeDirection(Node::AnyCPtr n) const
 {
-	for (const auto & l : links.objects) {
+	for (const auto & l : links) {
 		for (const auto & e : l->ends) {
 			// cppcheck-suppress useStlAlgorithm
 			if (e.node.get() == n.get()) {
