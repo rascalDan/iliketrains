@@ -41,7 +41,7 @@ public:
 		terrain->point(GeoData::VertexHandle {517}).z = 100'000;
 		terrain->generateMeshes();
 		gameState->assets = AssetFactory::loadAll(RESDIR);
-		brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(gameState->assets.at("brush-47"));
+		brush47rvc = gameState->assets.at("brush-47").dynamicCast<RailVehicleClass>();
 		std::random_device randomdev {};
 		std::uniform_real_distribution<Angle> rotationDistribution {0, two_pi};
 		std::uniform_int_distribution<GlobalDistance> positionOffsetDistribution {-1500, +1500};
@@ -57,9 +57,10 @@ public:
 		train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
 		for (auto x = 40000; x < 100000; x += 5000) {
 			for (auto y = 65000; y < 125000; y += 5000) {
-				gameState->world.create<Plant>(
-						std::dynamic_pointer_cast<Foliage>(gameState->assets.at(std::format(
-								"Tree-{:#02}-{}", treeDistribution(randomdev), treeVariantDistribution(randomdev)))),
+				gameState->world.create<Plant>(gameState->assets
+													   .at(std::format("Tree-{:#02}-{}", treeDistribution(randomdev),
+															   treeVariantDistribution(randomdev)))
+													   .dynamicCast<Foliage>(),
 						Location {{x + positionOffsetDistribution(randomdev), y + positionOffsetDistribution(randomdev),
 										  1},
 								{0, rotationDistribution(randomdev), 0}});
@@ -76,7 +77,7 @@ public:
 		water.render(shader, frustum);
 		rail.render(shader, frustum);
 		std::ranges::for_each(gameState->assets, [&shader, &frustum](const auto & asset) {
-			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
+			if (const auto renderable = asset.second.template getAs<const Renderable>()) {
 				renderable->render(shader, frustum);
 			}
 		});
@@ -98,7 +99,7 @@ public:
 	{
 		terrain->shadows(shadowMapper, frustum);
 		std::ranges::for_each(gameState->assets, [&shadowMapper, &frustum](const auto & asset) {
-			if (const auto renderable = std::dynamic_pointer_cast<const Renderable>(asset.second)) {
+			if (const auto renderable = asset.second.template getAs<const Renderable>()) {
 				renderable->shadows(shadowMapper, frustum);
 			}
 		});

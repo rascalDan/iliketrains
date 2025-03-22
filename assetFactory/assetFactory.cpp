@@ -5,6 +5,7 @@
 #include "filesystem.h"
 #include "gfx/image.h"
 #include "gfx/models/texture.h"
+#include "gfx/renderable.h"
 #include "object.h"
 #include "plane.h"
 #include "saxParse-persistence.h"
@@ -146,7 +147,7 @@ bool
 AssetFactory::persist(Persistence::PersistenceStore & store)
 {
 	using MapObjects = Persistence::MapByMember<Shapes, std::shared_ptr<Object>>;
-	using MapAssets = Persistence::MapByMember<Assets>;
+	using MapAssets = Persistence::MapByMember<Assets, Asset::Ptr>;
 	using MapTextureFragments = Persistence::MapByMember<TextureFragments>;
 	using MapAssImp = Persistence::MapByMember<AssImps, std::shared_ptr<AssImp>, &AssImp::path>;
 	return STORE_TYPE && STORE_NAME_HELPER("object", shapes, MapObjects)

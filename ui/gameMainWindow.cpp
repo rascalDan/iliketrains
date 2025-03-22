@@ -75,9 +75,9 @@ GameMainWindow::render() const
 void
 GameMainWindow::content(const SceneShader & shader, const Frustum & frustum) const
 {
-	for (const auto & [id, asset] : gameState->assets) {
-		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
-			r->render(shader, frustum);
+	for (const auto & [assetId, asset] : gameState->assets) {
+		if (const auto renderable = asset.getAs<const Renderable>()) {
+			renderable->render(shader, frustum);
 		}
 	}
 	gameState->world.apply<Renderable>(&Renderable::render, shader, frustum);
@@ -99,9 +99,9 @@ GameMainWindow::lights(const SceneShader & shader) const
 void
 GameMainWindow::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
-	for (const auto & [id, asset] : gameState->assets) {
-		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
-			r->shadows(shadowMapper, frustum);
+	for (const auto & [assetId, asset] : gameState->assets) {
+		if (const auto renderable = asset.getAs<const Renderable>()) {
+			renderable->shadows(shadowMapper, frustum);
 		}
 	}
 	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper, frustum);

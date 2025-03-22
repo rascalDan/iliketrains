@@ -182,7 +182,7 @@ RailLinks::render(const SceneShader & shader, const Frustum &) const
 const Surface *
 RailLinks::getBaseSurface() const
 {
-	return std::dynamic_pointer_cast<Surface>(gameState->assets.at("terrain.surface.gravel")).get();
+	return gameState->assets.at("terrain.surface.gravel").dynamicCast<const Surface>().get();
 }
 
 RelativeDistance

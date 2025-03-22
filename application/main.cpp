@@ -86,7 +86,7 @@ public:
 			}
 
 			const std::shared_ptr<Train> train = world.create<Train>(l3, 800000);
-			auto b47 = std::dynamic_pointer_cast<RailVehicleClass>(assets.at("brush-47"));
+			auto b47 = assets.at("brush-47").dynamicCast<RailVehicleClass>();
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);
 			}
@@ -101,8 +101,9 @@ public:
 			std::uniform_int_distribution<int> treeVariantDistribution {1, 4};
 			for (auto x = 311000000; x < 311830000; x += 5000) {
 				for (auto y = 491100000; y < 491130000; y += 5000) {
-					world.create<Plant>(std::dynamic_pointer_cast<Foliage>(assets.at(std::format("Tree-{:#02}-{}",
-												treeDistribution(randomdev), treeVariantDistribution(randomdev)))),
+					world.create<Plant>(assets.at(std::format("Tree-{:#02}-{}", treeDistribution(randomdev),
+														  treeVariantDistribution(randomdev)))
+												.dynamicCast<Foliage>(),
 							Location {terrain->positionAt({{x + positionOffsetDistribution(randomdev),
 											  y + positionOffsetDistribution(randomdev)}}),
 									{0, rotationDistribution(randomdev), 0}});
