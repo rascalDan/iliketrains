@@ -5,7 +5,7 @@
 
 class Objective;
 
-class Orders : public Collection<Objective> {
+class Orders : public SharedCollection<Objective> {
 public:
 	[[nodiscard]] Objective * current() const;
 	Objective * next();

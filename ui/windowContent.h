@@ -21,6 +21,6 @@ public:
 	virtual bool handleInput(const SDL_Event & e);
 
 protected:
-	::Collection<UIComponent> uiComponents;
+	UniqueCollection<UIComponent> uiComponents;
 	UIShader uiShader;
 };

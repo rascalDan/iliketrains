@@ -77,7 +77,7 @@ class NetworkOf : public Network, public Renderable, public NetworkLinkHolder<Li
 protected:
 	using Network::Network;
 
-	Collection<T> links;
+	SharedCollection<T> links;
 	void joinLinks(const Link::Ptr &) const;
 
 protected:

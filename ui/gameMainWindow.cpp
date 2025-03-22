@@ -32,7 +32,7 @@ GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, Scene
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
-	uiComponents.create<GameMainToolbar>(gms.get());
+	uiComponents.create<GameMainToolbar>(gms);
 }
 
 GameMainWindow::~GameMainWindow() { }

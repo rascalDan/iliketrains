@@ -34,10 +34,10 @@ public:
 	}
 };
 
-using TestCollection = Collection<Base>;
+using TestCollection = SharedCollection<Base>;
 
-BOOST_TEST_DONT_PRINT_LOG_VALUE(Collection<Base>::Objects::const_iterator)
-BOOST_TEST_DONT_PRINT_LOG_VALUE(Collection<Base>::Objects::const_reverse_iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_reverse_iterator)
 
 BOOST_FIXTURE_TEST_SUITE(tc, TestCollection)
 

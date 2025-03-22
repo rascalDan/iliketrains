@@ -36,7 +36,7 @@ public:
 		using Ptr = std::unique_ptr<Builder>;
 
 	protected:
-		Collection<const Link> candidateLinks;
+		SharedCollection<const Link> candidateLinks;
 	};
 
 private:

@@ -6,11 +6,11 @@
 #include <type_traits>
 #include <vector>
 
-template<typename Object, bool shared = true> class Collection {
+template<typename Ptr> class Collection {
 public:
 	virtual ~Collection() = default;
 
-	using Ptr = std::conditional_t<shared, std::shared_ptr<Object>, std::unique_ptr<Object>>;
+	using Object = Ptr::element_type;
 	using Objects = std::vector<Ptr>;
 	Objects objects;
 
@@ -19,7 +19,7 @@ public:
 	create(Params &&... params)
 		requires std::is_base_of_v<Object, T>
 	{
-		if constexpr (shared) {
+		if constexpr (requires(Ptr ptr) { ptr = std::make_shared<T>(std::forward<Params>(params)...); }) {
 			auto obj = std::make_shared<T>(std::forward<Params>(params)...);
 			objects.emplace_back(obj);
 			return obj;
@@ -129,3 +129,6 @@ protected:
 		});
 	}
 };
+
+template<typename T> using SharedCollection = Collection<std::shared_ptr<T>>;
+template<typename T> using UniqueCollection = Collection<std::unique_ptr<T>>;

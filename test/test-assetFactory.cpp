@@ -71,7 +71,7 @@ public:
 		sceneRenderer.render(*this);
 	}
 
-	Collection<const Renderable> objects;
+	SharedCollection<const Renderable> objects;
 
 private:
 	SceneRenderer sceneRenderer;

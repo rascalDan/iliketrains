@@ -6,7 +6,7 @@
 
 class MainApplication : public ApplicationBase {
 public:
-	using Windows = Collection<Window>;
+	using Windows = SharedCollection<Window>;
 	void mainLoop();
 
 protected:

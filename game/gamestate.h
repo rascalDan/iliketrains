@@ -16,7 +16,7 @@ public:
 	NO_MOVE(GameState);
 	NO_COPY(GameState);
 
-	Collection<WorldObject> world;
+	SharedCollection<WorldObject> world;
 	std::shared_ptr<Terrain> terrain;
 	std::shared_ptr<Environment> environment;
 	AssetFactory::Assets assets;
