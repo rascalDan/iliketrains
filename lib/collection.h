@@ -18,6 +18,10 @@ public:
 	operator=(Objects && other)
 	{
 		objects = std::move(other);
+		((std::get<OtherObjects<Others>>(otherObjects).clear()), ...);
+		for (const auto & other : objects) {
+			addOthersPtr(other.get());
+		}
 		return *this;
 	}
 
@@ -138,10 +142,10 @@ public:
 		return objects.empty();
 	}
 
-	auto
+	decltype(auto)
 	emplace(Ptr && ptr)
 	{
-		auto object = objects.emplace_back(std::move(ptr));
+		const auto & object = objects.emplace_back(std::move(ptr));
 		addOthersPtr(object.get());
 		return object;
 	}

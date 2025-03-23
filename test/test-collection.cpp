@@ -43,6 +43,7 @@ BOOST_FIXTURE_TEST_SUITE(tc, TestCollection)
 
 BOOST_AUTO_TEST_CASE(empty)
 {
+	BOOST_CHECK(TestCollection::empty());
 	BOOST_REQUIRE(!apply(&Base::add));
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_EQUAL(i, end());
@@ -88,6 +89,70 @@ BOOST_AUTO_TEST_CASE(a_sub)
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_NE(i, end());
 	BOOST_CHECK_EQUAL(*i, s);
+}
+
+BOOST_AUTO_TEST_CASE(begin_end)
+{
+	BOOST_CHECK_EQUAL(0, std::distance(begin(), end()));
+	create<Sub>();
+	create<Base>();
+	BOOST_CHECK_EQUAL(2, std::distance(begin(), end()));
+}
+
+BOOST_AUTO_TEST_CASE(rbegin_rend)
+{
+	BOOST_CHECK_EQUAL(0, std::distance(rbegin(), rend()));
+	create<Sub>();
+	create<Base>();
+	BOOST_CHECK_EQUAL(2, std::distance(rbegin(), rend()));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+using TestUniqueCollection = UniqueCollection<Base, Sub>;
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::const_iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::const_reverse_iterator)
+
+BOOST_FIXTURE_TEST_SUITE(utc, TestUniqueCollection)
+
+BOOST_AUTO_TEST_CASE(unique_create)
+{
+	create<Base>();
+	BOOST_CHECK_EQUAL(objects.size(), 1);
+	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
+	create<Sub>();
+	BOOST_CHECK_EQUAL(objects.size(), 2);
+	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(move_assign)
+{
+	create<Base>();
+	create<Sub>();
+
+	TestUniqueCollection::Objects other;
+	TestUniqueCollection::operator=(std::move(other));
+	BOOST_CHECK(objects.empty());
+	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
+
+	other.push_back(std::make_unique<Sub>());
+	other.push_back(std::make_unique<Base>());
+	TestUniqueCollection::operator=(std::move(other));
+	BOOST_CHECK_EQUAL(objects.size(), 2);
+	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
+	BOOST_CHECK(other.empty());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_FIXTURE_TEST_SUITE(btc, UniqueCollection<Base>)
+
+BOOST_AUTO_TEST_CASE(no_others)
+{
+	create<Base>();
+	create<Sub>();
+	emplace(std::make_unique<Base>());
+	emplace(std::make_unique<Sub>());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
