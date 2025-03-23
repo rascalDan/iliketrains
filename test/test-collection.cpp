@@ -40,10 +40,15 @@ public:
 	}
 };
 
+class Sub1 : public Sub { };
+
 using TestCollection = SharedCollection<Base, Sub>;
 
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::iterator)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_iterator)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_reverse_iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::OtherObjects<Sub>::iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::OtherObjects<Sub>::const_iterator)
 
 BOOST_FIXTURE_TEST_SUITE(tc, TestCollection)
 
@@ -55,6 +60,7 @@ BOOST_AUTO_TEST_CASE(empty)
 	BOOST_CHECK_EQUAL(i, end());
 	BOOST_CHECK(!find<Base>());
 	BOOST_CHECK(!find<Sub>());
+	BOOST_CHECK(!find<Sub1>());
 }
 
 BOOST_AUTO_TEST_CASE(a_base)
@@ -68,6 +74,7 @@ BOOST_AUTO_TEST_CASE(a_base)
 	BOOST_CHECK_EQUAL(i, end());
 	BOOST_CHECK_EQUAL(b.get(), find<Base>());
 	BOOST_CHECK(!find<Sub>());
+	BOOST_CHECK(!find<Sub1>());
 }
 
 BOOST_AUTO_TEST_CASE(emplace_others)
@@ -80,6 +87,7 @@ BOOST_AUTO_TEST_CASE(emplace_others)
 	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
 	BOOST_CHECK_EQUAL(b.get(), find<Base>());
 	BOOST_CHECK_EQUAL(s.get(), find<Sub>());
+	BOOST_CHECK(!find<Sub1>());
 }
 
 BOOST_AUTO_TEST_CASE(a_rbase)
@@ -101,6 +109,38 @@ BOOST_AUTO_TEST_CASE(a_sub)
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_NE(i, end());
 	BOOST_CHECK_EQUAL(*i, s);
+}
+
+BOOST_AUTO_TEST_CASE(filter)
+{
+	create<Base>();
+	BOOST_CHECK_EQUAL(1, apply<Base>(&Base::yes));
+	BOOST_CHECK_EQUAL(0, apply<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(0, apply<Sub1>(&Base::yes));
+	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).end(), applyOne<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).end(), applyOne<Sub1>(&Base::yes));
+	create<Sub>();
+	BOOST_CHECK_EQUAL(2, apply<Base>(&Base::yes));
+	BOOST_CHECK_EQUAL(1, apply<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(0, apply<Sub1>(&Base::yes));
+	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).begin(), applyOne<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).end(), applyOne<Sub1>(&Base::yes));
+	create<Sub1>();
+	BOOST_CHECK_EQUAL(3, apply<Base>(&Base::yes));
+	BOOST_CHECK_EQUAL(2, apply<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(1, apply<Sub1>(&Base::yes));
+	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).begin(), applyOne<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).begin() + 1, applyOne<Sub1>(&Base::yes));
+
+	BOOST_CHECK_EQUAL(std::get<idx<Sub>()>(otherObjects).size(), 2);
+	BOOST_CHECK_EQUAL(std::get<idx<Sub1>()>(otherObjects).size(), 2);
+
+	BOOST_CHECK_EQUAL(&objects, &containerFor<Base>());
+	BOOST_CHECK_EQUAL(&std::get<0>(otherObjects), &containerFor<Sub>());
+	BOOST_CHECK_EQUAL(&std::get<0>(otherObjects), &containerFor<Sub1>());
 }
 
 BOOST_AUTO_TEST_CASE(begin_end)
@@ -230,6 +270,8 @@ BOOST_AUTO_TEST_CASE(applyOneType)
 	create<Sub>();
 	BOOST_CHECK_EQUAL(objects.begin() + 1, applyOne<Sub>(&Base::yes));
 	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
+	create<Sub1>();
+	BOOST_CHECK_EQUAL(objects.begin() + 2, applyOne<Sub1>(&Base::yes));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

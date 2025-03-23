@@ -236,12 +236,21 @@ protected:
 	}
 
 	template<typename T>
+		requires((std::is_convertible_v<T *, Others *> || ...))
+	[[nodiscard]] consteval static bool
+	idx()
+	{
+		size_t typeIdx = 0;
+		return ((typeIdx++ && std::is_convertible_v<Others *, T *>) || ...);
+	}
+
+	template<typename T>
 	[[nodiscard]]
-	const auto &
+	constexpr const auto &
 	containerFor() const
 	{
 		if constexpr ((std::is_convertible_v<T *, Others *> || ...)) {
-			return std::get<OtherObjects<T>>(otherObjects);
+			return std::get<idx<T>()>(otherObjects);
 		}
 		else {
 			return objects;
@@ -260,7 +269,7 @@ protected:
 		}
 		else {
 			return std::count_if(begin, end, [&m, &params...](auto && op) {
-				if (auto o = dynamic_cast<T *>(op.get())) {
+				if (auto o = dynamic_cast<T *>(std::to_address(op))) {
 					std::invoke(m, o, std::forward<Params>(params)...);
 					return true;
 				}
@@ -280,7 +289,7 @@ protected:
 		}
 		else {
 			return std::find_if(begin, end, [&m, &params...](auto && op) {
-				if (auto o = dynamic_cast<T *>(op.get())) {
+				if (auto o = dynamic_cast<T *>(std::to_address(op))) {
 					return std::invoke(m, o, std::forward<Params>(params)...);
 				}
 				return false;
