@@ -54,12 +54,19 @@ public:
 	T *
 	find()
 	{
-		if (auto i = std::find_if(objects.begin(), objects.end(),
-					[](auto && o) {
-						return (dynamic_cast<T *>(o.get()));
-					});
-				i != objects.end()) {
-			return static_cast<T *>(i->get());
+		const auto & srcObjects = containerFor<T>();
+		if constexpr (std::is_convertible_v<typename std::remove_reference_t<decltype(srcObjects)>::value_type, T *>) {
+			if (srcObjects.empty()) {
+				return nullptr;
+			}
+			return srcObjects.front();
+		}
+		else if (auto i = std::find_if(srcObjects.begin(), srcObjects.end(),
+						 [](auto && o) {
+							 return dynamic_cast<T *>(std::to_address(o)) != nullptr;
+						 });
+				i != srcObjects.end()) {
+			return static_cast<T *>(std::to_address(*i));
 		}
 		return nullptr;
 	}
@@ -222,6 +229,19 @@ protected:
 					}
 				}(),
 				...);
+	}
+
+	template<typename T>
+	[[nodiscard]]
+	const auto &
+	containerFor() const
+	{
+		if constexpr ((std::is_convertible_v<T *, Others *> || ...)) {
+			return std::get<OtherObjects<T>>(otherObjects);
+		}
+		else {
+			return objects;
+		}
 	}
 
 	template<typename T = Object, typename... Params>

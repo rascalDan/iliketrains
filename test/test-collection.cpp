@@ -47,6 +47,8 @@ BOOST_AUTO_TEST_CASE(empty)
 	BOOST_REQUIRE(!apply(&Base::add));
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_EQUAL(i, end());
+	BOOST_CHECK(!find<Base>());
+	BOOST_CHECK(!find<Sub>());
 }
 
 BOOST_AUTO_TEST_CASE(a_base)
@@ -58,16 +60,20 @@ BOOST_AUTO_TEST_CASE(a_base)
 	BOOST_CHECK_EQUAL(b->total, 1);
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_EQUAL(i, end());
+	BOOST_CHECK_EQUAL(b.get(), find<Base>());
+	BOOST_CHECK(!find<Sub>());
 }
 
 BOOST_AUTO_TEST_CASE(emplace_others)
 {
-	emplace(std::make_shared<Base>());
+	auto b = emplace(std::make_shared<Base>());
 	BOOST_CHECK_EQUAL(objects.size(), 1);
 	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
-	emplace(std::make_shared<Sub>());
+	auto s = emplace(std::make_shared<Sub>());
 	BOOST_CHECK_EQUAL(objects.size(), 2);
 	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
+	BOOST_CHECK_EQUAL(b.get(), find<Base>());
+	BOOST_CHECK_EQUAL(s.get(), find<Sub>());
 }
 
 BOOST_AUTO_TEST_CASE(a_rbase)
@@ -105,6 +111,25 @@ BOOST_AUTO_TEST_CASE(rbegin_rend)
 	create<Sub>();
 	create<Base>();
 	BOOST_CHECK_EQUAL(2, std::distance(rbegin(), rend()));
+}
+
+BOOST_AUTO_TEST_CASE(createCreate)
+{
+	auto b = findOrCreate<Base>();
+	BOOST_CHECK(b);
+	auto b2 = findOrCreate<Base>();
+	BOOST_CHECK_EQUAL(b, b2);
+	auto s = findOrCreate<Sub>();
+	BOOST_CHECK_NE(s, b);
+	auto s2 = findOrCreate<Sub>();
+	BOOST_CHECK_EQUAL(s, s2);
+}
+
+BOOST_AUTO_TEST_CASE(createCreateSub)
+{
+	auto s = findOrCreate<Sub>();
+	auto b = findOrCreate<Base>();
+	BOOST_CHECK_EQUAL(s, b);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
