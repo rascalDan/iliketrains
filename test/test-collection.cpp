@@ -143,6 +143,30 @@ BOOST_AUTO_TEST_CASE(move_assign)
 	BOOST_CHECK(other.empty());
 }
 
+BOOST_AUTO_TEST_CASE(clearAll)
+{
+	create<Base>();
+	create<Sub>();
+	emplace(std::make_unique<Base>());
+	emplace(std::make_unique<Sub>());
+
+	clear();
+	BOOST_CHECK(objects.empty());
+	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
+}
+
+BOOST_AUTO_TEST_CASE(removeAllOfSub)
+{
+	create<Base>();
+	create<Sub>();
+	emplace(std::make_unique<Base>());
+	emplace(std::make_unique<Sub>());
+
+	removeAll<Sub>();
+	BOOST_CHECK_EQUAL(objects.size(), 2);
+	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_FIXTURE_TEST_SUITE(btc, UniqueCollection<Base>)

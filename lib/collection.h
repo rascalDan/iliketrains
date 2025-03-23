@@ -103,13 +103,22 @@ public:
 		return applyOne_internal<T>(objects.rbegin(), objects.rend(), m, std::forward<Params>(params)...);
 	}
 
-	template<typename T = Object>
+	template<typename T>
+		requires(std::is_convertible_v<T *, Others *> || ...)
 	auto
 	removeAll()
 	{
+		std::get<OtherObjects<T>>(otherObjects).clear();
 		return std::erase_if(objects, [](auto && op) {
 			return dynamic_cast<T *>(op.get());
 		});
+	}
+
+	void
+	clear()
+	{
+		((std::get<OtherObjects<Others>>(otherObjects).clear()), ...);
+		objects.clear();
 	}
 
 	[[nodiscard]] auto

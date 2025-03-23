@@ -90,7 +90,7 @@ public:
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);
 			}
-			train->orders.removeAll();
+			train->orders.clear();
 			train->orders.create<FreeRoam>(&train->orders);
 			train->currentActivity = train->orders.current()->createActivity();
 
@@ -113,7 +113,7 @@ public:
 
 		mainLoop();
 
-		world.removeAll();
+		world.clear();
 		return 0;
 	}
 };

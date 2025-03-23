@@ -22,11 +22,11 @@ BuilderFreeExtend::move(
 			candidateLinks = network->candidateExtend(*p1, p->first);
 		}
 		else {
-			candidateLinks.removeAll();
+			candidateLinks.clear();
 		}
 	}
 	else {
-		candidateLinks.removeAll();
+		candidateLinks.clear();
 	}
 }
 
