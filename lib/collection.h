@@ -6,12 +6,13 @@
 #include <type_traits>
 #include <vector>
 
-template<typename Ptr> class Collection {
+template<typename Ptr, typename... Others> class Collection {
 public:
 	virtual ~Collection() = default;
 
 	using Object = Ptr::element_type;
 	using Objects = std::vector<Ptr>;
+	template<typename T> using OtherObjects = std::vector<T *>;
 
 	Collection &
 	operator=(Objects && other)
@@ -34,10 +35,14 @@ public:
 		if constexpr (requires(Ptr ptr) { ptr = std::make_shared<T>(std::forward<Params>(params)...); }) {
 			auto obj = std::make_shared<T>(std::forward<Params>(params)...);
 			objects.emplace_back(obj);
+			addOthersType<T>(obj.get());
 			return obj;
 		}
 		else {
-			return static_cast<T *>(objects.emplace_back(std::make_unique<T>(std::forward<Params>(params)...)).get());
+			auto obj = static_cast<T *>(
+					objects.emplace_back(std::make_unique<T>(std::forward<Params>(params)...)).get());
+			addOthersType<T>(obj);
+			return obj;
 		}
 	}
 
@@ -136,11 +141,75 @@ public:
 	auto
 	emplace(Ptr && ptr)
 	{
-		return objects.emplace_back(std::move(ptr));
+		auto object = objects.emplace_back(std::move(ptr));
+		addOthersPtr(object.get());
+		return object;
 	}
 
 protected:
 	Objects objects;
+	std::tuple<OtherObjects<Others>...> otherObjects;
+
+	template<typename T>
+	void
+	addOthersType(T * obj)
+	{
+		applyToOthersType<T>(
+				[](auto & others, auto ptr) {
+					others.emplace_back(ptr);
+				},
+				obj);
+	}
+
+	void
+	addOthersPtr(Object * obj)
+	{
+		applyToOthersPtr(
+				[](auto & others, auto ptr) {
+					others.emplace_back(ptr);
+				},
+				obj);
+	}
+
+	template<typename T>
+		requires(sizeof...(Others) == 0)
+	void
+	applyToOthersType(const auto &, T *)
+	{
+	}
+
+	void
+	applyToOthersPtr(const auto &, Object *)
+		requires(sizeof...(Others) == 0)
+	{
+	}
+
+	template<typename T>
+		requires(sizeof...(Others) > 0)
+	void
+	applyToOthersType(const auto & func, T * obj)
+	{
+		(
+				[&]() {
+					if constexpr (std::is_convertible_v<T *, Others *>) {
+						std::invoke(func, std::get<OtherObjects<Others>>(otherObjects), obj);
+					}
+				}(),
+				...);
+	}
+
+	void
+	applyToOthersPtr(const auto & func, Object * obj)
+		requires(sizeof...(Others) > 0)
+	{
+		(
+				[&]() {
+					if (auto ptr = dynamic_cast<Others *>(obj)) {
+						std::invoke(func, std::get<OtherObjects<Others>>(otherObjects), ptr);
+					}
+				}(),
+				...);
+	}
 
 	template<typename T = Object, typename... Params>
 	auto
@@ -168,5 +237,5 @@ protected:
 	}
 };
 
-template<typename T> using SharedCollection = Collection<std::shared_ptr<T>>;
-template<typename T> using UniqueCollection = Collection<std::unique_ptr<T>>;
+template<typename T, typename... Others> using SharedCollection = Collection<std::shared_ptr<T>, Others...>;
+template<typename T, typename... Others> using UniqueCollection = Collection<std::unique_ptr<T>, Others...>;

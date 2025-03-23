@@ -34,7 +34,7 @@ public:
 	}
 };
 
-using TestCollection = SharedCollection<Base>;
+using TestCollection = SharedCollection<Base, Sub>;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_iterator)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_reverse_iterator)
@@ -51,10 +51,22 @@ BOOST_AUTO_TEST_CASE(empty)
 BOOST_AUTO_TEST_CASE(a_base)
 {
 	auto b = create<Base>();
+	BOOST_CHECK_EQUAL(objects.size(), 1);
+	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
 	BOOST_REQUIRE(apply(&Base::add));
 	BOOST_CHECK_EQUAL(b->total, 1);
 	const auto i = applyOne(&Base::add);
 	BOOST_CHECK_EQUAL(i, end());
+}
+
+BOOST_AUTO_TEST_CASE(emplace_others)
+{
+	emplace(std::make_shared<Base>());
+	BOOST_CHECK_EQUAL(objects.size(), 1);
+	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
+	emplace(std::make_shared<Sub>());
+	BOOST_CHECK_EQUAL(objects.size(), 2);
+	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(a_rbase)
@@ -69,6 +81,8 @@ BOOST_AUTO_TEST_CASE(a_rbase)
 BOOST_AUTO_TEST_CASE(a_sub)
 {
 	auto s = create<Sub>();
+	BOOST_CHECK_EQUAL(objects.size(), 1);
+	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
 	BOOST_REQUIRE(apply(&Base::add));
 	BOOST_CHECK_EQUAL(s->total, 2);
 	const auto i = applyOne(&Base::add);
