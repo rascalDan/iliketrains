@@ -21,6 +21,12 @@ public:
 		return false;
 	}
 
+	[[nodiscard]] virtual bool
+	yes() const
+	{
+		return true;
+	}
+
 	unsigned int total {0};
 };
 
@@ -137,6 +143,8 @@ BOOST_AUTO_TEST_SUITE_END()
 using TestUniqueCollection = UniqueCollection<Base, Sub>;
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::const_iterator)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::const_reverse_iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::iterator)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::reverse_iterator)
 
 BOOST_FIXTURE_TEST_SUITE(utc, TestUniqueCollection)
 
@@ -202,6 +210,26 @@ BOOST_AUTO_TEST_CASE(no_others)
 	create<Sub>();
 	emplace(std::make_unique<Base>());
 	emplace(std::make_unique<Sub>());
+}
+
+BOOST_AUTO_TEST_CASE(applyAll)
+{
+	create<Base>();
+	BOOST_CHECK_EQUAL(0, apply<Sub>(&Base::add));
+	BOOST_CHECK_EQUAL(1, apply<Base>(&Base::add));
+	create<Sub>();
+	BOOST_CHECK_EQUAL(1, apply<Sub>(&Base::add));
+	BOOST_CHECK_EQUAL(2, apply<Base>(&Base::add));
+}
+
+BOOST_AUTO_TEST_CASE(applyOneType)
+{
+	create<Base>();
+	BOOST_CHECK_EQUAL(objects.end(), applyOne<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
+	create<Sub>();
+	BOOST_CHECK_EQUAL(objects.begin() + 1, applyOne<Sub>(&Base::yes));
+	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

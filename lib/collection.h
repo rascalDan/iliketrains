@@ -86,28 +86,32 @@ public:
 	auto
 	apply(const auto & m, Params &&... params) const
 	{
-		return apply_internal<T>(objects.begin(), objects.end(), m, std::forward<Params>(params)...);
+		const auto & srcObjects = containerFor<T>();
+		return apply_internal<T>(srcObjects.begin(), srcObjects.end(), m, std::forward<Params>(params)...);
 	}
 
 	template<typename T = Object, typename... Params>
 	auto
 	rapply(const auto & m, Params &&... params) const
 	{
-		return apply_internal<T>(objects.rbegin(), objects.rend(), m, std::forward<Params>(params)...);
+		const auto & srcObjects = containerFor<T>();
+		return apply_internal<T>(srcObjects.rbegin(), srcObjects.rend(), m, std::forward<Params>(params)...);
 	}
 
 	template<typename T = Object, typename... Params>
 	auto
 	applyOne(const auto & m, Params &&... params) const
 	{
-		return applyOne_internal<T>(objects.begin(), objects.end(), m, std::forward<Params>(params)...);
+		const auto & srcObjects = containerFor<T>();
+		return applyOne_internal<T>(srcObjects.begin(), srcObjects.end(), m, std::forward<Params>(params)...);
 	}
 
 	template<typename T = Object, typename... Params>
 	auto
 	rapplyOne(const auto & m, Params &&... params) const
 	{
-		return applyOne_internal<T>(objects.rbegin(), objects.rend(), m, std::forward<Params>(params)...);
+		const auto & srcObjects = containerFor<T>();
+		return applyOne_internal<T>(srcObjects.rbegin(), srcObjects.rend(), m, std::forward<Params>(params)...);
 	}
 
 	template<typename T>
@@ -248,25 +252,40 @@ protected:
 	auto
 	apply_internal(const auto begin, const auto end, const auto & m, Params &&... params) const
 	{
-		return std::count_if(begin, end, [&m, &params...](auto && op) {
-			if (auto o = dynamic_cast<T *>(op.get())) {
-				std::invoke(m, o, std::forward<Params>(params)...);
-				return true;
-			}
-			return false;
-		});
+		if constexpr (std::is_convertible_v<decltype(std::to_address(*begin)), T *>) {
+			std::for_each(begin, end, [&m, &params...](auto && op) {
+				std::invoke(m, op, std::forward<Params>(params)...);
+			});
+			return std::distance(begin, end);
+		}
+		else {
+			return std::count_if(begin, end, [&m, &params...](auto && op) {
+				if (auto o = dynamic_cast<T *>(op.get())) {
+					std::invoke(m, o, std::forward<Params>(params)...);
+					return true;
+				}
+				return false;
+			});
+		}
 	}
 
 	template<typename T = Object, typename... Params>
 	auto
 	applyOne_internal(const auto begin, const auto end, const auto & m, Params &&... params) const
 	{
-		return std::find_if(begin, end, [&m, &params...](auto && op) {
-			if (auto o = dynamic_cast<T *>(op.get())) {
-				return std::invoke(m, o, std::forward<Params>(params)...);
-			}
-			return false;
-		});
+		if constexpr (std::is_convertible_v<decltype(std::to_address(*begin)), T *>) {
+			return std::find_if(begin, end, [&m, &params...](auto && op) {
+				return std::invoke(m, op, std::forward<Params>(params)...);
+			});
+		}
+		else {
+			return std::find_if(begin, end, [&m, &params...](auto && op) {
+				if (auto o = dynamic_cast<T *>(op.get())) {
+					return std::invoke(m, o, std::forward<Params>(params)...);
+				}
+				return false;
+			});
+		}
 	}
 };
 
