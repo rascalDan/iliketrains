@@ -80,7 +80,7 @@ GameMainWindow::content(const SceneShader & shader, const Frustum & frustum) con
 			renderable->render(shader, frustum);
 		}
 	}
-	gameState->world.apply<Renderable>(&Renderable::render, shader, frustum);
+	gameState->world.apply<const Renderable>(&Renderable::render, shader, frustum);
 	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader, frustum);
 }
 
@@ -93,7 +93,7 @@ GameMainWindow::environment(const SceneShader &, const SceneRenderer & r) const
 void
 GameMainWindow::lights(const SceneShader & shader) const
 {
-	gameState->world.apply<Renderable>(&Renderable::lights, shader);
+	gameState->world.apply<const Renderable>(&Renderable::lights, shader);
 }
 
 void
@@ -104,5 +104,5 @@ GameMainWindow::shadows(const ShadowMapper & shadowMapper, const Frustum & frust
 			renderable->shadows(shadowMapper, frustum);
 		}
 	}
-	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper, frustum);
+	gameState->world.apply<const Renderable>(&Renderable::shadows, shadowMapper, frustum);
 }

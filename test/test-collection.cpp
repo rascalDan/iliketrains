@@ -113,6 +113,10 @@ BOOST_AUTO_TEST_CASE(a_sub)
 
 BOOST_AUTO_TEST_CASE(filter)
 {
+	static_assert(TestCollection::idx<Sub>() == 0);
+	static_assert(TestCollection::idx<const Sub>() == 0);
+	static_assert(TestCollection::idx<Sub1>() == 0);
+	static_assert(TestCollection::idx<const Sub1>() == 0);
 	create<Base>();
 	BOOST_CHECK_EQUAL(1, apply<Base>(&Base::yes));
 	BOOST_CHECK_EQUAL(0, apply<Sub>(&Base::yes));

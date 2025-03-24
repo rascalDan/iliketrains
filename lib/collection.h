@@ -236,12 +236,12 @@ protected:
 	}
 
 	template<typename T>
-		requires((std::is_convertible_v<T *, Others *> || ...))
+		requires((std::is_base_of_v<Others, T> || ...))
 	[[nodiscard]] consteval static bool
 	idx()
 	{
 		size_t typeIdx = 0;
-		return ((typeIdx++ && std::is_convertible_v<Others *, T *>) || ...);
+		return ((typeIdx++ && std::is_base_of_v<Others, T>) || ...);
 	}
 
 	template<typename T>
@@ -249,7 +249,7 @@ protected:
 	constexpr const auto &
 	containerFor() const
 	{
-		if constexpr ((std::is_convertible_v<T *, Others *> || ...)) {
+		if constexpr ((std::is_base_of_v<Others, T> || ...)) {
 			return std::get<idx<T>()>(otherObjects);
 		}
 		else {
