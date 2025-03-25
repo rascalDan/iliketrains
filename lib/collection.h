@@ -237,11 +237,12 @@ protected:
 
 	template<typename T>
 		requires((std::is_base_of_v<Others, T> || ...))
-	[[nodiscard]] consteval static bool
+	[[nodiscard]] consteval static size_t
 	idx()
 	{
 		size_t typeIdx = 0;
-		return ((typeIdx++ && std::is_base_of_v<Others, T>) || ...);
+		auto found = ((++typeIdx && std::is_base_of_v<Others, T>) || ...);
+		return typeIdx - found;
 	}
 
 	template<typename T>
