@@ -195,10 +195,10 @@ protected:
 				obj);
 	}
 
-	template<typename T>
+	template<typename T, typename... Params>
 		requires(sizeof...(Others) == 0)
 	void
-	applyToOthersType(const auto &, T *)
+	applyToOthersType(const auto &, Params...)
 	{
 	}
 
@@ -208,15 +208,16 @@ protected:
 	{
 	}
 
-	template<typename T>
+	template<typename T, typename... Params>
 		requires(sizeof...(Others) > 0)
 	void
-	applyToOthersType(const auto & func, T * obj)
+	applyToOthersType(const auto & func, Params &&... params)
 	{
 		(
 				[&]() {
 					if constexpr (std::is_convertible_v<T *, Others *>) {
-						std::invoke(func, std::get<OtherObjects<Others>>(otherObjects), obj);
+						std::invoke(
+								func, std::get<OtherObjects<Others>>(otherObjects), std::forward<Params>(params)...);
 					}
 				}(),
 				...);
