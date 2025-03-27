@@ -42,6 +42,15 @@ public:
 
 class Sub1 : public Sub { };
 
+class Sub2 : public Sub { };
+
+class Base2 {
+public:
+	virtual ~Base2() = default;
+};
+
+class Multi : public Sub1, public Base2 { };
+
 using TestCollection = SharedCollection<Base, Sub>;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::iterator)
@@ -238,8 +247,9 @@ BOOST_AUTO_TEST_CASE(removeAllOfSub)
 	create<Sub>();
 	emplace(std::make_unique<Base>());
 	emplace(std::make_unique<Sub>());
+	emplace(std::make_unique<Sub1>());
 
-	removeAll<Sub>();
+	BOOST_CHECK_EQUAL(removeAll<Sub>(), 3);
 	BOOST_CHECK_EQUAL(objects.size(), 2);
 	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
 }
@@ -276,6 +286,75 @@ BOOST_AUTO_TEST_CASE(applyOneType)
 	BOOST_CHECK_EQUAL(objects.begin(), applyOne<Base>(&Base::yes));
 	create<Sub1>();
 	BOOST_CHECK_EQUAL(objects.begin() + 2, applyOne<Sub1>(&Base::yes));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+using MultiCollection = Collection<std::unique_ptr<Base>, Multi, Sub, Base2>;
+
+BOOST_FIXTURE_TEST_SUITE(multi, MultiCollection)
+
+BOOST_AUTO_TEST_CASE(addMulti)
+{
+	static_assert(MultiCollection::idx<Multi>() == 0);
+	static_assert(MultiCollection::idx<Sub>() == 1);
+	static_assert(MultiCollection::idx<Base2>() == 2);
+	create<Base>();
+	BOOST_CHECK_EQUAL(objects.size(), 1);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
+	create<Sub>();
+	BOOST_CHECK_EQUAL(objects.size(), 2);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 1);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
+	create<Sub1>();
+	BOOST_CHECK_EQUAL(objects.size(), 3);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 2);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
+	create<Sub2>();
+	BOOST_CHECK_EQUAL(objects.size(), 4);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 3);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
+	create<Multi>();
+	BOOST_CHECK_EQUAL(objects.size(), 5);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 1);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 4);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(removeMulti)
+{
+	create<Base>();
+	create<Sub>();
+	create<Sub1>();
+	create<Sub2>();
+	create<Multi>();
+	BOOST_CHECK_EQUAL(objects.size(), 5);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 1);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 4);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 1);
+
+	BOOST_CHECK_EQUAL(removeAll<Multi>(), 1);
+	BOOST_CHECK_EQUAL(objects.size(), 4);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 3);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
+
+	BOOST_CHECK_EQUAL(removeAll<Sub>(), 3);
+	BOOST_CHECK_EQUAL(objects.size(), 1);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
+
+	BOOST_CHECK_EQUAL(removeAll<Base>(), 1);
+	BOOST_CHECK_EQUAL(objects.size(), 0);
+	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 0);
+	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

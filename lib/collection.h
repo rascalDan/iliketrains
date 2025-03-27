@@ -115,14 +115,24 @@ public:
 	}
 
 	template<typename T>
-		requires(std::is_convertible_v<T *, Others *> || ...)
+		requires std::is_base_of_v<Object, T>
 	auto
 	removeAll()
 	{
-		std::get<OtherObjects<T>>(otherObjects).clear();
-		return std::erase_if(objects, [](auto && op) {
-			return dynamic_cast<T *>(op.get());
-		});
+		auto removeAllFrom = [](auto & container) {
+			if constexpr (std::is_base_of_v<T, decltype(std::to_address(container.front()))>) {
+				const auto size = container.size();
+				container.clear();
+				return size;
+			}
+			else {
+				return std::erase_if(container, [](auto && objPtr) -> bool {
+					return dynamic_cast<const T *>(std::to_address(objPtr));
+				});
+			}
+		};
+		(removeAllFrom(std::get<OtherObjects<Others>>(otherObjects)), ...);
+		return removeAllFrom(objects);
 	}
 
 	void
