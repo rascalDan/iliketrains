@@ -132,7 +132,7 @@ public:
 	removeAll()
 	{
 		auto removeAllFrom = [](auto & container) {
-			if constexpr (std::is_base_of_v<T, decltype(std::to_address(container.front()))>) {
+			if constexpr (std::is_base_of_v<T, std::decay_t<decltype(*container.front())>>) {
 				const auto size = container.size();
 				container.clear();
 				return size;
