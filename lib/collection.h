@@ -3,12 +3,16 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <special_members.h>
 #include <type_traits>
 #include <vector>
 
 template<typename Ptr, typename... Others> class Collection {
 public:
+	Collection() = default;
 	virtual ~Collection() = default;
+
+	DEFAULT_MOVE_NO_COPY(Collection);
 
 	using Object = Ptr::element_type;
 	using Objects = std::vector<Ptr>;
