@@ -35,6 +35,14 @@ public:
 		return objects[idx];
 	}
 
+	template<typename T = Object>
+		requires(std::is_same_v<T, Object> || (std::is_base_of_v<Others, T> || ...))
+	[[nodiscard]] auto
+	size() const noexcept
+	{
+		return containerFor<T>().size();
+	}
+
 	template<typename T = Object, typename... Params>
 	auto
 	create(Params &&... params)

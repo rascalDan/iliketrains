@@ -320,10 +320,10 @@ BOOST_AUTO_TEST_CASE(addMulti)
 	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 3);
 	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 0);
 	create<Multi>();
-	BOOST_CHECK_EQUAL(objects.size(), 5);
-	BOOST_CHECK_EQUAL(std::get<0>(otherObjects).size(), 1);
-	BOOST_CHECK_EQUAL(std::get<1>(otherObjects).size(), 4);
-	BOOST_CHECK_EQUAL(std::get<2>(otherObjects).size(), 1);
+	BOOST_CHECK_EQUAL(size(), 5);
+	BOOST_CHECK_EQUAL(size<Multi>(), 1);
+	BOOST_CHECK_EQUAL(size<Sub>(), 4);
+	BOOST_CHECK_EQUAL(size<Base2>(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(removeMulti)
