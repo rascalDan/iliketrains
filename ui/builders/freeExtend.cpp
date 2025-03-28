@@ -16,17 +16,17 @@ BuilderFreeExtend::move(
 {
 	if (p1) {
 		if (const auto p = network->intersectRayNodes(ray)) {
-			candidateLinks.objects = network->candidateJoins(*p1, p->pos);
+			candidateLinks = network->candidateJoins(*p1, p->pos);
 		}
 		else if (const auto p = geoData->intersectRay(ray)) {
-			candidateLinks.objects = network->candidateExtend(*p1, p->first);
+			candidateLinks = network->candidateExtend(*p1, p->first);
 		}
 		else {
-			candidateLinks.removeAll();
+			candidateLinks.clear();
 		}
 	}
 	else {
-		candidateLinks.removeAll();
+		candidateLinks.clear();
 	}
 }
 

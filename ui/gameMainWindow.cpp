@@ -32,7 +32,7 @@ GameMainWindow::GameMainWindow(size_t w, size_t h) : WindowContent {w, h}, Scene
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera, ScreenAbsCoord {w, h});
-	uiComponents.create<GameMainToolbar>(gms.get());
+	uiComponents.create<GameMainToolbar>(gms);
 }
 
 GameMainWindow::~GameMainWindow() { }
@@ -75,12 +75,12 @@ GameMainWindow::render() const
 void
 GameMainWindow::content(const SceneShader & shader, const Frustum & frustum) const
 {
-	for (const auto & [id, asset] : gameState->assets) {
-		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
-			r->render(shader, frustum);
+	for (const auto & [assetId, asset] : gameState->assets) {
+		if (const auto renderable = asset.getAs<const Renderable>()) {
+			renderable->render(shader, frustum);
 		}
 	}
-	gameState->world.apply<Renderable>(&Renderable::render, shader, frustum);
+	gameState->world.apply<const Renderable>(&Renderable::render, shader, frustum);
 	uiComponents.apply<WorldOverlay>(&WorldOverlay::render, shader, frustum);
 }
 
@@ -93,16 +93,16 @@ GameMainWindow::environment(const SceneShader &, const SceneRenderer & r) const
 void
 GameMainWindow::lights(const SceneShader & shader) const
 {
-	gameState->world.apply<Renderable>(&Renderable::lights, shader);
+	gameState->world.apply<const Renderable>(&Renderable::lights, shader);
 }
 
 void
 GameMainWindow::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
-	for (const auto & [id, asset] : gameState->assets) {
-		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
-			r->shadows(shadowMapper, frustum);
+	for (const auto & [assetId, asset] : gameState->assets) {
+		if (const auto renderable = asset.getAs<const Renderable>()) {
+			renderable->shadows(shadowMapper, frustum);
 		}
 	}
-	gameState->world.apply<Renderable>(&Renderable::shadows, shadowMapper, frustum);
+	gameState->world.apply<const Renderable>(&Renderable::shadows, shadowMapper, frustum);
 }

@@ -29,6 +29,6 @@ private:
 	void generateMeshes();
 
 	std::shared_ptr<GeoData> geoData;
-	Collection<MeshT<Vertex>, false> meshes;
+	UniqueCollection<MeshT<Vertex>> meshes;
 	Texture::Ptr water;
 };

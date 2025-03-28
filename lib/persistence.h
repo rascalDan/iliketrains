@@ -1,5 +1,6 @@
 #pragma once
 
+#include "manyPtr.h"
 #include <charconv>
 #include <format>
 #include <functional>
@@ -200,7 +201,7 @@ namespace Persistence {
 		}
 
 		[[nodiscard]] virtual NameActionSelection setName(const std::string_view key, SelectionFactory &&) = 0;
-		virtual void selHandler() {};
+		virtual void selHandler() { };
 		virtual void setType(const std::string_view, const Persistable *) = 0;
 
 		SelectionPtr sel {};

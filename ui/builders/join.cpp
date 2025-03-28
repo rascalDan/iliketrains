@@ -15,10 +15,10 @@ BuilderJoin::move(Network * network, const GeoData *, const SDL_MouseMotionEvent
 {
 	if (p1) {
 		if (const auto p = network->intersectRayNodes(ray)) {
-			candidateLinks.objects = network->candidateJoins(p1->pos, p->pos);
+			candidateLinks = network->candidateJoins(p1->pos, p->pos);
 		}
 		else {
-			candidateLinks.removeAll();
+			candidateLinks.clear();
 		}
 	}
 }
@@ -33,7 +33,7 @@ BuilderJoin::click(
 				if (p1) {
 					create(network, geoData, p1, p);
 					p1.reset();
-					candidateLinks.removeAll();
+					candidateLinks.clear();
 				}
 				else {
 					p1 = p;

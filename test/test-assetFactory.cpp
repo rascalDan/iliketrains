@@ -71,7 +71,7 @@ public:
 		sceneRenderer.render(*this);
 	}
 
-	Collection<const Renderable> objects;
+	SharedCollection<const Renderable> objects;
 
 private:
 	SceneRenderer sceneRenderer;
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(surfaces, *boost::unit_test::timeout(5))
 	BOOST_CHECK_EQUAL(4, mf->assets.size());
 	auto gravelAsset = mf->assets.at("terrain.surface.gravel");
 	BOOST_REQUIRE(gravelAsset);
-	auto gravel = std::dynamic_pointer_cast<Surface>(gravelAsset);
+	auto gravel = gravelAsset.dynamicCast<Surface>();
 	BOOST_REQUIRE(gravel);
 	BOOST_REQUIRE_EQUAL(gravel->name, "Gravel");
 	BOOST_REQUIRE_EQUAL(gravel->colorBias, RGB {.9F});
@@ -111,14 +111,14 @@ BOOST_AUTO_TEST_CASE(brush47xml, *boost::unit_test::timeout(5))
 	BOOST_CHECK_EQUAL(1, mf->assets.size());
 	auto brush47 = mf->assets.at("brush-47");
 	BOOST_REQUIRE(brush47);
-	auto brush47rvc = std::dynamic_pointer_cast<RailVehicleClass>(brush47);
+	auto brush47rvc = brush47.dynamicCast<RailVehicleClass>();
 	BOOST_REQUIRE(brush47rvc);
 	BOOST_REQUIRE(brush47rvc->bodyMesh);
 	BOOST_REQUIRE(brush47rvc->bogies.front());
 	BOOST_REQUIRE(brush47rvc->bogies.back());
 
 	auto railVehicle = std::make_shared<RailVehicle>(brush47rvc);
-	objects.objects.push_back(brush47rvc);
+	objects.emplace(brush47rvc);
 
 	render(10000);
 }
@@ -130,14 +130,14 @@ BOOST_AUTO_TEST_CASE(foliage, *boost::unit_test::timeout(5))
 	gameState.assets = mf->assets;
 	auto tree_01_1 = mf->assets.at("Tree-01-1");
 	BOOST_REQUIRE(tree_01_1);
-	auto tree_01_1_f = std::dynamic_pointer_cast<Foliage>(tree_01_1);
+	auto tree_01_1_f = tree_01_1.dynamicCast<Foliage>();
 	BOOST_REQUIRE(tree_01_1_f);
 
 	auto plant1 = std::make_shared<Plant>(tree_01_1_f, Location {{-2000, 2000, 0}, {0, 0, 0}});
 	auto plant2 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, -4000, 0}, {0, 1, 0}});
 	auto plant3 = std::make_shared<Plant>(tree_01_1_f, Location {{-2000, -4000, 0}, {0, 2, 0}});
 	auto plant4 = std::make_shared<Plant>(tree_01_1_f, Location {{3000, 2000, 0}, {0, 3, 0}});
-	objects.objects.push_back(tree_01_1_f);
+	objects.emplace(tree_01_1_f);
 
 	render(6000);
 }
@@ -151,22 +151,22 @@ BOOST_AUTO_TEST_CASE(lights, *boost::unit_test::timeout(5))
 	BOOST_REQUIRE(rlight);
 	auto oldlamp = mf->assets.at("old-lamp");
 	BOOST_REQUIRE(oldlamp);
-	auto rlight_f = std::dynamic_pointer_cast<Illuminator>(rlight);
+	auto rlight_f = rlight.dynamicCast<Illuminator>();
 	BOOST_REQUIRE(rlight_f);
-	auto oldlamp_f = std::dynamic_pointer_cast<Illuminator>(oldlamp);
+	auto oldlamp_f = oldlamp.dynamicCast<Illuminator>();
 	BOOST_REQUIRE(oldlamp_f);
 
 	auto light1 = std::make_shared<Light>(oldlamp_f, Location {{0, 0, 0}, {0, 0, 0}});
 	auto light2 = std::make_shared<Light>(rlight_f, Location {{-4000, 0, 0}, {0, 2, 0}});
 	auto light3 = std::make_shared<Light>(rlight_f, Location {{-4000, -4000, 0}, {0, 1, 0}});
 	auto light4 = std::make_shared<Light>(oldlamp_f, Location {{3000, 4600, 0}, {0, 2, 0}});
-	objects.objects.push_back(rlight_f);
-	objects.objects.push_back(oldlamp_f);
+	objects.emplace(rlight_f);
+	objects.emplace(oldlamp_f);
 
 	// yes I'm hacking some floor to light up as though its a bush
-	auto floorf = std::dynamic_pointer_cast<Foliage>(mf->assets.at("floor"));
+	auto floorf = mf->assets.at("floor").dynamicCast<Foliage>();
 	auto floor = std::make_shared<Plant>(floorf, Location {});
-	objects.objects.push_back(floorf);
+	objects.emplace(floorf);
 
 	render(6000);
 }

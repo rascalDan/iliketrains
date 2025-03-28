@@ -8,6 +8,7 @@
 class WorldObject;
 class Terrain;
 class Environment;
+class Renderable;
 
 class GameState {
 public:
@@ -16,7 +17,7 @@ public:
 	NO_MOVE(GameState);
 	NO_COPY(GameState);
 
-	Collection<WorldObject> world;
+	SharedCollection<WorldObject, Renderable> world;
 	std::shared_ptr<Terrain> terrain;
 	std::shared_ptr<Environment> environment;
 	AssetFactory::Assets assets;

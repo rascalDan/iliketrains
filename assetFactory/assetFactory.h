@@ -12,7 +12,7 @@ class Texture;
 class AssetFactory : public Persistence::Persistable {
 public:
 	using Shapes = std::map<std::string, Shape::Ptr, std::less<>>;
-	using Assets = std::map<std::string, Asset::Ptr, std::less<>>;
+	using Assets = std::map<std::string, Asset::ManyPtr, std::less<>>;
 	using AssImps = std::map<std::string, AssImp::Ptr, std::less<>>;
 	using TextureFragments = std::map<std::string, TextureFragment::Ptr, std::less<>>;
 	using Colour = RGB;

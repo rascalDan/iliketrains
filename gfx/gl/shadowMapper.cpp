@@ -88,7 +88,7 @@ ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, co
 
 	shadowStenciller.setLightDirection(dir);
 	for (const auto & [id, asset] : gameState->assets) {
-		if (const auto r = std::dynamic_pointer_cast<const Renderable>(asset)) {
+		if (const auto r = asset.getAs<const Renderable>()) {
 			r->updateStencil(shadowStenciller);
 		}
 	}

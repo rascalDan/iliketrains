@@ -15,7 +15,7 @@ class SceneShader;
 class ShadowMapper;
 template<typename> class Ray;
 
-class Train : public Vehicle, public Collection<RailVehicle, false>, public Can<Go>, public Can<Idle> {
+class Train : public Vehicle, public UniqueCollection<RailVehicle>, public Can<Go>, public Can<Idle> {
 public:
 	explicit Train(const Link::CPtr & link, float linkDist = 0) : Vehicle {link, linkDist} { }
 

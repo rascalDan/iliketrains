@@ -19,5 +19,5 @@ public:
 
 	bool handleInput(const SDL_Event & e, const Position & parentPos) override;
 
-	Collection<IconButton, false> icons;
+	UniqueCollection<IconButton> icons;
 };
