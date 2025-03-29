@@ -7,6 +7,8 @@
 #include <ray.h>
 #include <stream_support.h>
 
+QueryTool::QueryTool() : clicked {"Click something for details"} { }
+
 bool
 QueryTool::click(const SDL_MouseButtonEvent & event, const Ray<GlobalPosition3D> & ray)
 {

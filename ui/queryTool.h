@@ -3,6 +3,9 @@
 #include "gameMainSelector.h"
 
 class QueryTool : public GameMainSelector::Component {
+public:
+	QueryTool();
+
 protected:
 	using GameMainSelector::Component::render;
 
