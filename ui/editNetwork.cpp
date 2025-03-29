@@ -67,6 +67,7 @@ EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection &
 void
 EditNetwork::render(bool & open)
 {
+	ImGui::SetNextWindowSize({-1, -1});
 	ImGui::Begin("Edit Network", &open);
 
 	auto builderChoice = [this]<typename Impl>(const char * name) {

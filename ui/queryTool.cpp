@@ -35,6 +35,7 @@ QueryTool::click(const SDL_MouseButtonEvent & event, const Ray<GlobalPosition3D>
 void
 QueryTool::render(bool & open)
 {
+	ImGui::SetNextWindowSize({-1, -1});
 	ImGui::Begin("Query Tool", &open);
 	ImGui::TextUnformatted(clicked.c_str());
 	ImGui::End();
