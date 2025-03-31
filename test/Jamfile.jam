@@ -65,6 +65,7 @@ run perf-instancing.cpp : \< : test-instancing : <library>benchmark <library>tes
 run test-glContainer.cpp : : : <library>test ;
 run test-pack.cpp : : : <library>test ;
 run test-environment.cpp : : : <library>test ;
+run test-ui.cpp : : : <library>test ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
 explicit perf-assetFactory ;
