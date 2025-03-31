@@ -1,10 +1,10 @@
 #include "gameMainWindow.h"
 #include "editNetwork.h"
 #include "gameMainSelector.h"
-#include "icon.h"
 #include "imgui_extras.h"
 #include "manualCameraController.h"
 #include "queryTool.h"
+#include "svgIcon.h"
 #include <SDL2/SDL.h>
 #include <collection.h>
 #include <game/environment.h>
@@ -20,7 +20,7 @@
 class GameMainToolbar : public UIComponent {
 public:
 	static constexpr auto TOOLBAR_HEIGHT = 54.F;
-	static constexpr ImVec2 TOOLBAR_ICON_SIZE {32, 32};
+	template<typename T> static constexpr T TOOLBAR_ICON_SIZE {32, 32};
 
 	explicit GameMainToolbar(GameMainSelector * gms) : gms {gms} { }
 
@@ -28,10 +28,10 @@ public:
 	render() override
 	{
 		if (IltGui::BeginToolbar("bottomBar", ImGuiDir_Down, TOOLBAR_HEIGHT)) {
-			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
+			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE<ImVec2>)) {
 				gms->target = std::make_unique<EditNetworkOf<RailLinks>>();
-	}
-			if (ImGui::ImageButton("Query", *buildRailsIcon, TOOLBAR_ICON_SIZE)) {
+			}
+			if (ImGui::ImageButton("Query", *queryToolIcon, TOOLBAR_ICON_SIZE<ImVec2>)) {
 				gms->target = std::make_unique<QueryTool>();
 			}
 			IltGui::EndToolbar();
@@ -45,7 +45,8 @@ public:
 	}
 
 private:
-	Icon buildRailsIcon {"ui/icon/network.png"};
+	SvgIcon buildRailsIcon {TOOLBAR_ICON_SIZE<ImageDimensions>, "ui/icon/rails.svg"};
+	SvgIcon queryToolIcon {TOOLBAR_ICON_SIZE<ImageDimensions>, "ui/icon/magnifier.svg"};
 	GameMainSelector * gms;
 };
 
