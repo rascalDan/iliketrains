@@ -92,7 +92,6 @@ lib ilt :
 	<library>thirdparty/<variant>release
 	<implicit-dependency>thirdparty
 	<library>sdl2
-	<library>thirdparty//imguisdl2
 	<library>freetype2
 	<library>glib-2.0
 	<library>mxml
