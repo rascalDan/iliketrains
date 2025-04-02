@@ -2,16 +2,13 @@
 
 #include "chronology.h"
 #include "collection.h"
-#include "gfx/gl/uiShader.h"
 #include "special_members.h"
 #include "stdTypeDefs.h"
 #include "uiComponent.h" // IWYU pragma: keep
-#include <functional>
 
 class WindowContent : public StdTypeDefs<WindowContent> {
 public:
-	using Factory = std::function<Ptr(size_t width, size_t height)>;
-	WindowContent(size_t width, size_t height);
+	WindowContent() = default;
 	virtual ~WindowContent() = default;
 	NO_MOVE(WindowContent);
 	NO_COPY(WindowContent);
@@ -22,5 +19,4 @@ public:
 
 protected:
 	UniqueCollection<UIComponent> uiComponents;
-	UIShader uiShader;
 };

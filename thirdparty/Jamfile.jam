@@ -28,3 +28,15 @@ lib imguisdl2 :
 	: :
 	<include>imgui
 	;
+
+lib lunasvg :
+	[ glob lunasvg/source/*.cpp lunasvg/plutovg/source/*.c ]
+	:
+	<link>static
+	<include>lunasvg/include
+	<include>lunasvg/plutovg/include
+	<warnings>off
+	<cflags>-fPIC
+	: :
+	<include>lunasvg/include
+	;

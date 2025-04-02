@@ -5,7 +5,7 @@
 #include <maths.h>
 
 bool
-ManualCameraController::handleInput(const SDL_Event & e, const Position &)
+ManualCameraController::handleInput(const SDL_Event & e)
 {
 	switch (e.type) {
 		case SDL_KEYDOWN:
@@ -72,7 +72,7 @@ ManualCameraController::handleInput(const SDL_Event & e, const Position &)
 }
 
 void
-ManualCameraController::render(const UIShader &, const Position &) const
+ManualCameraController::render()
 {
 }
 

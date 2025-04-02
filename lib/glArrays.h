@@ -6,6 +6,7 @@
 #include <glad/gl.h>
 #include <special_members.h>
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 template<size_t N> class glArraysBase {
 	static_assert(N > 0);
 
@@ -15,20 +16,30 @@ public:
 	CUSTOM_MOVE(glArraysBase);
 
 	// NOLINTNEXTLINE(hicpp-explicit-conversions)
-	inline
 	operator GLuint() const
+		requires(N == 1)
 	{
-		static_assert(N == 1, "Implicit cast only if N == 1");
 		return ids.front();
 	}
 
-	inline auto
+	GLuint
+	operator*() const
+		requires(N == 1)
+	{
+		return ids.front();
+	}
+
+	const auto &
 	operator[](size_t n) const
 	{
 		return ids[n];
 	}
 
-	constexpr static auto size {N};
+	constexpr static auto
+	size()
+	{
+		return N;
+	}
 
 protected:
 	glArraysBase() noexcept = default;
@@ -49,6 +60,7 @@ glArraysBase<N>::operator=(glArraysBase<N> && src) noexcept
 	return *this;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 template<size_t N, auto Gen, auto Del> class glArrays : public glArraysBase<N> {
 public:
 	using glArraysBase<N>::glArraysBase;
@@ -56,12 +68,12 @@ public:
 
 	DEFAULT_MOVE_COPY(glArrays);
 
-	inline glArrays() noexcept
+	glArrays() noexcept
 	{
 		(*Gen)(N, this->ids.data());
 	}
 
-	inline ~glArrays() noexcept
+	~glArrays() noexcept
 	{
 		if (this->ids.front()) {
 			(*Del)(N, this->ids.data());
@@ -69,6 +81,7 @@ public:
 	}
 };
 
+// NOLINTBEGIN(readability-identifier-naming)
 template<size_t N> using glVertexArrays = glArrays<N, &glGenVertexArrays, &glDeleteVertexArrays>;
 using glVertexArray = glVertexArrays<1>;
 template<size_t N> using glBuffers = glArrays<N, &glGenBuffers, &glDeleteBuffers>;
@@ -79,3 +92,4 @@ template<size_t N> using glFrameBuffers = glArrays<N, &glGenFramebuffers, &glDel
 using glFrameBuffer = glFrameBuffers<1>;
 template<size_t N> using glRenderBuffers = glArrays<N, &glGenRenderbuffers, &glDeleteRenderbuffers>;
 using glRenderBuffer = glRenderBuffers<1>;
+// NOLINTEND(readability-identifier-naming)

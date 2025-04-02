@@ -75,6 +75,7 @@ perfrun perf-instancing.cpp : : test-instancing ;
 run test-glContainer.cpp : : : <library>test ;
 run test-pack.cpp : : : <library>test ;
 run test-environment.cpp : : : <library>test ;
+run test-ui.cpp : : : <library>test ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
 alias perf : perf-assetFactory perf-persistence perf-geoData perf-instancing perf-terrain ;

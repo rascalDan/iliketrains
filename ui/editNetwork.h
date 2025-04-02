@@ -2,8 +2,6 @@
 
 #include "game/geoData.h"
 #include "gameMainSelector.h"
-#include "modeHelper.h"
-#include "toolbar.h"
 #include "worldOverlay.h"
 #include <game/gamestate.h>
 #include <game/network/network.h>
@@ -17,9 +15,9 @@ public:
 
 	bool click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> &) override;
 	bool move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> &) override;
-	bool handleInput(const SDL_Event & e, const UIComponent::Position &) override;
+	bool handleInput(const SDL_Event & e) override;
 	void render(const SceneShader &, const Frustum &) const override;
-	void render(const UIShader & shader, const UIComponent::Position & pos) const override;
+	void render(bool & open) override;
 
 	using NetworkClickPos = std::variant<GlobalPosition3D, Node::Ptr>;
 
@@ -42,10 +40,7 @@ public:
 private:
 	Network * network;
 	Builder::Ptr builder;
-	Mode<Builder::Ptr, ModeSecondClick::NoAction> mode {builder};
-	Toolbar builderToolbar;
 	Texture blue;
-	const Font font;
 };
 
 template<typename T> class EditNetworkOf : public EditNetwork {

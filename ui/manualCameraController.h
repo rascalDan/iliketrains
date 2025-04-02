@@ -6,15 +6,14 @@
 #include <glm/glm.hpp>
 #include <maths.h>
 
-class UIShader;
 class Camera;
 
 class ManualCameraController : public CameraController, public UIComponent {
 public:
-	explicit ManualCameraController(GlobalPosition2D f) : UIComponent {{}}, focus {f} { }
+	explicit ManualCameraController(GlobalPosition2D f) : focus {f} { }
 
-	bool handleInput(const SDL_Event & e, const Position &) override;
-	void render(const UIShader &, const Position & parentPos) const override;
+	bool handleInput(const SDL_Event & e) override;
+	void render() override;
 
 	void updateCamera(Camera * camera) const override;
 

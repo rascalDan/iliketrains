@@ -2,25 +2,15 @@
 #include "builders/freeExtend.h"
 #include "builders/join.h"
 #include "builders/straight.h"
-#include "text.h"
+#include "imgui_wrap.h"
 #include <game/gamestate.h>
 #include <game/terrain.h>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
-const std::filesystem::path fontpath {"/usr/share/fonts/hack/Hack-Regular.ttf"};
 constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
 
-EditNetwork::EditNetwork(Network * n) :
-	network {n},
-	builderToolbar {
-			{"ui/icon/network.png", mode.toggle<BuilderStraight>()},
-			{"ui/icon/network.png", mode.toggle<BuilderJoin>()},
-			{"ui/icon/network.png", mode.toggle<BuilderFreeExtend>()},
-	},
-	blue {1, 1, &TRANSPARENT_BLUE}, font {fontpath, 15}
-{
-}
+EditNetwork::EditNetwork(Network * n) : network {n}, blue {1, 1, &TRANSPARENT_BLUE} { }
 
 bool
 EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
@@ -42,9 +32,9 @@ EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> & 
 }
 
 bool
-EditNetwork::handleInput(const SDL_Event & e, const UIComponent::Position & parentPos)
+EditNetwork::handleInput(const SDL_Event &)
 {
-	return builderToolbar.handleInput(e, parentPos);
+	return false;
 }
 
 void
@@ -75,10 +65,20 @@ EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection &
 }
 
 void
-EditNetwork::render(const UIShader & shader, const UIComponent::Position & parentPos) const
+EditNetwork::render(bool & open)
 {
-	if (builder) {
-		Text {builder->hint(), font, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
-	}
-	builderToolbar.render(shader, parentPos);
+	ImGui::SetNextWindowSize({-1, -1});
+	ImGui::Begin("Edit Network", &open);
+
+	auto builderChoice = [this]<typename Impl>(const char * name) {
+		if (ImGui::RadioButton(name, dynamic_cast<Impl *>(builder.get()))) {
+			builder = std::make_unique<Impl>();
+		}
+	};
+	builderChoice.operator()<BuilderStraight>("Straight");
+	builderChoice.operator()<BuilderJoin>("Join");
+	builderChoice.operator()<BuilderFreeExtend>("Free Extend");
+	ImGui::TextUnformatted(builder ? builder->hint().c_str() : "Select a build mode");
+
+	ImGui::End();
 }

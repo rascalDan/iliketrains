@@ -1,8 +1,6 @@
 #include "windowContent.h"
 #include "SDL_events.h"
 
-WindowContent::WindowContent(size_t width, size_t height) : uiShader {width, height} { }
-
 void
 WindowContent::tick(TickDuration)
 {
@@ -27,6 +25,6 @@ WindowContent::handleInput(const SDL_Event & e)
 			eAdjusted.motion.y = size.y - e.motion.y;
 			break;
 	}
-	uiComponents.rapplyOne(&UIComponent::handleInput, eAdjusted, UIComponent::Position {{}, size});
+	uiComponents.rapplyOne(&UIComponent::handleInput, eAdjusted);
 	return true;
 }

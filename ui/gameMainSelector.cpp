@@ -1,6 +1,4 @@
 #include "gameMainSelector.h"
-#include "collection.h"
-#include "text.h"
 #include "ui/uiComponent.h"
 #include <SDL2/SDL.h>
 #include <game/gamestate.h>
@@ -8,27 +6,21 @@
 #include <game/terrain.h>
 #include <game/worldobject.h> // IWYU pragma: keep
 #include <gfx/camera.h>
-#include <optional>
 #include <stream_support.h>
-#include <typeinfo>
 
-const std::filesystem::path fontpath {"/usr/share/fonts/hack/Hack-Regular.ttf"};
-
-GameMainSelector::GameMainSelector(const Camera * c, ScreenAbsCoord size) :
-	UIComponent {{{}, size}}, camera {c}, font {fontpath, 15}
-{
-}
+GameMainSelector::GameMainSelector(const Camera * c) : camera {c} { }
 
 constexpr ScreenAbsCoord TargetPos {5, 45};
 
 void
-GameMainSelector::render(const UIShader & shader, const Position & parentPos) const
+GameMainSelector::render()
 {
 	if (target) {
-		target->render(shader, parentPos + position + TargetPos);
-	}
-	if (!clicked.empty()) {
-		Text {clicked, font, {{50, 10}, {0, 15}}, {1, 1, 0}}.render(shader, parentPos);
+		bool open = true;
+		target->render(open);
+		if (!open) {
+			target.reset();
+		}
 	}
 }
 
@@ -41,10 +33,12 @@ GameMainSelector::render(const SceneShader & shader, const Frustum & frustum) co
 }
 
 bool
-GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
+GameMainSelector::handleInput(const SDL_Event & e)
 {
-	const auto getRay = [this](const auto & e) {
-		const auto mouse = ScreenRelCoord {e.x, e.y} / position.size;
+	const auto getRay = [this, &window = e.window](const auto & e) {
+		glm::ivec2 size {};
+		SDL_GetWindowSizeInPixels(SDL_GetWindowFromID(window.windowID), &size.x, &size.y);
+		const auto mouse = ScreenRelCoord {e.x, e.y} / ScreenRelCoord {size};
 		return camera->unProject(mouse);
 	};
 	if (target) {
@@ -60,7 +54,7 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 				}
 				break;
 		}
-		return target->handleInput(e, parentPos + position + TargetPos);
+		return target->handleInput(e);
 	}
 	else {
 		switch (e.type) {
@@ -73,22 +67,8 @@ GameMainSelector::handleInput(const SDL_Event & e, const Position & parentPos)
 }
 
 void
-GameMainSelector::defaultClick(const Ray<GlobalPosition3D> & ray)
+GameMainSelector::defaultClick(const Ray<GlobalPosition3D> &)
 {
-	BaryPosition baryPos {};
-	RelativeDistance distance {};
-
-	if (const auto selected = gameState->world.applyOne<Selectable>(&Selectable::intersectRay, ray, baryPos, distance);
-			selected != gameState->world.end()) {
-		const auto & ref = *selected.base()->get();
-		clicked = typeid(ref).name();
-	}
-	else if (const auto pos = gameState->terrain->intersectRay(ray)) {
-		clicked = streamed_string(*pos);
-	}
-	else {
-		clicked.clear();
-	}
 }
 
 bool
@@ -104,13 +84,13 @@ GameMainSelector::Component::move(const SDL_MouseMotionEvent &, const Ray<Global
 }
 
 bool
-GameMainSelector::Component::handleInput(const SDL_Event &, const Position &)
+GameMainSelector::Component::handleInput(const SDL_Event &)
 {
 	return false;
 }
 
 void
-GameMainSelector::Component::render(const UIShader &, const UIComponent::Position &) const
+GameMainSelector::Component::render(bool &)
 {
 }
 
