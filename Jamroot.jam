@@ -46,15 +46,15 @@ project i-like-trains : requirements
 	<toolset>tidy:<define>TIDY
 	;
 
-exe iliketrains :
-	application/main.cpp
-	:
-	<library>ilt
-	;
+exe iliketrains : application/main.cpp : <library>ilt ;
+exe resviewer : application/resviewer.cpp : <library>ilt ;
 
 explicit main ;
 always main ;
 run iliketrains : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.* ] ] : : main ;
+explicit runresviewer ;
+always runresviewer ;
+run resviewer : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.xml ] ] : : runresviewer ;
 
 lib ilt :
 	[ glob-tree *.cpp *.?s *.t?s : application bin test thirdparty ]

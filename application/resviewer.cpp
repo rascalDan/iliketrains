@@ -1,0 +1,30 @@
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_sdl2.h>
+#include <game/gamestate.h>
+#include <gfx/gl/sceneProvider.h>
+#include <gfx/gl/sceneRenderer.h>
+#include <ui/applicationBase.h>
+#include <ui/mainApplication.h>
+#include <ui/mainWindow.h>
+
+constexpr int DEFAULT_WIDTH = 240;
+constexpr int DEFAULT_HEIGHT = 160;
+
+int
+main(int argc, char ** argv)
+{
+	class ResViewer : GameState, MainApplication {
+	public:
+		void
+		run(std::span<char * const> fileList)
+		{
+			windows.create<MainWindow>(DEFAULT_WIDTH, DEFAULT_HEIGHT/*, "ILT - Resource Viewer",
+						   SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL*/);
+			mainLoop();
+		}
+	};
+
+	std::span files {argv, static_cast<size_t>(argc)};
+
+	ResViewer {}.run(files.subspan(2));
+}
