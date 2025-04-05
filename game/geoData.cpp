@@ -286,9 +286,27 @@ GeoData::updateAllVertexNormals(const R & range)
 void
 GeoData::updateVertexNormal(VertexHandle vertex)
 {
-	Normal3D n;
-	calc_vertex_normal_correct(vertex, n);
-	set_normal(vertex, glm::normalize(n));
+	Normal3D normal {};
+	{ // Lifted from calc_vertex_normal_correct in PolyMeshT_impl.hh but doesn't use Scalar to normalise
+		ConstVertexIHalfedgeIter cvih_it = this->cvih_iter(vertex);
+		if (!cvih_it.is_valid()) { // don't crash on isolated vertices
+			return;
+		}
+		Normal in_he_vec;
+		calc_edge_vector(*cvih_it, in_he_vec);
+		for (; cvih_it.is_valid(); ++cvih_it) { // calculates the sector normal defined by cvih_it and adds it to normal
+			if (this->is_boundary(*cvih_it)) {
+				continue;
+			}
+			HalfedgeHandle out_heh(this->next_halfedge_handle(*cvih_it));
+			Normal out_he_vec;
+			calc_edge_vector(out_heh, out_he_vec);
+			normal += cross(in_he_vec, out_he_vec); // sector area is taken into account
+			in_he_vec = out_he_vec;
+			in_he_vec *= -1; // change the orientation
+		}
+	} // End lift
+	set_normal(vertex, glm::normalize(normal));
 }
 
 OpenMesh::VertexHandle
