@@ -14,7 +14,7 @@ public:
 	NO_COPY(GameMainWindow);
 
 	void tick(TickDuration) override;
-	void render() const override;
+	void render() override;
 
 private:
 	bool handleInput(const SDL_Event &) override;

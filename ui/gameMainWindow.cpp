@@ -85,7 +85,7 @@ GameMainWindow::handleInput(const SDL_Event & event)
 }
 
 void
-GameMainWindow::render() const
+GameMainWindow::render()
 {
 	SceneRenderer::render(*this);
 	glEnable(GL_BLEND);
