@@ -17,6 +17,8 @@ public:
 	void render(const SceneShader & shader, const Frustum &) const override;
 	void shadows(const ShadowMapper & shadowMapper, const Frustum &) const override;
 
+	[[nodiscard]] std::any createAt(const Location &) const override;
+
 	struct LocationVertex {
 		glm::mat3 body, front, back;
 		GlobalPosition3D bodyPos, frontPos, backPos;

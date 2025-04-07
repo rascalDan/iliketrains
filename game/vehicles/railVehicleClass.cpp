@@ -17,6 +17,19 @@ RailVehicleClass::persist(Persistence::PersistenceStore & store)
 			&& STORE_HELPER(bodyMesh, Asset::MeshConstruct) && Asset::persist(store);
 }
 
+std::any
+RailVehicleClass::createAt(const Location & position) const
+{
+	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(instances.acquire(LocationVertex {
+			.body = position.getRotationTransform(),
+			.front = position.getRotationTransform(),
+			.back = position.getRotationTransform(),
+			.bodyPos = position.pos,
+			.frontPos = {sincos(position.rot.x) * wheelBase * 0.5F, position.pos.z},
+			.backPos = {sincos(position.rot.x) * wheelBase * -0.5F, position.pos.z},
+	}));
+}
+
 void
 RailVehicleClass::postLoad()
 {

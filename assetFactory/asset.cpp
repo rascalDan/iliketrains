@@ -7,6 +7,12 @@ Asset::persist(Persistence::PersistenceStore & store)
 	return STORE_MEMBER(id) && STORE_MEMBER(name);
 }
 
+std::any
+Asset::createAt(const Location &) const
+{
+	return {};
+}
+
 Asset::TexturePtr
 Asset::getTexture() const
 {
