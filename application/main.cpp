@@ -44,7 +44,7 @@ public:
 	int
 	run()
 	{
-		windows.create<MainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT)->setContent<GameMainWindow>();
+		windows.create<MainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT, "I Like Trains")->setContent<GameMainWindow>();
 
 		terrain = world.create<Terrain>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
 		world.create<Water>(terrain);

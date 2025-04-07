@@ -18,8 +18,7 @@ main(int argc, char ** argv)
 		void
 		run(std::span<char * const> fileList)
 		{
-			windows.create<MainWindow>(DEFAULT_WIDTH, DEFAULT_HEIGHT/*, "ILT - Resource Viewer",
-						   SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL*/);
+			windows.create<MainWindow>(DEFAULT_WIDTH, DEFAULT_HEIGHT, "ILT - Resource Viewer");
 			mainLoop();
 		}
 	};
