@@ -7,8 +7,7 @@
 #include <ui/mainApplication.h>
 #include <ui/mainWindow.h>
 
-constexpr int DEFAULT_WIDTH = 240;
-constexpr int DEFAULT_HEIGHT = 160;
+constexpr ScreenAbsCoord DEFAULT_WINDOW_SIZE {800, 600};
 
 int
 main(int argc, char ** argv)
@@ -18,7 +17,7 @@ main(int argc, char ** argv)
 		void
 		run(std::span<char * const> fileList)
 		{
-			windows.create<MainWindow>(DEFAULT_WIDTH, DEFAULT_HEIGHT, "ILT - Resource Viewer");
+			windows.create<MainWindow>(DEFAULT_WINDOW_SIZE, "ILT - Resource Viewer");
 			mainLoop();
 		}
 	};

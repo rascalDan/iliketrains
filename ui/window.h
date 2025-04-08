@@ -15,7 +15,7 @@ using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContext, SDL_GL_D
 
 class Window {
 public:
-	Window(size_t width, size_t height, const char * title, Uint32 flags);
+	Window(ScreenAbsCoord size, const char * title, Uint32 flags);
 	virtual ~Window() = default;
 
 	NO_COPY(Window);
@@ -39,7 +39,6 @@ public:
 protected:
 	void clear(float r, float g, float b, float a) const;
 
-	const ScreenAbsCoord size;
 	SDL_WindowPtr m_window;
 	SDL_GLContextPtr glContext;
 	WindowContent::Ptr content;

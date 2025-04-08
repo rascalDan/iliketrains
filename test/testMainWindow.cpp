@@ -2,7 +2,7 @@
 #include <boost/test/test_tools.hpp>
 #include <format>
 
-TestMainWindow::TestMainWindow() : MainWindow {1, 1, __FILE__, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN}
+TestMainWindow::TestMainWindow() : MainWindow {{1, 1}, __FILE__, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN}
 {
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(

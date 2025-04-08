@@ -36,15 +36,14 @@
 #include <ui/gameMainWindow.h>
 #include <ui/window.h>
 
-static const int DISPLAY_WIDTH = 1280;
-static const int DISPLAY_HEIGHT = 1024;
+constexpr ScreenAbsCoord DEFAULT_WINDOW_SIZE {1280, 1024};
 
 class DummyMainApplication : public GameState, public MainApplication {
 public:
 	int
 	run()
 	{
-		windows.create<MainWindow>(DISPLAY_WIDTH, DISPLAY_HEIGHT, "I Like Trains")->setContent<GameMainWindow>();
+		windows.create<MainWindow>(DEFAULT_WINDOW_SIZE, "I Like Trains")->setContent<GameMainWindow>();
 
 		terrain = world.create<Terrain>(GeoData::loadFromAsciiGrid("test/fixtures/height/SD19.asc"));
 		world.create<Water>(terrain);
