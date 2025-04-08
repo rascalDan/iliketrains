@@ -7,7 +7,7 @@
 
 class GameMainWindow : public WindowContent, SceneRenderer, public SceneProvider {
 public:
-	GameMainWindow(size_t w, size_t h);
+	GameMainWindow(ScreenAbsCoord size);
 	~GameMainWindow() override;
 
 	NO_MOVE(GameMainWindow);

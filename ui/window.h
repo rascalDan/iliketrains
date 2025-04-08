@@ -27,7 +27,7 @@ public:
 	{
 		glm::ivec2 size {};
 		SDL_GetWindowSizeInPixels(m_window, &size.x, &size.y);
-		content = std::make_unique<C>(size.x, size.y, std::forward<P>(p)...);
+		content = std::make_unique<C>(ScreenAbsCoord {size.x, size.y}, std::forward<P>(p)...);
 	}
 
 	void tick(TickDuration elapsed);
