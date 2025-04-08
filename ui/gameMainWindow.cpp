@@ -57,8 +57,6 @@ GameMainWindow::GameMainWindow(ScreenAbsCoord size) : SceneRenderer {size, 0}
 	uiComponents.create<GameMainToolbar>(gms);
 }
 
-GameMainWindow::~GameMainWindow() { }
-
 void
 GameMainWindow::tick(TickDuration)
 {
