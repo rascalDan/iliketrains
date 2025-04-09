@@ -52,7 +52,7 @@ private:
 	tick(TickDuration tick) override
 	{
 		if (autoRotate != 0) {
-			cameraAngle = normalize(cameraAngle + autoRotate * tick.count());
+			cameraAngle = normalize(cameraAngle + (autoRotate * tick.count()));
 			camera.setPosition(calcCameraPosition());
 			camera.lookAt({0, 0, TERRAIN_HEIGHT + cameraFocus});
 		}
