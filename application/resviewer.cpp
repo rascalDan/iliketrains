@@ -1,5 +1,6 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_sdl2.h>
+#include <boost/program_options.hpp>
 #include <game/environment.h>
 #include <game/gamestate.h>
 #include <game/terrain.h>
@@ -23,7 +24,8 @@ constexpr GlobalDistance MAX_CAMERA_DIST = 30'000;
 
 class ViewerContent : public WindowContent, SceneRenderer, SceneProvider {
 public:
-	ViewerContent(ScreenAbsCoord size, std::span<char * const> files) : SceneRenderer {size, 0}, fileList(files)
+	ViewerContent(ScreenAbsCoord size, std::span<const std::filesystem::path> files) :
+		SceneRenderer {size, 0}, fileList(files)
 	{
 		camera.setPosition(calcCameraPosition());
 		camera.lookAt({0, 0, TERRAIN_HEIGHT + cameraFocus});
@@ -94,12 +96,12 @@ private:
 	fileSelection()
 	{
 		ImGui::BeginListBox("File");
-		for (const auto file : fileList) {
-			if (ImGui::Selectable(file, file == selectedFile)) {
+		for (const auto & file : fileList) {
+			if (ImGui::Selectable(file.c_str(), &file == selectedFile)) {
 				location.reset();
 				selectedAsset = nullptr;
 				gameState->assets = AssetFactory::loadXML(file)->assets;
-				selectedFile = file;
+				selectedFile = &file;
 			}
 		}
 		ImGui::EndListBox();
@@ -149,8 +151,8 @@ private:
 		}
 	}
 
-	std::span<char * const> fileList;
-	char * selectedFile {};
+	std::span<const std::filesystem::path> fileList;
+	const std::filesystem::path * selectedFile {};
 	const Renderable * selectedAsset {};
 	Location position {.pos = {0, 0, TERRAIN_HEIGHT}, .rot = {}};
 	std::any location;
@@ -167,7 +169,7 @@ main(int argc, char ** argv)
 	class ResViewer : GameState, MainApplication {
 	public:
 		void
-		run(std::span<char * const> fileList)
+		run(std::span<const std::filesystem::path> fileList)
 		{
 			windows.create<MainWindow>(DEFAULT_WINDOW_SIZE, "ILT - Resource Viewer")
 					->setContent<ViewerContent>(fileList);
@@ -175,7 +177,26 @@ main(int argc, char ** argv)
 		}
 	};
 
-	std::span files {argv, static_cast<size_t>(argc)};
+	namespace po = boost::program_options;
+	po::options_description opts("ILT - Resource Viewer");
+	std::vector<std::filesystem::path> resources;
+	// clang-format off
+	opts.add_options()
+		("resource,r", po::value(&resources)->composing(), "Resource file")
+		("help,h", po::value<bool>()->default_value(false)->zero_tokens(), "Help")
+		;
+	// clang-format on
+	po::positional_options_description pod;
+	pod.add("resource", -1);
+	po::variables_map varmap;
+	po::store(po::command_line_parser(argc, argv).options(opts).positional(pod).run(), varmap);
+	po::notify(varmap);
 
-	ResViewer {}.run(files.subspan(2));
+	if (varmap.at("help").as<bool>()) {
+		std::cout << opts << '\n';
+		return EXIT_SUCCESS;
+	}
+
+	ResViewer {}.run(resources);
+	return EXIT_SUCCESS;
 }
