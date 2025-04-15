@@ -56,6 +56,26 @@ private:
 			camera.setPosition(calcCameraPosition());
 			camera.lookAt({0, 0, TERRAIN_HEIGHT + cameraFocus});
 		}
+		if (selectedFile) {
+			try {
+				if (const auto curmTime = std::filesystem::last_write_time(*selectedFile); curmTime != fileTime) {
+					location.reset();
+					selectedAsset = nullptr;
+					gameState->assets = AssetFactory::loadXML(*selectedFile)->assets;
+					fileTime = curmTime;
+					if (!selectedAssetId.empty() && gameState->assets.contains(selectedAssetId)) {
+						auto asset = gameState->assets.at(selectedAssetId);
+						auto renderable = asset.getAs<const Renderable>();
+						if (renderable) {
+							location = asset->createAt(position);
+							selectedAsset = renderable;
+						}
+					}
+				}
+			}
+			catch (...) {
+			}
+		}
 	}
 
 	bool
@@ -99,8 +119,10 @@ private:
 		for (const auto & file : fileList) {
 			if (ImGui::Selectable(file.c_str(), &file == selectedFile)) {
 				location.reset();
+				selectedAssetId.clear();
 				selectedAsset = nullptr;
 				gameState->assets = AssetFactory::loadXML(file)->assets;
+				fileTime = std::filesystem::last_write_time(file);
 				selectedFile = &file;
 			}
 		}
@@ -116,6 +138,7 @@ private:
 				auto renderable = asset.second.getAs<const Renderable>();
 				if (renderable) {
 					if (ImGui::Selectable(asset.first.c_str(), renderable == selectedAsset)) {
+						selectedAssetId = asset.first;
 						selectedAsset = renderable;
 						location = asset.second->createAt(position);
 					}
@@ -152,7 +175,9 @@ private:
 	}
 
 	std::span<const std::filesystem::path> fileList;
+	std::filesystem::file_time_type fileTime;
 	const std::filesystem::path * selectedFile {};
+	std::string selectedAssetId;
 	const Renderable * selectedAsset {};
 	Location position {.pos = {0, 0, TERRAIN_HEIGHT}, .rot = {}};
 	std::any location;
