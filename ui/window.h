@@ -15,7 +15,7 @@ using SDL_GLContextPtr = wrapped_ptrt<GL_Context, SDL_GL_CreateContext, SDL_GL_D
 
 class Window {
 public:
-	Window(size_t width, size_t height, const std::string & title, Uint32 flags);
+	Window(ScreenAbsCoord size, const char * title, Uint32 flags);
 	virtual ~Window() = default;
 
 	NO_COPY(Window);
@@ -27,7 +27,7 @@ public:
 	{
 		glm::ivec2 size {};
 		SDL_GetWindowSizeInPixels(m_window, &size.x, &size.y);
-		content = std::make_unique<C>(size.x, size.y, std::forward<P>(p)...);
+		content = std::make_unique<C>(ScreenAbsCoord {size.x, size.y}, std::forward<P>(p)...);
 	}
 
 	void tick(TickDuration elapsed);
@@ -39,7 +39,6 @@ public:
 protected:
 	void clear(float r, float g, float b, float a) const;
 
-	const ScreenAbsCoord size;
 	SDL_WindowPtr m_window;
 	SDL_GLContextPtr glContext;
 	WindowContent::Ptr content;

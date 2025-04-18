@@ -50,14 +50,12 @@ private:
 	GameMainSelector * gms;
 };
 
-GameMainWindow::GameMainWindow(size_t w, size_t h) : SceneRenderer {{w, h}, 0}
+GameMainWindow::GameMainWindow(ScreenAbsCoord size) : SceneRenderer {size, 0}
 {
 	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
 	auto gms = uiComponents.create<GameMainSelector>(&camera);
 	uiComponents.create<GameMainToolbar>(gms);
 }
-
-GameMainWindow::~GameMainWindow() { }
 
 void
 GameMainWindow::tick(TickDuration)
@@ -85,7 +83,7 @@ GameMainWindow::handleInput(const SDL_Event & event)
 }
 
 void
-GameMainWindow::render() const
+GameMainWindow::render()
 {
 	SceneRenderer::render(*this);
 	glEnable(GL_BLEND);

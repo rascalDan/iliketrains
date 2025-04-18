@@ -14,7 +14,7 @@ public:
 	NO_COPY(WindowContent);
 
 	virtual void tick(TickDuration);
-	virtual void render() const = 0;
+	virtual void render() = 0;
 	virtual bool handleInput(const SDL_Event & e);
 
 protected:

@@ -71,6 +71,7 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 	configuregdata(gIllumination, GL_RGB8, GL_RGB);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+	shader.setViewPort({0, 0, size.x, size.y});
 }
 
 void

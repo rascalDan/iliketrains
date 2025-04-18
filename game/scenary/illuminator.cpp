@@ -2,6 +2,16 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/texture.h" // IWYU pragma: keep
+#include <location.h>
+
+static_assert(std::is_constructible_v<Illuminator>);
+
+std::any
+Illuminator::createAt(const Location & position) const
+{
+	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(
+			instances.acquire(position.getRotationTransform(), position.pos));
+}
 
 bool
 Illuminator::SpotLight::persist(Persistence::PersistenceStore & store)

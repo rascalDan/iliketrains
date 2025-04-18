@@ -15,6 +15,8 @@ class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illumina
 	std::optional<glVertexArray> instancesSpotLightVAO, instancesPointLightVAO;
 
 public:
+	[[nodiscard]] std::any createAt(const Location &) const override;
+
 	struct LightCommonVertex {
 		RelativePosition3D position;
 		RGB colour;

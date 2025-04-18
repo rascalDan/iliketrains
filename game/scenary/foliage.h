@@ -17,6 +17,8 @@ class Foliage : public Asset, public Renderable, public StdTypeDefs<Foliage> {
 	glVertexArray instancePointVAO;
 
 public:
+	[[nodiscard]] std::any createAt(const Location &) const override;
+
 	struct LocationVertex {
 		glm::mat3 rotation;
 		float yaw;

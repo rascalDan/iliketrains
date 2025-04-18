@@ -2,6 +2,16 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/vertexArrayObject.h"
+#include <location.h>
+
+static_assert(std::is_constructible_v<Foliage>);
+
+std::any
+Foliage::createAt(const Location & position) const
+{
+	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(
+			instances.acquire(position.getRotationTransform(), position.rot.y, position.pos));
+}
 
 bool
 Foliage::persist(Persistence::PersistenceStore & store)

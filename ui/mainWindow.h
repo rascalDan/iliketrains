@@ -5,12 +5,9 @@
 
 class MainWindow : public Window {
 public:
-	MainWindow(size_t w, size_t h);
+	MainWindow(ScreenAbsCoord size, const char * title, Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 	~MainWindow() override;
 
 	NO_MOVE(MainWindow);
 	NO_COPY(MainWindow);
-
-protected:
-	MainWindow(size_t width, size_t height, const std::string & title, Uint32 flags);
 };

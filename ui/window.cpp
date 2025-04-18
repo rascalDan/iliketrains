@@ -7,10 +7,9 @@
 #include "backends/imgui_impl_sdl2.h"
 #pragma GCC diagnostic pop
 
-Window::Window(size_t width, size_t height, const std::string & title, Uint32 flags) :
-	size {static_cast<int>(width), static_cast<int>(height)},
-	m_window {title.c_str(), static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.x,
-			size.y, flags},
+Window::Window(ScreenAbsCoord size, const char * title, Uint32 flags) :
+	m_window {title, static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.x, size.y,
+			flags},
 	glContext {m_window}
 {
 }
