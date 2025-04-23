@@ -18,7 +18,7 @@ struct Surface;
 class GeoData;
 template<typename> class Ray;
 
-template<size_t... n> using GenDef = std::tuple<glm::vec<n, GlobalDistance>...>;
+template<size_t... N> using GenDef = std::tuple<glm::vec<N, GlobalDistance>...>;
 using GenCurveDef = GenDef<3, 3, 2>;
 
 class Network {
@@ -30,7 +30,7 @@ public:
 
 	[[nodiscard]] Node::Ptr findNodeAt(GlobalPosition3D) const;
 	[[nodiscard]] Node::Ptr nodeAt(GlobalPosition3D);
-	enum class NodeIs { InNetwork, NotInNetwork };
+	enum class NodeIs : uint8_t { InNetwork, NotInNetwork };
 	using NodeInsertion = std::pair<Node::Ptr, NodeIs>;
 	[[nodiscard]] NodeInsertion newNodeAt(GlobalPosition3D);
 	[[nodiscard]] NodeInsertion candidateNodeAt(GlobalPosition3D) const;
@@ -38,7 +38,7 @@ public:
 	[[nodiscard]] virtual Node::Ptr intersectRayNodes(const Ray<GlobalPosition3D> &) const;
 
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, GlobalPosition3D) const;
-	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &) const;
+	[[nodiscard]] static Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &);
 
 	virtual Link::CCollection candidateStraight(GlobalPosition3D, GlobalPosition3D) = 0;
 	virtual Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) = 0;
@@ -53,7 +53,7 @@ public:
 	[[nodiscard]] virtual RelativeDistance getBaseWidth() const = 0;
 
 protected:
-	static void joinLinks(const Link::Ptr & l, const Link::Ptr & ol);
+	static void joinLinks(const Link::Ptr & link, const Link::Ptr & oldLink);
 	static GenCurveDef genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir);
 	static std::pair<GenCurveDef, GenCurveDef> genCurveDef(
 			const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir);
@@ -80,34 +80,33 @@ protected:
 	SharedCollection<T> links;
 	void joinLinks(const Link::Ptr &) const;
 
-protected:
 	[[nodiscard]] Link::Ptr intersectRayLinks(const Ray<GlobalPosition3D> &) const override;
 
 public:
 	template<typename L, typename... Params>
 	std::shared_ptr<L>
-	candidateLink(GlobalPosition3D a, GlobalPosition3D b, Params &&... params)
+	candidateLink(GlobalPosition3D positionA, GlobalPosition3D positionB, Params &&... params)
 		requires std::is_base_of_v<T, L>
 	{
-		const auto node1 = candidateNodeAt(a).first, node2 = candidateNodeAt(b).first;
+		const auto node1 = candidateNodeAt(positionA).first, node2 = candidateNodeAt(positionB).first;
 		return std::make_shared<L>(*this, node1, node2, std::forward<Params>(params)...);
 	}
 
 	template<typename L, typename... Params>
 	std::shared_ptr<L>
-	addLink(GlobalPosition3D a, GlobalPosition3D b, Params &&... params)
+	addLink(GlobalPosition3D positionA, GlobalPosition3D positionB, Params &&... params)
 		requires std::is_base_of_v<T, L>
 	{
-		const auto node1 = nodeAt(a), node2 = nodeAt(b);
-		auto l {links.template create<L>(*this, node1, node2, std::forward<Params>(params)...)};
-		joinLinks(l);
-		return l;
+		const auto node1 = nodeAt(positionA), node2 = nodeAt(positionB);
+		auto newLink = links.template create<L>(*this, node1, node2, std::forward<Params>(params)...);
+		joinLinks(newLink);
+		return std::move(newLink);
 	}
 
-	Link::CCollection candidateStraight(GlobalPosition3D n1, GlobalPosition3D n2) override;
+	Link::CCollection candidateStraight(GlobalPosition3D, GlobalPosition3D) override;
 	Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) override;
 	Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection addStraight(const GeoData *, GlobalPosition3D n1, GlobalPosition3D n2) override;
+	Link::CCollection addStraight(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
 	Link::CCollection addJoins(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
 	Link::CCollection addExtend(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
 

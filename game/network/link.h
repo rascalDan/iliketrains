@@ -16,7 +16,7 @@ template<typename> class Ray;
 // it has location
 class Node : public StdTypeDefs<Node> {
 public:
-	explicit Node(GlobalPosition3D p) noexcept : pos(p) { };
+	explicit Node(GlobalPosition3D position) noexcept : pos(position) { };
 	virtual ~Node() noexcept = default;
 	NO_COPY(Node);
 	NO_MOVE(Node);
@@ -35,6 +35,7 @@ public:
 	struct End {
 		Node::Ptr node;
 		float dir;
+		// NOLINTNEXTLINE(readability-redundant-member-init) don't require client to empty initialise this
 		Nexts nexts {};
 	};
 
@@ -58,8 +59,8 @@ protected:
 	}
 };
 
-bool operator<(const GlobalPosition3D & a, const GlobalPosition3D & b);
-bool operator<(const Node & a, const Node & b);
+bool operator<(const GlobalPosition3D &, const GlobalPosition3D &);
+bool operator<(const Node &, const Node &);
 
 class LinkStraight : public virtual Link {
 public:

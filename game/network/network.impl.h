@@ -6,10 +6,10 @@
 
 template<typename T, typename... Links>
 void
-NetworkOf<T, Links...>::joinLinks(const Link::Ptr & l) const
+NetworkOf<T, Links...>::joinLinks(const Link::Ptr & link) const
 {
-	for (const auto & ol : links) {
-		Network::joinLinks(l, ol);
+	for (const auto & oldLink : links) {
+		Network::joinLinks(link, oldLink);
 	}
 }
 
@@ -32,11 +32,11 @@ template<typename T, typename... Links>
 float
 NetworkOf<T, Links...>::findNodeDirection(Node::AnyCPtr n) const
 {
-	for (const auto & l : links) {
-		for (const auto & e : l->ends) {
+	for (const auto & link : links) {
+		for (const auto & end : link->ends) {
 			// cppcheck-suppress useStlAlgorithm
-			if (e.node.get() == n.get()) {
-				return e.dir;
+			if (end.node.get() == n.get()) {
+				return end.dir;
 			}
 		}
 	}
@@ -45,16 +45,17 @@ NetworkOf<T, Links...>::findNodeDirection(Node::AnyCPtr n) const
 
 template<typename T, typename... Links>
 Link::CCollection
-NetworkOf<T, Links...>::candidateStraight(GlobalPosition3D n1, GlobalPosition3D n2)
+NetworkOf<T, Links...>::candidateStraight(GlobalPosition3D positionA, GlobalPosition3D positionB)
 {
-	return {candidateLink<typename T::StraightLink>(n1, n2)};
+	return {candidateLink<typename T::StraightLink>(positionA, positionB)};
 }
 
 template<typename T, typename... Links>
 Link::CCollection
 NetworkOf<T, Links...>::candidateJoins(GlobalPosition3D start, GlobalPosition3D end)
 {
-	if (::distance(start, end) < 2000.F) {
+	static constexpr auto MIN_DISTANCE = 2000.F;
+	if (::distance(start, end) < MIN_DISTANCE) {
 		return {};
 	}
 	const auto defs = genCurveDef(
@@ -74,17 +75,17 @@ NetworkOf<T, Links...>::candidateExtend(GlobalPosition3D start, GlobalPosition3D
 
 template<typename T, typename... Links>
 Link::CCollection
-NetworkOf<T, Links...>::addStraight(const GeoData * geoData, GlobalPosition3D n1, GlobalPosition3D n2)
+NetworkOf<T, Links...>::addStraight(const GeoData * geoData, GlobalPosition3D positionA, GlobalPosition3D positionB)
 {
 	Link::CCollection out;
-	geoData->walk(n1.xy(), n2, [geoData, &out, this, &n1](const GeoData::WalkStep & step) {
+	geoData->walk(positionA.xy(), positionB, [geoData, &out, this, &positionA](const GeoData::WalkStep & step) {
 		if (step.previous.is_valid() && geoData->getSurface(step.current) != geoData->getSurface(step.previous)) {
 			const auto surfaceEdgePosition = geoData->positionAt(GeoData::PointFace(step.exitPosition, step.current));
-			out.emplace_back(addLink<typename T::StraightLink>(n1, surfaceEdgePosition));
-			n1 = surfaceEdgePosition;
+			out.emplace_back(addLink<typename T::StraightLink>(positionA, surfaceEdgePosition));
+			positionA = surfaceEdgePosition;
 		}
 	});
-	out.emplace_back(addLink<typename T::StraightLink>(n1, n2));
+	out.emplace_back(addLink<typename T::StraightLink>(positionA, positionB));
 	return out;
 }
 
@@ -92,6 +93,7 @@ template<typename T, typename... Links>
 Link::CCollection
 NetworkOf<T, Links...>::addCurve(const GeoData * geoData, const GenCurveDef & curve)
 {
+	static constexpr auto MIN_DISTANCE = 2000.F;
 	auto [cstart, cend, centre] = curve;
 	Link::CCollection out;
 	std::set<GeoData::WalkStepCurve, SortedBy<&GeoData::WalkStepCurve::angle>> breaks;
@@ -115,7 +117,7 @@ NetworkOf<T, Links...>::addCurve(const GeoData * geoData, const GenCurveDef & cu
 						|| geoData->positionAt(GeoData::PointFace(step.exitPosition, step.current)).z;
 			});
 	points.push_back(cend);
-	mergeClose(points, ::distance<3, GlobalDistance>, ::midpoint<3, GlobalDistance>, 2'000.F);
+	mergeClose(points, ::distance<3, GlobalDistance>, ::midpoint<3, GlobalDistance>, MIN_DISTANCE);
 	std::ranges::transform(points | std::views::pairwise, std::back_inserter(out), [this, centre](const auto pair) {
 		const auto [a, b] = pair;
 		return this->addLink<typename T::CurveLink>(a, b, centre);
@@ -127,7 +129,8 @@ template<typename T, typename... Links>
 Link::CCollection
 NetworkOf<T, Links...>::addJoins(const GeoData * geoData, GlobalPosition3D start, GlobalPosition3D end)
 {
-	if (::distance(start, end) < 2000.F) {
+	static constexpr auto MIN_DISTANCE = 2000.F;
+	if (::distance(start, end) < MIN_DISTANCE) {
 		return {};
 	}
 	const auto defs = genCurveDef(start, end, findNodeDirection(nodeAt(start)), findNodeDirection(nodeAt(end)));

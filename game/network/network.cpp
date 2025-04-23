@@ -8,8 +8,8 @@
 #include <stdexcept>
 #include <utility>
 
-Network::Network(const std::string & tn) :
-	texture {std::make_shared<Texture>(tn,
+Network::Network(const std::string & textureName) :
+	texture {std::make_shared<Texture>(textureName,
 			TextureOptions {
 					.minFilter = GL_NEAREST_MIPMAP_LINEAR,
 			})}
@@ -25,19 +25,18 @@ Network::nodeAt(GlobalPosition3D pos)
 Network::NodeInsertion
 Network::newNodeAt(GlobalPosition3D pos)
 {
-	if (auto [n, i] = candidateNodeAt(pos); i == NodeIs::NotInNetwork) {
-		return {*nodes.insert(std::move(n)).first, i};
+	auto [node, inNetwork] = candidateNodeAt(pos);
+	if (inNetwork == NodeIs::NotInNetwork) {
+		return {*nodes.insert(std::move(node)).first, inNetwork};
 	}
-	else {
-		return {std::move(n), NodeIs::InNetwork};
-	}
+	return {std::move(node), NodeIs::InNetwork};
 }
 
 Node::Ptr
 Network::findNodeAt(GlobalPosition3D pos) const
 {
-	if (const auto n = nodes.find(pos); n != nodes.end()) {
-		return *n;
+	if (const auto node = nodes.find(pos); node != nodes.end()) {
+		return *node;
 	}
 	return {};
 }
@@ -45,8 +44,8 @@ Network::findNodeAt(GlobalPosition3D pos) const
 Network::NodeInsertion
 Network::candidateNodeAt(GlobalPosition3D pos) const
 {
-	if (const auto n = nodes.find(pos); n != nodes.end()) {
-		return {*n, NodeIs::InNetwork};
+	if (const auto node = nodes.find(pos); node != nodes.end()) {
+		return {*node, NodeIs::InNetwork};
 	}
 	return {std::make_shared<Node>(pos), NodeIs::NotInNetwork};
 }
@@ -54,12 +53,13 @@ Network::candidateNodeAt(GlobalPosition3D pos) const
 Node::Ptr
 Network::intersectRayNodes(const Ray<GlobalPosition3D> & ray) const
 {
+	static constexpr auto MIN_DISTANCE = 2000;
 	// Click within 2m of a node
 	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
 				[&ray](const Node::Ptr & node) {
 					GlobalPosition3D ipos;
 					Normal3D inorm;
-					return ray.intersectSphere(node->pos, 2000, ipos, inorm);
+					return ray.intersectSphere(node->pos, MIN_DISTANCE, ipos, inorm);
 				});
 			node != nodes.end()) {
 		return *node;
@@ -68,14 +68,14 @@ Network::intersectRayNodes(const Ray<GlobalPosition3D> & ray) const
 }
 
 void
-Network::joinLinks(const Link::Ptr & l, const Link::Ptr & ol)
+Network::joinLinks(const Link::Ptr & link, const Link::Ptr & oldLink)
 {
-	if (l != ol) {
-		for (const auto oe : {0U, 1U}) {
-			for (const auto te : {0U, 1U}) {
-				if (l->ends[te].node == ol->ends[oe].node) {
-					l->ends[te].nexts.emplace_back(ol, oe);
-					ol->ends[oe].nexts.emplace_back(l, te);
+	if (link != oldLink) {
+		for (const auto oldLinkEnd : {0U, 1U}) {
+			for (const auto linkEnd : {0U, 1U}) {
+				if (link->ends[linkEnd].node == oldLink->ends[oldLinkEnd].node) {
+					link->ends[linkEnd].nexts.emplace_back(oldLink, oldLinkEnd);
+					oldLink->ends[oldLinkEnd].nexts.emplace_back(link, linkEnd);
 				}
 			}
 		}
@@ -93,7 +93,7 @@ Network::routeFromTo(const Link::End & start, GlobalPosition3D dest) const
 }
 
 Link::Nexts
-Network::routeFromTo(const Link::End & end, const Node::Ptr & dest) const
+Network::routeFromTo(const Link::End & end, const Node::Ptr & dest)
 {
 	return RouteWalker().findRouteTo(end, dest);
 }
@@ -102,11 +102,11 @@ GenCurveDef
 Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir)
 {
 	const auto diff = difference(end, start);
-	const auto vy {vector_yaw(diff)};
+	const auto yaw = vector_yaw(diff);
 	const auto dir = pi + startDir;
-	const auto flatStart {start.xy()}, flatEnd {end.xy()};
-	const auto n2ed {(vy * 2) - dir - pi};
-	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};
+	const auto flatStart = start.xy(), flatEnd = end.xy();
+	const auto n2ed = (yaw * 2) - dir - pi;
+	const auto centre = find_arc_centre(flatStart, dir, flatEnd, n2ed);
 
 	if (centre.second) { // right hand arc
 		return {end, start, centre.first};
@@ -121,24 +121,23 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 	endDir += pi;
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	auto midheight = [&](auto mid) {
-		const auto sm = ::distance<2>(flatStart, mid);
-		const auto em = ::distance<2>(flatEnd, mid);
-		return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (sm / (sm + em)));
+		const auto startToMid = ::distance<2>(flatStart, mid);
+		const auto endToMid = ::distance<2>(flatEnd, mid);
+		return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (startToMid / (startToMid + endToMid)));
 	};
-	if (const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir); radii.first < radii.second) {
-		const auto radius {radii.first};
-		const auto c1 = flatStart + (sincos(startDir + half_pi) * radius);
-		const auto c2 = flatEnd + (sincos(endDir + half_pi) * radius);
-		const auto mid = (c1 + c2) / 2;
+	const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir);
+	if (radii.first < radii.second) {
+		const auto radius = radii.first;
+		const auto centre1 = flatStart + (sincos(startDir + half_pi) * radius);
+		const auto centre2 = flatEnd + (sincos(endDir + half_pi) * radius);
+		const auto mid = (centre1 + centre2) / 2;
 		const auto midh = mid || midheight(mid);
-		return {{start, midh, c1}, {end, midh, c2}};
+		return {{start, midh, centre1}, {end, midh, centre2}};
 	}
-	else {
-		const auto radius {radii.second};
-		const auto c1 = flatStart + (sincos(startDir - half_pi) * radius);
-		const auto c2 = flatEnd + (sincos(endDir - half_pi) * radius);
-		const auto mid = (c1 + c2) / 2;
-		const auto midh = mid || midheight(mid);
-		return {{midh, start, c1}, {midh, end, c2}};
-	}
+	const auto radius = radii.second;
+	const auto centre1 = flatStart + (sincos(startDir - half_pi) * radius);
+	const auto centre2 = flatEnd + (sincos(endDir - half_pi) * radius);
+	const auto mid = (centre1 + centre2) / 2;
+	const auto midh = mid || midheight(mid);
+	return {{midh, start, centre1}, {midh, end, centre2}};
 }

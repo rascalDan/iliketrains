@@ -1,6 +1,5 @@
 #include "rail.h"
 #include "game/gamestate.h"
-#include "game/geoData.h"
 #include "network.h"
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/gl/sceneShader.h>
@@ -40,34 +39,33 @@ RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
 	const auto flatStart {start.xy()}, flatEnd {end.xy()};
 	if (node2ins.second == NodeIs::InNetwork) {
 		auto midheight = [&](auto mid) {
-			const auto sm = ::distance<2>(flatStart, mid);
-			const auto em = ::distance<2>(flatEnd, mid);
-			return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (sm / (sm + em)));
+			const auto startToMid = ::distance<2>(flatStart, mid);
+			const auto endToMid = ::distance<2>(flatEnd, mid);
+			return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (startToMid / (startToMid + endToMid)));
 		};
 		const float dir2 = pi + findNodeDirection(node2ins.first);
-		if (const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2); radii.first < radii.second) {
-			const auto radius {radii.first};
-			const auto c1 = flatStart + (sincos(dir + half_pi) * radius);
-			const auto c2 = flatEnd + (sincos(dir2 + half_pi) * radius);
-			const auto mid = (c1 + c2) / 2;
+		const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2);
+		if (radii.first < radii.second) {
+			const auto radius = radii.first;
+			const auto centre1 = flatStart + (sincos(dir + half_pi) * radius);
+			const auto centre2 = flatEnd + (sincos(dir2 + half_pi) * radius);
+			const auto mid = (centre1 + centre2) / 2;
 			const auto midh = mid || midheight(mid);
-			addLink<RailLinkCurve>(start, midh, c1);
-			return addLink<RailLinkCurve>(end, midh, c2);
+			addLink<RailLinkCurve>(start, midh, centre1);
+			return addLink<RailLinkCurve>(end, midh, centre2);
 		}
-		else {
-			const auto radius {radii.second};
-			const auto c1 = flatStart + (sincos(dir - half_pi) * radius);
-			const auto c2 = flatEnd + (sincos(dir2 - half_pi) * radius);
-			const auto mid = (c1 + c2) / 2;
-			const auto midh = mid || midheight(mid);
-			addLink<RailLinkCurve>(midh, start, c1);
-			return addLink<RailLinkCurve>(midh, end, c2);
-		}
+		const auto radius = radii.second;
+		const auto centre1 = flatStart + (sincos(dir - half_pi) * radius);
+		const auto centre2 = flatEnd + (sincos(dir2 - half_pi) * radius);
+		const auto mid = (centre1 + centre2) / 2;
+		const auto midh = mid || midheight(mid);
+		addLink<RailLinkCurve>(midh, start, centre1);
+		return addLink<RailLinkCurve>(midh, end, centre2);
 	}
 	const auto diff = difference(end, start);
-	const auto vy {vector_yaw(diff)};
-	const auto n2ed {(vy * 2) - dir - pi};
-	const auto centre {find_arc_centre(flatStart, dir, flatEnd, n2ed)};
+	const auto yaw = vector_yaw(diff);
+	const auto n2ed = (yaw * 2) - dir - pi;
+	const auto centre = find_arc_centre(flatStart, dir, flatEnd, n2ed);
 
 	if (centre.second) { // right hand arc
 		std::swap(start, end);
@@ -102,31 +100,34 @@ namespace {
 	}
 }
 
-RailLinkStraight::RailLinkStraight(NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & a,
-		const Node::Ptr & b) : RailLinkStraight(instances, a, b, b->pos - a->pos)
+RailLinkStraight::RailLinkStraight(NetworkLinkHolder<RailLinkStraight> & instances, const Node::Ptr & nodeA,
+		const Node::Ptr & nodeB) : RailLinkStraight(instances, nodeA, nodeB, nodeB->pos - nodeA->pos)
 {
 }
 
-RailLinkStraight::RailLinkStraight(
-		NetworkLinkHolder<RailLinkStraight> & instances, Node::Ptr a, Node::Ptr b, const RelativePosition3D & diff) :
-	Link({std::move(a), vector_yaw(diff)}, {std::move(b), vector_yaw(-diff)}, glm::length(diff)),
+RailLinkStraight::RailLinkStraight(NetworkLinkHolder<RailLinkStraight> & instances, Node::Ptr nodeA, Node::Ptr nodeB,
+		const RelativePosition3D & diff) :
+	Link({.node = std::move(nodeA), .dir = vector_yaw(diff)}, {.node = std::move(nodeB), .dir = vector_yaw(-diff)},
+			glm::length(diff)),
 	instance {instances.vertices.acquire(
 			ends[0].node->pos, ends[1].node->pos, flat_orientation(diff), roundSleepers(length))}
 {
 }
 
-RailLinkCurve::RailLinkCurve(
-		NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b, GlobalPosition2D c) :
-	RailLinkCurve(instances, a, b, c || a->pos.z, ::distance<2>(a->pos.xy(), c), {c, a->pos, b->pos})
+RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & nodeA,
+		const Node::Ptr & nodeB, GlobalPosition2D centre) :
+	RailLinkCurve(instances, nodeA, nodeB, centre || nodeA->pos.z, ::distance<2>(nodeA->pos.xy(), centre),
+			{centre, nodeA->pos, nodeB->pos})
 {
 }
 
-RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & a, const Node::Ptr & b,
-		GlobalPosition3D c, RelativeDistance radius, const Arc arc) :
-	Link({a, normalize(arc.first + half_pi)}, {b, normalize(arc.second - half_pi)},
-			glm::length(RelativePosition2D {radius * arc.length(), difference(a->pos, b->pos).z})),
-	LinkCurve {c, radius, arc}, instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, c,
-										roundSleepers(length), half_pi - arc.first, half_pi - arc.second, radius)}
+RailLinkCurve::RailLinkCurve(NetworkLinkHolder<RailLinkCurve> & instances, const Node::Ptr & nodeA,
+		const Node::Ptr & nodeB, GlobalPosition3D centre, RelativeDistance radius, const Arc arc) :
+	Link({.node = nodeA, .dir = normalize(arc.first + half_pi)},
+			{.node = nodeB, .dir = normalize(arc.second - half_pi)},
+			glm::length(RelativePosition2D {radius * arc.length(), difference(nodeA->pos, nodeB->pos).z})),
+	LinkCurve {centre, radius, arc}, instance {instances.vertices.acquire(ends[0].node->pos, ends[1].node->pos, centre,
+											 roundSleepers(length), half_pi - arc.first, half_pi - arc.second, radius)}
 {
 }
 
@@ -155,11 +156,11 @@ template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder()
 namespace {
 	template<typename LinkType>
 	void
-	renderType(const NetworkLinkHolder<LinkType> & n, auto & s)
+	renderType(const NetworkLinkHolder<LinkType> & networkLinks, auto & shader)
 	{
-		if (auto count = n.vertices.size()) {
-			s.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
-			glBindVertexArray(n.vao);
+		if (auto count = networkLinks.vertices.size()) {
+			shader.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
+			glBindVertexArray(networkLinks.vao);
 			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
 		}
 	};
@@ -188,5 +189,6 @@ RailLinks::getBaseSurface() const
 RelativeDistance
 RailLinks::getBaseWidth() const
 {
-	return 5'700;
+	static constexpr auto BASE_WIDTH = 5'700;
+	return BASE_WIDTH;
 }

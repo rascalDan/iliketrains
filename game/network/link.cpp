@@ -5,37 +5,43 @@
 #include <ray.h>
 #include <tuple>
 
-Link::Link(End a, End b, float l) : ends {{std::move(a), std::move(b)}}, length {l} { }
+Link::Link(End endA, End endB, float len) : ends {{std::move(endA), std::move(endB)}}, length {len} { }
 
-LinkCurve::LinkCurve(GlobalPosition3D c, RelativeDistance r, Arc a) : centreBase {c}, radius {r}, arc {std::move(a)} { }
-
-bool
-operator<(const GlobalPosition3D & a, const GlobalPosition3D & b)
+LinkCurve::LinkCurve(GlobalPosition3D centre, RelativeDistance radius, Arc arc) :
+	centreBase {centre}, radius {radius}, arc {std::move(arc)}
 {
-	// NOLINTNEXTLINE(hicpp-use-nullptr,modernize-use-nullptr)
-	return std::tie(a.x, a.y, a.z) < std::tie(b.x, b.y, b.z);
 }
 
 bool
-operator<(const Node & a, const Node & b)
+operator<(const GlobalPosition3D & left, const GlobalPosition3D & right)
 {
-	return a.pos < b.pos;
+	// NOLINTNEXTLINE(hicpp-use-nullptr,modernize-use-nullptr)
+	return std::tie(left.x, left.y, left.z) < std::tie(right.x, right.y, right.z);
+}
+
+bool
+operator<(const Node & left, const Node & right)
+{
+	return left.pos < right.pos;
 }
 
 Location
 LinkStraight::positionAt(RelativeDistance dist, unsigned char start) const
 {
-	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
-	const RelativePosition3D diff {es.second->pos - es.first->pos};
-	const auto dir {glm::normalize(diff)};
-	return Location {es.first->pos + (vehiclePositionOffset() + dir * dist), {vector_pitch(dir), vector_yaw(dir), 0}};
+	const auto endNodes = std::make_pair(ends[start].node.get(), ends[1 - start].node.get());
+	const auto diff = ::difference(endNodes.second->pos, endNodes.first->pos);
+	const auto directionVector = glm::normalize(diff);
+	return Location {
+			.pos = endNodes.first->pos + (vehiclePositionOffset() + directionVector * dist),
+			.rot = {vector_pitch(directionVector), vector_yaw(directionVector), 0},
+	};
 }
 
 bool
 LinkStraight::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
-	return ray.passesCloseToEdges(
-			std::array {GlobalPosition3D {ends.front().node->pos}, GlobalPosition3D {ends.back().node->pos}}, 1000);
+	static constexpr auto PROXIMITY = 1'000;
+	return ray.passesCloseToEdges(std::array {ends.front().node->pos, ends.back().node->pos}, PROXIMITY);
 }
 
 std::vector<GlobalPosition3D>
@@ -55,33 +61,36 @@ LinkStraight::getBase(RelativeDistance width) const
 Location
 LinkCurve::positionAt(float dist, unsigned char start) const
 {
-	static constexpr std::array<float, 2> dirOffset {half_pi, -half_pi};
-	const auto frac {dist / length};
-	const auto es {std::make_pair(ends[start].node.get(), ends[1 - start].node.get())};
-	const auto as {std::make_pair(arc[start], arc[1 - start])};
-	const auto ang {as.first + ((as.second - as.first) * frac)};
-	const auto relPos {(sincos(ang) || 0.F) * radius};
-	const auto relClimb {vehiclePositionOffset()
+	static constexpr std::array DIR_OFFSET {half_pi, -half_pi};
+	const auto frac = dist / length;
+	const auto endNodes = std::make_pair(ends[start].node.get(), ends[1 - start].node.get());
+	const auto arcEndAngles = std::make_pair(arc[start], arc[1 - start]);
+	const auto ang = glm::mix(arcEndAngles.first, arcEndAngles.second, frac);
+	const auto relPos = (sincos(ang) || 0.F) * radius;
+	const auto relClimb = vehiclePositionOffset()
 			+ RelativePosition3D {0, 0,
-					static_cast<RelativeDistance>(es.first->pos.z - centreBase.z)
-							+ (static_cast<RelativeDistance>(es.second->pos.z - es.first->pos.z) * frac)}};
-	const auto pitch {vector_pitch(difference(es.second->pos, es.first->pos) / length)};
-	return Location {GlobalPosition3D(relPos + relClimb) + centreBase, {pitch, normalize(ang + dirOffset[start]), 0}};
+					static_cast<RelativeDistance>(endNodes.first->pos.z - centreBase.z)
+							+ (static_cast<RelativeDistance>(endNodes.second->pos.z - endNodes.first->pos.z) * frac)};
+	const auto pitch {vector_pitch(difference(endNodes.second->pos, endNodes.first->pos) / length)};
+	return Location {
+			.pos = GlobalPosition3D(relPos + relClimb) + centreBase,
+			.rot = {pitch, normalize(ang + DIR_OFFSET[start]), 0},
+	};
 }
 
 bool
 LinkCurve::intersectRay(const Ray<GlobalPosition3D> & ray) const
 {
-	const auto & e0p {ends[0].node->pos};
-	const auto & e1p {ends[1].node->pos};
+	const auto e0p = ends[0].node->pos.z;
+	const auto e1p = ends[1].node->pos.z;
 	const auto slength = round_frac(length / 2.F, 5.F);
 	const auto segs = std::round(15.F * slength / std::pow(radius, 0.7F));
-	const auto step {glm::vec<2, RelativeDistance> {arc.length(), e1p.z - e0p.z} / segs};
+	const auto step {glm::vec<2, RelativeDistance> {arc.length(), e1p - e0p} / segs};
 
 	auto segCount = static_cast<std::size_t>(std::lround(segs)) + 1;
 	std::vector<GlobalPosition3D> points;
 	points.reserve(segCount);
-	for (std::remove_const_t<decltype(step)> swing = {arc.first, centreBase.z - e0p.z}; segCount;
+	for (std::remove_const_t<decltype(step)> swing = {arc.first, centreBase.z - e0p}; segCount;
 			swing += step, --segCount) {
 		points.emplace_back(centreBase + ((sincos(swing.x) * radius) || swing.y));
 	}
@@ -94,7 +103,7 @@ LinkCurve::getBase(RelativeDistance width) const
 	const auto start = ends.front().node->pos;
 	const auto end = ends.back().node->pos;
 	const auto segs = std::ceil(std::sqrt(radius) * 0.02F * arc.length());
-	const auto step {glm::vec<2, RelativeDistance> {arc.length(), end.z - start.z} / segs};
+	const auto step = glm::vec<2, RelativeDistance> {arc.length(), end.z - start.z} / segs;
 
 	auto segCount = static_cast<size_t>(segs) + 1;
 	std::vector<GlobalPosition3D> out;
