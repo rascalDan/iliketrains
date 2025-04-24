@@ -57,9 +57,7 @@ Network::intersectRayNodes(const Ray<GlobalPosition3D> & ray) const
 	// Click within 2m of a node
 	if (const auto node = std::find_if(nodes.begin(), nodes.end(),
 				[&ray](const Node::Ptr & node) {
-					GlobalPosition3D ipos;
-					Normal3D inorm;
-					return ray.intersectSphere(node->pos, MIN_DISTANCE, ipos, inorm);
+					return ray.intersectSphere(node->pos, MIN_DISTANCE);
 				});
 			node != nodes.end()) {
 		return *node;

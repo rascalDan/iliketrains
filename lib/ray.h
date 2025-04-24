@@ -78,21 +78,30 @@ public:
 		return std::nullopt;
 	}
 
-	bool
-	intersectSphere(const PositionType centre, const PositionType::value_type size, PositionType & position,
-			Normal3D & normal) const
+	struct IntersectSphereResult {
+		PositionType position;
+		Normal3D normal;
+	};
+
+	std::optional<IntersectSphereResult>
+	intersectSphere(const PositionType centre, const PositionType::value_type size) const
 	{
+		IntersectSphereResult out;
 		if constexpr (std::is_floating_point_v<typename PositionType::value_type>) {
-			return glm::intersectRaySphere(start, direction, centre, size, position, normal);
+			if (glm::intersectRaySphere(start, direction, centre, size, out.position, out.normal)) {
+				return out;
+			}
 		}
 		else {
 			const RelativePosition3D cr = centre - start;
 			RelativePosition3D positionF {};
-			const auto r = glm::intersectRaySphere(
-					{}, direction, cr, static_cast<RelativeDistance>(size), positionF, normal);
-			position = GlobalPosition3D(positionF) + start;
-			return r;
+			if (glm::intersectRaySphere(
+						{}, direction, cr, static_cast<RelativeDistance>(size), positionF, out.normal)) {
+				out.position = GlobalPosition3D(positionF) + start;
+				return out;
+			}
 		}
+		return std::nullopt;
 	}
 };
 
