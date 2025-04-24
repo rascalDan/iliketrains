@@ -121,11 +121,9 @@ GeoData::intersectRay(const Ray<GlobalPosition3D> & ray, FaceHandle face) const
 	walkUntil(PointFace {ray.start, face},
 			ray.start.xy() + (ray.direction.xy() * ::difference(extents.max.xy(), extents.min.xy())),
 			[&out, &ray, this](const auto & step) {
-				BaryPosition bari {};
-				RelativeDistance dist {};
 				const auto t = triangle<3>(step.current);
-				if (ray.intersectTriangle(t.x, t.y, t.z, bari, dist)) {
-					out.emplace(t * bari, step.current);
+				if (const auto inter = ray.intersectTriangle(t.x, t.y, t.z)) {
+					out.emplace(t * inter->bary, step.current);
 					return true;
 				}
 				return false;

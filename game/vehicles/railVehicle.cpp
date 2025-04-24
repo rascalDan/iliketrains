@@ -72,7 +72,12 @@ RailVehicle::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & bary
 	}};
 	return std::any_of(
 			triangles.begin(), triangles.end(), [&cornerVertices, &ray, &baryPos, &distance](const auto & idx) {
-				return ray.intersectTriangle(
-						cornerVertices[idx[0]], cornerVertices[idx[1]], cornerVertices[idx[2]], baryPos, distance);
+				if (const auto inter = ray.intersectTriangle(
+							cornerVertices[idx[0]], cornerVertices[idx[1]], cornerVertices[idx[2]])) {
+					baryPos = inter->bary;
+					distance = inter->distance;
+					return true;
+				};
+				return false;
 			});
 }
