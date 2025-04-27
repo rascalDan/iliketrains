@@ -32,13 +32,13 @@ static_assert(pow(3, 2) == 9);
 static_assert(pow(pi, 3) == 31.006278991699219F);
 
 float
-operator"" _mph(const long double v)
+operator""_mph(const long double v)
 {
 	return static_cast<float>(mph_to_ms(v));
 }
 
 float
-operator"" _kph(const long double v)
+operator""_kph(const long double v)
 {
 	return static_cast<float>(kph_to_ms(v));
 }
