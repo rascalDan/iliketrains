@@ -81,7 +81,7 @@ namespace std {
 	inline std::ostream &
 	operator<<(std::ostream & s, const E & e)
 	{
-		return s << EnumTypeDetails<E>::typeName << "::" << EnumDetails<E>::to_string(e).value();
+		return s << EnumTypeDetails<E>::TYPE_NAME << "::" << EnumDetails<E>::toString(e).value();
 	}
 
 	template<typename T>
