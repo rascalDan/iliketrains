@@ -11,43 +11,45 @@
 #include <glad/gl.h>
 #include <set>
 
-std::set<GLuint> active;
+namespace {
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables) - tracker
+	std::set<GLuint> active;
 
-void
-generator(GLsizei n, GLuint * out)
-{
-	static GLuint next {1};
+	void
+	generator(GLsizei count, GLuint * out)
+	{
+		static GLuint next {1};
 
-	while (n--) {
-		active.insert(next);
-		*out++ = next++;
+		std::generate_n(out, count, []() {
+			return *active.emplace(next++).first;
+		});
 	}
+
+	void
+	deleter(GLsizei n, GLuint * input)
+	{
+		BOOST_CHECK(std::ranges::all_of(std::span(input, static_cast<size_t>(n)), [](GLuint name) {
+			return active.erase(name) > 0;
+		}));
+	}
+
+	using TestArray = glArrays<5, &generator, &deleter>;
 }
 
-void
-deleter(GLsizei n, GLuint * in)
-{
-	BOOST_CHECK(std::all_of(in, in + n, [](GLuint id) {
-		return active.erase(id) > 0;
-	}));
-}
-
-using TestArray = glArrays<5, &generator, &deleter>;
-
-BOOST_AUTO_TEST_CASE(generate_and_delete)
+BOOST_AUTO_TEST_CASE(GenerateAndDelete)
 {
 	{
-		const TestArray a;
+		const TestArray arr;
 	}
 	BOOST_CHECK(active.empty());
 }
 
-BOOST_AUTO_TEST_CASE(generate_move_and_delete)
+BOOST_AUTO_TEST_CASE(GenerateMoveAndDelete)
 {
 	{
-		TestArray a;
+		TestArray arr1;
 		BOOST_CHECK_EQUAL(TestArray::size(), active.size());
-		const TestArray b {std::move(a)};
+		const TestArray arr2 {std::move(arr1)};
 		BOOST_CHECK_EQUAL(TestArray::size(), active.size());
 	}
 	BOOST_CHECK(active.empty());
@@ -56,22 +58,22 @@ BOOST_AUTO_TEST_CASE(generate_move_and_delete)
 constexpr std::array TRIANGLE_STRIP_IN {0, 1, 2, 3, 4, 5};
 static_assert(std::distance(strip_begin(TRIANGLE_STRIP_IN), strip_end(TRIANGLE_STRIP_IN)) == 4);
 
-BOOST_AUTO_TEST_CASE(triangle_strip_iter)
+BOOST_AUTO_TEST_CASE(TriangleStripIter)
 {
 	constexpr std::array TRIANGLE_STRIP_EXPECTED {0, 1, 2, 2, 1, 3, 2, 3, 4, 4, 3, 5};
 
 	std::vector<int> out;
-	std::for_each(strip_begin(TRIANGLE_STRIP_IN), strip_end(TRIANGLE_STRIP_IN), [&out](const auto & t) {
-		const auto [a, b, c] = t;
-		out.push_back(a);
-		out.push_back(b);
-		out.push_back(c);
+	std::for_each(strip_begin(TRIANGLE_STRIP_IN), strip_end(TRIANGLE_STRIP_IN), [&out](const auto & triangle) {
+		const auto [corner1, corner2, corner3] = triangle;
+		out.push_back(corner1);
+		out.push_back(corner2);
+		out.push_back(corner3);
 	});
 	BOOST_REQUIRE_EQUAL(out.size(), (TRIANGLE_STRIP_IN.size() - 2) * 3);
 	BOOST_CHECK_EQUAL_COLCOL(out, TRIANGLE_STRIP_EXPECTED);
 }
 
-BOOST_AUTO_TEST_CASE(triangle_strip_range_adapter)
+BOOST_AUTO_TEST_CASE(TriangleStripRangeAdapter)
 {
 	using TriTuple = std::tuple<int, int, int>;
 	std::vector<TriTuple> outRange;
@@ -82,7 +84,7 @@ BOOST_AUTO_TEST_CASE(triangle_strip_range_adapter)
 
 using MergeCloseData = std::tuple<std::vector<int>, int, std::vector<int>>;
 
-BOOST_DATA_TEST_CASE(mergeCloseInts,
+BOOST_DATA_TEST_CASE(MergeCloseInts,
 		boost::unit_test::data::make<MergeCloseData>({
 				{{0}, 0, {0}},
 				{{0, 1}, 0, {0, 1}},
@@ -112,7 +114,7 @@ BOOST_DATA_TEST_CASE(mergeCloseInts,
 	BOOST_CHECK_EQUAL_COLCOL(mutableCollection, expected);
 }
 
-BOOST_AUTO_TEST_CASE(aabb_from_points)
+BOOST_AUTO_TEST_CASE(AABBFromPoints)
 {
 	const auto aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(std::vector<GlobalPosition3D> {
 			{1, 2, 3},

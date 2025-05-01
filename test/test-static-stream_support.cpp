@@ -14,7 +14,7 @@ static_assert(NonStringIterableCollection<std::array<char, 1>>);
 static_assert(!NonStringIterableCollection<std::string>);
 static_assert(!NonStringIterableCollection<std::string_view>);
 
-static_assert(requires(std::vector<int> i, std::ostream & o) { o << i; });
-static_assert(requires(std::array<int, 10> i, std::ostream & o) { o << i; });
-static_assert(requires(std::set<int> i, std::ostream & o) { o << i; });
-static_assert(requires(std::map<int, int> i, std::ostream & o) { o << i; });
+static_assert(requires(std::vector<int> input, std::ostream & strm) { strm << input; });
+static_assert(requires(std::array<int, 10> input, std::ostream & strm) { strm << input; });
+static_assert(requires(std::set<int> input, std::ostream & strm) { strm << input; });
+static_assert(requires(std::map<int, int> input, std::ostream & strm) { strm << input; });

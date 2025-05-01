@@ -10,7 +10,7 @@ using IntegerVectorPack = pack<int, std::vector>;
 
 BOOST_FIXTURE_TEST_SUITE(pint, IntegerVectorPack)
 
-BOOST_AUTO_TEST_CASE(basics)
+BOOST_AUTO_TEST_CASE(Basics)
 {
 	BOOST_CHECK_EQUAL(size(), 0);
 	BOOST_CHECK_NO_THROW(emplace(1));

@@ -30,7 +30,7 @@ struct TestObject : public Persistence::Persistable {
 	TestObject() = default;
 
 	float flt {};
-	std::string str {};
+	std::string str;
 	bool bl {};
 	RelativePosition3D pos {};
 	GlobalPosition3D gpos {};

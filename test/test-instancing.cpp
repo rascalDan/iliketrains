@@ -11,36 +11,38 @@
 
 BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
-struct TestInstanceVertices : public InstanceVertices<int> {
-	void
-	checkReverseIndex(std::source_location ctx = std::source_location::current())
-	{
-		BOOST_TEST_CONTEXT(ctx.function_name() << ":" << ctx.line()) {
-			std::vector<size_t> genIndexIndex(size(), npos);
-			for (size_t i {}; i < index.size(); i++) {
-				if (index[i] != npos) {
-					BOOST_REQUIRE_EQUAL(genIndexIndex.at(index[i]), npos);
-					genIndexIndex.at(index[i]) = i;
+namespace {
+	struct TestInstanceVertices : public InstanceVertices<int> {
+		void
+		checkReverseIndex(std::source_location ctx = std::source_location::current())
+		{
+			BOOST_TEST_CONTEXT(ctx.function_name() << ":" << ctx.line()) {
+				std::vector<size_t> genIndexIndex(size(), npos);
+				for (size_t i {}; i < index.size(); i++) {
+					if (index[i] != npos) {
+						BOOST_REQUIRE_EQUAL(genIndexIndex.at(index[i]), npos);
+						genIndexIndex.at(index[i]) = i;
+					}
+				}
+
+				BOOST_TEST_CONTEXT(reverseIndex << genIndexIndex) {
+					BOOST_CHECK_EQUAL_COLCOL(reverseIndex, genIndexIndex);
 				}
 			}
-
-			BOOST_TEST_CONTEXT(reverseIndex << genIndexIndex) {
-				BOOST_CHECK_EQUAL_COLCOL(reverseIndex, genIndexIndex);
-			}
 		}
-	}
-};
+	};
+}
 
 BOOST_FIXTURE_TEST_SUITE(i, TestInstanceVertices)
 
-BOOST_AUTO_TEST_CASE(createDestroy)
+BOOST_AUTO_TEST_CASE(CreateDestroy)
 {
 	BOOST_CHECK(unused.empty());
 	BOOST_CHECK(index.empty());
 	BOOST_CHECK(reverseIndex.empty());
 }
 
-BOOST_AUTO_TEST_CASE(acquireRelease)
+BOOST_AUTO_TEST_CASE(AcquireRelease)
 {
 	{
 		auto proxy = acquire();
@@ -58,7 +60,7 @@ BOOST_AUTO_TEST_CASE(acquireRelease)
 	BOOST_CHECK(reverseIndex.empty());
 }
 
-BOOST_AUTO_TEST_CASE(acquireReleaseMove)
+BOOST_AUTO_TEST_CASE(AcquireReleaseMove)
 {
 	{
 		auto proxy1 = acquire();
@@ -75,7 +77,7 @@ BOOST_AUTO_TEST_CASE(acquireReleaseMove)
 	BOOST_CHECK(reverseIndex.empty());
 }
 
-BOOST_AUTO_TEST_CASE(autoMapUnmap)
+BOOST_AUTO_TEST_CASE(AutoMapUnmap)
 {
 	{
 		auto proxy = acquire();
@@ -88,7 +90,7 @@ BOOST_AUTO_TEST_CASE(autoMapUnmap)
 	BOOST_CHECK_EQUAL(0, size());
 }
 
-BOOST_AUTO_TEST_CASE(initialize)
+BOOST_AUTO_TEST_CASE(Initialize)
 {
 	auto proxy = acquire(5);
 	const auto & constProxy = proxy;
@@ -97,20 +99,20 @@ BOOST_AUTO_TEST_CASE(initialize)
 	BOOST_CHECK_EQUAL(constProxy.get(), constProxy.get());
 }
 
-BOOST_AUTO_TEST_CASE(resize)
+BOOST_AUTO_TEST_CASE(Resize)
 {
 	constexpr auto COUNT = 500;
 	std::vector<decltype(acquire())> proxies;
 	std::vector<int> expected;
-	for (auto n = 0; n < COUNT; n++) {
-		proxies.push_back(acquire(n));
-		expected.emplace_back(n);
+	for (auto value = 0; value < COUNT; value++) {
+		proxies.push_back(acquire(value));
+		expected.emplace_back(value);
 	}
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), data(), data() + COUNT);
 	BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), proxies.begin(), proxies.end());
 }
 
-BOOST_AUTO_TEST_CASE(shuffle)
+BOOST_AUTO_TEST_CASE(Shuffle)
 {
 	std::vector<decltype(acquire())> proxies;
 	BOOST_CHECK_EQUAL(0, proxies.emplace_back(acquire(0)));
@@ -176,30 +178,33 @@ BOOST_AUTO_TEST_CASE(shuffle)
 	checkReverseIndex();
 }
 
-BOOST_DATA_TEST_CASE(shuffle_random, boost::unit_test::data::xrange(0, 10), x)
+BOOST_DATA_TEST_CASE(ShuffleRandom, boost::unit_test::data::xrange(0, 10), iteration)
 {
-	std::ignore = x;
+	std::ignore = iteration;
 	std::mt19937 gen(std::random_device {}());
 	std::map<int, InstanceVertices<int>::InstanceProxy> proxies;
-	const std::string_view actions = "aaaaaaaarararrraarrrararararaarrrarararararararararraarrrraaaarararaararar";
-	int n {};
-	for (const auto action : actions) {
+	static constexpr std::string_view ACTIONS
+			= "aaaaaaaarararrraarrrararararaarrrarararararararararraarrrraaaarararaararar";
+	int count {};
+	for (const auto action : ACTIONS) {
 		switch (action) {
+			default:
+				std::unreachable();
 			case 'a':
-				BOOST_REQUIRE_EQUAL(n, proxies.emplace(n, acquire(n)).first->second);
-				n++;
+				BOOST_REQUIRE_EQUAL(count, proxies.emplace(count, acquire(count)).first->second);
+				count++;
 				break;
 			case 'r':
 				BOOST_REQUIRE(!proxies.empty());
-				auto e = std::next(proxies.begin(),
+				auto toErase = std::next(proxies.begin(),
 						std::uniform_int_distribution<> {0, static_cast<int>(proxies.size() - 1)}(gen));
-				proxies.erase(e);
+				proxies.erase(toErase);
 				break;
 		}
 
 		BOOST_REQUIRE_EQUAL(size(), proxies.size());
-		for (const auto & [n, p] : proxies) {
-			BOOST_REQUIRE_EQUAL(n, p);
+		for (const auto & [value, proxy] : proxies) {
+			BOOST_REQUIRE_EQUAL(value, proxy);
 		}
 		std::set<size_t> iused;
 		for (size_t i {}; i < index.size(); i++) {
@@ -219,25 +224,25 @@ BOOST_DATA_TEST_CASE(shuffle_random, boost::unit_test::data::xrange(0, 10), x)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(partition_by, *boost::unit_test::timeout(1))
+BOOST_AUTO_TEST_CASE(PartitionBy, *boost::unit_test::timeout(1))
 {
 	std::mt19937 gen(std::random_device {}());
 	std::uniform_int_distribution<int> dist(0, 100000);
-	static constexpr auto N = 1000;
-	reserve(N);
+	static constexpr auto COUNT = 1000;
+	reserve(COUNT);
 	std::vector<decltype(acquire(0))> instances;
-	instances.reserve(N);
+	instances.reserve(COUNT);
 	// At least one of each
 	instances.push_back(acquire(1));
 	instances.push_back(acquire(3));
-	while (instances.size() < N) {
+	while (instances.size() < COUNT) {
 		instances.push_back(acquire(dist(gen)));
 	}
 	const std::vector<int> values(instances.begin(), instances.end());
-	BOOST_REQUIRE_EQUAL(size(), N);
+	BOOST_REQUIRE_EQUAL(size(), COUNT);
 
-	const auto pred = [](auto x) {
-		return (x % 3) == 0;
+	const auto pred = [](auto value) {
+		return (value % 3) == 0;
 	};
 	auto matchedEnd = partition(pred);
 	// The underlying data is partitioned...

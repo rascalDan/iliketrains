@@ -11,7 +11,7 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(GeoMutation);
 
 BOOST_TEST_DECORATOR(*boost::unit_test::timeout(2));
 
-BOOST_DATA_TEST_CASE(deformLogical,
+BOOST_DATA_TEST_CASE(DeformLogical,
 		boost::unit_test::data::make<Something>({
 				{"nochange", [](GeoData &) {}, 16, 33, 18}, // No change base case
 				{"simple",

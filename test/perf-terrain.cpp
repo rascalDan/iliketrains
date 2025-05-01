@@ -5,7 +5,7 @@
 #include <benchmark/benchmark.h>
 
 namespace {
-	const TestMainWindowAppBase window;
+	const TestMainWindowAppBase WINDOW;
 
 	void
 	terrainMeshgen(benchmark::State & state)

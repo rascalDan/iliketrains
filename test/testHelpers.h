@@ -11,34 +11,36 @@ template<typename T>
 decltype(auto)
 loadFixtureJson(const std::filesystem::path & path)
 {
-	std::ifstream in {FIXTURESDIR / path};
-	return Persistence::JsonParsePersistence {}.loadState<std::vector<T>>(in);
+	std::ifstream inputStream {FIXTURESDIR / path};
+	return Persistence::JsonParsePersistence {}.loadState<std::vector<T>>(inputStream);
 }
+
+extern const std::filesystem::path ANALYSIS_DIRECTORY;
 
 #define BOOST_CHECK_CLOSE_VEC(a_, b_) \
 	{ \
-		const auto a {a_}, b {b_}; \
-		BOOST_TEST_CONTEXT("BOOST_CHECK_CLOSE_VEC(" << std::setprecision(8) << a << ", " << b << ")") { \
-			BOOST_CHECK_LT(glm::length(a - b), 0.1F); \
+		const auto left_ {a_}, right_ {b_}; \
+		BOOST_TEST_CONTEXT("BOOST_CHECK_CLOSE_VEC(" << std::setprecision(8) << left_ << ", " << right_ << ")") { \
+			BOOST_CHECK_LT(glm::length(left_ - right_), 0.1F); \
 		} \
 	}
 
 #define BOOST_CHECK_CLOSE_VECI(a_, b_) \
 	{ \
-		const auto a {a_}, b {b_}; \
-		BOOST_TEST_CONTEXT("BOOST_CHECK_CLOSE_VEC(" << std::setprecision(8) << a << ", " << b << ")") { \
-			BOOST_CHECK_LE(std::abs(a.x - b.x), 1); \
-			BOOST_CHECK_LE(std::abs(a.y - b.y), 1); \
-			BOOST_CHECK_LE(std::abs(a.z - b.z), 1); \
+		const auto left_ {a_}, right_ {b_}; \
+		BOOST_TEST_CONTEXT("BOOST_CHECK_CLOSE_VEC(" << std::setprecision(8) << left_ << ", " << right_ << ")") { \
+			BOOST_CHECK_LE(std::abs(left_.x - right_.x), 1); \
+			BOOST_CHECK_LE(std::abs(left_.y - right_.y), 1); \
+			BOOST_CHECK_LE(std::abs(left_.z - right_.z), 1); \
 		} \
 	}
 
 #define BOOST_CHECK_BETWEEN(a_, b_, c_) \
 	{ \
-		const auto a {a_}, b {b_}, c {c_}; \
-		BOOST_TEST_CONTEXT("BOOST_CHECK_BETWEEN(" << a << ", " << b << ", " << c << ")") { \
-			BOOST_CHECK_LE(b, a); \
-			BOOST_CHECK_GE(c, a); \
+		const auto value_ {a_}, min_ {b_}, max_ {c_}; \
+		BOOST_TEST_CONTEXT("BOOST_CHECK_BETWEEN(" << min_ << " <= " << value_ << " <= " << max_ << ")") { \
+			BOOST_CHECK_LE(min_, value_); \
+			BOOST_CHECK_GE(max_, value_); \
 		} \
 	}
 #define BOOST_REQUIRE_THEN(VAR, EXPR) \

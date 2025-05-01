@@ -14,30 +14,30 @@ template<typename E> constexpr std::array VALID_VALUES {E::Aa, E::B, E::C};
 constexpr std::array INVALID_VALUES {-1, 3, 20};
 
 #define TESTS_FOR_TYPE(TYPE) \
-	BOOST_DATA_TEST_CASE(invalid_check_##TYPE, INVALID_VALUES, input) \
+	BOOST_DATA_TEST_CASE(InvalidCheck##TYPE, INVALID_VALUES, input) \
 	{ \
 		BOOST_CHECK(!EnumDetails<TYPE>::isValid(static_cast<TYPE>(input))); \
 	} \
-	BOOST_DATA_TEST_CASE(invalid_parse_##TYPE, INVALID_NAMES, input) \
+	BOOST_DATA_TEST_CASE(InvalidParse##TYPE, INVALID_NAMES, input) \
 	{ \
 		BOOST_CHECK(!EnumDetails<TYPE>::parse(input).has_value()); \
 	} \
-	BOOST_DATA_TEST_CASE(invalid_to_string_##TYPE, INVALID_VALUES, input) \
+	BOOST_DATA_TEST_CASE(InvalidToString##TYPE, INVALID_VALUES, input) \
 	{ \
 		BOOST_CHECK(!EnumDetails<TYPE>::toString(static_cast<TYPE>(input)).has_value()); \
 	} \
-	BOOST_DATA_TEST_CASE(valid_check_##TYPE, VALID_VALUES<TYPE>, input) \
+	BOOST_DATA_TEST_CASE(ValidCheck##TYPE, VALID_VALUES<TYPE>, input) \
 	{ \
 		BOOST_CHECK(EnumDetails<TYPE>::isValid(input)); \
 	} \
-	BOOST_DATA_TEST_CASE(valid_parse_##TYPE, VALID_NAMES ^ VALID_VALUES<TYPE>, input, output) \
+	BOOST_DATA_TEST_CASE(ValidParse##TYPE, VALID_NAMES ^ VALID_VALUES<TYPE>, input, output) \
 	{ \
 		const auto parsed = EnumDetails<TYPE>::parse(input); \
 		BOOST_CHECK_IF(parsedOK, parsed.has_value()) { \
 			BOOST_CHECK_EQUAL(parsed.value(), output); \
 		} \
 	} \
-	BOOST_DATA_TEST_CASE(valid_to_string_##TYPE, VALID_VALUES<TYPE> ^ VALID_NAMES, input, output) \
+	BOOST_DATA_TEST_CASE(ValidToString##TYPE, VALID_VALUES<TYPE> ^ VALID_NAMES, input, output) \
 	{ \
 		const auto parsed = EnumDetails<TYPE>::toString(input); \
 		BOOST_CHECK_IF(parsedOK, parsed.has_value()) { \

@@ -8,50 +8,54 @@
 #include <special_members.h>
 #include <vector>
 
-class Base {
-public:
-	Base() = default;
-	virtual ~Base() = default;
-	DEFAULT_MOVE_COPY(Base);
+namespace {
+	class Base {
+	public:
+		Base() = default;
+		virtual ~Base() = default;
+		DEFAULT_MOVE_COPY(Base);
 
-	virtual bool
-	add()
-	{
-		total += 1;
-		return false;
-	}
+		virtual bool
+		add()
+		{
+			total += 1;
+			return false;
+		}
 
-	[[nodiscard]] virtual bool
-	yes() const
-	{
-		return true;
-	}
+		[[nodiscard]] virtual bool
+		yes() const
+		{
+			return true;
+		}
 
-	unsigned int total {0};
-};
+		unsigned int total {0};
+	};
 
-class Sub : public Base {
-public:
-	bool
-	add() override
-	{
-		total += 2;
-		return true;
-	}
-};
+	class Sub : public Base {
+	public:
+		bool
+		add() override
+		{
+			total += 2;
+			return true;
+		}
+	};
 
-class Sub1 : public Sub { };
+	class Sub1 : public Sub { };
 
-class Sub2 : public Sub { };
+	class Sub2 : public Sub { };
 
-class Base2 {
-public:
-	virtual ~Base2() = default;
-};
+	class Base2 {
+	public:
+		Base2() = default;
+		virtual ~Base2() = default;
+		DEFAULT_MOVE_COPY(Base2);
+	};
 
-class Multi : public Sub1, public Base2 { };
+	class Multi : public Sub1, public Base2 { };
 
-using TestCollection = SharedCollection<Base, Sub>;
+	using TestCollection = SharedCollection<Base, Sub>;
+}
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::iterator)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::Objects::const_iterator)
@@ -61,66 +65,66 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(TestCollection::OtherObjects<Sub>::const_iterato
 
 BOOST_FIXTURE_TEST_SUITE(tc, TestCollection)
 
-BOOST_AUTO_TEST_CASE(empty)
+BOOST_AUTO_TEST_CASE(Empty)
 {
 	BOOST_CHECK(TestCollection::empty());
 	BOOST_REQUIRE(!apply(&Base::add));
-	const auto i = applyOne(&Base::add);
-	BOOST_CHECK_EQUAL(i, end());
+	const auto appliedTo = applyOne(&Base::add);
+	BOOST_CHECK_EQUAL(appliedTo, end());
 	BOOST_CHECK(!find<Base>());
 	BOOST_CHECK(!find<Sub>());
 	BOOST_CHECK(!find<Sub1>());
 }
 
-BOOST_AUTO_TEST_CASE(a_base)
+BOOST_AUTO_TEST_CASE(ABaseApply)
 {
-	auto b = create<Base>();
+	auto base = create<Base>();
 	BOOST_CHECK_EQUAL(objects.size(), 1);
 	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
 	BOOST_REQUIRE(apply(&Base::add));
-	BOOST_CHECK_EQUAL(b->total, 1);
-	const auto i = applyOne(&Base::add);
-	BOOST_CHECK_EQUAL(i, end());
-	BOOST_CHECK_EQUAL(b.get(), find<Base>());
+	BOOST_CHECK_EQUAL(base->total, 1);
+	const auto appliedTo = applyOne(&Base::add);
+	BOOST_CHECK_EQUAL(appliedTo, end());
+	BOOST_CHECK_EQUAL(base.get(), find<Base>());
 	BOOST_CHECK(!find<Sub>());
 	BOOST_CHECK(!find<Sub1>());
 }
 
-BOOST_AUTO_TEST_CASE(emplace_others)
+BOOST_AUTO_TEST_CASE(EmplaceOthers)
 {
-	auto b = emplace(std::make_shared<Base>());
+	auto base = emplace(std::make_shared<Base>());
 	BOOST_CHECK_EQUAL(objects.size(), 1);
 	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
-	auto s = emplace(std::make_shared<Sub>());
+	auto sub = emplace(std::make_shared<Sub>());
 	BOOST_CHECK_EQUAL(objects.size(), 2);
 	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
-	BOOST_CHECK_EQUAL(b.get(), find<Base>());
-	BOOST_CHECK_EQUAL(s.get(), find<Sub>());
+	BOOST_CHECK_EQUAL(base.get(), find<Base>());
+	BOOST_CHECK_EQUAL(sub.get(), find<Sub>());
 	BOOST_CHECK(!find<Sub1>());
 }
 
-BOOST_AUTO_TEST_CASE(a_rbase)
+BOOST_AUTO_TEST_CASE(ABaseRApply)
 {
-	auto b = create<Base>();
+	auto base = create<Base>();
 	BOOST_REQUIRE(rapply(&Base::add));
-	BOOST_CHECK_EQUAL(b->total, 1);
-	const auto i = rapplyOne(&Base::add);
-	BOOST_CHECK_EQUAL(i, rend());
+	BOOST_CHECK_EQUAL(base->total, 1);
+	const auto appliedTo = rapplyOne(&Base::add);
+	BOOST_CHECK_EQUAL(appliedTo, rend());
 }
 
-BOOST_AUTO_TEST_CASE(a_sub)
+BOOST_AUTO_TEST_CASE(ASubApply)
 {
-	auto s = create<Sub>();
+	auto sub = create<Sub>();
 	BOOST_CHECK_EQUAL(objects.size(), 1);
 	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
 	BOOST_REQUIRE(apply(&Base::add));
-	BOOST_CHECK_EQUAL(s->total, 2);
-	const auto i = applyOne(&Base::add);
-	BOOST_CHECK_NE(i, end());
-	BOOST_CHECK_EQUAL(*i, s);
+	BOOST_CHECK_EQUAL(sub->total, 2);
+	const auto appliedTo = applyOne(&Base::add);
+	BOOST_CHECK_NE(appliedTo, end());
+	BOOST_CHECK_EQUAL(*appliedTo, sub);
 }
 
-BOOST_AUTO_TEST_CASE(filter)
+BOOST_AUTO_TEST_CASE(Filter)
 {
 	static_assert(TestCollection::idx<Sub>() == 0);
 	static_assert(TestCollection::idx<const Sub>() == 0);
@@ -156,7 +160,7 @@ BOOST_AUTO_TEST_CASE(filter)
 	BOOST_CHECK_EQUAL(&std::get<0>(otherObjects), &containerFor<Sub1>());
 }
 
-BOOST_AUTO_TEST_CASE(begin_end)
+BOOST_AUTO_TEST_CASE(BeginEnd)
 {
 	BOOST_CHECK_EQUAL(0, std::distance(begin(), end()));
 	create<Sub>();
@@ -164,7 +168,7 @@ BOOST_AUTO_TEST_CASE(begin_end)
 	BOOST_CHECK_EQUAL(2, std::distance(begin(), end()));
 }
 
-BOOST_AUTO_TEST_CASE(rbegin_rend)
+BOOST_AUTO_TEST_CASE(RBeginREnd)
 {
 	BOOST_CHECK_EQUAL(0, std::distance(rbegin(), rend()));
 	create<Sub>();
@@ -172,23 +176,23 @@ BOOST_AUTO_TEST_CASE(rbegin_rend)
 	BOOST_CHECK_EQUAL(2, std::distance(rbegin(), rend()));
 }
 
-BOOST_AUTO_TEST_CASE(createCreate)
+BOOST_AUTO_TEST_CASE(CreateCreate)
 {
-	auto b = findOrCreate<Base>();
-	BOOST_CHECK(b);
-	auto b2 = findOrCreate<Base>();
-	BOOST_CHECK_EQUAL(b, b2);
-	auto s = findOrCreate<Sub>();
-	BOOST_CHECK_NE(s, b);
-	auto s2 = findOrCreate<Sub>();
-	BOOST_CHECK_EQUAL(s, s2);
+	auto base1 = findOrCreate<Base>();
+	BOOST_CHECK(base1);
+	auto base2 = findOrCreate<Base>();
+	BOOST_CHECK_EQUAL(base1, base2);
+	auto sub1 = findOrCreate<Sub>();
+	BOOST_CHECK_NE(sub1, base1);
+	auto sub2 = findOrCreate<Sub>();
+	BOOST_CHECK_EQUAL(sub1, sub2);
 }
 
-BOOST_AUTO_TEST_CASE(createCreateSub)
+BOOST_AUTO_TEST_CASE(CreateCreateSub)
 {
-	auto s = findOrCreate<Sub>();
-	auto b = findOrCreate<Base>();
-	BOOST_CHECK_EQUAL(s, b);
+	auto sub = findOrCreate<Sub>();
+	auto base = findOrCreate<Base>();
+	BOOST_CHECK_EQUAL(sub, base);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -201,7 +205,7 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(TestUniqueCollection::Objects::reverse_iterator)
 
 BOOST_FIXTURE_TEST_SUITE(utc, TestUniqueCollection)
 
-BOOST_AUTO_TEST_CASE(unique_create)
+BOOST_AUTO_TEST_CASE(UniqueCreate)
 {
 	create<Base>();
 	BOOST_CHECK_EQUAL(objects.size(), 1);
@@ -211,7 +215,7 @@ BOOST_AUTO_TEST_CASE(unique_create)
 	BOOST_CHECK_EQUAL(std::get<OtherObjects<Sub>>(otherObjects).size(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(move_assign)
+BOOST_AUTO_TEST_CASE(MoveAssign)
 {
 	create<Base>();
 	create<Sub>();
@@ -229,7 +233,7 @@ BOOST_AUTO_TEST_CASE(move_assign)
 	BOOST_CHECK(other.empty());
 }
 
-BOOST_AUTO_TEST_CASE(clearAll)
+BOOST_AUTO_TEST_CASE(ClearAll)
 {
 	create<Base>();
 	create<Sub>();
@@ -241,7 +245,7 @@ BOOST_AUTO_TEST_CASE(clearAll)
 	BOOST_CHECK(std::get<OtherObjects<Sub>>(otherObjects).empty());
 }
 
-BOOST_AUTO_TEST_CASE(removeAllOfSub)
+BOOST_AUTO_TEST_CASE(RemoveAllOfSub)
 {
 	create<Base>();
 	create<Sub>();
@@ -258,7 +262,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_FIXTURE_TEST_SUITE(btc, UniqueCollection<Base>)
 
-BOOST_AUTO_TEST_CASE(no_others)
+BOOST_AUTO_TEST_CASE(NoOthers)
 {
 	create<Base>();
 	create<Sub>();
@@ -266,7 +270,7 @@ BOOST_AUTO_TEST_CASE(no_others)
 	emplace(std::make_unique<Sub>());
 }
 
-BOOST_AUTO_TEST_CASE(applyAll)
+BOOST_AUTO_TEST_CASE(ApplyAll)
 {
 	create<Base>();
 	BOOST_CHECK_EQUAL(0, apply<Sub>(&Base::add));
@@ -276,7 +280,7 @@ BOOST_AUTO_TEST_CASE(applyAll)
 	BOOST_CHECK_EQUAL(2, apply<Base>(&Base::add));
 }
 
-BOOST_AUTO_TEST_CASE(applyOneType)
+BOOST_AUTO_TEST_CASE(ApplyOneType)
 {
 	create<Base>();
 	BOOST_CHECK_EQUAL(objects.end(), applyOne<Sub>(&Base::yes));
@@ -294,7 +298,7 @@ using MultiCollection = Collection<std::unique_ptr<Base>, Multi, Sub, Base2>;
 
 BOOST_FIXTURE_TEST_SUITE(multi, MultiCollection)
 
-BOOST_AUTO_TEST_CASE(addMulti)
+BOOST_AUTO_TEST_CASE(AddMulti)
 {
 	static_assert(MultiCollection::idx<Multi>() == 0);
 	static_assert(MultiCollection::idx<Sub>() == 1);
@@ -326,7 +330,7 @@ BOOST_AUTO_TEST_CASE(addMulti)
 	BOOST_CHECK_EQUAL(size<Base2>(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(removeMulti)
+BOOST_AUTO_TEST_CASE(RemoveMulti)
 {
 	create<Base>();
 	create<Sub>();
@@ -359,39 +363,39 @@ BOOST_AUTO_TEST_CASE(removeMulti)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_CASE(wrapped_ptr_file_cons)
+BOOST_AUTO_TEST_CASE(WrappedPtrFileCons)
 {
 	using FilePtr = wrapped_ptr<FILE, &fclose>;
-	const FilePtr fp {fopen, "/dev/null", "r"};
-	BOOST_REQUIRE(fp);
-	BOOST_CHECK_NO_THROW(fflush(fp));
+	const FilePtr file {fopen, "/dev/null", "r"};
+	BOOST_REQUIRE(file);
+	BOOST_CHECK_NO_THROW(fflush(file));
 
-	BOOST_CHECK_EQUAL(fp.get(), fp.operator->());
-	BOOST_CHECK_EQUAL(fp.get(), fp.operator FILE *());
+	BOOST_CHECK_EQUAL(file.get(), file.operator->());
+	BOOST_CHECK_EQUAL(file.get(), file.operator FILE *());
 }
 
-BOOST_AUTO_TEST_CASE(wrapped_ptr_file_move)
+BOOST_AUTO_TEST_CASE(WrappedPtrFileMove)
 {
 	using FilePtr = wrapped_ptr<FILE, &fclose>;
-	FilePtr fp {fopen, "/dev/null", "r"};
-	BOOST_REQUIRE(fp);
+	FilePtr file {fopen, "/dev/null", "r"};
+	BOOST_REQUIRE(file);
 
-	FilePtr fp2 {std::move(fp)};
-	BOOST_REQUIRE(!fp);
+	FilePtr fp2 {std::move(file)};
+	BOOST_REQUIRE(!file);
 	BOOST_REQUIRE(fp2);
 
-	fp = std::move(fp2);
-	BOOST_REQUIRE(fp);
+	file = std::move(fp2);
+	BOOST_REQUIRE(file);
 	BOOST_REQUIRE(!fp2);
 
 	FilePtr fp3 {fopen, "/dev/null", "r"};
-	fp = std::move(fp3);
+	file = std::move(fp3);
 }
 
-BOOST_AUTO_TEST_CASE(wrapped_ptr_file_typed)
+BOOST_AUTO_TEST_CASE(WrappedPtrFileTyped)
 {
 	using FilePtr = wrapped_ptrt<FILE, &fopen, &fclose>;
-	const FilePtr fp {"/dev/null", "r"};
-	BOOST_REQUIRE(fp);
-	BOOST_CHECK_NO_THROW(fflush(fp));
+	const FilePtr file {"/dev/null", "r"};
+	BOOST_REQUIRE(file);
+	BOOST_CHECK_NO_THROW(fflush(file));
 }

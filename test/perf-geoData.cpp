@@ -2,13 +2,13 @@
 #include <game/geoData.h>
 
 namespace {
-	const GeoData geoDataFixture {GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")};
+	const GeoData GEO_DATA_FIXTURE {GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc")};
 
 	void
 	terrainFindPoint(benchmark::State & state)
 	{
 		for (auto loop : state) {
-			benchmark::DoNotOptimize(geoDataFixture.findPoint({315555000, 495556000}));
+			benchmark::DoNotOptimize(GEO_DATA_FIXTURE.findPoint({315555000, 495556000}));
 		}
 	}
 
@@ -16,9 +16,9 @@ namespace {
 	terrainWalk(benchmark::State & state)
 	{
 		const glm::vec2 point {310001000, 490000000};
-		const GeoData::PointFace start {point, geoDataFixture.findPoint(point)};
+		const GeoData::PointFace start {point, GEO_DATA_FIXTURE.findPoint(point)};
 		for (auto loop : state) {
-			geoDataFixture.walk(start, {319999000, 500000000}, [](auto step) {
+			GEO_DATA_FIXTURE.walk(start, {319999000, 500000000}, [](auto step) {
 				benchmark::DoNotOptimize(step);
 			});
 		}
@@ -28,7 +28,7 @@ namespace {
 	terrainWalkBoundary(benchmark::State & state)
 	{
 		for (auto loop : state) {
-			geoDataFixture.boundaryWalk([](auto heh) {
+			GEO_DATA_FIXTURE.boundaryWalk([](auto heh) {
 				benchmark::DoNotOptimize(heh);
 			});
 		}
@@ -43,7 +43,7 @@ namespace {
 				{315655000, 495557000, 0},
 		}};
 		for (auto loop : state) {
-			auto geoData {geoDataFixture};
+			auto geoData {GEO_DATA_FIXTURE};
 			benchmark::DoNotOptimize(geoData.setHeights(points, GeoData::SetHeightsOpts {.surface = nullptr}));
 		}
 	}

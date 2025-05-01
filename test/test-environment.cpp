@@ -2,7 +2,6 @@
 #include "testHelpers.h"
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
-#include <cmath>
 #include <stream_support.h>
 
 #include <chronology.h>
@@ -11,25 +10,27 @@
 #include <gfx/lightDirection.h>
 #include <maths.h>
 
-using sunPosTestData = std::tuple<Direction2D, time_t, Direction2D>;
-using sunDirTestData = std::tuple<Direction2D, Direction3D, float, float>;
-constexpr Direction2D Doncaster = {-1.1, 53.5};
-constexpr Direction2D NewYork = {74.0, 40.7};
-constexpr Direction2D Syndey = {-151.2, -33.9};
-constexpr Direction2D EqGM = {};
+namespace {
+	using SunPosTestData = std::tuple<Direction2D, time_t, Direction2D>;
+	using SunDirTestData = std::tuple<Direction2D, Direction3D, float, float>;
+	constexpr Direction2D DONCASTER = {-1.1, 53.5};
+	constexpr Direction2D NEW_YORK = {74.0, 40.7};
+	constexpr Direction2D SYNDEY = {-151.2, -33.9};
+	constexpr Direction2D EQ_GM = {};
+}
 
-BOOST_DATA_TEST_CASE(sun_position,
-		boost::unit_test::data::make<sunPosTestData>({
-				{EqGM, "2024-01-02T00:00:00"_time_t, {181.52F, -66.86F}},
-				{EqGM, "2024-01-02T06:00:00"_time_t, {113.12F, -0.85F}},
-				{EqGM, "2024-01-02T06:30:00"_time_t, {113.12F, 6.05F}},
-				{EqGM, "2024-01-02T12:00:00"_time_t, {177.82F, 66.97F}},
-				{EqGM, "2024-01-02T18:00:00"_time_t, {246.99F, 0.90F}},
-				{EqGM, "2024-01-03T00:00:00"_time_t, {181.52F, -67.04F}},
-				{EqGM, "2024-06-29T12:00:00"_time_t, {2.1F, 66.80F}},
-				{Doncaster, "2024-06-29T12:00:00"_time_t, {176.34F, 59.64F}},
-				{NewYork, "2024-06-29T12:00:00"_time_t, {278.04F, 27.34F}},
-				{Syndey, "2024-06-29T12:00:00"_time_t, {106.13F, -63.29F}},
+BOOST_DATA_TEST_CASE(SunPosition,
+		boost::unit_test::data::make<SunPosTestData>({
+				{EQ_GM, "2024-01-02T00:00:00"_time_t, {181.52F, -66.86F}},
+				{EQ_GM, "2024-01-02T06:00:00"_time_t, {113.12F, -0.85F}},
+				{EQ_GM, "2024-01-02T06:30:00"_time_t, {113.12F, 6.05F}},
+				{EQ_GM, "2024-01-02T12:00:00"_time_t, {177.82F, 66.97F}},
+				{EQ_GM, "2024-01-02T18:00:00"_time_t, {246.99F, 0.90F}},
+				{EQ_GM, "2024-01-03T00:00:00"_time_t, {181.52F, -67.04F}},
+				{EQ_GM, "2024-06-29T12:00:00"_time_t, {2.1F, 66.80F}},
+				{DONCASTER, "2024-06-29T12:00:00"_time_t, {176.34F, 59.64F}},
+				{NEW_YORK, "2024-06-29T12:00:00"_time_t, {278.04F, 27.34F}},
+				{SYNDEY, "2024-06-29T12:00:00"_time_t, {106.13F, -63.29F}},
 		}),
 		position, timeOfYear, expSunPos)
 {
@@ -38,8 +39,8 @@ BOOST_DATA_TEST_CASE(sun_position,
 	BOOST_CHECK_CLOSE(sunPos.y, expSunPos.y, 1.F);
 }
 
-BOOST_DATA_TEST_CASE(sun_direction,
-		boost::unit_test::data::make<sunDirTestData>({
+BOOST_DATA_TEST_CASE(SunDirection,
+		boost::unit_test::data::make<SunDirTestData>({
 				{{0.F, 0.F}, south, 0.314F, 0.0087F},
 				{{90.F, 0.F}, west, 0.314F, 0.0087F},
 				{{-90.F, 0.F}, east, 0.314F, 0.0087F},
@@ -55,9 +56,9 @@ BOOST_DATA_TEST_CASE(sun_direction,
 		}),
 		position, direction, amb, dir)
 {
-	const LightDirection ld {position * degreesToRads};
-	BOOST_CHECK_CLOSE_VEC(ld.vector(), direction);
-	BOOST_CHECK_CLOSE(glm::length(ld.vector()), 1.F, 1);
-	BOOST_CHECK_CLOSE(ld.ambient(), amb, 5);
-	BOOST_CHECK_CLOSE(ld.directional(), dir, 5);
+	const LightDirection lightDir {position * degreesToRads};
+	BOOST_CHECK_CLOSE_VEC(lightDir.vector(), direction);
+	BOOST_CHECK_CLOSE(glm::length(lightDir.vector()), 1.F, 1);
+	BOOST_CHECK_CLOSE(lightDir.ambient(), amb, 5);
+	BOOST_CHECK_CLOSE(lightDir.directional(), dir, 5);
 }

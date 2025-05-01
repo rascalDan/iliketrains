@@ -21,122 +21,126 @@
 
 BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
-struct TestLinkS;
+namespace {
+	struct TestLinkS;
 
-struct TestLink : public virtual Link {
-	using StraightLink = TestLinkS;
-	using CurveLink = TestLinkS;
-};
+	struct TestLink : public virtual Link {
+		using StraightLink = TestLinkS;
+		using CurveLink = TestLinkS;
+	};
 
-struct TestLinkS : public TestLink, public LinkStraight {
-	TestLinkS(NetworkLinkHolder<TestLinkS> & network, const Node::Ptr & a, const Node::Ptr & b) :
-		TestLinkS {network, a, b, (a->pos - b->pos)}
-	{
-	}
+	struct TestLinkS : public TestLink, public LinkStraight {
+		TestLinkS(NetworkLinkHolder<TestLinkS> & network, const Node::Ptr & nodeA, const Node::Ptr & nodeB) :
+			TestLinkS {network, nodeA, nodeB, (nodeA->pos - nodeB->pos)}
+		{
+		}
 
-	TestLinkS(NetworkLinkHolder<TestLinkS> &, Node::Ptr a, Node::Ptr b, RelativePosition2D l) :
-		Link {{std::move(a), 0}, {std::move(b), pi}, glm::length(l)}
-	{
-	}
+		TestLinkS(NetworkLinkHolder<TestLinkS> &, Node::Ptr nodeA, Node::Ptr nodeB, RelativePosition2D difference) :
+			Link {{.node = std::move(nodeA), .dir = 0}, {.node = std::move(nodeB), .dir = pi}, glm::length(difference)}
+		{
+		}
 
-	struct Vertex { };
+		struct Vertex { };
 
-	TestLinkS(NetworkLinkHolder<TestLinkS> &, Node::Ptr a, Node::Ptr b, float l) :
-		Link {{std::move(a), 0}, {std::move(b), pi}, l}
-	{
-	}
-};
+		TestLinkS(NetworkLinkHolder<TestLinkS> &, Node::Ptr nodeA, Node::Ptr nodeB, float length) :
+			Link {{.node = std::move(nodeA), .dir = 0}, {.node = std::move(nodeB), .dir = pi}, length}
+		{
+		}
+	};
 
-constexpr GlobalPosition3D p000 {0, 0, 500}, p100 {10500, 0, 1000}, p200 {20100, 0, 2000}, p300 {30700, 0, 3000};
-constexpr GlobalPosition3D p110 {10300, 10400, 4000};
+	constexpr GlobalPosition3D P000 {0, 0, 500}, P100 {10500, 0, 1000}, P200 {20100, 0, 2000}, P300 {30700, 0, 3000};
+	constexpr GlobalPosition3D P110 {10300, 10400, 4000};
+}
 
 template<> NetworkLinkHolder<TestLinkS>::NetworkLinkHolder() = default;
 
-struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
-	TestNetwork() : NetworkOf<TestLink, TestLinkS> {RESDIR "rails.jpg"}
-	{
-		//       0        1        2
-		// p000 <-> p100 <-> p200 <-> p300
-		//   \        |       /
-		//    \       5      /
-		//     3      |     4
-		//      \-> p110 <-/
-		addLink<TestLinkS>(p000, p100, 1.F);
-		addLink<TestLinkS>(p100, p200, 1.F);
-		addLink<TestLinkS>(p200, p300, 1.F);
-		addLink<TestLinkS>(p000, p110, 2.F);
-		addLink<TestLinkS>(p200, p110, 2.F);
-		addLink<TestLinkS>(p100, p110, 1.F);
-	}
+namespace {
+	struct TestNetwork : public NetworkOf<TestLink, TestLinkS> {
+		TestNetwork() : NetworkOf<TestLink, TestLinkS> {RESDIR "rails.jpg"}
+		{
+			//       0        1        2
+			// p000 <-> p100 <-> p200 <-> p300
+			//   \        |       /
+			//    \       5      /
+			//     3      |     4
+			//      \-> p110 <-/
+			addLink<TestLinkS>(P000, P100, 1.F);
+			addLink<TestLinkS>(P100, P200, 1.F);
+			addLink<TestLinkS>(P200, P300, 1.F);
+			addLink<TestLinkS>(P000, P110, 2.F);
+			addLink<TestLinkS>(P200, P110, 2.F);
+			addLink<TestLinkS>(P100, P110, 1.F);
+		}
 
-	void
-	render(const SceneShader &, const Frustum &) const override
-	{
-	}
+		void
+		render(const SceneShader &, const Frustum &) const override
+		{
+		}
 
-	const Surface *
-	getBaseSurface() const override
-	{
-		return nullptr;
-	}
+		const Surface *
+		getBaseSurface() const override
+		{
+			return nullptr;
+		}
 
-	RelativeDistance
-	getBaseWidth() const override
-	{
-		return 5'700;
-	}
-};
+		RelativeDistance
+		getBaseWidth() const override
+		{
+			return 5'700;
+		}
+	};
 
-const auto VALID_NODES = boost::unit_test::data::make<GlobalPosition3D>({
-		p000,
-		p100,
-		p200,
-		p300,
-});
-const auto INVALID_NODES = boost::unit_test::data::make<GlobalPosition3D>({
-		{1000, 0, 0},
-		{0, 1000, 0},
-		{0, 0, 1000},
-});
+	constexpr auto VALID_NODES = std::array<GlobalPosition3D, 4>({
+			P000,
+			P100,
+			P200,
+			P300,
+	});
+	constexpr auto INVALID_NODES = std::array<GlobalPosition3D, 3>({
+			{1000, 0, 0},
+			{0, 1000, 0},
+			{0, 0, 1000},
+	});
+}
 
 BOOST_FIXTURE_TEST_SUITE(tn, TestNetwork)
 
-BOOST_DATA_TEST_CASE(findNodeAt_valid, VALID_NODES, p)
+BOOST_DATA_TEST_CASE(FindNodeAtValid, VALID_NODES, point)
 {
-	auto n = findNodeAt(p);
-	BOOST_REQUIRE(n);
-	BOOST_CHECK_EQUAL(n->pos, p);
+	auto node = findNodeAt(point);
+	BOOST_REQUIRE(node);
+	BOOST_CHECK_EQUAL(node->pos, point);
 }
 
-BOOST_DATA_TEST_CASE(findNodeAt_invalid, INVALID_NODES, p)
+BOOST_DATA_TEST_CASE(FindNodeAtInvalid, INVALID_NODES, point)
 {
-	BOOST_REQUIRE(!findNodeAt(p));
+	BOOST_REQUIRE(!findNodeAt(point));
 }
 
-BOOST_DATA_TEST_CASE(nodeAt, VALID_NODES + INVALID_NODES, p)
+BOOST_DATA_TEST_CASE(NodeAt, VALID_NODES + INVALID_NODES, point)
 {
-	auto n = nodeAt(p);
-	BOOST_REQUIRE(n);
-	BOOST_CHECK_EQUAL(n->pos, p);
+	auto node = nodeAt(point);
+	BOOST_REQUIRE(node);
+	BOOST_CHECK_EQUAL(node->pos, point);
 }
 
-BOOST_DATA_TEST_CASE(newNodeAt_existing, VALID_NODES, p)
+BOOST_DATA_TEST_CASE(NewNodeAtExisting, VALID_NODES, point)
 {
-	auto n = newNodeAt(p);
-	BOOST_CHECK_EQUAL(n.second, Network::NodeIs::InNetwork);
-	BOOST_REQUIRE(n.first);
-	BOOST_CHECK_EQUAL(n.first->pos, p);
+	auto node = newNodeAt(point);
+	BOOST_CHECK_EQUAL(node.second, Network::NodeIs::InNetwork);
+	BOOST_REQUIRE(node.first);
+	BOOST_CHECK_EQUAL(node.first->pos, point);
 }
 
-BOOST_DATA_TEST_CASE(newNodeAt_new, INVALID_NODES, p)
+BOOST_DATA_TEST_CASE(NewNodeAtNew, INVALID_NODES, point)
 {
-	auto n = newNodeAt(p);
-	BOOST_CHECK_EQUAL(n.second, Network::NodeIs::NotInNetwork);
-	BOOST_REQUIRE(n.first);
-	BOOST_CHECK_EQUAL(n.first->pos, p);
+	auto node = newNodeAt(point);
+	BOOST_CHECK_EQUAL(node.second, Network::NodeIs::NotInNetwork);
+	BOOST_REQUIRE(node.first);
+	BOOST_CHECK_EQUAL(node.first->pos, point);
 }
 
-BOOST_AUTO_TEST_CASE(network_joins)
+BOOST_AUTO_TEST_CASE(NetworkJoins)
 {
 	// Ends
 	BOOST_CHECK(links[2]->ends[1].nexts.empty());
@@ -160,75 +164,67 @@ BOOST_AUTO_TEST_CASE(network_joins)
 	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].second, 1);
 }
 
-BOOST_DATA_TEST_CASE(routeTo_nodeNotInNetwork, INVALID_NODES, dest)
+BOOST_DATA_TEST_CASE(RouteToNodeNotInNetwork, INVALID_NODES, dest)
 {
 	const auto & start = links[0]->ends[1];
 	BOOST_CHECK_THROW((void)routeFromTo(start, dest), std::out_of_range);
 }
 
-BOOST_AUTO_TEST_CASE(routeTo_noSteps)
+BOOST_AUTO_TEST_CASE(RouteToNoSteps)
 {
 	const auto & start = links[0]->ends[1];
-	auto r = this->routeFromTo(start, p100);
-	BOOST_CHECK(r.empty());
+	auto route = this->routeFromTo(start, P100);
+	BOOST_CHECK(route.empty());
 }
 
-BOOST_AUTO_TEST_CASE(routeTo_upStream_to2)
+BOOST_AUTO_TEST_CASE(RouteToUpStreamTo2)
 {
 	const auto & start = links[0]->ends[1];
-	auto r = this->routeFromTo(start, p200);
-	BOOST_REQUIRE_EQUAL(r.size(), 1);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[1].get());
+	auto route = this->routeFromTo(start, P200);
+	BOOST_REQUIRE_EQUAL(route.size(), 1);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[1].get());
 }
 
-BOOST_AUTO_TEST_CASE(routeTo_upStream_to3)
+BOOST_AUTO_TEST_CASE(RouteToUpStreamTo3)
 {
 	const auto & start = links[0]->ends[1];
-	auto r = this->routeFromTo(start, p300);
-	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[2].get());
+	auto route = this->routeFromTo(start, P300);
+	BOOST_REQUIRE_EQUAL(route.size(), 2);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[2].get());
 }
 
-BOOST_AUTO_TEST_CASE(routeTo_downStream_to0)
+BOOST_AUTO_TEST_CASE(RouteToDownStreamTo0)
 {
 	const auto & start = links[2]->ends[0];
-	auto r = this->routeFromTo(start, p000);
-	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[0].get());
+	auto route = this->routeFromTo(start, P000);
+	BOOST_REQUIRE_EQUAL(route.size(), 2);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[0].get());
 }
 
-BOOST_AUTO_TEST_CASE(routeTo_upStream_3to300)
+BOOST_AUTO_TEST_CASE(RouteToUpStream3to300)
 {
 	const auto & start = links[3]->ends[1];
-	auto r = this->routeFromTo(start, p300);
-	BOOST_REQUIRE_EQUAL(r.size(), 2);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[4].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[2].get());
+	auto route = this->routeFromTo(start, P300);
+	BOOST_REQUIRE_EQUAL(route.size(), 2);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[4].get());
+	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[2].get());
 }
 
-BOOST_AUTO_TEST_CASE(routeTo_downStream_3to300)
+BOOST_AUTO_TEST_CASE(RouteToDownStream3to300)
 {
 	const auto & start = links[3]->ends[0];
-	auto r = this->routeFromTo(start, p300);
-	BOOST_REQUIRE_EQUAL(r.size(), 3);
-	BOOST_CHECK_EQUAL(r[0].first.lock().get(), links[0].get());
-	BOOST_CHECK_EQUAL(r[1].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(r[2].first.lock().get(), links[2].get());
+	auto route = this->routeFromTo(start, P300);
+	BOOST_REQUIRE_EQUAL(route.size(), 3);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[0].get());
+	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(route[2].first.lock().get(), links[2].get());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-namespace std {
-	std::ostream &
-	operator<<(std::ostream & s, const Link::End & e)
-	{
-		return s << std::format("End[dir: {}, loc: ({}, {}, {})]", e.dir, e.node->pos.x, e.node->pos.y, e.node->pos.z);
-	}
-}
-
-BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
+BOOST_FIXTURE_TEST_CASE(TestRailNetwork, RailLinks)
 {
 	//       0        1        2
 	//   --p000 <-> p100 <-> p200 <-> p300 \         x
@@ -239,60 +235,60 @@ BOOST_FIXTURE_TEST_CASE(test_rail_network, RailLinks)
 	//  \          |             \        /
 	//   \        /                ------/
 	//    --------
-	auto l0 = addLinksBetween(p000, p100);
-	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l0.get()));
-	BOOST_CHECK_EQUAL(l0->length, ::distance(p000, p100));
-	BOOST_CHECK_CLOSE(l0->ends[0].dir, half_pi, 0.1F);
-	BOOST_CHECK_CLOSE(l0->ends[1].dir, -half_pi, 0.1F);
-	BOOST_CHECK(l0->ends[0].nexts.empty());
-	BOOST_CHECK(l0->ends[1].nexts.empty());
+	auto link0 = addLinksBetween(P000, P100);
+	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(link0.get()));
+	BOOST_CHECK_EQUAL(link0->length, ::distance(P000, P100));
+	BOOST_CHECK_CLOSE(link0->ends[0].dir, half_pi, 0.1F);
+	BOOST_CHECK_CLOSE(link0->ends[1].dir, -half_pi, 0.1F);
+	BOOST_CHECK(link0->ends[0].nexts.empty());
+	BOOST_CHECK(link0->ends[1].nexts.empty());
 
-	auto l1 = addLinksBetween(p200, p100);
-	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l1.get()));
-	BOOST_CHECK_EQUAL(l1->length, ::distance(p200, p100));
-	BOOST_CHECK_CLOSE(l1->ends[0].dir, half_pi, 0.1F);
-	BOOST_CHECK_CLOSE(l1->ends[1].dir, -half_pi, 0.1F);
-	BOOST_CHECK(l0->ends[0].nexts.empty());
-	BOOST_CHECK_EQUAL(l0->ends[1].nexts.at(0).first.lock(), l1);
-	BOOST_CHECK_EQUAL(l0->ends[1].nexts.at(0).second, 0);
-	BOOST_CHECK_EQUAL(l1->ends[0].nexts.at(0).first.lock(), l0);
-	BOOST_CHECK_EQUAL(l1->ends[0].nexts.at(0).second, 1);
-	BOOST_CHECK(l1->ends[1].nexts.empty());
+	auto link1 = addLinksBetween(P200, P100);
+	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(link1.get()));
+	BOOST_CHECK_EQUAL(link1->length, ::distance(P200, P100));
+	BOOST_CHECK_CLOSE(link1->ends[0].dir, half_pi, 0.1F);
+	BOOST_CHECK_CLOSE(link1->ends[1].dir, -half_pi, 0.1F);
+	BOOST_CHECK(link0->ends[0].nexts.empty());
+	BOOST_CHECK_EQUAL(link0->ends[1].nexts.at(0).first.lock(), link1);
+	BOOST_CHECK_EQUAL(link0->ends[1].nexts.at(0).second, 0);
+	BOOST_CHECK_EQUAL(link1->ends[0].nexts.at(0).first.lock(), link0);
+	BOOST_CHECK_EQUAL(link1->ends[0].nexts.at(0).second, 1);
+	BOOST_CHECK(link1->ends[1].nexts.empty());
 
-	auto l2 = addLinksBetween(p200, p300);
-	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(l2.get()));
-	BOOST_CHECK_EQUAL(l2->length, ::distance(p200, p300));
-	BOOST_CHECK_CLOSE(l2->ends[0].dir, half_pi, 0.1F);
-	BOOST_CHECK_CLOSE(l2->ends[1].dir, -half_pi, 0.1F);
-	BOOST_CHECK(l0->ends[0].nexts.empty());
-	BOOST_CHECK_EQUAL(l1->ends[1].nexts.at(0).first.lock(), l2);
-	BOOST_CHECK_EQUAL(l1->ends[1].nexts.at(0).second, 0);
-	BOOST_CHECK_EQUAL(l2->ends[0].nexts.at(0).first.lock(), l1);
-	BOOST_CHECK_EQUAL(l2->ends[0].nexts.at(0).second, 1);
-	BOOST_CHECK(l2->ends[1].nexts.empty());
+	auto link2 = addLinksBetween(P200, P300);
+	BOOST_CHECK(dynamic_cast<RailLinkStraight *>(link2.get()));
+	BOOST_CHECK_EQUAL(link2->length, ::distance(P200, P300));
+	BOOST_CHECK_CLOSE(link2->ends[0].dir, half_pi, 0.1F);
+	BOOST_CHECK_CLOSE(link2->ends[1].dir, -half_pi, 0.1F);
+	BOOST_CHECK(link0->ends[0].nexts.empty());
+	BOOST_CHECK_EQUAL(link1->ends[1].nexts.at(0).first.lock(), link2);
+	BOOST_CHECK_EQUAL(link1->ends[1].nexts.at(0).second, 0);
+	BOOST_CHECK_EQUAL(link2->ends[0].nexts.at(0).first.lock(), link1);
+	BOOST_CHECK_EQUAL(link2->ends[0].nexts.at(0).second, 1);
+	BOOST_CHECK(link2->ends[1].nexts.empty());
 
-	BOOST_CHECK_IF(l3, addLinksBetween(p000, p110)) {
-		BOOST_CHECK_IF(l3c, dynamic_cast<RailLinkCurve *>(l3.get())) {
-			BOOST_CHECK_CLOSE(l3c->radius, 10'300.F, 0.1F);
-			BOOST_CHECK_CLOSE(l3c->arc.length(), pi + half_pi, 0.5F);
-			BOOST_CHECK_CLOSE(l3->length, 48'563.F, 0.1F);
-			BOOST_CHECK_CLOSE(l3->ends[0].dir, -half_pi, 0.5F);
-			BOOST_CHECK_CLOSE(l3->ends[1].dir, -0.0097F, 0.5F);
-			BOOST_CHECK_EQUAL(l0->ends[0].nexts.at(0).first.lock(), l3);
-			BOOST_CHECK_EQUAL(l0->ends[0].nexts.at(0).second, 0);
-			BOOST_CHECK_EQUAL(l3->ends[0].nexts.at(0).first.lock(), l0);
-			BOOST_CHECK_EQUAL(l3->ends[0].nexts.at(0).second, 0);
-			BOOST_CHECK(l3->ends[1].nexts.empty());
+	BOOST_CHECK_IF(link3, addLinksBetween(P000, P110)) {
+		BOOST_CHECK_IF(link3c, dynamic_cast<RailLinkCurve *>(link3.get())) {
+			BOOST_CHECK_CLOSE(link3c->radius, 10'300.F, 0.1F);
+			BOOST_CHECK_CLOSE(link3c->arc.length(), pi + half_pi, 0.5F);
+			BOOST_CHECK_CLOSE(link3->length, 48'563.F, 0.1F);
+			BOOST_CHECK_CLOSE(link3->ends[0].dir, -half_pi, 0.5F);
+			BOOST_CHECK_CLOSE(link3->ends[1].dir, -0.0097F, 0.5F);
+			BOOST_CHECK_EQUAL(link0->ends[0].nexts.at(0).first.lock(), link3);
+			BOOST_CHECK_EQUAL(link0->ends[0].nexts.at(0).second, 0);
+			BOOST_CHECK_EQUAL(link3->ends[0].nexts.at(0).first.lock(), link0);
+			BOOST_CHECK_EQUAL(link3->ends[0].nexts.at(0).second, 0);
+			BOOST_CHECK(link3->ends[1].nexts.empty());
 		}
 	}
 
-	BOOST_CHECK_IF(l4, addLinksBetween(p110, p300)) {
-		BOOST_CHECK_IF(l4c, dynamic_cast<RailLinkCurve *>(l4.get())) {
-			BOOST_CHECK_CLOSE(l4c->radius, 6950.F, 0.1F);
-			BOOST_CHECK_CLOSE(l4c->arc.length(), 4.456F, 0.1F);
-			BOOST_CHECK_CLOSE(l4->length, 30'981.F, 0.1F);
-			BOOST_CHECK_BETWEEN(l4->ends[0].dir, .25F, .26F);
-			BOOST_CHECK_CLOSE(l4->ends[1].dir, half_pi, 0.1F);
+	BOOST_CHECK_IF(link4, addLinksBetween(P110, P300)) {
+		BOOST_CHECK_IF(link4c, dynamic_cast<RailLinkCurve *>(link4.get())) {
+			BOOST_CHECK_CLOSE(link4c->radius, 6950.F, 0.1F);
+			BOOST_CHECK_CLOSE(link4c->arc.length(), 4.456F, 0.1F);
+			BOOST_CHECK_CLOSE(link4->length, 30'981.F, 0.1F);
+			BOOST_CHECK_BETWEEN(link4->ends[0].dir, .25F, .26F);
+			BOOST_CHECK_CLOSE(link4->ends[1].dir, half_pi, 0.1F);
 		}
 	}
 }

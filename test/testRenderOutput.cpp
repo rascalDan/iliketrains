@@ -2,7 +2,7 @@
 #include <gl_traits.h>
 #include <stdexcept>
 
-TestRenderOutput::TestRenderOutput(TextureAbsCoord s) : size {s}
+TestRenderOutput::TestRenderOutput(TextureAbsCoord outputSize) : size {outputSize}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
 	const auto configuregdata

@@ -18,7 +18,7 @@ BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 BOOST_FIXTURE_TEST_SUITE(i, glContainer<int>)
 
-BOOST_AUTO_TEST_CASE(createDestroy, *boost::unit_test::timeout(1))
+BOOST_AUTO_TEST_CASE(CreateDestroy, *boost::unit_test::timeout(1))
 {
 	// Unmapped
 	BOOST_CHECK(!data_);
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(createDestroy, *boost::unit_test::timeout(1))
 	BOOST_CHECK(!access_);
 }
 
-BOOST_AUTO_TEST_CASE(mapModes)
+BOOST_AUTO_TEST_CASE(MapModes)
 {
 	BOOST_CHECK_EQUAL(std::accumulate(begin(), end(), 0), 0);
 	BOOST_CHECK(!data_);
@@ -78,14 +78,13 @@ BOOST_AUTO_TEST_CASE(mapModes)
 	BOOST_CHECK_EQUAL(access_, GL_READ_WRITE);
 	BOOST_CHECK_NO_THROW(unmap());
 
-	const auto & c = *this;
-	BOOST_CHECK_EQUAL(std::accumulate(c.begin(), c.end(), 0), 10);
+	BOOST_CHECK_EQUAL(std::ranges::fold_left(std::as_const(*this), 0, std::plus {}), 10);
 	BOOST_CHECK(data_);
 	BOOST_CHECK_EQUAL(access_, GL_READ_ONLY);
 	BOOST_CHECK_NO_THROW(unmap());
 }
 
-BOOST_AUTO_TEST_CASE(push_back_test, *boost::unit_test::timeout(1))
+BOOST_AUTO_TEST_CASE(PushBackTest, *boost::unit_test::timeout(1))
 {
 	BOOST_CHECK_EQUAL(capacity_, 1);
 	BOOST_CHECK_EQUAL(size_, 0);
@@ -103,7 +102,7 @@ BOOST_AUTO_TEST_CASE(push_back_test, *boost::unit_test::timeout(1))
 	}
 }
 
-BOOST_AUTO_TEST_CASE(emplace_back_test, *boost::unit_test::timeout(1))
+BOOST_AUTO_TEST_CASE(EmplaceBackTest, *boost::unit_test::timeout(1))
 {
 	BOOST_CHECK_EQUAL(capacity_, 1);
 	BOOST_CHECK_EQUAL(size_, 0);
@@ -146,7 +145,7 @@ BOOST_AUTO_TEST_CASE(emplace_back_test, *boost::unit_test::timeout(1))
 	BOOST_CHECK_EQUAL(7, rend() - rbegin());
 }
 
-BOOST_AUTO_TEST_CASE(resize_test)
+BOOST_AUTO_TEST_CASE(ResizeTest)
 {
 	BOOST_CHECK_NO_THROW(push_back(1));
 	BOOST_CHECK_NO_THROW(emplace_back(2));
@@ -177,7 +176,7 @@ BOOST_AUTO_TEST_CASE(resize_test)
 	BOOST_CHECK_EQUAL(rbegin(), rend());
 }
 
-BOOST_AUTO_TEST_CASE(shrink_to_fit_test)
+BOOST_AUTO_TEST_CASE(ShrinkToFitTest)
 {
 	BOOST_CHECK_NO_THROW(reserve(4));
 	BOOST_CHECK_NO_THROW(emplace_back(1));
@@ -205,7 +204,7 @@ BOOST_AUTO_TEST_CASE(shrink_to_fit_test)
 	BOOST_CHECK_EQUAL(size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE(getters)
+BOOST_AUTO_TEST_CASE(Getters)
 {
 	BOOST_CHECK(empty());
 	BOOST_CHECK_NO_THROW(emplace_back(1));
@@ -238,24 +237,24 @@ BOOST_AUTO_TEST_CASE(getters)
 	BOOST_CHECK_THROW(std::ignore = constCont.at(2), std::out_of_range);
 }
 
-BOOST_AUTO_TEST_CASE(random_access)
+BOOST_AUTO_TEST_CASE(RandomAccess)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1));
 	BOOST_CHECK_NO_THROW(emplace_back(2));
 	BOOST_CHECK_NO_THROW(emplace_back(3));
 
-	auto i = begin();
-	BOOST_CHECK_EQUAL(1, *i);
-	BOOST_CHECK_EQUAL(2, *++i);
-	BOOST_CHECK_EQUAL(2, *i++);
-	BOOST_CHECK_EQUAL(3, *i);
-	BOOST_CHECK_EQUAL(3, *i--);
-	BOOST_CHECK_EQUAL(2, *i);
-	BOOST_CHECK_EQUAL(1, *--i);
-	BOOST_CHECK_EQUAL(1, *i);
+	auto iterator = begin();
+	BOOST_CHECK_EQUAL(1, *iterator);
+	BOOST_CHECK_EQUAL(2, *++iterator);
+	BOOST_CHECK_EQUAL(2, *iterator++);
+	BOOST_CHECK_EQUAL(3, *iterator);
+	BOOST_CHECK_EQUAL(3, *iterator--);
+	BOOST_CHECK_EQUAL(2, *iterator);
+	BOOST_CHECK_EQUAL(1, *--iterator);
+	BOOST_CHECK_EQUAL(1, *iterator);
 }
 
-BOOST_AUTO_TEST_CASE(random_write)
+BOOST_AUTO_TEST_CASE(RandomWrite)
 {
 	BOOST_CHECK_NO_THROW(resize(3));
 	BOOST_CHECK_EQUAL(size(), 3);
@@ -278,7 +277,7 @@ BOOST_AUTO_TEST_CASE(random_write)
 	BOOST_CHECK_THROW(at(4, 0), std::out_of_range);
 }
 
-BOOST_AUTO_TEST_CASE(insert_remove_test)
+BOOST_AUTO_TEST_CASE(InsertRemoveTest)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1));
 	BOOST_CHECK_NO_THROW(emplace_back(2));
@@ -323,19 +322,19 @@ BOOST_AUTO_TEST_CASE(insert_remove_test)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(stl)
+BOOST_AUTO_TEST_CASE(StlCompatilibty)
 {
 	BOOST_CHECK_NO_THROW(resize(10));
-	BOOST_CHECK_NO_THROW(std::generate(begin(), end(), [x = 0]() mutable {
-		return x++;
+	BOOST_CHECK_NO_THROW(std::generate(begin(), end(), [value = 0]() mutable {
+		return value++;
 	}));
 	BOOST_CHECK_NO_THROW(std::sort(rbegin(), rend()));
 	{
 		std::array expected1 {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 		BOOST_CHECK_EQUAL_COLLECTIONS(begin(), end(), expected1.begin(), expected1.end());
 	}
-	const auto newend = std::remove_if(begin(), end(), [](const auto & x) {
-		return x % 2 == 0;
+	const auto newend = std::remove_if(begin(), end(), [](const auto & value) {
+		return value % 2 == 0;
 	});
 	{
 		std::array expected1 {9, 7, 5, 3, 1};
@@ -343,7 +342,7 @@ BOOST_AUTO_TEST_CASE(stl)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(iter_compare)
+BOOST_AUTO_TEST_CASE(IterCompare)
 {
 	BOOST_CHECK_EQUAL(begin(), end());
 	BOOST_CHECK_EQUAL(rbegin(), rend());
@@ -356,7 +355,7 @@ BOOST_AUTO_TEST_CASE(iter_compare)
 
 BOOST_AUTO_TEST_SUITE_END();
 
-BOOST_AUTO_TEST_CASE(create_copy_source, *boost::unit_test::timeout(1))
+BOOST_AUTO_TEST_CASE(CreateCopySource, *boost::unit_test::timeout(1))
 {
 	const std::vector src {4, 6, 2, 4, 6, 0};
 	glContainer dst {src};
@@ -365,16 +364,36 @@ BOOST_AUTO_TEST_CASE(create_copy_source, *boost::unit_test::timeout(1))
 	BOOST_CHECK_EQUAL_COLLECTIONS(src.begin(), src.end(), dst.begin(), dst.end());
 }
 
-struct C {
-	int x;
-	float y;
-};
+namespace {
+	struct C {
+		int x;
+		float y;
+	};
 
-static_assert(std::is_trivially_destructible_v<C>);
+	static_assert(std::is_trivially_destructible_v<C>);
+
+	struct CC {
+		CC() = default;
+
+		CC(int intValue, float floatValue) noexcept : x {intValue}, y {floatValue} { }
+
+		~CC()
+		{
+			++x;
+		}
+
+		DEFAULT_MOVE_COPY(CC);
+
+		int x;
+		float y;
+	};
+
+	static_assert(!std::is_trivially_destructible_v<CC>);
+}
 
 BOOST_FIXTURE_TEST_SUITE(c, glContainer<C>)
 
-BOOST_AUTO_TEST_CASE(basic)
+BOOST_AUTO_TEST_CASE(Basic)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1, 2.F));
 	BOOST_CHECK_EQUAL(1, begin()->x);
@@ -391,27 +410,9 @@ BOOST_AUTO_TEST_CASE(basic)
 
 BOOST_AUTO_TEST_SUITE_END();
 
-struct CC {
-	CC() = default;
-
-	CC(int a, float b) noexcept : x {a}, y {b} { }
-
-	~CC()
-	{
-		++x;
-	}
-
-	DEFAULT_MOVE_COPY(CC);
-
-	int x;
-	float y;
-};
-
-static_assert(!std::is_trivially_destructible_v<CC>);
-
 BOOST_FIXTURE_TEST_SUITE(cc, glContainer<CC>)
 
-BOOST_AUTO_TEST_CASE(basic)
+BOOST_AUTO_TEST_CASE(Basic)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1, 2.F));
 	BOOST_CHECK_EQUAL(1, begin()->x);
@@ -435,7 +436,7 @@ BOOST_AUTO_TEST_CASE(basic)
 	BOOST_CHECK_EQUAL(capacity(), 1);
 }
 
-BOOST_AUTO_TEST_CASE(insert_remove_test)
+BOOST_AUTO_TEST_CASE(InsertRemoveTest)
 {
 	BOOST_CHECK_NO_THROW(emplace_back(1, 2.F));
 	BOOST_CHECK_NO_THROW(emplace_back(3, 4.F));
