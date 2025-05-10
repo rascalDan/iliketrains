@@ -162,7 +162,7 @@ NetworkOf<T, Links...>::create(const GenCurveDef & def)
 
 template<typename T, typename... Links>
 void
-NetworkOf<T, Links...>::add(const GeoData *, const Link::Ptr & link)
+NetworkOf<T, Links...>::add(GeoData * geoData, const Link::Ptr & link)
 {
 	const auto addIf = [this](auto && lptr) {
 		if (lptr) {
@@ -178,4 +178,7 @@ NetworkOf<T, Links...>::add(const GeoData *, const Link::Ptr & link)
 		throw std::logic_error("Unsupported link type for network");
 	}
 	joinLinks(link);
+	if (geoData) {
+		geoData->setHeights(link->getBase(getBaseWidth()), GeoData::SetHeightsOpts {.surface = getBaseSurface()});
+	}
 }
