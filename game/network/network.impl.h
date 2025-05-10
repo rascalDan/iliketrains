@@ -143,3 +143,39 @@ NetworkOf<T, Links...>::addExtend(const GeoData * geoData, GlobalPosition3D star
 {
 	return addCurve(geoData, genCurveDef(start, end, findNodeDirection(nodeAt(start))));
 }
+
+template<typename T, typename... Links>
+Link::Ptr
+NetworkOf<T, Links...>::create(const GenStraightDef & def)
+{
+	return std::make_shared<typename T::StraightLink>(
+			*this, candidateNodeAt(std::get<0>(def)).first, candidateNodeAt(std::get<1>(def)).first);
+}
+
+template<typename T, typename... Links>
+Link::Ptr
+NetworkOf<T, Links...>::create(const GenCurveDef & def)
+{
+	return std::make_shared<typename T::CurveLink>(
+			*this, candidateNodeAt(std::get<0>(def)).first, candidateNodeAt(std::get<1>(def)).first, std::get<2>(def));
+}
+
+template<typename T, typename... Links>
+void
+NetworkOf<T, Links...>::add(const GeoData *, const Link::Ptr & link)
+{
+	const auto addIf = [this](auto && lptr) {
+		if (lptr) {
+			links.emplace(lptr);
+			return true;
+		}
+		return false;
+	};
+	for (auto & end : link->ends) {
+		end.node = nodeAt(end.node->pos);
+	}
+	if (!(addIf(std::dynamic_pointer_cast<Links>(link)) || ...)) {
+		throw std::logic_error("Unsupported link type for network");
+	}
+	joinLinks(link);
+}

@@ -142,3 +142,28 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 
 	return {genCurveDef(start, joint, startDir), genCurveDef(end, joint, endDir)};
 }
+
+Link::Collection
+Network::create(const CreationDefinition & def)
+{
+	// TODO
+	// Where to make a straight to join because angles align?
+	// Where to drop part of S curve pair if a single curve works?
+
+	if (!def.fromEnd.direction && !def.toEnd.direction) {
+		// No specific directions at either end, straight link
+		return {create(GenStraightDef {def.fromEnd.position, def.toEnd.position})};
+	}
+	if (def.fromEnd.direction) {
+		if (def.toEnd.direction) {
+			// Two specific directions at both ends, S curves
+			const auto curves = genCurveDef(
+					def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction, *def.toEnd.direction);
+			return {create(curves.first), create(curves.second)};
+		}
+		// One specific direction, single curve from there
+		return {create(genCurveDef(def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction))};
+	}
+	// One specific direction, single curve from the other
+	return {create(genCurveDef(def.toEnd.position, def.fromEnd.position, *def.toEnd.direction))};
+}

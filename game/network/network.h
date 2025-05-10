@@ -19,7 +19,18 @@ class GeoData;
 template<typename> class Ray;
 
 template<size_t... N> using GenDef = std::tuple<glm::vec<N, GlobalDistance>...>;
+using GenStraightDef = GenDef<3, 3>;
 using GenCurveDef = GenDef<3, 3, 2>;
+
+struct CreationDefinitionEnd {
+	GlobalPosition3D position;
+	std::optional<Angle> direction;
+};
+
+struct CreationDefinition {
+	CreationDefinitionEnd fromEnd;
+	CreationDefinitionEnd toEnd;
+};
 
 class Network {
 public:
@@ -49,6 +60,9 @@ public:
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
+	[[nodiscard]] Link::Collection create(const CreationDefinition &);
+	virtual void add(const GeoData *, const Link::Ptr &) = 0;
+
 	[[nodiscard]] virtual const Surface * getBaseSurface() const = 0;
 	[[nodiscard]] virtual RelativeDistance getBaseWidth() const = 0;
 
@@ -57,6 +71,9 @@ protected:
 	static GenCurveDef genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir);
 	static std::pair<GenCurveDef, GenCurveDef> genCurveDef(
 			const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir);
+
+	[[nodiscard]] virtual Link::Ptr create(const GenStraightDef &) = 0;
+	[[nodiscard]] virtual Link::Ptr create(const GenCurveDef &) = 0;
 
 	using Nodes = std::set<Node::Ptr, PtrMemberSorter<Node::Ptr, &Node::pos>>;
 	Nodes nodes;
@@ -111,6 +128,10 @@ public:
 	Link::CCollection addExtend(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
 
 	[[nodiscard]] float findNodeDirection(Node::AnyCPtr) const override;
+	using Network::create;
+	[[nodiscard]] Link::Ptr create(const GenStraightDef &) override;
+	[[nodiscard]] Link::Ptr create(const GenCurveDef &) override;
+	void add(const GeoData *, const Link::Ptr &) override;
 
 protected:
 	Link::CCollection addCurve(const GeoData *, const GenCurveDef &);
