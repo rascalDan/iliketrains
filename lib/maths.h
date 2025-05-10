@@ -427,6 +427,21 @@ find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, An
 }
 
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>
+std::pair<glm::vec<2, T, Q>, bool>
+find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end)
+{
+	if (start == end) {
+		return {start, false};
+	}
+	const auto startNormal = vector_normal(sincos(entrys) * 10'000.F);
+	const auto diffEnds = difference(end, start);
+	const auto midEnds = start + ((end - start) / 2);
+	const auto diffNormal = vector_normal(diffEnds);
+	const auto centre = linesIntersectAt(start, start + startNormal, midEnds, midEnds + diffNormal);
+	return {*centre, normalize(vector_yaw(diffEnds) - entrys) < 0};
+}
+
+template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 Angle
 find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, Rotation2D bd)
 {

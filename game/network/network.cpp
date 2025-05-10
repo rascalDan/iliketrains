@@ -99,12 +99,9 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest)
 GenCurveDef
 Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir)
 {
-	const auto diff = difference(end, start);
-	const auto yaw = vector_yaw(diff);
 	const auto dir = pi + startDir;
 	const auto flatStart = start.xy(), flatEnd = end.xy();
-	const auto n2ed = (yaw * 2) - dir - pi;
-	const auto centre = find_arc_centre(flatStart, dir, flatEnd, n2ed);
+	const auto centre = find_arc_centre(flatStart, dir, flatEnd);
 
 	if (centre.second) { // right hand arc
 		return {end, start, centre.first};
