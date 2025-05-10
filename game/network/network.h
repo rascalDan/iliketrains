@@ -135,4 +135,5 @@ public:
 
 protected:
 	Link::CCollection addCurve(const GeoData *, const GenCurveDef &);
+	[[nodiscard]] bool anyLinks() const;
 };

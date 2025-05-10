@@ -161,6 +161,13 @@ NetworkOf<T, Links...>::create(const GenCurveDef & def)
 }
 
 template<typename T, typename... Links>
+bool
+NetworkOf<T, Links...>::anyLinks() const
+{
+	return !(static_cast<const NetworkLinkHolder<Links> *>(this)->vertices.empty() && ...);
+}
+
+template<typename T, typename... Links>
 void
 NetworkOf<T, Links...>::add(GeoData * geoData, const Link::Ptr & link)
 {

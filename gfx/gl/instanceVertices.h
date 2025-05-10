@@ -118,6 +118,7 @@ public:
 	}
 
 	using base::bufferName;
+	using base::empty;
 
 	[[nodiscard]] auto
 	size() const
