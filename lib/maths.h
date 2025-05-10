@@ -8,6 +8,7 @@
 #include <glm/gtc/constants.hpp>
 #include <numeric>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -288,6 +289,15 @@ sq(T value)
 	return value * value;
 }
 
+template<glm::length_t L, typename T, glm::qualifier Q>
+auto
+vectorMagSquared(const glm::vec<L, T, Q> & val)
+{
+	return std::ranges::fold_left(std::views::iota(0, L), T {}, [&val](auto total, auto axis) {
+		return total + sq(val[axis]);
+	});
+}
+
 template<glm::qualifier Q = glm::defaultp>
 constexpr glm::vec<3, int64_t, Q>
 crossProduct(const glm::vec<3, int64_t, Q> & valueA, const glm::vec<3, int64_t, Q> & valueB)
@@ -401,6 +411,15 @@ linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, con
 		return std::nullopt;
 	}
 	return Aabs + CVec {(b1 * c2) / -determinant, (a1 * c2) / determinant};
+}
+
+template<std::floating_point T> constexpr auto EPSILON = 0.0001F;
+
+template<std::floating_point T>
+auto
+isWithinLimit(T lhs, T rhs, T limit = EPSILON<T>)
+{
+	return std::abs(lhs - rhs) <= limit;
 }
 
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>

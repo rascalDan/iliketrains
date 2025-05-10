@@ -112,27 +112,33 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 std::pair<GenCurveDef, GenCurveDef>
 Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir)
 {
-	startDir += pi;
-	endDir += pi;
-	const auto flatStart {start.xy()}, flatEnd {end.xy()};
-	auto midheight = [&](auto mid) {
-		const auto startToMid = ::distance<2>(flatStart, mid);
-		const auto endToMid = ::distance<2>(flatEnd, mid);
-		return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (startToMid / (startToMid + endToMid)));
-	};
-	const auto radii = find_arcs_radius(flatStart, startDir, flatEnd, endDir);
-	if (radii.first < radii.second) {
-		const auto radius = radii.first;
-		const auto centre1 = flatStart + (sincos(startDir + half_pi) * radius);
-		const auto centre2 = flatEnd + (sincos(endDir + half_pi) * radius);
-		const auto mid = (centre1 + centre2) / 2;
-		const auto midh = mid || midheight(mid);
-		return {{start, midh, centre1}, {end, midh, centre2}};
+	// Based on formula/code from https://www.ryanjuckett.com/biarc-interpolation/
+	const auto startVec = -sincos(startDir);
+	const auto endVec = sincos(endDir);
+	const auto diff = difference(end, start);
+	const auto diffDotStartVec = glm::dot(diff.xy(), startVec);
+	const auto endsVecTotal = (startVec + endVec);
+	const auto tMagSqr = vectorMagSquared(endsVecTotal);
+	const auto equalTangents = isWithinLimit(tMagSqr, 4.0F);
+	const auto perpT1 = isWithinLimit(diffDotStartVec, 0.0F);
+
+	if (equalTangents && perpT1) {
+		const auto joint = start + (diff * 0.5F);
+		return {genCurveDef(start, joint, startDir), genCurveDef(end, joint, endDir)};
 	}
-	const auto radius = radii.second;
-	const auto centre1 = flatStart + (sincos(startDir - half_pi) * radius);
-	const auto centre2 = flatEnd + (sincos(endDir - half_pi) * radius);
-	const auto mid = (centre1 + centre2) / 2;
-	const auto midh = mid || midheight(mid);
-	return {{midh, start, centre1}, {midh, end, centre2}};
+
+	const auto vDotT = glm::dot(diff.xy(), endsVecTotal);
+	const auto extLen1 = [&]() {
+		const auto vMagSqr = vectorMagSquared(diff);
+		if (equalTangents) {
+			return vMagSqr / (4 * diffDotStartVec);
+		}
+		const auto denominator = 2.F - (2.F * glm::dot(startVec, endVec));
+		const auto discriminant = sq(vDotT) + (denominator * vMagSqr);
+		return (std::sqrt(discriminant) - vDotT) / denominator;
+	}();
+
+	const auto joint = (start + end + ((difference(startVec, endVec) * extLen1) || 0.F)) / 2;
+
+	return {genCurveDef(start, joint, startDir), genCurveDef(end, joint, endDir)};
 }
