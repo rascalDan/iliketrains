@@ -1,32 +1,53 @@
 #include "editNetwork.h"
-#include "builders/freeExtend.h"
-#include "builders/join.h"
-#include "builders/straight.h"
 #include "imgui_wrap.h"
 #include <game/gamestate.h>
 #include <game/terrain.h>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
 
-constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
-
-EditNetwork::EditNetwork(Network * n) : network {n}, blue {1, 1, &TRANSPARENT_BLUE} { }
+EditNetwork::EditNetwork(Network * n) : network {n} { }
 
 bool
-EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)
+EditNetwork::click(const SDL_MouseButtonEvent & event, const Ray<GlobalPosition3D> & ray)
 {
-	if (builder && (e.button == SDL_BUTTON_LEFT || e.button == SDL_BUTTON_MIDDLE)) {
-		builder->click(network, gameState->terrain.get(), e, ray);
-		return true;
+	switch (event.button) {
+		case SDL_BUTTON_MIDDLE:
+			currentStart.reset();
+			candidates.clear();
+			return true;
+		case SDL_BUTTON_LEFT:
+			if (!currentStart) {
+				currentStart = resolveRay(ray);
+			}
+			else {
+				if (const auto def = resolveRay(ray)) {
+					candidates = network->create(CreationDefinition {.fromEnd = *currentStart, .toEnd = *def});
+					for (const auto & link : candidates) {
+						network->add(gameState->terrain.get(), link);
+					}
+					if (continuousMode) {
+						currentStart = def;
+						currentStart->direction = candidates.back()->endAt(def->position)->dir;
+					}
+					else {
+						currentStart.reset();
+					}
+					candidates.clear();
+				}
+			}
+			return true;
+		default:
+			return false;
 	}
-	return false;
 }
 
 bool
-EditNetwork::move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> & ray)
+EditNetwork::move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> & ray)
 {
-	if (builder) {
-		builder->move(network, gameState->terrain.get(), e, ray);
+	if (currentStart) {
+		if (const auto def = resolveRay(ray)) {
+			candidates = network->create(CreationDefinition {.fromEnd = *currentStart, .toEnd = *def});
+		}
 	}
 	return false;
 }
@@ -38,30 +59,22 @@ EditNetwork::handleInput(const SDL_Event &)
 }
 
 void
-EditNetwork::render(const SceneShader & shader, const Frustum & frustum) const
+EditNetwork::render(const SceneShader &, const Frustum &) const
 {
-	if (builder) {
-		blue.bind();
-		shader.absolute.use();
-		builder->render(shader, frustum);
-	}
 }
 
-void
-EditNetwork::Builder::render(const SceneShader & shader, const Frustum & frustum) const
+std::optional<CreationDefinitionEnd>
+EditNetwork::resolveRay(const Ray<GlobalPosition3D> & ray) const
 {
-	candidateLinks.apply<const Renderable>(&Renderable::render, shader, frustum);
-}
-
-void
-EditNetwork::Builder::setHeightsFor(Network * network, const Link::CCollection & links, GeoData::SetHeightsOpts opts)
-{
-	opts.surface = network->getBaseSurface();
-	const auto width = network->getBaseWidth();
-
-	for (const auto & link : links) {
-		gameState->terrain->setHeights(link->getBase(width), opts);
+	if (const auto position = gameState->terrain->intersectRay(ray)) {
+		const auto node = network->intersectRayNodes(ray);
+		if (node) {
+			const auto direction = network->findNodeDirection(node);
+			return CreationDefinitionEnd {.position = node->pos, .direction = direction};
+		}
+		return CreationDefinitionEnd {.position = position->first, .direction = std::nullopt};
 	}
+	return {};
 }
 
 void
@@ -69,16 +82,6 @@ EditNetwork::render(bool & open)
 {
 	ImGui::SetNextWindowSize({-1, -1});
 	ImGui::Begin("Edit Network", &open);
-
-	auto builderChoice = [this]<typename Impl>(const char * name) {
-		if (ImGui::RadioButton(name, dynamic_cast<Impl *>(builder.get()))) {
-			builder = std::make_unique<Impl>();
-		}
-	};
-	builderChoice.operator()<BuilderStraight>("Straight");
-	builderChoice.operator()<BuilderJoin>("Join");
-	builderChoice.operator()<BuilderFreeExtend>("Free Extend");
-	ImGui::TextUnformatted(builder ? builder->hint().c_str() : "Select a build mode");
-
+	ImGui::Checkbox("Continuous mode", &continuousMode);
 	ImGui::End();
 }

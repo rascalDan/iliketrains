@@ -1,6 +1,5 @@
 #include "ui/mainApplication.h"
 #include "ui/mainWindow.h"
-#include <array>
 #include <assetFactory/assetFactory.h>
 #include <collection.h>
 #include <game/activities/go.h>
@@ -30,9 +29,6 @@
 #include <special_members.h>
 #include <stream_support.h>
 #include <ui/applicationBase.h>
-#include <ui/builders/freeExtend.h>
-#include <ui/builders/join.h>
-#include <ui/builders/straight.h>
 #include <ui/gameMainWindow.h>
 #include <ui/window.h>
 
@@ -50,7 +46,7 @@ public:
 		assets = AssetFactory::loadAll("res");
 
 		{
-			auto rl = world.create<RailLinks>();
+			auto railLinks = world.create<RailLinks>();
 			const auto nodes = materializeRange(std::vector<GlobalPosition2D> {
 														{315103000, 491067000},
 														{315977000, 490777000},
@@ -60,31 +56,26 @@ public:
 														{316129566, 490893054},
 														{315825622, 490833929},
 														{315106182, 491073714},
+														{314955393, 490999023},
 												}
 					| std::views::transform([this](const auto n) {
 						  return terrain->positionAt(n);
 					  }));
-			auto l3 = BuilderStraight {}.create(rl.get(), terrain.get(), *nodes.begin(), *++nodes.begin()).front();
-			for (const auto & [from, to] : nodes | std::views::drop(1) | std::views::pairwise) {
-				const auto links = BuilderFreeExtend {}.createExtend(rl.get(), terrain.get(), from, to);
-			}
-			for (const auto & [from, to] : std::initializer_list<std::pair<GlobalPosition2D, GlobalPosition2D>> {
-						 {{315103000, 491067000}, {315003434, 491076253}},
-						 {{315103000, 491067000}, {315016495, 491019224}},
-						 {{315016495, 491019224}, {314955393, 490999023}},
-				 }) {
-				const auto links = BuilderFreeExtend {}.createExtend(
-						rl.get(), terrain.get(), terrain->positionAt(from), terrain->positionAt(to));
-			}
-			for (const auto & [from, to] : std::initializer_list<std::pair<GlobalPosition2D, GlobalPosition2D>> {
-						 {{315106182, 491073714}, {314955393, 490999023}},
-				 }) {
-				auto p1 = rl->intersectRayNodes({from || 0, up})->pos;
-				auto p2 = rl->intersectRayNodes({to || 0, up})->pos;
-				const auto links = BuilderFreeExtend {}.createJoin(rl.get(), terrain.get(), p1, p2);
+
+			Link::Ptr l3;
+			for (std::optional<Angle> previousDir; const auto [fromPos, toPos] : std::views::pairwise(nodes)) {
+				const auto links = railLinks->create({
+						.fromEnd = {.position = fromPos, .direction = previousDir},
+						.toEnd = {.position = toPos, .direction = std::nullopt},
+				});
+				for (const auto & link : links) {
+					railLinks->add(terrain.get(), link);
+				}
+				l3 = links.back();
+				previousDir = links.back()->endAt(toPos)->dir;
 			}
 
-			const std::shared_ptr<Train> train = world.create<Train>(l3, 800000);
+			const std::shared_ptr<Train> train = world.create<Train>(l3, 0);
 			auto b47 = assets.at("brush-47").dynamicCast<RailVehicleClass>();
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);

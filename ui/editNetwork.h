@@ -1,6 +1,5 @@
 #pragma once
 
-#include "game/geoData.h"
 #include "gameMainSelector.h"
 #include "worldOverlay.h"
 #include <game/gamestate.h>
@@ -13,40 +12,25 @@ class EditNetwork : public GameMainSelector::Component, public WorldOverlay {
 public:
 	explicit EditNetwork(Network *);
 
-	bool click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> &) override;
-	bool move(const SDL_MouseMotionEvent & e, const Ray<GlobalPosition3D> &) override;
-	bool handleInput(const SDL_Event & e) override;
+	bool click(const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &) override;
+	bool move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &) override;
+	bool handleInput(const SDL_Event &) override;
 	void render(const SceneShader &, const Frustum &) const override;
 	void render(bool & open) override;
 
-	using NetworkClickPos = std::variant<GlobalPosition3D, Node::Ptr>;
-
-	class Builder {
-	public:
-		virtual ~Builder() = default;
-		virtual void render(const SceneShader & shader, const Frustum &) const;
-		virtual std::string hint() const = 0;
-		virtual void click(Network *, const GeoData *, const SDL_MouseButtonEvent &, const Ray<GlobalPosition3D> &) = 0;
-		virtual void move(Network *, const GeoData *, const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> &) = 0;
-
-		static void setHeightsFor(Network *, const Link::CCollection &, GeoData::SetHeightsOpts = {});
-
-		using Ptr = std::unique_ptr<Builder>;
-
-	protected:
-		SharedCollection<const Link> candidateLinks;
-	};
-
 private:
+	[[nodiscard]] std::optional<CreationDefinitionEnd> resolveRay(const Ray<GlobalPosition3D> &) const;
+
 	Network * network;
-	Builder::Ptr builder;
-	Texture blue;
+	bool continuousMode {false};
+	std::optional<CreationDefinitionEnd> currentStart;
+	Link::Collection candidates;
 };
 
 template<typename T> class EditNetworkOf : public EditNetwork {
 public:
 	template<typename... P>
-	explicit EditNetworkOf(P &&... p) : EditNetwork(gameState->world.findOrCreate<T>(), std::forward<P>(p)...)
+	explicit EditNetworkOf(P &&... params) : EditNetwork(gameState->world.findOrCreate<T>(), std::forward<P>(params)...)
 	{
 	}
 };

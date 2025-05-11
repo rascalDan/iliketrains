@@ -52,7 +52,7 @@ private:
 
 GameMainWindow::GameMainWindow(ScreenAbsCoord size) : SceneRenderer {size, 0}
 {
-	uiComponents.create<ManualCameraController>(glm::vec2 {310'727'624, 494'018'810});
+	uiComponents.create<ManualCameraController>(glm::vec2 {315103000, 491067000});
 	auto gms = uiComponents.create<GameMainSelector>(&camera);
 	uiComponents.create<GameMainToolbar>(gms);
 }
