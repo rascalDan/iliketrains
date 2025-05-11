@@ -12,6 +12,8 @@
 #include <set>
 #include <string>
 #include <utility>
+#include <variant>
+#include <vector>
 
 class SceneShader;
 struct Surface;
@@ -21,6 +23,8 @@ template<typename> class Ray;
 template<size_t... N> using GenDef = std::tuple<glm::vec<N, GlobalDistance>...>;
 using GenStraightDef = GenDef<3, 3>;
 using GenCurveDef = GenDef<3, 3, 2>;
+using GenLinkDef = std::variant<GenStraightDef, GenCurveDef>;
+using GenLinksDef = std::vector<GenLinkDef>;
 
 struct CreationDefinitionEnd {
 	GlobalPosition3D position;

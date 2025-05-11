@@ -150,20 +150,31 @@ Network::create(const CreationDefinition & def)
 	// Where to make a straight to join because angles align?
 	// Where to drop part of S curve pair if a single curve works?
 
-	if (!def.fromEnd.direction && !def.toEnd.direction) {
-		// No specific directions at either end, straight link
-		return {create(GenStraightDef {def.fromEnd.position, def.toEnd.position})};
-	}
-	if (def.fromEnd.direction) {
-		if (def.toEnd.direction) {
-			// Two specific directions at both ends, S curves
-			const auto curves = genCurveDef(
-					def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction, *def.toEnd.direction);
-			return {create(curves.first), create(curves.second)};
+	const auto linkDefs = [&def]() -> GenLinksDef {
+		if (!def.fromEnd.direction && !def.toEnd.direction) {
+			// No specific directions at either end, straight link
+			return {GenStraightDef {def.fromEnd.position, def.toEnd.position}};
 		}
-		// One specific direction, single curve from there
-		return {create(genCurveDef(def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction))};
-	}
-	// One specific direction, single curve from the other
-	return {create(genCurveDef(def.toEnd.position, def.fromEnd.position, *def.toEnd.direction))};
+		if (def.fromEnd.direction) {
+			if (def.toEnd.direction) {
+				// Two specific directions at both ends, S curves
+				const auto curves = genCurveDef(
+						def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction, *def.toEnd.direction);
+				return {curves.first, curves.second};
+			}
+			// One specific direction, single curve from there
+			return {genCurveDef(def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction)};
+		}
+		// One specific direction, single curve from the other
+		return {genCurveDef(def.toEnd.position, def.fromEnd.position, *def.toEnd.direction)};
+	};
+	Link::Collection links;
+	std::ranges::transform(linkDefs(), std::back_inserter(links), [this](const auto & def) {
+		return std::visit(
+				[this](const auto & typedDef) {
+					return this->create(typedDef);
+				},
+				def);
+	});
+	return links;
 }
