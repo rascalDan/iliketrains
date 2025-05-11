@@ -269,10 +269,11 @@ BOOST_DATA_TEST_CASE(GenCurveDefs,
 
 BOOST_AUTO_TEST_CASE(NetworkCreateStraight)
 {
-	const auto link = create(CreationDefinition {
-			.fromEnd = {.position = {0, 0, 0}, .direction = {}},
-			.toEnd = {.position = {0, 1000, 0}, .direction = {}},
-	});
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = {}},
+					.toEnd = {.position = {0, 1000, 0}, .direction = {}},
+			});
 	BOOST_REQUIRE_EQUAL(link.size(), 1);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());
@@ -290,10 +291,11 @@ BOOST_AUTO_TEST_CASE(NetworkCreateStraight)
 
 BOOST_AUTO_TEST_CASE(NetworkCreateExtendingCurve)
 {
-	const auto link = create(CreationDefinition {
-			.fromEnd = {.position = {0, 0, 0}, .direction = half_pi},
-			.toEnd = {.position = {0, 1000, 0}, .direction = {}},
-	});
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = half_pi},
+					.toEnd = {.position = {0, 1000, 0}, .direction = {}},
+			});
 	BOOST_REQUIRE_EQUAL(link.size(), 1);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());
@@ -315,10 +317,11 @@ BOOST_AUTO_TEST_CASE(NetworkCreateExtendingCurve)
 
 BOOST_AUTO_TEST_CASE(NetworkCreateExtendeeCurve)
 {
-	const auto link = create(CreationDefinition {
-			.fromEnd = {.position = {0, 0, 0}, .direction = {}},
-			.toEnd = {.position = {0, 1000, 0}, .direction = half_pi},
-	});
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = {}},
+					.toEnd = {.position = {0, 1000, 0}, .direction = half_pi},
+			});
 	BOOST_REQUIRE_EQUAL(link.size(), 1);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());
@@ -343,10 +346,11 @@ BOOST_AUTO_TEST_CASE(NetworkCreateExtendeeCurve)
 
 BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPair)
 {
-	const auto link = create(CreationDefinition {
-			.fromEnd = {.position = {0, 0, 0}, .direction = pi},
-			.toEnd = {.position = {1000, 1000, 0}, .direction = 0},
-	});
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = pi},
+					.toEnd = {.position = {1000, 1000, 0}, .direction = 0},
+			});
 	BOOST_REQUIRE_EQUAL(link.size(), 2);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());
@@ -382,10 +386,11 @@ BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPair)
 BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPairEqTan)
 {
 	// This could be achieved with a single curve, but not there yet
-	const auto link = create(CreationDefinition {
-			.fromEnd = {.position = {0, 0, 0}, .direction = 0},
-			.toEnd = {.position = {1000, 0, 0}, .direction = 0},
-	});
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = 0},
+					.toEnd = {.position = {1000, 0, 0}, .direction = 0},
+			});
 	BOOST_REQUIRE_EQUAL(link.size(), 2);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());
@@ -402,10 +407,11 @@ BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPairEqTan)
 BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPairEqTanPerp)
 {
 	// This creates an equal pair of semi-circle arcs
-	const auto link = create(CreationDefinition {
-			.fromEnd = {.position = {0, 0, 0}, .direction = 0},
-			.toEnd = {.position = {1000, 0, 0}, .direction = pi},
-	});
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = 0},
+					.toEnd = {.position = {1000, 0, 0}, .direction = pi},
+			});
 	BOOST_REQUIRE_EQUAL(link.size(), 2);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());

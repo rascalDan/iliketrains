@@ -1,6 +1,8 @@
 #include "network.h"
+#include "game/geoData.h"
 #include "routeWalker.h"
 #include <array>
+#include <collections.h>
 #include <game/network/link.h>
 #include <gfx/models/texture.h>
 #include <glm/gtx/intersect.hpp>
@@ -96,6 +98,66 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest)
 	return RouteWalker().findRouteTo(end, dest);
 }
 
+void
+Network::terrainSplitAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos)
+{
+	std::visit(
+			[pos](auto & typedDefPrevious, auto & typedDefNext) {
+				std::get<1>(typedDefPrevious) = std::get<0>(typedDefNext) = pos;
+			},
+			previous, next);
+}
+
+GenLinksDef
+Network::terrainSplit(const GeoData * geoData, const GenStraightDef & def) const
+{
+	GenLinksDef out {def};
+	const auto [fromPos, toPos] = def;
+	geoData->walk(fromPos.xy(), toPos, [geoData, &out](const GeoData::WalkStep & step) {
+		if (step.previous.is_valid() && geoData->getSurface(step.current) != geoData->getSurface(step.previous)) {
+			const auto surfaceEdgePosition = geoData->positionAt(GeoData::PointFace(step.exitPosition, step.current));
+			out.emplace_back(out.back());
+			terrainSplitAt(*out.rbegin(), *++out.rbegin(), surfaceEdgePosition);
+		}
+	});
+	return out;
+}
+
+GenLinksDef
+Network::terrainSplit(const GeoData * geoData, const GenCurveDef & def) const
+{
+	static constexpr auto MIN_DISTANCE = 2000.F;
+	auto [cstart, cend, centre] = def;
+	std::set<GeoData::WalkStepCurve, SortedBy<&GeoData::WalkStepCurve::angle>> breaks;
+	const auto radiusMid = ::distance(cstart.xy(), centre);
+	for (const auto radiusOffset : {-getBaseWidth() / 2.F, 0.F, getBaseWidth() / 2.F}) {
+		const auto radius = radiusOffset + radiusMid;
+		const auto start = centre + (difference(cstart.xy(), centre) * radius) / radiusMid;
+		const auto end = centre + (difference(cend.xy(), centre) * radius) / radiusMid;
+		geoData->walk(start, end, centre, [geoData, &breaks](const GeoData::WalkStepCurve & step) {
+			if (step.previous.is_valid() && geoData->getSurface(step.current) != geoData->getSurface(step.previous)) {
+				breaks.insert(step);
+			}
+		});
+	}
+	std::vector<GlobalPosition3D> points;
+	points.reserve(breaks.size() + 2);
+	points.push_back(cstart);
+	std::ranges::transform(
+			breaks, std::back_inserter(points), [geoData, centre, radiusMid](const GeoData::WalkStepCurve & step) {
+				return (centre + (sincos(step.angle) * radiusMid))
+						|| geoData->positionAt(GeoData::PointFace(step.exitPosition, step.current)).z;
+			});
+	points.push_back(cend);
+	mergeClose(points, ::distance<3, GlobalDistance>, ::midpoint<3, GlobalDistance>, MIN_DISTANCE);
+	GenLinksDef out {def};
+	std::ranges::for_each(++points.begin(), --points.end(), [&out](const auto pos) {
+		out.emplace_back(out.back());
+		terrainSplitAt(*out.rbegin(), *++out.rbegin(), pos);
+	});
+	return out;
+}
+
 GenCurveDef
 Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir)
 {
@@ -144,7 +206,7 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 }
 
 Link::Collection
-Network::create(const CreationDefinition & def)
+Network::create(const GeoData * geoData, const CreationDefinition & def)
 {
 	// TODO
 	// Where to make a straight to join because angles align?
@@ -168,8 +230,17 @@ Network::create(const CreationDefinition & def)
 		// One specific direction, single curve from the other
 		return {genCurveDef(def.toEnd.position, def.fromEnd.position, *def.toEnd.direction)};
 	};
+	const auto splitDefs = [&linkDefs, this, geoData]() {
+		return std::ranges::fold_left(linkDefs(), GenLinksDef {}, [this, geoData](auto && existing, const auto & def) {
+			return existing += std::visit(
+						   [this, geoData](const auto & typedDef) {
+							   return this->terrainSplit(geoData, typedDef);
+						   },
+						   def);
+		});
+	};
 	Link::Collection links;
-	std::ranges::transform(linkDefs(), std::back_inserter(links), [this](const auto & def) {
+	std::ranges::transform(geoData ? splitDefs() : linkDefs(), std::back_inserter(links), [this](const auto & def) {
 		return std::visit(
 				[this](const auto & typedDef) {
 					return this->create(typedDef);

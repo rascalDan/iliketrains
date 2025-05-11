@@ -21,7 +21,8 @@ EditNetwork::click(const SDL_MouseButtonEvent & event, const Ray<GlobalPosition3
 			}
 			else {
 				if (const auto def = resolveRay(ray)) {
-					candidates = network->create(CreationDefinition {.fromEnd = *currentStart, .toEnd = *def});
+					candidates = network->create(
+							gameState->terrain.get(), CreationDefinition {.fromEnd = *currentStart, .toEnd = *def});
 					for (const auto & link : candidates) {
 						network->add(gameState->terrain.get(), link);
 					}
@@ -46,7 +47,8 @@ EditNetwork::move(const SDL_MouseMotionEvent &, const Ray<GlobalPosition3D> & ra
 {
 	if (currentStart) {
 		if (const auto def = resolveRay(ray)) {
-			candidates = network->create(CreationDefinition {.fromEnd = *currentStart, .toEnd = *def});
+			candidates = network->create(
+					gameState->terrain.get(), CreationDefinition {.fromEnd = *currentStart, .toEnd = *def});
 		}
 	}
 	return false;

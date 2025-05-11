@@ -64,7 +64,7 @@ public:
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
-	[[nodiscard]] Link::Collection create(const CreationDefinition &);
+	[[nodiscard]] Link::Collection create(const GeoData *, const CreationDefinition &);
 	virtual void add(GeoData *, const Link::Ptr &) = 0;
 
 	[[nodiscard]] virtual const Surface * getBaseSurface() const = 0;
@@ -76,6 +76,9 @@ protected:
 	static std::pair<GenCurveDef, GenCurveDef> genCurveDef(
 			const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir);
 
+	[[nodiscard]] GenLinksDef terrainSplit(const GeoData *, const GenStraightDef &) const;
+	[[nodiscard]] GenLinksDef terrainSplit(const GeoData *, const GenCurveDef &) const;
+	static void terrainSplitAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos);
 	[[nodiscard]] virtual Link::Ptr create(const GenStraightDef &) = 0;
 	[[nodiscard]] virtual Link::Ptr create(const GenCurveDef &) = 0;
 

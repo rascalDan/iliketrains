@@ -64,10 +64,11 @@ public:
 
 			Link::Ptr l3;
 			for (std::optional<Angle> previousDir; const auto [fromPos, toPos] : std::views::pairwise(nodes)) {
-				const auto links = railLinks->create({
-						.fromEnd = {.position = fromPos, .direction = previousDir},
-						.toEnd = {.position = toPos, .direction = std::nullopt},
-				});
+				const auto links = railLinks->create(gameState->terrain.get(),
+						{
+								.fromEnd = {.position = fromPos, .direction = previousDir},
+								.toEnd = {.position = toPos, .direction = std::nullopt},
+						});
 				for (const auto & link : links) {
 					railLinks->add(terrain.get(), link);
 				}
