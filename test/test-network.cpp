@@ -331,6 +331,9 @@ BOOST_AUTO_TEST_CASE(NetworkCreateExtendeeCurve)
 		BOOST_CHECK_CLOSE(curve->ends.front().dir, -half_pi, 1);
 		BOOST_CHECK_CLOSE_VECI(curve->ends.back().node->pos, GlobalPosition3D(0, 1000, 0));
 		BOOST_CHECK_CLOSE(curve->ends.back().dir, -half_pi, 1);
+		BOOST_CHECK_EQUAL(curve->endAt(GlobalPosition3D(0, 0, 0)), &curve->ends.front());
+		BOOST_CHECK_EQUAL(curve->endAt(GlobalPosition3D(0, 1000, 0)), &curve->ends.back());
+		BOOST_CHECK(!curve->endAt(GlobalPosition3D(1000, 1000, 0)));
 	}
 
 	add(nullptr, link.front());

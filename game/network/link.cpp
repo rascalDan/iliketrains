@@ -7,6 +7,18 @@
 
 Link::Link(End endA, End endB, float len) : ends {{std::move(endA), std::move(endB)}}, length {len} { }
 
+const Link::End *
+Link::endAt(const GlobalPosition3D & queryPos) const
+{
+	if (ends.front().node->pos == queryPos) {
+		return &ends.front();
+	}
+	if (ends.back().node->pos == queryPos) {
+		return &ends.back();
+	}
+	return nullptr;
+}
+
 LinkCurve::LinkCurve(GlobalPosition3D centre, RelativeDistance radius, Arc arc) :
 	centreBase {centre}, radius {radius}, arc {std::move(arc)}
 {

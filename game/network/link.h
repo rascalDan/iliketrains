@@ -48,6 +48,8 @@ public:
 	[[nodiscard]] virtual bool intersectRay(const Ray<GlobalPosition3D> &) const = 0;
 	[[nodiscard]] virtual std::vector<GlobalPosition3D> getBase(RelativeDistance width) const = 0;
 
+	[[nodiscard]] const End * endAt(const GlobalPosition3D &) const;
+
 	std::array<End, 2> ends;
 	float length;
 
