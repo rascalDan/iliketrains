@@ -102,18 +102,25 @@ namespace {
 	struct TestNetwork : public EmptyNetwork {
 		TestNetwork()
 		{
-			//       0        1        2
-			// p000 <-> p100 <-> p200 <-> p300
-			//   \        |       /
-			//    \       5      /
-			//     3      |     4
-			//      \-> p110 <-/
-			addLink<TestLinkS>(P000, P100, 1.F, 0);
-			addLink<TestLinkS>(P100, P200, 1.F, 0);
-			addLink<TestLinkS>(P200, P300, 1.F, 0);
-			addLink<TestLinkS>(P000, P110, 2.F, 0);
-			addLink<TestLinkS>(P200, P110, 2.F, 0);
-			addLink<TestLinkS>(P100, P110, 1.F, 0);
+			/*       0        1        2
+			 /   -> p000 <-> p100 <-> p200 <-> p300
+			 / /            /              \.
+			 / 3            5              4
+			 /  \           /             /
+			 /    --> p110 <-------------   */
+			add(nullptr, createChain(nullptr, std::array {P000, P100, P200, P300}));
+			add(nullptr,
+					create(nullptr,
+							{.fromEnd = {.position = P000, .direction = -half_pi},
+									.toEnd = {.position = P110, .direction = -half_pi}}));
+			add(nullptr,
+					create(nullptr,
+							{.fromEnd = {.position = P200, .direction = half_pi},
+									.toEnd = {.position = P110, .direction = half_pi}}));
+			add(nullptr,
+					create(nullptr,
+							{.fromEnd = {.position = P100, .direction = -half_pi},
+									.toEnd = {.position = P110, .direction = half_pi}}));
 		}
 	};
 
@@ -169,26 +176,27 @@ BOOST_DATA_TEST_CASE(NewNodeAtNew, INVALID_NODES, point)
 
 BOOST_AUTO_TEST_CASE(NetworkJoins)
 {
+	BOOST_REQUIRE_EQUAL(links.size(), 9);
 	// Ends
 	BOOST_CHECK(links[2]->ends[1].nexts.empty());
 	// Join 0 <-> 1
 	BOOST_REQUIRE_EQUAL(links[0]->ends[1].nexts.size(), 2);
 	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].second, 0);
-	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].first.lock().get(), links[5].get());
-	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].second, 0);
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].first.lock().get(), links[7].get());
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].second, 1);
 	BOOST_REQUIRE_EQUAL(links[1]->ends[0].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].first.lock().get(), links[0].get());
-	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].first.lock().get(), links[2].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].second, 0);
 	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].first.lock().get(), links[5].get());
 	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].second, 0);
 	// Join 1 <-> 2
 	BOOST_REQUIRE_EQUAL(links[1]->ends[1].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].first.lock().get(), links[2].get());
-	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].second, 0);
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].first.lock().get(), links[0].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].second, 1);
 	BOOST_REQUIRE_EQUAL(links[2]->ends[0].nexts.size(), 2);
 	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].second, 0);
 }
 
 BOOST_DATA_TEST_CASE(RouteToNodeNotInNetwork, INVALID_NODES, dest)
@@ -234,19 +242,21 @@ BOOST_AUTO_TEST_CASE(RouteToUpStream3to300)
 {
 	const auto & start = links[3]->ends[1];
 	auto route = this->routeFromTo(start, P300);
-	BOOST_REQUIRE_EQUAL(route.size(), 2);
-	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[4].get());
-	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[2].get());
+	BOOST_REQUIRE_EQUAL(route.size(), 3);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[0].get());
+	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[1].get());
+	BOOST_CHECK_EQUAL(route[2].first.lock().get(), links[2].get());
 }
 
 BOOST_AUTO_TEST_CASE(RouteToDownStream3to300)
 {
 	const auto & start = links[3]->ends[0];
 	auto route = this->routeFromTo(start, P300);
-	BOOST_REQUIRE_EQUAL(route.size(), 3);
-	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[0].get());
-	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(route[2].first.lock().get(), links[2].get());
+	BOOST_REQUIRE_EQUAL(route.size(), 4);
+	BOOST_CHECK_EQUAL(route[0].first.lock().get(), links[4].get());
+	BOOST_CHECK_EQUAL(route[1].first.lock().get(), links[6].get());
+	BOOST_CHECK_EQUAL(route[2].first.lock().get(), links[5].get());
+	BOOST_CHECK_EQUAL(route[3].first.lock().get(), links[2].get());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

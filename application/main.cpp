@@ -62,21 +62,10 @@ public:
 						  return terrain->positionAt(n);
 					  }));
 
-			Link::Ptr l3;
-			for (std::optional<Angle> previousDir; const auto [fromPos, toPos] : std::views::pairwise(nodes)) {
-				const auto links = railLinks->create(gameState->terrain.get(),
-						{
-								.fromEnd = {.position = fromPos, .direction = previousDir},
-								.toEnd = {.position = toPos, .direction = std::nullopt},
-						});
-				for (const auto & link : links) {
-					railLinks->add(terrain.get(), link);
-				}
-				l3 = links.back();
-				previousDir = links.back()->endAt(toPos)->dir;
-			}
+			const auto chain = railLinks->createChain(gameState->terrain.get(), nodes);
+			railLinks->add(gameState->terrain.get(), chain);
 
-			const std::shared_ptr<Train> train = world.create<Train>(l3, 0);
+			const std::shared_ptr<Train> train = world.create<Train>(chain.front(), 0);
 			auto b47 = assets.at("brush-47").dynamicCast<RailVehicleClass>();
 			for (int N = 0; N < 6; N++) {
 				train->create<RailVehicle>(b47);

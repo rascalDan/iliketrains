@@ -69,8 +69,13 @@ namespace {
 									.rot = {0, rotationDistribution(randomdev), 0}});
 				}
 			}
-			rail.addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
-			rail.addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
+			rail.add(nullptr,
+					rail.createChain(nullptr,
+							std::array<GlobalPosition3D, 3> {{
+									{42000, 50000, 1000},
+									{65000, 50000, 1000},
+									{75000, 45000, 2000},
+							}}));
 		}
 
 		void
@@ -218,11 +223,15 @@ BOOST_AUTO_TEST_CASE(RailNetwork)
 	public:
 		TestRail()
 		{
-			net.addLinksBetween({20000, 10000, 0}, {100000, 100000, 0});
-			net.addLinksBetween({20000, 10000, 0}, {10000, 10000, 0});
-			net.addLinksBetween({10000, 20000, 0}, {100000, 120000, 0});
-			net.addLinksBetween({10000, 20000, 0}, {10000, 10000, 0});
-			net.addLinksBetween({100000, 100000, 0}, {100000, 120000, 0});
+			net.add(nullptr,
+					net.createChain(nullptr,
+							std::array<GlobalPosition3D, 5> {{
+									{20000, 10000, 0},
+									{100000, 100000, 0},
+									{100000, 120000, 0},
+									{40000, 40000, 0},
+									{10000, 20000, 0},
+							}}));
 		}
 
 		void
