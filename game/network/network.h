@@ -66,9 +66,10 @@ public:
 
 protected:
 	static void joinLinks(const Link::Ptr & link, const Link::Ptr & oldLink);
-	static GenCurveDef genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir);
-	static std::pair<GenCurveDef, GenCurveDef> genCurveDef(
-			const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir);
+	static GenLinksDef genDef(const GlobalPosition3D & start, const GlobalPosition3D & end);
+	static GenLinksDef genDef(const GlobalPosition3D & start, const GlobalPosition3D & end, Angle startDir);
+	static GenLinksDef genDef(
+			const GlobalPosition3D & start, const GlobalPosition3D & end, Angle startDir, Angle endDir);
 
 	[[nodiscard]] GenLinksDef terrainSplit(const GeoData *, const GenStraightDef &) const;
 	[[nodiscard]] GenLinksDef terrainSplit(const GeoData *, const GenCurveDef &) const;

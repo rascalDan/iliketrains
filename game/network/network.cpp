@@ -166,21 +166,27 @@ Network::terrainSplit(const GeoData * geoData, const GenCurveDef & def) const
 	return out;
 }
 
-GenCurveDef
-Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir)
+GenLinksDef
+Network::genDef(const GlobalPosition3D & start, const GlobalPosition3D & end)
+{
+	return {GenStraightDef {start, end}};
+}
+
+GenLinksDef
+Network::genDef(const GlobalPosition3D & start, const GlobalPosition3D & end, Angle startDir)
 {
 	const auto dir = pi + startDir;
 	const auto flatStart = start.xy(), flatEnd = end.xy();
 	const auto centre = find_arc_centre(flatStart, dir, flatEnd);
 
 	if (centre.second) { // right hand arc
-		return {end, start, centre.first};
+		return {GenCurveDef {end, start, centre.first}};
 	}
-	return {start, end, centre.first};
+	return {GenCurveDef {start, end, centre.first}};
 }
 
-std::pair<GenCurveDef, GenCurveDef>
-Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & end, float startDir, float endDir)
+GenLinksDef
+Network::genDef(const GlobalPosition3D & start, const GlobalPosition3D & end, Angle startDir, Angle endDir)
 {
 	// Based on formula/code from https://www.ryanjuckett.com/biarc-interpolation/
 	const auto startVec = -sincos(startDir);
@@ -194,7 +200,7 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 
 	if (equalTangents && perpT1) {
 		const auto joint = start + (diff * 0.5F);
-		return {genCurveDef(start, joint, startDir), genCurveDef(end, joint, endDir)};
+		return genDef(start, joint, startDir) + genDef(end, joint, endDir);
 	}
 
 	const auto vDotT = glm::dot(diff.xy(), endsVecTotal);
@@ -210,7 +216,7 @@ Network::genCurveDef(const GlobalPosition3D & start, const GlobalPosition3D & en
 
 	const auto joint = (start + end + ((difference(startVec, endVec) * extLen1) || 0.F)) / 2;
 
-	return {genCurveDef(start, joint, startDir), genCurveDef(end, joint, endDir)};
+	return genDef(start, joint, startDir) + genDef(end, joint, endDir);
 }
 
 Link::Collection
@@ -228,15 +234,13 @@ Network::create(const GeoData * geoData, const CreationDefinition & def)
 		if (def.fromEnd.direction) {
 			if (def.toEnd.direction) {
 				// Two specific directions at both ends, S curves
-				const auto curves = genCurveDef(
-						def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction, *def.toEnd.direction);
-				return {curves.first, curves.second};
+				return genDef(def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction, *def.toEnd.direction);
 			}
 			// One specific direction, single curve from there
-			return {genCurveDef(def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction)};
+			return genDef(def.fromEnd.position, def.toEnd.position, *def.fromEnd.direction);
 		}
 		// One specific direction, single curve from the other
-		return {genCurveDef(def.toEnd.position, def.fromEnd.position, *def.toEnd.direction)};
+		return genDef(def.toEnd.position, def.fromEnd.position, *def.toEnd.direction);
 	};
 	const auto splitDefs = [&linkDefs, this, geoData]() {
 		return std::ranges::fold_left(linkDefs(), GenLinksDef {}, [this, geoData](auto && existing, const auto & def) {

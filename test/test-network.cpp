@@ -274,7 +274,10 @@ BOOST_DATA_TEST_CASE(GenCurveDefs,
 		}),
 		start, end, startDir, exp)
 {
-	BOOST_CHECK_EQUAL(genCurveDef(start, end, startDir), exp);
+	const auto defs = genDef(start, end, startDir);
+	BOOST_REQUIRE_EQUAL(defs.size(), 1);
+	BOOST_REQUIRE_EQUAL(defs.front().index(), 1);
+	BOOST_CHECK_EQUAL(std::get<GenCurveDef>(defs.front()), exp);
 }
 
 BOOST_AUTO_TEST_CASE(NetworkCreateStraight)
