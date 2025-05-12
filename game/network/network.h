@@ -65,7 +65,9 @@ public:
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
 	[[nodiscard]] Link::Collection create(const GeoData *, const CreationDefinition &);
+	[[nodiscard]] Link::Collection createChain(const GeoData *, std::span<const GlobalPosition3D>);
 	virtual void add(GeoData *, const Link::Ptr &) = 0;
+	void add(GeoData *, std::span<const Link::Ptr>);
 
 	[[nodiscard]] virtual const Surface * getBaseSurface() const = 0;
 	[[nodiscard]] virtual RelativeDistance getBaseWidth() const = 0;
@@ -138,6 +140,7 @@ public:
 	using Network::create;
 	[[nodiscard]] Link::Ptr create(const GenStraightDef &) override;
 	[[nodiscard]] Link::Ptr create(const GenCurveDef &) override;
+	using Network::add;
 	void add(GeoData *, const Link::Ptr &) override;
 
 protected:

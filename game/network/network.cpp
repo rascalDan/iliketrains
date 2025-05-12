@@ -99,6 +99,14 @@ Network::routeFromTo(const Link::End & end, const Node::Ptr & dest)
 }
 
 void
+Network::add(GeoData * geoData, const std::span<const Link::Ptr> links)
+{
+	for (const auto & link : links) {
+		add(geoData, link);
+	}
+}
+
+void
 Network::terrainSplitAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos)
 {
 	std::visit(
@@ -248,4 +256,21 @@ Network::create(const GeoData * geoData, const CreationDefinition & def)
 				def);
 	});
 	return links;
+}
+
+Link::Collection
+Network::createChain(const GeoData * geoData, const std::span<const GlobalPosition3D> positions)
+{
+	Link::Collection out;
+	std::ranges::for_each(positions | std::views::pairwise,
+			[&out, dir = std::optional<Angle> {}, geoData, this](const auto & current) mutable {
+				const auto & [previous, next] = current;
+				CreationDefinition def = {
+						.fromEnd = {.position = previous, .direction = dir},
+						.toEnd = {.position = next, .direction = {}},
+				};
+				out += create(geoData, def);
+				dir = out.back()->endAt(next)->dir;
+			});
+	return out;
 }
