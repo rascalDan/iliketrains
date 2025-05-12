@@ -74,7 +74,6 @@ class RailLinks : public NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>, p
 public:
 	RailLinks();
 
-	std::shared_ptr<RailLink> addLinksBetween(GlobalPosition3D start, GlobalPosition3D end);
 	void render(const SceneShader &, const Frustum &) const override;
 
 	[[nodiscard]] const Surface * getBaseSurface() const override;

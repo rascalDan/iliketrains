@@ -8,7 +8,6 @@
 #include "sorting.h"
 #include "special_members.h"
 #include <glm/glm.hpp>
-#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -54,13 +53,6 @@ public:
 
 	[[nodiscard]] Link::Nexts routeFromTo(const Link::End &, GlobalPosition3D) const;
 	[[nodiscard]] static Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &);
-
-	virtual Link::CCollection candidateStraight(GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection addStraight(const GeoData *, GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection addJoins(const GeoData *, GlobalPosition3D, GlobalPosition3D) = 0;
-	virtual Link::CCollection addExtend(const GeoData *, GlobalPosition3D, GlobalPosition3D) = 0;
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
 
@@ -109,33 +101,6 @@ protected:
 	[[nodiscard]] Link::Ptr intersectRayLinks(const Ray<GlobalPosition3D> &) const override;
 
 public:
-	template<typename L, typename... Params>
-	std::shared_ptr<L>
-	candidateLink(GlobalPosition3D positionA, GlobalPosition3D positionB, Params &&... params)
-		requires std::is_base_of_v<T, L>
-	{
-		const auto node1 = candidateNodeAt(positionA).first, node2 = candidateNodeAt(positionB).first;
-		return std::make_shared<L>(*this, node1, node2, std::forward<Params>(params)...);
-	}
-
-	template<typename L, typename... Params>
-	std::shared_ptr<L>
-	addLink(GlobalPosition3D positionA, GlobalPosition3D positionB, Params &&... params)
-		requires std::is_base_of_v<T, L>
-	{
-		const auto node1 = nodeAt(positionA), node2 = nodeAt(positionB);
-		auto newLink = links.template create<L>(*this, node1, node2, std::forward<Params>(params)...);
-		joinLinks(newLink);
-		return std::move(newLink);
-	}
-
-	Link::CCollection candidateStraight(GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection candidateJoins(GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection candidateExtend(GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection addStraight(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection addJoins(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
-	Link::CCollection addExtend(const GeoData *, GlobalPosition3D, GlobalPosition3D) override;
-
 	[[nodiscard]] float findNodeDirection(Node::AnyCPtr) const override;
 	using Network::create;
 	[[nodiscard]] Link::Ptr create(const GenStraightDef &) override;
@@ -144,6 +109,5 @@ public:
 	void add(GeoData *, const Link::Ptr &) override;
 
 protected:
-	Link::CCollection addCurve(const GeoData *, const GenCurveDef &);
 	[[nodiscard]] bool anyLinks() const;
 };

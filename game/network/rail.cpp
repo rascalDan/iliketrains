@@ -18,61 +18,6 @@ RailLinks::tick(TickDuration)
 {
 }
 
-std::shared_ptr<RailLink>
-RailLinks::addLinksBetween(GlobalPosition3D start, GlobalPosition3D end)
-{
-	auto node1ins = newNodeAt(start), node2ins = newNodeAt(end);
-	if (node1ins.second == NodeIs::NotInNetwork && node2ins.second == NodeIs::NotInNetwork) {
-		// Both nodes are new, direct link, easy
-		return addLink<RailLinkStraight>(start, end);
-	}
-	if (node1ins.second == NodeIs::NotInNetwork && node2ins.second == NodeIs::InNetwork) {
-		// node1 is new, node2 exists, but we build from existing outwards
-		std::swap(node1ins, node2ins);
-		std::swap(start, end);
-	}
-	// Find start link/end - opposite entry dir to existing link; so pi +...
-	const Angle dir = pi + findNodeDirection(node1ins.first);
-	if (dir == vector_yaw(difference(end, start))) {
-		return addLink<RailLinkStraight>(start, end);
-	}
-	const auto flatStart {start.xy()}, flatEnd {end.xy()};
-	if (node2ins.second == NodeIs::InNetwork) {
-		auto midheight = [&](auto mid) {
-			const auto startToMid = ::distance<2>(flatStart, mid);
-			const auto endToMid = ::distance<2>(flatEnd, mid);
-			return start.z + GlobalDistance(RelativeDistance(end.z - start.z) * (startToMid / (startToMid + endToMid)));
-		};
-		const float dir2 = pi + findNodeDirection(node2ins.first);
-		const auto radii = find_arcs_radius(flatStart, dir, flatEnd, dir2);
-		if (radii.first < radii.second) {
-			const auto radius = radii.first;
-			const auto centre1 = flatStart + (sincos(dir + half_pi) * radius);
-			const auto centre2 = flatEnd + (sincos(dir2 + half_pi) * radius);
-			const auto mid = (centre1 + centre2) / 2;
-			const auto midh = mid || midheight(mid);
-			addLink<RailLinkCurve>(start, midh, centre1);
-			return addLink<RailLinkCurve>(end, midh, centre2);
-		}
-		const auto radius = radii.second;
-		const auto centre1 = flatStart + (sincos(dir - half_pi) * radius);
-		const auto centre2 = flatEnd + (sincos(dir2 - half_pi) * radius);
-		const auto mid = (centre1 + centre2) / 2;
-		const auto midh = mid || midheight(mid);
-		addLink<RailLinkCurve>(midh, start, centre1);
-		return addLink<RailLinkCurve>(midh, end, centre2);
-	}
-	const auto diff = difference(end, start);
-	const auto yaw = vector_yaw(diff);
-	const auto n2ed = (yaw * 2) - dir - pi;
-	const auto centre = find_arc_centre(flatStart, dir, flatEnd, n2ed);
-
-	if (centre.second) { // right hand arc
-		std::swap(start, end);
-	}
-	return addLink<RailLinkCurve>(start, end, centre.first);
-}
-
 namespace {
 	constexpr const std::array<RelativePosition3D, RAIL_CROSSSECTION_VERTICES> RAIL_CROSS_SECTION {{
 			{-1330.F, 0.F, 0},
