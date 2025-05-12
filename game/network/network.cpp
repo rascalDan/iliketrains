@@ -107,7 +107,7 @@ Network::add(GeoData * geoData, const std::span<const Link::Ptr> links)
 }
 
 void
-Network::terrainSplitAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos)
+Network::connectAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos)
 {
 	std::visit(
 			[pos](auto & typedDefPrevious, auto & typedDefNext) {
@@ -125,7 +125,7 @@ Network::terrainSplit(const GeoData * geoData, const GenStraightDef & def) const
 		if (step.previous.is_valid() && geoData->getSurface(step.current) != geoData->getSurface(step.previous)) {
 			const auto surfaceEdgePosition = geoData->positionAt(GeoData::PointFace(step.exitPosition, step.current));
 			out.emplace_back(out.back());
-			terrainSplitAt(*out.rbegin(), *++out.rbegin(), surfaceEdgePosition);
+			connectAt(*out.rbegin(), *++out.rbegin(), surfaceEdgePosition);
 		}
 	});
 	return out;
@@ -161,7 +161,7 @@ Network::terrainSplit(const GeoData * geoData, const GenCurveDef & def) const
 	GenLinksDef out {def};
 	std::ranges::for_each(++points.begin(), --points.end(), [&out](const auto pos) {
 		out.emplace_back(out.back());
-		terrainSplitAt(*out.rbegin(), *++out.rbegin(), pos);
+		connectAt(*out.rbegin(), *++out.rbegin(), pos);
 	});
 	return out;
 }

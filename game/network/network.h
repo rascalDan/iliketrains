@@ -72,7 +72,7 @@ protected:
 
 	[[nodiscard]] GenLinksDef terrainSplit(const GeoData *, const GenStraightDef &) const;
 	[[nodiscard]] GenLinksDef terrainSplit(const GeoData *, const GenCurveDef &) const;
-	static void terrainSplitAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos);
+	static void connectAt(GenLinkDef & previous, GenLinkDef & next, GlobalPosition3D pos);
 	[[nodiscard]] virtual Link::Ptr create(const GenStraightDef &) = 0;
 	[[nodiscard]] virtual Link::Ptr create(const GenCurveDef &) = 0;
 
