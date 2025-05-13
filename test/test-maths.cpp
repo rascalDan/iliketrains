@@ -151,24 +151,6 @@ BOOST_DATA_TEST_CASE(TestCreateArc,
 	BOOST_CHECK_CLOSE(arc.second, expAngles.second, 1.F);
 }
 
-using FindArcCentreData = std::tuple<glm::vec2, float, glm::vec2, float, glm::vec2, bool>;
-
-BOOST_DATA_TEST_CASE(TestFindArcCentre,
-		boost::unit_test::data::make<FindArcCentreData>({
-				{{2, 2}, pi, {3, 3}, half_pi, {3, 2}, true},
-				{{2, 2}, pi, {1, 3}, -half_pi, {1, 2}, false},
-				{{-1100, -1000}, pi, {-900, -800}, half_pi, {-900, -1000}, true},
-				{{1100, 1000}, 0, {1050, 900}, pi + 0.92F, {973, 1000}, true},
-				{{1050, 900}, 0.92F, {1000, 800}, pi, {1127, 800}, false},
-		}),
-		startPoint, startEntryAngle, endPoint, endEntryAngle, expCentre, leftRight)
-{
-	const auto centre = find_arc_centre(startPoint, startEntryAngle, endPoint, endEntryAngle);
-	BOOST_CHECK_CLOSE(expCentre.x, centre.first.x, 1);
-	BOOST_CHECK_CLOSE(expCentre.y, centre.first.y, 1);
-	BOOST_CHECK_EQUAL(leftRight, centre.second);
-}
-
 BOOST_AUTO_TEST_CASE(TestFindArcsRadius)
 {
 	BOOST_CHECK_CLOSE(

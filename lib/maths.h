@@ -435,19 +435,6 @@ isWithinLimit(T lhs, T rhs, T limit = EPSILON<T>)
 
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 std::pair<glm::vec<2, T, Q>, bool>
-find_arc_centre(glm::vec<2, T, Q> start, Rotation2D startDir, glm::vec<2, T, Q> end, Rotation2D endDir)
-{
-	const auto det = endDir.x * startDir.y - endDir.y * startDir.x;
-	if (det != 0) { // near parallel line will yield noisy results
-		const glm::vec<2, RelativeDistance, Q> d = end - start;
-		const auto u = (d.y * endDir.x - d.x * endDir.y) / det;
-		return {start + glm::vec<2, T, Q>(startDir * u), u < 0};
-	}
-	throw std::runtime_error("no intersection");
-}
-
-template<Arithmetic T, glm::qualifier Q = glm::defaultp>
-std::pair<glm::vec<2, T, Q>, bool>
 find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
 {
 	if (start == end) {
