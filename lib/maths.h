@@ -458,40 +458,6 @@ find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end)
 	return {*centre, normalize(vector_yaw(diffEnds) - entrys) < 0};
 }
 
-template<Arithmetic T, glm::qualifier Q = glm::defaultp>
-Angle
-find_arcs_radius(glm::vec<2, T, Q> start, Rotation2D ad, glm::vec<2, T, Q> end, Rotation2D bd)
-{
-	using std::sqrt;
-
-	// Calculates path across both arcs along the normals... pythagorean theorem... for some known radius r
-	// (2r)^2 = ((m + (X*r)) - (o + (Z*r)))^2 + ((n + (Y*r)) - (p + (W*r)))^2
-	// According to symbolabs.com equation tool, that solves for r to give:
-	// r=(-2 m X+2 X o+2 m Z-2 o Z-2 n Y+2 Y p+2 n W-2 p W-sqrt((2 m X-2 X o-2 m Z+2 o Z+2 n Y-2 Y p-2 n W+2 p W)^(2)-4
-	// (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y W+W^(2)-4) (m^(2)-2 m o+o^(2)+n^(2)-2 n p+p^(2))))/(2 (X^(2)-2 X Z+Z^(2)+Y^(2)-2 Y
-	// W+W^(2)-4))
-	// Locally simplified to work relative, removing one half of the problem and operating on relative positions.
-
-	// These exist cos limitations of online formula rearrangement, and I'm OK with that.
-	const RelativePosition2D diff {end - start};
-	const auto &o {diff.x}, &p {diff.y};
-	const auto &X {ad.x}, &Y {ad.y}, &Z {bd.x}, &W {bd.y};
-
-	return (-2 * X * o + 2 * o * Z - 2 * Y * p + 2 * p * W
-				   - sqrt(sq(2 * X * o - 2 * o * Z + 2 * Y * p - 2 * p * W)
-						   - (4 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4) * (sq(o) + sq(p)))))
-			/ (2 * (sq(X) - 2 * X * Z + sq(Z) + sq(Y) - 2 * Y * W + sq(W) - 4));
-}
-
-template<Arithmetic T, glm::qualifier Q = glm::defaultp>
-std::pair<Angle, Angle>
-find_arcs_radius(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
-{
-	const auto getrad = [&](auto leftOrRight) {
-		return find_arcs_radius(start, sincos(entrys + leftOrRight), end, sincos(entrye + leftOrRight));
-	};
-	return {getrad(-half_pi), getrad(half_pi)};
-}
 
 template<Arithmetic T>
 auto

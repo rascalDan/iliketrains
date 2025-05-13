@@ -151,12 +151,6 @@ BOOST_DATA_TEST_CASE(TestCreateArc,
 	BOOST_CHECK_CLOSE(arc.second, expAngles.second, 1.F);
 }
 
-BOOST_AUTO_TEST_CASE(TestFindArcsRadius)
-{
-	BOOST_CHECK_CLOSE(
-			find_arcs_radius(RelativePosition2D {10.32, 26.71}, {0.4, .92}, {2.92, 22.41}, {-0.89, -0.45}), 2.29, 1);
-}
-
 namespace {
 	struct TestLinkStraight : public LinkStraight {
 		explicit TestLinkStraight(glm::vec3 entryVector) :
