@@ -399,30 +399,29 @@ normalize(T ang)
 	return ang;
 }
 
+template<Arithmetic T, std::floating_point D, glm::qualifier Q = glm::defaultp>
+[[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
+linesIntersectAtDirs(const glm::vec<2, T, Q> Aabs, const glm::vec<2, D, Q> Adir, const glm::vec<2, T, Q> Cabs,
+		const glm::vec<2, D, Q> Cdir)
+{
+	const auto abNormal = vector_normal(Adir);
+	const auto cdNormal = vector_normal(Cdir);
+	const auto determinant = (abNormal.x * cdNormal.y) - (cdNormal.x * abNormal.y);
+
+	if (determinant == 0) {
+		return std::nullopt;
+	}
+	const auto Crel = difference(Cabs, Aabs);
+	const auto c2 = (cdNormal.x * Crel.x) + (cdNormal.y * Crel.y);
+	return Aabs + vector_normal((abNormal * c2) / determinant);
+}
+
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>
 [[nodiscard]] constexpr std::optional<glm::vec<2, T, Q>>
 linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, const glm::vec<2, T, Q> Cabs,
 		const glm::vec<2, T, Q> Dabs)
 {
-	using CT = CalcType<T>;
-	using CVec = glm::vec<2, CT, Q>;
-	// Line AB represented as a1x + b1y = c1
-	const CVec Brel = Babs - Aabs;
-	const CT a1 = Brel.y;
-	const CT b1 = -Brel.x;
-
-	// Line CD represented as a2x + b2y = c2
-	const CVec Crel = Cabs - Aabs, Del = Dabs - Aabs;
-	const CT a2 = Del.y - Crel.y;
-	const CT b2 = Crel.x - Del.x;
-	const CT c2 = (a2 * Crel.x) + (b2 * Crel.y);
-
-	const auto determinant = (a1 * b2) - (a2 * b1);
-
-	if (determinant == 0) {
-		return std::nullopt;
-	}
-	return Aabs + CVec {(b1 * c2) / -determinant, (a1 * c2) / determinant};
+	return linesIntersectAtDirs(Aabs, difference(Babs, Aabs), Cabs, difference(Dabs, Cabs));
 }
 
 template<std::floating_point T> constexpr auto EPSILON = 0.0001F;
