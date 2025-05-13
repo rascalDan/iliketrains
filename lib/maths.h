@@ -77,11 +77,23 @@ constexpr auto degreesToRads = pi / 180.F;
 constexpr auto earthMeanRadius = 6371.01F; // In km
 constexpr auto astronomicalUnit = 149597890.F; // In km
 
-template<glm::length_t D>
-constexpr GlobalPosition<D>
-operator+(const GlobalPosition<D> & global, const RelativePosition<D> & relative)
+// GLM round is not constexpr :( And we can use lround to convert at the same time
+template<glm::length_t D, std::floating_point T, glm::qualifier Q>
+[[nodiscard]] constexpr glm::vec<D, long, Q>
+lround(const glm::vec<D, T, Q> & value)
 {
-	return global + GlobalPosition<D>(glm::round(relative));
+	glm::vec<D, long, Q> out;
+	for (glm::length_t axis = 0; axis < D; ++axis) {
+		out[axis] = std::lround(value[axis]);
+	}
+	return out;
+}
+
+template<glm::length_t D, std::floating_point T, glm::qualifier Q>
+constexpr GlobalPosition<D>
+operator+(const GlobalPosition<D> & global, const glm::vec<D, T, Q> & relative)
+{
+	return global + GlobalPosition<D> {lround(relative)};
 }
 
 template<glm::length_t D>
@@ -91,11 +103,11 @@ operator+(const GlobalPosition<D> & global, const CalcPosition<D> & relative)
 	return global + GlobalPosition<D>(relative);
 }
 
-template<glm::length_t D>
+template<glm::length_t D, std::floating_point T, glm::qualifier Q>
 constexpr GlobalPosition<D>
-operator-(const GlobalPosition<D> & global, const RelativePosition<D> & relative)
+operator-(const GlobalPosition<D> & global, const glm::vec<D, T, Q> & relative)
 {
-	return global - GlobalPosition<D>(glm::round(relative));
+	return global - GlobalPosition<D> {lround(relative)};
 }
 
 template<glm::length_t D>
