@@ -1,5 +1,6 @@
 #include "maths.h"
 #include <cmath>
+#include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/transform.hpp>
@@ -32,6 +33,7 @@ static_assert(pow(3, 1) == 3);
 static_assert(pow(3, 2) == 9);
 static_assert(pow(pi, 3) == 31.006278991699219F);
 
+#ifndef __clang__
 static_assert(!linesIntersectAt<int>({0, 10}, {10, 10}, {10, 0}, {0, 0}).has_value());
 static_assert(*linesIntersectAt<int>({0, 0}, {10, 10}, {10, 0}, {0, 10}) == GlobalPosition2D {5, 5});
 static_assert(*linesIntersectAt<int>({300'000'000, 400'000'00}, {300'010'000, 400'010'00}, {310'010'000, 410'000'00},
@@ -43,6 +45,13 @@ constexpr auto EAST2D = RelativePosition2D(east);
 static_assert(!linesIntersectAtDirs<int>({0, 0}, NORTH2D, {10, 10}, NORTH2D).has_value());
 static_assert(linesIntersectAtDirs<int>({0, 0}, NORTH2D, {10, 10}, EAST2D) == GlobalPosition2D {0, 10});
 static_assert(linesIntersectAtDirs<int>({0, 0}, EAST2D, {10, 10}, NORTH2D) == GlobalPosition2D {10, 0});
+
+static_assert(find_arc_centre<int>({0, 0}, -NORTH2D, {10, 10}) == std::make_pair<GlobalPosition2D>({10, 0}, 10.F));
+static_assert(find_arc_centre<int>({20, 0}, -NORTH2D, {10, 10}) == std::make_pair<GlobalPosition2D>({10, 0}, -10.F));
+static_assert(find_arc_centre<int>({10, 0}, -NORTH2D, {10, 10}).second == 0.F);
+static_assert(isWithinLimit(find_arc_centre<int>({0, 0}, pi + quarter_pi, {1000, 1000}).second, 0.F, 0.1F));
+#endif
+
 // NOLINTEND(readability-magic-numbers)
 
 float

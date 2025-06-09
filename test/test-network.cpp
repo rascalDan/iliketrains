@@ -102,21 +102,25 @@ namespace {
 	struct TestNetwork : public EmptyNetwork {
 		TestNetwork()
 		{
-			/*       0        1        2
-			 /   -> p000 <-> p100 <-> p200 <-> p300
-			 / /            /              \.
-			 / 3            5              4
-			 /  \           /             /
-			 /    --> p110 <-------------   */
+			/*
+			 *   4--> p110 <---------6-------
+			 * /            8                 \.
+			 * 3            7                  5
+			 *  \           \                 /
+			 *   -> p000 <-0-> p100 <-1-> p200 <-2-> p300  */
+			// 0, 1 and 2 - 3 straight links between 4 nodes
 			add(nullptr, createChain(nullptr, std::array {P000, P100, P200, P300}));
+			// 3 and 4 - RH biarc from p000 to p110
 			add(nullptr,
 					create(nullptr,
 							{.fromEnd = {.position = P000, .direction = -half_pi},
 									.toEnd = {.position = P110, .direction = -half_pi}}));
+			// 5 and 6 - LH biarc from p200 to p110
 			add(nullptr,
 					create(nullptr,
 							{.fromEnd = {.position = P200, .direction = half_pi},
 									.toEnd = {.position = P110, .direction = half_pi}}));
+			// 7 and 8 - RL S biarc from p100 to p110
 			add(nullptr,
 					create(nullptr,
 							{.fromEnd = {.position = P100, .direction = -half_pi},
@@ -182,21 +186,25 @@ BOOST_AUTO_TEST_CASE(NetworkJoins)
 	// Join 0 <-> 1
 	BOOST_REQUIRE_EQUAL(links[0]->ends[1].nexts.size(), 2);
 	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[0].second, 0);
 	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].first.lock().get(), links[7].get());
 	BOOST_CHECK_EQUAL(links[0]->ends[1].nexts[1].second, 1);
 	BOOST_REQUIRE_EQUAL(links[1]->ends[0].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].first.lock().get(), links[2].get());
-	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].second, 0);
-	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].first.lock().get(), links[5].get());
-	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].second, 0);
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].first.lock().get(), links[0].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].first.lock().get(), links[7].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[0].nexts[1].second, 1);
 	// Join 1 <-> 2
 	BOOST_REQUIRE_EQUAL(links[1]->ends[1].nexts.size(), 2);
-	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].first.lock().get(), links[0].get());
-	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].first.lock().get(), links[2].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[0].second, 0);
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[1].first.lock().get(), links[5].get());
+	BOOST_CHECK_EQUAL(links[1]->ends[1].nexts[1].second, 0);
 	BOOST_REQUIRE_EQUAL(links[2]->ends[0].nexts.size(), 2);
 	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].first.lock().get(), links[1].get());
-	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].second, 0);
+	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[0].second, 1);
+	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[1].first.lock().get(), links[5].get());
+	BOOST_CHECK_EQUAL(links[2]->ends[0].nexts[1].second, 0);
 }
 
 BOOST_DATA_TEST_CASE(RouteToNodeNotInNetwork, INVALID_NODES, dest)
@@ -302,6 +310,54 @@ BOOST_AUTO_TEST_CASE(NetworkCreateStraight)
 	BOOST_CHECK_EQUAL(nodes.size(), 2);
 }
 
+BOOST_AUTO_TEST_CASE(NetworkCreateExtendingStraight)
+{
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = pi + quarter_pi},
+					.toEnd = {.position = {1000, 1000, 0}, .direction = {}},
+			});
+	BOOST_REQUIRE_EQUAL(link.size(), 1);
+	BOOST_CHECK(links.empty());
+	BOOST_CHECK(nodes.empty());
+
+	BOOST_CHECK_IF(straight, std::dynamic_pointer_cast<TestLinkS>(link.front())) {
+		BOOST_CHECK_CLOSE(straight->length, 1414, 1);
+		BOOST_CHECK_CLOSE_VECI(straight->ends.front().node->pos, GlobalPosition3D(0, 0, 0));
+		BOOST_CHECK_CLOSE(straight->ends.front().dir, quarter_pi - pi, 1);
+		BOOST_CHECK_CLOSE_VECI(straight->ends.back().node->pos, GlobalPosition3D(1000, 1000, 0));
+		BOOST_CHECK_CLOSE(straight->ends.back().dir, quarter_pi, 1);
+	}
+
+	add(nullptr, link.front());
+	BOOST_CHECK_EQUAL(links.size(), 1);
+	BOOST_CHECK_EQUAL(nodes.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(NetworkCreateExtendeeStraight)
+{
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {0, 0, 0}, .direction = {}},
+					.toEnd = {.position = {1000, 1000, 0}, .direction = quarter_pi},
+			});
+	BOOST_REQUIRE_EQUAL(link.size(), 1);
+	BOOST_CHECK(links.empty());
+	BOOST_CHECK(nodes.empty());
+
+	BOOST_CHECK_IF(straight, std::dynamic_pointer_cast<TestLinkS>(link.front())) {
+		BOOST_CHECK_CLOSE(straight->length, 1414, 1);
+		BOOST_CHECK_CLOSE_VECI(straight->ends.front().node->pos, GlobalPosition3D(1000, 1000, 0));
+		BOOST_CHECK_CLOSE(straight->ends.front().dir, quarter_pi, 1);
+		BOOST_CHECK_CLOSE_VECI(straight->ends.back().node->pos, GlobalPosition3D(0, 0, 0));
+		BOOST_CHECK_CLOSE(straight->ends.back().dir, quarter_pi - pi, 1);
+	}
+
+	add(nullptr, link.front());
+	BOOST_CHECK_EQUAL(links.size(), 1);
+	BOOST_CHECK_EQUAL(nodes.size(), 2);
+}
+
 BOOST_AUTO_TEST_CASE(NetworkCreateExtendingCurve)
 {
 	const auto link = create(nullptr,
@@ -396,24 +452,41 @@ BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPair)
 	BOOST_CHECK_EQUAL(link.back()->ends.back().nexts.front().first.lock(), link.front());
 }
 
-BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPairEqTan)
+BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPairEqTanLH)
 {
-	// This could be achieved with a single curve, but not there yet
+	// Creates a biarc pair and then merges them into a single curve
+	const auto link = create(nullptr,
+			CreationDefinition {
+					.fromEnd = {.position = {1000, 0, 0}, .direction = 0},
+					.toEnd = {.position = {0, 0, 0}, .direction = 0},
+			});
+	BOOST_REQUIRE_EQUAL(link.size(), 1);
+	BOOST_CHECK(links.empty());
+	BOOST_CHECK(nodes.empty());
+
+	BOOST_CHECK_IF(firstCurve, std::dynamic_pointer_cast<TestLinkC>(link.front())) {
+		BOOST_CHECK_CLOSE_VECI(firstCurve->ends.front().node->pos, GlobalPosition3D(1000, 0, 0));
+		BOOST_CHECK_CLOSE_VECI(firstCurve->ends.back().node->pos, GlobalPosition3D(0, 0, 0));
+		BOOST_CHECK_CLOSE_VECI(firstCurve->centreBase, GlobalPosition3D(500, 0, 0));
+	}
+}
+
+BOOST_AUTO_TEST_CASE(NetworkCreateBiarcPairEqTanRH)
+{
+	// Creates a biarc pair and then merges them into a single curve
 	const auto link = create(nullptr,
 			CreationDefinition {
 					.fromEnd = {.position = {0, 0, 0}, .direction = 0},
 					.toEnd = {.position = {1000, 0, 0}, .direction = 0},
 			});
-	BOOST_REQUIRE_EQUAL(link.size(), 2);
+	BOOST_REQUIRE_EQUAL(link.size(), 1);
 	BOOST_CHECK(links.empty());
 	BOOST_CHECK(nodes.empty());
 
 	BOOST_CHECK_IF(firstCurve, std::dynamic_pointer_cast<TestLinkC>(link.front())) {
+		BOOST_CHECK_CLOSE_VECI(firstCurve->ends.front().node->pos, GlobalPosition3D(1000, 0, 0));
+		BOOST_CHECK_CLOSE_VECI(firstCurve->ends.back().node->pos, GlobalPosition3D(0, 0, 0));
 		BOOST_CHECK_CLOSE_VECI(firstCurve->centreBase, GlobalPosition3D(500, 0, 0));
-	}
-
-	BOOST_CHECK_IF(secondCurve, std::dynamic_pointer_cast<TestLinkC>(link.back())) {
-		BOOST_CHECK_CLOSE_VECI(secondCurve->centreBase, GlobalPosition3D(500, 0, 0));
 	}
 }
 

@@ -179,10 +179,13 @@ Network::genDef(const GlobalPosition3D & start, const GlobalPosition3D & end, An
 	const auto flatStart = start.xy(), flatEnd = end.xy();
 	const auto centre = find_arc_centre(flatStart, dir, flatEnd);
 
-	if (centre.second) { // right hand arc
+	if (centre.second > 0.1F) {
 		return {GenCurveDef {end, start, centre.first}};
 	}
-	return {GenCurveDef {start, end, centre.first}};
+	if (centre.second < -0.1F) {
+		return {GenCurveDef {start, end, centre.first}};
+	}
+	return {GenStraightDef {start, end}};
 }
 
 GenLinksDef
@@ -219,13 +222,38 @@ Network::genDef(const GlobalPosition3D & start, const GlobalPosition3D & end, An
 	return genDef(start, joint, startDir) + genDef(end, joint, endDir);
 }
 
+namespace {
+	struct MergeEq {
+		bool
+		operator()(GenCurveDef & lhs, const GenCurveDef & rhs) const
+		{
+			if (distance(std::get<2>(lhs), std::get<2>(rhs)) < 100.F) { // LHS.centre near RHS.centre
+				if (std::get<1>(lhs) == std::get<0>(rhs)) { // LHS.end == RHS.start
+					std::get<1>(lhs) = std::get<1>(rhs);
+				}
+				else if (std::get<0>(lhs) == std::get<1>(rhs)) { // LHS.start == RHS.end
+					std::get<0>(lhs) = std::get<0>(rhs);
+				}
+				else {
+					return false;
+				}
+				std::get<2>(lhs) = midpoint(std::get<2>(lhs), std::get<2>(rhs));
+				return true;
+			}
+			return false;
+		}
+
+		bool
+		operator()(const auto &, const auto &) const
+		{
+			return false;
+		}
+	};
+}
+
 Link::Collection
 Network::create(const GeoData * geoData, const CreationDefinition & def)
 {
-	// TODO
-	// Where to make a straight to join because angles align?
-	// Where to drop part of S curve pair if a single curve works?
-
 	const auto linkDefs = [&def]() -> GenLinksDef {
 		if (!def.fromEnd.direction && !def.toEnd.direction) {
 			// No specific directions at either end, straight link
@@ -251,8 +279,20 @@ Network::create(const GeoData * geoData, const CreationDefinition & def)
 						   def);
 		});
 	};
+	// Merge adjacent pairs where possible
+	auto linkDefsGen = geoData ? splitDefs() : linkDefs();
+	if (!linkDefsGen.empty()) {
+		for (auto lhsIter = linkDefsGen.begin(), rhsIter = lhsIter + 1; rhsIter != linkDefsGen.end();) {
+			if (std::visit(MergeEq {}, *lhsIter, *rhsIter)) {
+				rhsIter = linkDefsGen.erase(rhsIter);
+			}
+			else {
+				lhsIter = rhsIter++;
+			}
+		}
+	}
 	Link::Collection links;
-	std::ranges::transform(geoData ? splitDefs() : linkDefs(), std::back_inserter(links), [this](const auto & def) {
+	std::ranges::transform(linkDefsGen, std::back_inserter(links), [this](const auto & def) {
 		return std::visit(
 				[this](const auto & typedDef) {
 					return this->create(typedDef);

@@ -427,37 +427,35 @@ linesIntersectAt(const glm::vec<2, T, Q> Aabs, const glm::vec<2, T, Q> Babs, con
 template<std::floating_point T> constexpr auto EPSILON = 0.0001F;
 
 template<std::floating_point T>
-auto
+[[nodiscard]] constexpr auto
 isWithinLimit(T lhs, T rhs, T limit = EPSILON<T>)
 {
 	return std::abs(lhs - rhs) <= limit;
 }
 
-template<Arithmetic T, glm::qualifier Q = glm::defaultp>
-std::pair<glm::vec<2, T, Q>, bool>
-find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end, Angle entrye)
+template<Arithmetic T, std::floating_point D, glm::qualifier Q = glm::defaultp>
+constexpr std::pair<glm::vec<2, T, Q>, D>
+find_arc_centre(glm::vec<2, T, Q> start, glm::vec<2, D, Q> entrys, glm::vec<2, T, Q> end)
 {
 	if (start == end) {
-		return {start, false};
+		return {start, 0};
 	}
-	return find_arc_centre(start, sincos(entrys + half_pi), end, sincos(entrye - half_pi));
+	const auto diffEnds = difference(end, start);
+	const auto offset = entrys.x * diffEnds.y - entrys.y * diffEnds.x;
+	if (offset == 0.F) {
+		return {start, offset};
+	}
+	const auto midEnds = start + ((end - start) / 2);
+	const auto centre = linesIntersectAtDirs(start, vector_normal(entrys), midEnds, vector_normal(diffEnds));
+	return {*centre, offset};
 }
 
 template<Arithmetic T, glm::qualifier Q = glm::defaultp>
-std::pair<glm::vec<2, T, Q>, bool>
+constexpr std::pair<glm::vec<2, T, Q>, float>
 find_arc_centre(glm::vec<2, T, Q> start, Angle entrys, glm::vec<2, T, Q> end)
 {
-	if (start == end) {
-		return {start, false};
-	}
-	const auto startNormal = vector_normal(sincos(entrys) * 10'000.F);
-	const auto diffEnds = difference(end, start);
-	const auto midEnds = start + ((end - start) / 2);
-	const auto diffNormal = vector_normal(diffEnds);
-	const auto centre = linesIntersectAt(start, start + startNormal, midEnds, midEnds + diffNormal);
-	return {*centre, normalize(vector_yaw(diffEnds) - entrys) < 0};
+	return find_arc_centre(start, sincos(entrys), end);
 }
-
 
 template<Arithmetic T>
 auto
