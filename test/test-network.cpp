@@ -97,6 +97,12 @@ namespace {
 		{
 			return 5'700;
 		}
+
+		SnapPoints
+		getSnapPoints() const override
+		{
+			return {};
+		}
 	};
 
 	struct TestNetwork : public EmptyNetwork {

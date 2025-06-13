@@ -23,6 +23,7 @@ private:
 
 	Network * network;
 	bool continuousMode {false};
+	SnapPoints snapPoints;
 	std::optional<CreationDefinitionEnd> currentStart;
 	Link::Collection candidates;
 };

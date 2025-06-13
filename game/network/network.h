@@ -35,6 +35,19 @@ struct CreationDefinition {
 	CreationDefinitionEnd toEnd;
 };
 
+struct SnapPoint : CreationDefinitionEnd {
+	template<typename... CDE>
+		requires std::is_constructible_v<CreationDefinitionEnd, CDE...>
+	explicit SnapPoint(GlobalPosition3D snapPosition, CDE &&... cde) :
+		CreationDefinitionEnd {std::forward<CDE>(cde)...}, snapPosition(snapPosition)
+	{
+	}
+
+	GlobalPosition3D snapPosition;
+};
+
+using SnapPoints = std::vector<SnapPoint>;
+
 class Network {
 public:
 	using LinkEnd = std::pair<Link::Ptr, unsigned char>;
@@ -55,6 +68,7 @@ public:
 	[[nodiscard]] static Link::Nexts routeFromTo(const Link::End &, const Node::Ptr &);
 
 	[[nodiscard]] virtual float findNodeDirection(Node::AnyCPtr) const = 0;
+	[[nodiscard]] virtual SnapPoints getSnapPoints() const = 0;
 
 	[[nodiscard]] Link::Collection create(const GeoData *, const CreationDefinition &);
 	[[nodiscard]] Link::Collection createChain(const GeoData *, std::span<const GlobalPosition3D>);

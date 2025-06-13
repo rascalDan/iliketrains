@@ -137,3 +137,19 @@ RailLinks::getBaseWidth() const
 	static constexpr auto BASE_WIDTH = 5'700;
 	return BASE_WIDTH;
 }
+
+SnapPoints
+RailLinks::getSnapPoints() const
+{
+	static constexpr auto EXTENSION_SNAP_DIST = 1'200.F;
+	SnapPoints out;
+	for (const auto & link : links) {
+		for (const auto & end : link->ends) {
+			// Link end node; directionless, suitable crossings
+			out.emplace_back(end.node->pos, end.node->pos, std::nullopt);
+			// Link end; with direction, suitable for continuing/joining
+			out.emplace_back(end.node->pos - ((sincos(end.dir) * EXTENSION_SNAP_DIST) || 0.F), end.node->pos, end.dir);
+		}
+	}
+	return out;
+}
