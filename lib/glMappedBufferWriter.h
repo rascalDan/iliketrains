@@ -9,10 +9,10 @@ template<typename T> class glMappedBufferWriter {
 public:
 	using difference_type = std::ptrdiff_t;
 
-	glMappedBufferWriter(GLenum target, GLuint buffer, size_t count, GLenum usage = GL_STATIC_DRAW) :
+	glMappedBufferWriter(GLenum target, GLuint buffer, size_t count) :
 		target {target}, data {[&]() {
 			glBindBuffer(target, buffer);
-			glBufferData(target, static_cast<GLsizeiptr>(sizeof(T) * count), nullptr, usage);
+			glBufferData(target, static_cast<GLsizeiptr>(sizeof(T) * count), nullptr, GL_DYNAMIC_DRAW);
 			return static_cast<T *>(glMapBuffer(target, GL_WRITE_ONLY));
 		}()}
 	{
