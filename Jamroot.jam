@@ -14,13 +14,11 @@ lib pthread : : <link>shared ;
 lib OpenMeshCore : : <link>shared ;
 lib boost_program_options : : <link>shared ;
 
-variant coverage : debug ;
 project i-like-trains : requirements
 	<cxxstd>23
 	<linkflags>-Wl,-z,defs
 	<variant>release:<lto>on-thin
 	<variant>profile:<lto>on-thin
-	<variant>coverage:<coverage>on
 	<toolset>tidy:<enable>all
 	<toolset>tidy:<exclude>bin/link-static/lib/jsonParse.cpp
 	<toolset>tidy:<checkxx>boost-*
