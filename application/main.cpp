@@ -38,7 +38,7 @@
 
 constexpr ScreenAbsCoord DEFAULT_WINDOW_SIZE {1280, 1024};
 
-class DummyMainApplication : public GameState, public MainApplication {
+class DummyMainApplication : public MainApplication, public GameState {
 public:
 	int
 	run()
