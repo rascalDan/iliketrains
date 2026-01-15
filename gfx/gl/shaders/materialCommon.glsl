@@ -13,7 +13,7 @@ map(uint mapmode, float value)
 				discard;
 			}
 	}
-	return 0;
+	return 0.0;
 }
 
 vec2

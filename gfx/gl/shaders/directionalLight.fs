@@ -48,7 +48,7 @@ isShaded(vec4 Position)
 			return getShadow(positionInLightSpace, m, texelSize);
 		}
 	}
-	return 1;
+	return 1.0;
 }
 
 void
