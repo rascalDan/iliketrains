@@ -76,6 +76,18 @@ constexpr auto degreesToRads = pi / 180.F;
 constexpr auto earthMeanRadius = 6371.01F; // In km
 constexpr auto astronomicalUnit = 149597890.F; // In km
 
+// GLM round is not constexpr :( And we can use lround to convert at the same time
+template<glm::length_t D, std::floating_point T, glm::qualifier Q>
+[[nodiscard]] constexpr glm::vec<D, long, Q>
+lround(const glm::vec<D, T, Q> & value)
+{
+	glm::vec<D, long, Q> out {};
+	for (glm::length_t axis = 0; axis < D; ++axis) {
+		out[axis] = std::lround(value[axis]);
+	}
+	return out;
+}
+
 template<glm::length_t D>
 constexpr GlobalPosition<D>
 operator+(const GlobalPosition<D> & global, const RelativePosition<D> & relative)
