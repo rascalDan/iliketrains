@@ -14,7 +14,9 @@ static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
 		{1, -1, 1, 0},
 }};
 
-SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
+SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) : SceneRenderer {s, o, glDebugScope {o}} { }
+
+SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	camera {{-1250000, -1250000, 35.0F}, quarter_pi, ratio(s), 100, 10000000}, size {s}, output {o},
 	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}
 {
@@ -59,6 +61,7 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) :
 void
 SceneRenderer::resize(ScreenAbsCoord newSize)
 {
+	glDebugScope _ {output};
 	size = newSize;
 	camera.setAspect(ratio(size));
 	const auto configuregdata = [this](const GLuint data, const GLint iformat, const GLenum format) {
@@ -77,55 +80,66 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 void
 SceneRenderer::render(const SceneProvider & scene) const
 {
+	glDebugScope _ {output};
 	shader.setViewProjection(camera.getPosition(), camera.getViewProjection());
 	glViewport(0, 0, size.x, size.y);
 
-	// Geometry/colour pass - writes albedo, normal and position textures
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	glEnable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	scene.content(shader, camera);
+	if (glDebugScope _ {gBuffer, "Geometry/colour pass"}) {
+		// Geometry/colour pass - writes albedo, normal and position textures
+		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+		glEnable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		scene.content(shader, camera);
+	}
 
-	// Environment pass -
-	// * ambient - clears illumination texture - see setAmbientLight
-	// * directional - updates shadowMapper, reads normal and position, writes illumination - see setDirectionalLight
-	scene.environment(shader, *this);
+	if (glDebugScope _ {gBufferIll, "Environment pass"}) {
+		// Environment pass -
+		// * ambient - clears illumination texture - see setAmbientLight
+		// * directional - updates shadowMapper, reads normal and position, writes illumination - see
+		// setDirectionalLight
+		scene.environment(shader, *this);
+	}
 
-	// Scene lights pass -
-	// * per light - reads normal and position, writes illumination
-	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gPosition);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, gNormal);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
-	glDisable(GL_DEPTH_TEST);
-	scene.lights(shader);
+	if (glDebugScope _ {gBufferIll, "Scene lighting pass"}) {
+		// Scene lights pass -
+		// * per light - reads normal and position, writes illumination
+		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
+		glDisable(GL_DEPTH_TEST);
+		scene.lights(shader);
+	}
 
-	// Composition pass - reads albedo and illumination, writes output
-	glBindFramebuffer(GL_FRAMEBUFFER, output);
-	glViewport(0, 0, size.x, size.y);
-	glCullFace(GL_BACK);
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, gIllumination);
-	lighting.use();
-	renderQuad();
+	if (glDebugScope _ {output, "Composition pass"}) {
+		// Composition pass - reads albedo and illumination, writes output
+		glBindFramebuffer(GL_FRAMEBUFFER, output);
+		glViewport(0, 0, size.x, size.y);
+		glCullFace(GL_BACK);
+		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, gIllumination);
+		lighting.use();
+		renderQuad();
+	}
 }
 
 void
 SceneRenderer::setAmbientLight(const RGB & colour) const
 {
+	glDebugScope _ {output};
 	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 	glClearColor(colour.r, colour.g, colour.b, 1.0F);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -136,6 +150,7 @@ SceneRenderer::setDirectionalLight(
 		const RGB & colour, const LightDirection & direction, const SceneProvider & scene) const
 {
 	if (colour.r > 0 || colour.g > 0 || colour.b > 0) {
+		glDebugScope _ {output};
 		const auto lvp = shadowMapper.update(scene, direction, camera);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glBlendFunc(GL_ONE, GL_ONE);

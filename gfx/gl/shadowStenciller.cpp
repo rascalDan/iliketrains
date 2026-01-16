@@ -1,5 +1,4 @@
 #include "shadowStenciller.h"
-#include "gfx/gl/program.h"
 #include "gfx/gl/shaders/fs-shadowStencil.h"
 #include "gfx/gl/shaders/gs-shadowStencil.h"
 #include "gfx/gl/shaders/vs-shadowStencil.h"
@@ -7,12 +6,14 @@
 #include "gfx/models/mesh.h"
 #include "glArrays.h"
 #include "gl_traits.h"
+#include "gldebug.h"
 #include "maths.h"
 #include <stdexcept>
 
 ShadowStenciller::ShadowStenciller() :
 	shadowCaster {shadowStencil_vs, shadowStencil_gs, shadowStencil_fs}, viewProjections {}
 {
+	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
@@ -50,6 +51,7 @@ ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
 void
 ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh, const Texture::AnyPtr texture) const
 {
+	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, stencil, 0);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {

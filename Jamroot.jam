@@ -17,6 +17,7 @@ lib boost_program_options : : <link>shared ;
 project i-like-trains : requirements
 	<cxxstd>23
 	<linkflags>-Wl,-z,defs
+	<variant>debug:<define>GLDEBUG=1
 	<variant>release:<lto>on-thin
 	<variant>profile:<lto>on-thin
 	<toolset>tidy:<enable>all

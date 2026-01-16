@@ -2,6 +2,7 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "game/gamestate.h"
 #include "game/worldobject.h"
+#include "gfx/gl/gldebug.h"
 
 void
 MainApplication::mainLoop()
@@ -13,10 +14,13 @@ MainApplication::mainLoop()
 		const auto t_passed = std::chrono::duration_cast<TickDuration>(t_end - t_start);
 
 		if (gameState) {
+			glDebugScope _ {0, "Tick all game state world objects"};
 			gameState->world.apply(&WorldObject::tick, t_passed);
 		}
 		windows.apply(&Window::tick, t_passed);
-		windows.apply(&Window::refresh);
+		if (glDebugScope _ {0, "Refresh all windows"}) {
+			windows.apply(&Window::refresh);
+		}
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 

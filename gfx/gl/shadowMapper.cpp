@@ -16,6 +16,7 @@
 #include "gfx/lightDirection.h"
 #include "gfx/renderable.h"
 #include "gl_traits.h"
+#include "gldebug.h"
 #include "location.h"
 #include "maths.h"
 #include "sceneProvider.h"
@@ -32,6 +33,7 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 			shadowDynamicPointInstWithTextures_fs},
 	size {s}
 {
+	glDebugScope _ {depthMap};
 	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
 	glTexImage3D(
 			GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, size.x, size.y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -83,6 +85,7 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 ShadowMapper::Definitions
 ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, const Camera & camera) const
 {
+	glDebugScope _ {depthMap};
 	glCullFace(GL_FRONT);
 	glEnable(GL_DEPTH_TEST);
 

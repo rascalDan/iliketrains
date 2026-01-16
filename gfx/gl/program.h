@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gldebug.h"
 #include "shader.h" // IWYU pragma: export
 #include <glRef.h>
 #include <glad/gl.h>
@@ -14,7 +15,9 @@ class Program {
 public:
 	Program() = delete;
 
-	template<typename... S> explicit Program(const S &... srcs)
+	template<typename... S> explicit Program(const S &... srcs) : Program {glDebugScope {0}, srcs...} { }
+
+	template<typename... S> explicit Program(glDebugScope, const S &... srcs)
 	{
 		(glAttachShader(m_program, srcs.compile()), ...);
 		linkAndValidate();

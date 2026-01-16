@@ -1,6 +1,7 @@
 #include "window.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl2.h"
+#include "gfx/gl/gldebug.h"
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 
@@ -14,6 +15,7 @@ Window::Window(ScreenAbsCoord size, const char * title, Uint32 flags) :
 void
 Window::clear(float r, float g, float b, float a) const
 {
+	glDebugScope _ {0};
 	glClearColor(r, g, b, a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -56,8 +58,10 @@ Window::refresh() const
 		content->render();
 		// Render UI stuff here
 	}
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	if (glDebugScope _ {0, "ImGui post"}) {
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 
 	swapBuffers();
 }

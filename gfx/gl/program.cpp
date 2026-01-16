@@ -1,5 +1,5 @@
 #include "program.h"
-#include "shader.h"
+#include "gldebug.h"
 #include <format>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
@@ -9,6 +9,7 @@
 void
 Program::linkAndValidate() const
 {
+	glDebugScope _ {m_program};
 	glLinkProgram(m_program);
 	checkProgramError(m_program, GL_LINK_STATUS, "Error linking shader program");
 

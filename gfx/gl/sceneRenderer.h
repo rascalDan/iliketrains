@@ -2,6 +2,7 @@
 
 #include "gfx/lightDirection.h"
 #include "glArrays.h"
+#include "gldebug.h"
 #include "program.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
@@ -11,7 +12,8 @@
 
 class SceneRenderer {
 public:
-	explicit SceneRenderer(ScreenAbsCoord size, GLuint output);
+	SceneRenderer(ScreenAbsCoord size, GLuint output);
+	SceneRenderer(ScreenAbsCoord size, GLuint output, glDebugScope);
 
 	void resize(ScreenAbsCoord size);
 
