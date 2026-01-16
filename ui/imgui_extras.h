@@ -1,4 +1,4 @@
-#include "imgui_wrap.h"
+#include <imgui.h>
 
 namespace IltGui {
 	// NOLINTBEGIN(readability-identifier-naming)

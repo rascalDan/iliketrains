@@ -1,9 +1,9 @@
 #include "queryTool.h"
-#include "imgui_wrap.h"
 #include <game/gamestate.h>
 #include <game/selectable.h>
 #include <game/terrain.h>
 #include <game/worldobject.h>
+#include <imgui.h>
 #include <ray.h>
 #include <stream_support.h>
 

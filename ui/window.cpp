@@ -1,11 +1,8 @@
 #include "window.h"
-#include <glad/gl.h>
-#include <glm/glm.hpp>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl2.h"
-#pragma GCC diagnostic pop
+#include <glad/gl.h>
+#include <glm/glm.hpp>
 
 Window::Window(ScreenAbsCoord size, const char * title, Uint32 flags) :
 	m_window {title, static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.x, size.y,

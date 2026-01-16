@@ -1,9 +1,9 @@
 #pragma once
 
-#include "imgui_wrap.h"
 #include <filesystem>
 #include <glArrays.h>
 #include <glm/glm.hpp>
+#include <imgui.h>
 
 class Image;
 

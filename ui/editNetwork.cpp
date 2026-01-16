@@ -2,11 +2,11 @@
 #include "builders/freeExtend.h"
 #include "builders/join.h"
 #include "builders/straight.h"
-#include "imgui_wrap.h"
 #include <game/gamestate.h>
 #include <game/terrain.h>
 #include <gfx/gl/sceneShader.h>
 #include <gfx/models/texture.h>
+#include <imgui.h>
 
 constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
 

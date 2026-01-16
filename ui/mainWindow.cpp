@@ -1,12 +1,8 @@
 #include "mainWindow.h"
-#include <format>
-#include <stdexcept>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl2.h"
-#pragma GCC diagnostic pop
+#include <format>
+#include <stdexcept>
 
 MainWindow::MainWindow(ScreenAbsCoord size, const char * title, Uint32 flags) : Window {size, title, flags}
 {

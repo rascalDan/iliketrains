@@ -1,9 +1,9 @@
 #pragma once
 
 #include "glArrays.h"
-#include "imgui_wrap.h"
 #include <config/types.h>
 #include <filesystem>
+#include <imgui.h>
 #include <lunasvg.h>
 
 class SvgIcon {

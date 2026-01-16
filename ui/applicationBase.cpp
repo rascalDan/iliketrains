@@ -1,6 +1,6 @@
 #include "applicationBase.h"
-#include "imgui_wrap.h"
 #include <SDL2/SDL.h>
+#include <imgui.h>
 #include <stdexcept>
 
 ApplicationBase::ApplicationBase()

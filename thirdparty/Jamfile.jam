@@ -1,42 +1,36 @@
+project ilt.thirdparty : requirements
+	<link>static
+	<cflags>-fPIC
+	<warnings>off
+	<warnings-as-errors>off
+	;
+
 import glad ;
 lib glad : gl.xml :
-	<link>static
-	<cflags>-fPIC
-	<warnings>off
-	<warnings-as-errors>off
 	<glad.version>3.3
 	;
-lib stb : stb_image.c :
-	<link>static
-	<cflags>-fPIC
-	<warnings>off
-	<warnings-as-errors>off
-	;
 
+lib stb : stb_image.c ;
+
+path-constant imgui : imgui ;
 lib imguisdl2 :
-	[ glob imgui/imgui*.cpp imgui/misc/cpp/*.cpp : imgui/imgui_demo.cpp ]
-	imgui/backends/imgui_impl_sdl2.cpp
-	imgui/backends/imgui_impl_opengl3.cpp
+	[ glob $(imgui)/imgui*.cpp $(imgui)/misc/cpp/*.cpp : $(imgui)/imgui_demo.cpp ]
+	$(imgui)/backends/imgui_impl_sdl2.cpp
+	$(imgui)/backends/imgui_impl_opengl3.cpp
 	:
-	<link>static
-	<include>imgui
-	<include>imgui/misc/cpp
+	<include>$(imgui)
+	<include>$(imgui)/misc/cpp
 	<use>..//sdl2
-	<cflags>-fPIC
-	<warnings>off
-	<warnings-as-errors>off
 	: :
-	<include>imgui
+	<cflags>-isystem\ $(imgui)
 	;
 
+path-constant lunasvg : lunasvg ;
 lib lunasvg :
-	[ glob lunasvg/source/*.cpp lunasvg/plutovg/source/*.c ]
+	[ glob $(lunasvg)/source/*.cpp $(lunasvg)/plutovg/source/*.c ]
 	:
-	<link>static
-	<include>lunasvg/include
-	<include>lunasvg/plutovg/include
-	<warnings>off
-	<cflags>-fPIC
+	<include>$(lunasvg)/include
+	<include>$(lunasvg)/plutovg/include
 	: :
-	<include>lunasvg/include
+	<cflags>-isystem\ $(lunasvg)/include
 	;

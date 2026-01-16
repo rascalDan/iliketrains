@@ -1,10 +1,7 @@
 #include "mainApplication.h"
+#include "backends/imgui_impl_sdl2.h"
 #include "game/gamestate.h"
 #include "game/worldobject.h"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#include "backends/imgui_impl_sdl2.h"
-#pragma GCC diagnostic pop
 
 void
 MainApplication::mainLoop()

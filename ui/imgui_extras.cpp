@@ -1,5 +1,5 @@
-#define IMGUI_INTERNAL
 #include "imgui_extras.h"
+#include <imgui_internal.h>
 
 namespace IltGui {
 	bool
