@@ -16,8 +16,9 @@ namespace {
 	}
 
 	using LookUpFunction = std::string (*)(GLenum);
-	constexpr std::array<std::tuple<std::string_view, GLenum, LookUpFunction>, 1> LOOKUPS {{
+	constexpr std::array<std::tuple<std::string_view, GLenum, LookUpFunction>, 2> LOOKUPS {{
 			{"GL_MAX_GEOMETRY_OUTPUT_VERTICES", GL_MAX_GEOMETRY_OUTPUT_VERTICES, getInt},
+			{"GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS", GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, getInt},
 	}};
 
 	struct ShaderCompileError : public MsgException<std::invalid_argument> {

@@ -24,8 +24,9 @@ getRot(float angle)
 void
 main()
 {
-	float segs = clamp(
-			round(reps[0] * radius[0] / 1000), 4, floor(uint(GL_MAX_GEOMETRY_OUTPUT_VERTICES) / (profileLength * 2u)));
+	float segs = clamp(round(reps[0] * radius[0] / 1000), 4,
+			min(floor(uint(GL_MAX_GEOMETRY_OUTPUT_VERTICES) / (profileLength * 2u)),
+					floor(uint(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS) / 5u)));
 	vec3 arcstep = vec3((bangle[0] - aangle[0]), // angle
 						   reps[0], // texture
 						   (bpos[0].z - apos[0].z)) // height
