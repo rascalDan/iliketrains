@@ -14,7 +14,7 @@ out vec3 rposition;
 float
 segDist(const ivec3 a, const ivec3 b)
 {
-	return min(distance(viewPoint, a), distance(viewPoint, b));
+	return min(length(vec3(viewPoint - a)), length(vec3(viewPoint - b)));
 }
 
 ifelse(
