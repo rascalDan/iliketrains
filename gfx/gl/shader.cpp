@@ -8,18 +8,18 @@
 
 namespace {
 	auto
-	getInt(GLenum e)
+	getInt(GLenum pname)
 	{
-		GLint i {};
-		glGetIntegerv(e, &i);
-		return std::to_string(i);
+		GLint data {};
+		glGetIntegerv(pname, &data);
+		return std::to_string(data);
 	}
 
 	using LookUpFunction = std::string (*)(GLenum);
-	constexpr std::array<std::tuple<std::string_view, GLenum, LookUpFunction>, 2> LOOKUPS {{
+	constexpr auto LOOKUPS = std::to_array<std::tuple<std::string_view, GLenum, LookUpFunction>>({
 			{"GL_MAX_GEOMETRY_OUTPUT_VERTICES", GL_MAX_GEOMETRY_OUTPUT_VERTICES, getInt},
 			{"GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS", GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, getInt},
-	}};
+	});
 
 	struct ShaderCompileError : public MsgException<std::invalid_argument> {
 		explicit ShaderCompileError(GLuint shader, Shader::Source src) :
