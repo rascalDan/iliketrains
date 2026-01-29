@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 include(`materialOut.glsl')
 in vec3 FragPos;

@@ -1,6 +1,4 @@
-#version 330 core
-#extension GL_ARB_enhanced_layouts : enable
-#extension GL_ARB_shading_language_420pack : enable
+#version 460 core
 
 const vec3[] cube = vec3[]( // http://www.cs.umd.edu/gvil/papers/av_ts.pdf
 		vec3(-1, 1, 1), // Front-top-left

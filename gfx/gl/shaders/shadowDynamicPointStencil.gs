@@ -1,5 +1,4 @@
-#version 330 core
-#extension GL_ARB_viewport_array : enable
+#version 460 core
 
 const vec2[] corners = vec2[4](vec2(-1, -1), vec2(-1, 1), vec2(1, -1), vec2(1, 1));
 const float tau = 6.28318531;

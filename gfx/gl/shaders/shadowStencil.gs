@@ -1,5 +1,4 @@
-#version 330 core
-#extension GL_ARB_viewport_array : enable
+#version 460 core
 
 include(`materialDetail.glsl')
 

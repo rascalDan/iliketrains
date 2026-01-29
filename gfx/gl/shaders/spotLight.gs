@@ -1,6 +1,4 @@
-#version 330 core
-#extension GL_ARB_enhanced_layouts : enable
-#extension GL_ARB_shading_language_420pack : enable
+#version 460 core
 
 const vec3[] pyramid = vec3[]( // four-sided
 		vec3(0, 0, 0), // Apex

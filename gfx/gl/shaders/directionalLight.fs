@@ -1,5 +1,4 @@
-#version 330 core
-#extension GL_ARB_shading_language_420pack : enable
+#version 460 core
 
 const int MAX_MAPS = 4;
 

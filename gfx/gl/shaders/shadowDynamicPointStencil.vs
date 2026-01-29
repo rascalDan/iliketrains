@@ -1,5 +1,4 @@
-#version 330 core
-#extension GL_ARB_shading_language_420pack : enable
+#version 460 core
 
 layout(location = 0) in ivec3 worldPos;
 layout(location = 1) in float modelYaw;

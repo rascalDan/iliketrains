@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 flat in ivec3 apos[];
 flat in ivec3 bpos[];
