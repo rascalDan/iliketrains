@@ -64,7 +64,7 @@ Shader::compile() const
 	};
 	if (lookups) {
 		std::basic_string<GLchar> textMod {text};
-		for (const auto & match : ctre::search_all<R"(\bGL_[A-Z_]+\b)">(textMod)) {
+		while (const auto match = ctre::search<R"(\bGL_[A-Z_]+\b)">(textMod)) {
 			if (const auto * const lookup = std::find_if(LOOKUPS.begin(), LOOKUPS.end(),
 						[&match](const auto & lookup) {
 							return std::get<std::string_view>(lookup) == match;
@@ -72,6 +72,9 @@ Shader::compile() const
 					lookup != LOOKUPS.end()) {
 				const auto & [name, pname, getFunction] = *lookup;
 				textMod.replace(match.begin(), match.end(), getFunction(pname));
+			}
+			else {
+				throw std::domain_error(std::format("Unknown shader constant: {}", match.view()));
 			}
 		}
 		source(textMod.c_str(), static_cast<GLint>(textMod.length()));
