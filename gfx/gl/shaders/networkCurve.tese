@@ -2,8 +2,6 @@
 
 layout(isolines, equal_spacing, cw) in;
 
-uniform ivec3 viewPoint;
-
 flat in ivec3 c_pos[][2];
 flat in ivec2 c_cpos[];
 flat in float c_reps[];
@@ -17,6 +15,8 @@ flat out float dist;
 
 const float startTolerance = 1. / 200.;
 const float endTolerance = 1. - startTolerance;
+
+include(`networkCommon.glsl')
 
 mat2
 getRot(float angle)
@@ -41,5 +41,5 @@ main()
 	}
 
 	tpos = c_reps[0] * gl_TessCoord.x;
-	dist = length(vec3(viewPoint - pos));
+	dist = viewPointDist(pos);
 }

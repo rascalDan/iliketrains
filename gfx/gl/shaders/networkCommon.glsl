@@ -12,9 +12,15 @@ out vec2 texCoord;
 out vec3 rposition;
 
 float
+viewPointDist(const ivec3 position)
+{
+	return length(vec3(viewPoint - position));
+}
+
+float
 segDist(const ivec3 a, const ivec3 b)
 {
-	return min(length(vec3(viewPoint - a)), length(vec3(viewPoint - b)));
+	return min(viewPointDist(a), viewPointDist(b));
 }
 
 ifelse(
