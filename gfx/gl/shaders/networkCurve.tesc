@@ -1,43 +1,37 @@
 #version 460 core
 
 layout(vertices = 1) out;
-flat in ivec3 apos[];
-flat in ivec3 bpos[];
-flat in ivec3 cpos[];
+
+flat in ivec3 pos[][2];
+flat in ivec2 cpos[];
 flat in float reps[];
-flat in float aangle[];
-flat in float bangle[];
+flat in float angles[][2];
 flat in float radius[];
 
-flat out ivec3 c_apos[];
-flat out ivec3 c_bpos[];
-flat out ivec3 c_cpos[];
+flat out ivec3 c_pos[][2];
+flat out ivec2 c_cpos[];
 flat out float c_reps[];
-flat out float c_aangle[];
-flat out float c_bangle[];
+flat out float c_angles[][2];
 flat out float c_radius[];
 
-int
-min2pow(float target)
+float
+segments()
 {
-	int x = 1;
-	while (x < target) {
-		x <<= 1;
-	}
-	return x;
+	const float arc = angles[gl_InvocationID][0] - angles[gl_InvocationID][1];
+	const float error = 100.;
+	const float diff = acos(1.f - (error / radius[gl_InvocationID]));
+	return clamp(arc / diff, arc, 180);
 }
 
 void
 main()
 {
-	c_apos[gl_InvocationID] = apos[gl_InvocationID];
-	c_bpos[gl_InvocationID] = bpos[gl_InvocationID];
+	c_pos[gl_InvocationID] = pos[gl_InvocationID];
 	c_cpos[gl_InvocationID] = cpos[gl_InvocationID];
 	c_reps[gl_InvocationID] = reps[gl_InvocationID];
-	c_aangle[gl_InvocationID] = aangle[gl_InvocationID];
-	c_bangle[gl_InvocationID] = bangle[gl_InvocationID];
+	c_angles[gl_InvocationID] = angles[gl_InvocationID];
 	c_radius[gl_InvocationID] = radius[gl_InvocationID];
 
 	gl_TessLevelOuter[0] = 1;
-	gl_TessLevelOuter[1] = min2pow(reps[gl_InvocationID]);
+	gl_TessLevelOuter[1] = segments();
 }
