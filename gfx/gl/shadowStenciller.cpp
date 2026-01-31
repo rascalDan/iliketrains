@@ -1,17 +1,17 @@
 #include "shadowStenciller.h"
-#include "gfx/gl/shaders/fs-shadowStencil.h"
-#include "gfx/gl/shaders/gs-shadowStencil.h"
-#include "gfx/gl/shaders/vs-shadowStencil.h"
 #include "gfx/lightDirection.h"
 #include "gfx/models/mesh.h"
 #include "glArrays.h"
 #include "gl_traits.h"
 #include "gldebug.h"
 #include "maths.h"
+#include <gfx/gl/shaders/shadowStencil-frag.h>
+#include <gfx/gl/shaders/shadowStencil-geom.h>
+#include <gfx/gl/shaders/shadowStencil-vert.h>
 #include <stdexcept>
 
 ShadowStenciller::ShadowStenciller() :
-	shadowCaster {shadowStencil_vs, shadowStencil_gs, shadowStencil_fs}, viewProjections {}
+	shadowCaster {shadowStencil_vert, shadowStencil_geom, shadowStencil_frag}, viewProjections {}
 {
 	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);

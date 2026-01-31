@@ -1,6 +1,6 @@
 include(`materialDetail.glsl')
 
-define(INOUT, ifelse(TYPE, .fs, in, out))
+define(INOUT, ifelse(TYPE, .frag, in, out))
 
 INOUT vec3 FragPos;
 INOUT vec2 TexCoords;

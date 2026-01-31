@@ -57,7 +57,7 @@ always runresviewer ;
 run resviewer : -- : [ sequence.insertion-sort [ glob-tree-ex res : *.xml ] ] : : runresviewer ;
 
 lib ilt :
-	[ glob-tree *.cpp *.?s *.t?s : application bin test thirdparty ]
+	[ glob-tree *.cpp *.vert *.frag *.geom *.tesc *.tese : application bin test thirdparty ]
 	[ lib generated : [ glob-tree *.ll *.c : bin thirdparty ] :
 		<include>.
 		<include>lib

@@ -2,16 +2,6 @@
 #include "collections.h"
 #include "game/gamestate.h"
 #include "gfx/aabb.h"
-#include "gfx/gl/shaders/fs-shadowDynamicPointInstWithTextures.h"
-#include "gfx/gl/shaders/fs-shadowDynamicPointStencil.h"
-#include "gfx/gl/shaders/gs-commonShadowPoint.h"
-#include "gfx/gl/shaders/gs-shadowDynamicPointInstWithTextures.h"
-#include "gfx/gl/shaders/gs-shadowDynamicPointStencil.h"
-#include "gfx/gl/shaders/vs-shadowDynamicPoint.h"
-#include "gfx/gl/shaders/vs-shadowDynamicPointInst.h"
-#include "gfx/gl/shaders/vs-shadowDynamicPointInstWithTextures.h"
-#include "gfx/gl/shaders/vs-shadowDynamicPointStencil.h"
-#include "gfx/gl/shaders/vs-shadowLandmass.h"
 #include "gfx/gl/shadowStenciller.h"
 #include "gfx/lightDirection.h"
 #include "gfx/renderable.h"
@@ -22,15 +12,25 @@
 #include "sceneProvider.h"
 #include "sceneShader.h"
 #include <gfx/camera.h>
+#include <gfx/gl/shaders/commonShadowPoint-geom.h>
+#include <gfx/gl/shaders/shadowDynamicPoint-vert.h>
+#include <gfx/gl/shaders/shadowDynamicPointInst-vert.h>
+#include <gfx/gl/shaders/shadowDynamicPointInstWithTextures-frag.h>
+#include <gfx/gl/shaders/shadowDynamicPointInstWithTextures-geom.h>
+#include <gfx/gl/shaders/shadowDynamicPointInstWithTextures-vert.h>
+#include <gfx/gl/shaders/shadowDynamicPointStencil-frag.h>
+#include <gfx/gl/shaders/shadowDynamicPointStencil-geom.h>
+#include <gfx/gl/shaders/shadowDynamicPointStencil-vert.h>
+#include <gfx/gl/shaders/shadowLandmass-vert.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
 #include <vector>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
-	landmess {shadowLandmass_vs}, dynamicPointInst {shadowDynamicPointInst_vs},
-	dynamicPointInstWithTextures {shadowDynamicPointInstWithTextures_vs, shadowDynamicPointInstWithTextures_gs,
-			shadowDynamicPointInstWithTextures_fs},
+	landmess {shadowLandmass_vert}, dynamicPointInst {shadowDynamicPointInst_vert},
+	dynamicPointInstWithTextures {shadowDynamicPointInstWithTextures_vert, shadowDynamicPointInstWithTextures_geom,
+			shadowDynamicPointInstWithTextures_frag},
 	size {s}
 {
 	glDebugScope _ {depthMap};
@@ -135,7 +135,7 @@ ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, co
 	return out;
 }
 
-ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) : Program {vs, commonShadowPoint_gs} { }
+ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) : Program {vs, commonShadowPoint_geom} { }
 
 ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs, const Shader & gs, const Shader & fs) :
 	Program {vs, gs, fs}
@@ -161,7 +161,7 @@ ShadowMapper::ShadowProgram::use() const
 	glUseProgram(*this);
 }
 
-ShadowMapper::DynamicPoint::DynamicPoint() : ShadowProgram {shadowDynamicPoint_vs} { }
+ShadowMapper::DynamicPoint::DynamicPoint() : ShadowProgram {shadowDynamicPoint_vert} { }
 
 void
 ShadowMapper::DynamicPoint::use(const Location & location) const
@@ -178,7 +178,7 @@ ShadowMapper::DynamicPoint::setModel(const Location & location) const
 }
 
 ShadowMapper::StencilShadowProgram::StencilShadowProgram() :
-	ShadowProgram {shadowDynamicPointStencil_vs, shadowDynamicPointStencil_gs, shadowDynamicPointStencil_fs}
+	ShadowProgram {shadowDynamicPointStencil_vert, shadowDynamicPointStencil_geom, shadowDynamicPointStencil_frag}
 {
 }
 

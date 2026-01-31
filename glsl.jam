@@ -3,18 +3,18 @@ import type : type ;
 import generators : register-standard ;
 import scanner : register ;
 
-type.register GL_VERTEX_SHADER : vs ;
-type.register GL_TESS_CONTROL_SHADER : tcs ;
-type.register GL_TESS_EVALUATION_SHADER : tes ;
-type.register GL_GEOMETRY_SHADER : gs ;
-type.register GL_FRAGMENT_SHADER : fs ;
+type.register GL_VERTEX_SHADER : vert ;
+type.register GL_TESS_CONTROL_SHADER : tesc ;
+type.register GL_TESS_EVALUATION_SHADER : tese ;
+type.register GL_GEOMETRY_SHADER : geom ;
+type.register GL_FRAGMENT_SHADER : frag ;
 type.register GL_GENERIC_SHADER : glsl ;
 
-generators.register-standard glsl.embed : GL_VERTEX_SHADER : CPP(vs-%) H(vs-%) GL_GENERIC_SHADER(vs-%) ;
-generators.register-standard glsl.embed : GL_TESS_CONTROL_SHADER : CPP(tcs-%) H(tcs-%) GL_GENERIC_SHADER(tcs-%) ;
-generators.register-standard glsl.embed : GL_TESS_EVALUATION_SHADER : CPP(tes-%) H(tes-%) GL_GENERIC_SHADER(tes-%) ;
-generators.register-standard glsl.embed : GL_GEOMETRY_SHADER : CPP(gs-%) H(gs-%) GL_GENERIC_SHADER(gs-%) ;
-generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(fs-%) H(fs-%) GL_GENERIC_SHADER(fs-%) ;
+generators.register-standard glsl.embed : GL_VERTEX_SHADER : CPP(%-vert) H(%-vert) GL_GENERIC_SHADER(%-vert) ;
+generators.register-standard glsl.embed : GL_TESS_CONTROL_SHADER : CPP(%-tesc) H(%-tesc) GL_GENERIC_SHADER(%-tesc) ;
+generators.register-standard glsl.embed : GL_TESS_EVALUATION_SHADER : CPP(%-tese) H(%-tese) GL_GENERIC_SHADER(%-tese) ;
+generators.register-standard glsl.embed : GL_GEOMETRY_SHADER : CPP(%-geom) H(%-geom) GL_GENERIC_SHADER(%-geom) ;
+generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(%-frag) H(%-frag) GL_GENERIC_SHADER(%-frag) ;
 
 class m4-scanner : common-scanner {
     rule pattern ( ) {
@@ -29,13 +29,14 @@ type.set-scanner GL_TESS_CONTROL_SHADER : m4-scanner ;
 type.set-scanner GL_TESS_EVALUATION_SHADER : m4-scanner ;
 type.set-scanner GL_GEOMETRY_SHADER : m4-scanner ;
 type.set-scanner GL_FRAGMENT_SHADER : m4-scanner ;
+type.set-scanner GL_GENERIC_SHADER : m4-scanner ;
 
 actions glsl.embed
 {
 	set -e
-	m4 -I$(2:D) -DSOURCE=$(2) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) $(2) > $(1[3])
-#STAGE=$(OPTIONS:L)
-#glslangValidator -S ${STAGE:3:4} -DGL_MAX_GEOMETRY_OUTPUT_VERTICES=64 -DGL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS=64 -l $(1[3])
+	m4 -I$(2:D) -DSOURCE=$(2) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) $(2) > $(1[3])$(2:S)
+	glslangValidator -l $(1[3])$(2:S)
+	mv $(1[3])$(2:S) $(1[3])
 	clang-format -i $(1[3])
 	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) lib/embed-glsl.h.m4 > $(1[2])
 	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) lib/embed-glsl.cpp.m4 > $(1[1])

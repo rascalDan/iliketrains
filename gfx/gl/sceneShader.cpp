@@ -1,25 +1,25 @@
 #include "sceneShader.h"
-#include <gfx/gl/shaders/fs-landmass.h>
-#include <gfx/gl/shaders/fs-material.h>
-#include <gfx/gl/shaders/fs-network.h>
-#include <gfx/gl/shaders/fs-pointLight.h>
-#include <gfx/gl/shaders/fs-spotLight.h>
-#include <gfx/gl/shaders/fs-water.h>
-#include <gfx/gl/shaders/gs-networkCurve.h>
-#include <gfx/gl/shaders/gs-networkStraight.h>
-#include <gfx/gl/shaders/gs-pointLight.h>
-#include <gfx/gl/shaders/gs-spotLight.h>
-#include <gfx/gl/shaders/tcs-networkCurve.h>
-#include <gfx/gl/shaders/tes-networkCurve.h>
-#include <gfx/gl/shaders/vs-dynamicPoint.h>
-#include <gfx/gl/shaders/vs-dynamicPointInst.h>
-#include <gfx/gl/shaders/vs-fixedPoint.h>
-#include <gfx/gl/shaders/vs-landmass.h>
-#include <gfx/gl/shaders/vs-networkCurve.h>
-#include <gfx/gl/shaders/vs-networkStraight.h>
-#include <gfx/gl/shaders/vs-pointLight.h>
-#include <gfx/gl/shaders/vs-spotLight.h>
-#include <gfx/gl/shaders/vs-water.h>
+#include <gfx/gl/shaders/dynamicPoint-vert.h>
+#include <gfx/gl/shaders/dynamicPointInst-vert.h>
+#include <gfx/gl/shaders/fixedPoint-vert.h>
+#include <gfx/gl/shaders/landmass-frag.h>
+#include <gfx/gl/shaders/landmass-vert.h>
+#include <gfx/gl/shaders/material-frag.h>
+#include <gfx/gl/shaders/network-frag.h>
+#include <gfx/gl/shaders/networkCurve-geom.h>
+#include <gfx/gl/shaders/networkCurve-tesc.h>
+#include <gfx/gl/shaders/networkCurve-tese.h>
+#include <gfx/gl/shaders/networkCurve-vert.h>
+#include <gfx/gl/shaders/networkStraight-geom.h>
+#include <gfx/gl/shaders/networkStraight-vert.h>
+#include <gfx/gl/shaders/pointLight-frag.h>
+#include <gfx/gl/shaders/pointLight-geom.h>
+#include <gfx/gl/shaders/pointLight-vert.h>
+#include <gfx/gl/shaders/spotLight-frag.h>
+#include <gfx/gl/shaders/spotLight-geom.h>
+#include <gfx/gl/shaders/spotLight-vert.h>
+#include <gfx/gl/shaders/water-frag.h>
+#include <gfx/gl/shaders/water-vert.h>
 #include <gfx/gl/vertexArrayObject.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
@@ -36,11 +36,11 @@ SceneShader::allPrograms(auto member, auto &&... ps) const
 }
 
 SceneShader::SceneShader() :
-	basicInst {dynamicPointInst_vs, material_fs}, absolute {fixedPoint_vs, material_fs},
-	spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
-	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs}, landmass {landmass_vs, landmass_fs},
-	networkStraight {networkStraight_vs, networkStraight_gs, network_fs},
-	networkCurve {networkCurve_vs, networkCurve_tcs, networkCurve_tes, networkCurve_gs, network_fs}
+	basicInst {dynamicPointInst_vert, material_frag}, absolute {fixedPoint_vert, material_frag},
+	spotLightInst {spotLight_vert, spotLight_geom, spotLight_frag},
+	pointLightInst {pointLight_vert, pointLight_geom, pointLight_frag}, landmass {landmass_vert, landmass_frag},
+	networkStraight {networkStraight_vert, networkStraight_geom, network_frag},
+	networkCurve {networkCurve_vert, networkCurve_tesc, networkCurve_tese, networkCurve_geom, network_frag}
 {
 }
 
@@ -73,7 +73,7 @@ SceneShader::SceneProgram::setViewPort(const ViewPort & viewPort) const
 	}
 }
 
-SceneShader::BasicProgram::BasicProgram() : SceneProgram {dynamicPoint_vs, material_fs} { }
+SceneShader::BasicProgram::BasicProgram() : SceneProgram {dynamicPoint_vert, material_frag} { }
 
 void
 SceneShader::BasicProgram::setModel(Location const & location) const
@@ -106,7 +106,7 @@ SceneShader::NetworkProgram::use(
 	glUniform(profileLengthLoc, static_cast<GLuint>(profile.size()));
 }
 
-SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vs, water_fs} { }
+SceneShader::WaterProgram::WaterProgram() : SceneProgram {water_vert, water_frag} { }
 
 void
 SceneShader::WaterProgram::use(float waveCycle) const

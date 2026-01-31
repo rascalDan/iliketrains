@@ -1,9 +1,9 @@
 #include "sceneRenderer.h"
 #include "maths.h"
 #include "vertexArrayObject.h"
-#include <gfx/gl/shaders/fs-directionalLight.h>
-#include <gfx/gl/shaders/fs-lighting.h>
-#include <gfx/gl/shaders/vs-lighting.h>
+#include <gfx/gl/shaders/directionalLight-frag.h>
+#include <gfx/gl/shaders/lighting-frag.h>
+#include <gfx/gl/shaders/lighting-vert.h>
 #include <glm/gtc/type_ptr.hpp>
 
 static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
@@ -18,7 +18,7 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o) : SceneRenderer {s, o, 
 
 SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	camera {{-1250000, -1250000, 35.0F}, quarter_pi, ratio(s), 100, 10000000}, size {s}, output {o},
-	lighting {lighting_vs, lighting_fs}, shadowMapper {{2048, 2048}}
+	lighting {lighting_vert, lighting_frag}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
 	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
@@ -175,7 +175,7 @@ SceneRenderer::renderQuad() const
 	glBindVertexArray(0);
 }
 
-SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() : Program {lighting_vs, directionalLight_fs} { }
+SceneRenderer::DirectionalLightProgram::DirectionalLightProgram() : Program {lighting_vert, directionalLight_frag} { }
 
 const auto toTextureSpaceMat = glm::translate(glm::identity<glm::mat4>(), glm::vec3 {0.5F})
 		* glm::scale(glm::identity<glm::mat4>(), glm::vec3 {0.5F});
