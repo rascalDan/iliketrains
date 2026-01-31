@@ -9,6 +9,8 @@
 #include <gfx/gl/shaders/gs-networkStraight.h>
 #include <gfx/gl/shaders/gs-pointLight.h>
 #include <gfx/gl/shaders/gs-spotLight.h>
+#include <gfx/gl/shaders/tcs-networkCurve.h>
+#include <gfx/gl/shaders/tes-networkCurve.h>
 #include <gfx/gl/shaders/vs-dynamicPoint.h>
 #include <gfx/gl/shaders/vs-dynamicPointInst.h>
 #include <gfx/gl/shaders/vs-fixedPoint.h>
@@ -38,7 +40,7 @@ SceneShader::SceneShader() :
 	spotLightInst {spotLight_vs, spotLight_gs, spotLight_fs},
 	pointLightInst {pointLight_vs, pointLight_gs, pointLight_fs}, landmass {landmass_vs, landmass_fs},
 	networkStraight {networkStraight_vs, networkStraight_gs, network_fs},
-	networkCurve {networkCurve_vs, networkCurve_gs, network_fs}
+	networkCurve {networkCurve_vs, networkCurve_tcs, networkCurve_tes, networkCurve_gs, network_fs}
 {
 }
 
