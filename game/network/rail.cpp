@@ -156,12 +156,12 @@ template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder()
 namespace {
 	template<typename LinkType>
 	void
-	renderType(const NetworkLinkHolder<LinkType> & networkLinks, auto & shader)
+	renderType(const NetworkLinkHolder<LinkType> & networkLinks, auto & shader, GLenum mode)
 	{
 		if (auto count = networkLinks.vertices.size()) {
 			shader.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
 			glBindVertexArray(networkLinks.vao);
-			glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
+			glDrawArrays(mode, 0, static_cast<GLsizei>(count));
 		}
 	};
 }
@@ -169,12 +169,13 @@ namespace {
 void
 RailLinks::render(const SceneShader & shader, const Frustum &) const
 {
-	if (!links.empty()) {
+	if (auto _ = glDebugScope(0); !links.empty()) {
 		texture->bind();
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(-1, 0);
-		renderType<RailLinkStraight>(*this, shader.networkStraight);
-		renderType<RailLinkCurve>(*this, shader.networkCurve);
+		renderType<RailLinkStraight>(*this, shader.networkStraight, GL_POINTS);
+		glPatchParameteri(GL_PATCH_VERTICES, 1);
+		renderType<RailLinkCurve>(*this, shader.networkCurve, GL_PATCHES);
 		glDisable(GL_POLYGON_OFFSET_FILL);
 		glBindVertexArray(0);
 	}

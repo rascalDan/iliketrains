@@ -7,7 +7,7 @@ project ilt.thirdparty : requirements
 
 import glad ;
 lib glad : gl.xml :
-	<glad.version>3.3
+	<glad.version>4.6
 	;
 
 lib stb : stb_image.c ;

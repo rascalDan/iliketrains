@@ -12,13 +12,19 @@ out vec2 texCoord;
 out vec3 rposition;
 
 float
+viewPointDist(const ivec3 position)
+{
+	return length(vec3(viewPoint - position));
+}
+
+float
 segDist(const ivec3 a, const ivec3 b)
 {
-	return min(distance(viewPoint, a), distance(viewPoint, b));
+	return min(viewPointDist(a), viewPointDist(b));
 }
 
 ifelse(
-		TYPE, .gs,
+		TYPE, .geom,
 		// Begin: Geometry shader only function
 		void doVertex(const ivec3 end, const uint v, const float texY, const mat2 rot) {
 			ivec3 vpos = end + ivec3(rot * profile[v].xy, profile[v].z);

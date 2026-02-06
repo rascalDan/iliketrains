@@ -8,17 +8,18 @@
 
 namespace {
 	auto
-	getInt(GLenum e)
+	getInt(GLenum pname)
 	{
-		GLint i {};
-		glGetIntegerv(e, &i);
-		return std::to_string(i);
+		GLint data {};
+		glGetIntegerv(pname, &data);
+		return std::to_string(data);
 	}
 
 	using LookUpFunction = std::string (*)(GLenum);
-	constexpr std::array<std::tuple<std::string_view, GLenum, LookUpFunction>, 1> LOOKUPS {{
+	constexpr auto LOOKUPS = std::to_array<std::tuple<std::string_view, GLenum, LookUpFunction>>({
 			{"GL_MAX_GEOMETRY_OUTPUT_VERTICES", GL_MAX_GEOMETRY_OUTPUT_VERTICES, getInt},
-	}};
+			{"GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS", GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, getInt},
+	});
 
 	struct ShaderCompileError : public MsgException<std::invalid_argument> {
 		explicit ShaderCompileError(GLuint shader, Shader::Source src) :
@@ -63,7 +64,7 @@ Shader::compile() const
 	};
 	if (lookups) {
 		std::basic_string<GLchar> textMod {text};
-		for (const auto & match : ctre::search_all<R"(\bGL_[A-Z_]+\b)">(textMod)) {
+		while (const auto match = ctre::search<R"(\bGL_[A-Z_]+\b)">(textMod)) {
 			if (const auto * const lookup = std::find_if(LOOKUPS.begin(), LOOKUPS.end(),
 						[&match](const auto & lookup) {
 							return std::get<std::string_view>(lookup) == match;
@@ -71,6 +72,9 @@ Shader::compile() const
 					lookup != LOOKUPS.end()) {
 				const auto & [name, pname, getFunction] = *lookup;
 				textMod.replace(match.begin(), match.end(), getFunction(pname));
+			}
+			else {
+				throw std::domain_error(std::format("Unknown shader constant: {}", match.view()));
 			}
 		}
 		source(textMod.c_str(), static_cast<GLint>(textMod.length()));
