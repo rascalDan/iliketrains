@@ -63,7 +63,10 @@ using FindPointData = std::tuple<GlobalPosition2D, int>;
 // No boundary cases as these can produce different valid results depending on starting point
 BOOST_DATA_TEST_CASE(FindPointOnTerrain,
 		boost::unit_test::data::make<FindPointData>({
-				{{0, 0}, -1}, {{XLLCORNER, 0}, -1}, {{0, YLLCORNER}, -1}, {{XLLCORNER + 1, YLLCORNER + 2}, 0},
+				{{0, 0}, -1},
+				{{XLLCORNER, 0}, -1},
+				{{0, YLLCORNER}, -1},
+				{{XLLCORNER + 1, YLLCORNER + 2}, 0},
 				{{XLLCORNER + (CELLSIZE * (NROWS - 1)) - 2, YLLCORNER + (CELLSIZE * (NCOLS - 1)) - 1}, 79200},
 				{{315555000, 495556000}, 44400}, // perf test target
 		})
@@ -291,7 +294,7 @@ BOOST_DATA_TEST_CASE(Deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	std::for_each(cams.begin(), cams.end(), [&renderer, &terrain, &tro](const auto & cam) {
 		renderer.camera.setView(cam.first.first, glm::normalize(cam.first.second));
 		BOOST_CHECK_NO_THROW(renderer.render(terrain));
-		Texture::save(tro.outImage, cam.second.c_str());
+		Texture::save(tro.outImage, (ANALYSIS_DIRECTORY / cam.second).c_str());
 	});
 }
 

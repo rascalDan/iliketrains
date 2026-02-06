@@ -36,7 +36,7 @@
 						-1.5
 					]
 				],
-				"/tmp/geoData0.tga"
+				"geoData0.tga"
 			],
 			[
 				[
@@ -51,7 +51,7 @@
 						-1.5
 					]
 				],
-				"/tmp/geoData1.tga"
+				"geoData1.tga"
 			],
 			[
 				[
@@ -66,7 +66,7 @@
 						-1.5
 					]
 				],
-				"/tmp/geoData2.tga"
+				"geoData2.tga"
 			]
 		]
 	],
@@ -102,7 +102,7 @@
 						-1.5
 					]
 				],
-				"/tmp/geoData3.tga"
+				"geoData3.tga"
 			],
 			[
 				[
@@ -117,7 +117,7 @@
 						-0.5
 					]
 				],
-				"/tmp/geoData4.tga"
+				"geoData4.tga"
 			]
 		]
 	],
@@ -153,7 +153,7 @@
 						-1.5
 					]
 				],
-				"/tmp/geoData5.tga"
+				"geoData5.tga"
 			]
 		]
 	],
@@ -194,7 +194,7 @@
 						-1.5
 					]
 				],
-				"/tmp/geoData6.tga"
+				"geoData6.tga"
 			]
 		]
 	]

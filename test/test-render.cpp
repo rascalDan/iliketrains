@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE(Basic)
 	renderer.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	const TestScene scene;
 	renderer.render(scene);
-	renderer.saveBuffers("/tmp/basic");
-	Texture::save(outImage, "/tmp/basic/final.tga");
+	renderer.saveBuffers(ANALYSIS_DIRECTORY / "basic");
+	Texture::save(outImage, (ANALYSIS_DIRECTORY / "basic/final.tga").c_str());
 }
 
 BOOST_AUTO_TEST_CASE(TerrainSD19)
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(TerrainSD19)
 	};
 
 	renderer.render(TestTerrain {});
-	Texture::save(outImage, "/tmp/terrain.tga");
+	Texture::save(outImage, (ANALYSIS_DIRECTORY / "terrain.tga").c_str());
 }
 
 BOOST_AUTO_TEST_CASE(RailNetwork)
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(RailNetwork)
 	};
 
 	renderer.render(TestRail {});
-	Texture::save(outImage, "/tmp/railnet.tga");
+	Texture::save(outImage, (ANALYSIS_DIRECTORY / "railnet.tga").c_str());
 }
 
 BOOST_AUTO_TEST_SUITE_END();

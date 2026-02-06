@@ -4,6 +4,7 @@
 #include <boost/test/unit_test_suite.hpp>
 
 #include "game/geoData.h"
+#include "test/testHelpers.h"
 
 using GeoMutation = std::function<void(GeoData &)>;
 using Something = std::tuple<const char *, GeoMutation, size_t, size_t, size_t>;
@@ -57,7 +58,7 @@ BOOST_DATA_TEST_CASE(DeformLogical,
 	auto geoData = GeoData::createFlat({0, 0}, {30'000, 30'000}, 1000);
 
 	BOOST_REQUIRE_NO_THROW(func(geoData));
-	OpenMesh::IO::write_mesh(geoData, std::format("/tmp/mesh-{}.obj", name));
+	OpenMesh::IO::write_mesh(geoData, ANALYSIS_DIRECTORY / std::format("mesh-{}.obj", name));
 
 	BOOST_CHECK_EQUAL(geoData.n_vertices(), expVertices);
 	BOOST_CHECK_EQUAL(geoData.n_edges(), expEdges);
