@@ -298,12 +298,11 @@ public:
 			allocBuffer(newSize);
 			mapForAdd();
 		}
-		if (newSize > size_) {
-			for (auto & uninitialised : mkspan().subspan(size_, newSize - size_)) {
+		if (const auto prevSize = setSize(newSize); newSize > prevSize) {
+			for (auto & uninitialised : mkspan().subspan(prevSize, newSize - prevSize)) {
 				new (&uninitialised) T {};
 			}
 		}
-		setSize(newSize);
 	}
 
 	void
@@ -423,10 +422,10 @@ public:
 	}
 
 protected:
-	void
+	size_type
 	setSize(size_type s)
 	{
-		size_ = s;
+		return std::exchange(size_, s);
 	}
 
 	void
