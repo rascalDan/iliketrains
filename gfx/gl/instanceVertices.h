@@ -48,13 +48,15 @@ public:
 		}
 
 		// NOLINTNEXTLINE)hicpp-explicit-conversions
-		[[nodiscard]] operator T &()
+		[[nodiscard]]
+		operator T &()
 		{
 			return instances->lookup(index);
 		}
 
 		// NOLINTNEXTLINE)hicpp-explicit-conversions
-		[[nodiscard]] operator const T &() const
+		[[nodiscard]]
+		operator const T &() const
 		{
 			return instances->lookup(index);
 		}
@@ -119,6 +121,7 @@ public:
 	}
 
 	using base::bufferName;
+	using base::reserve;
 
 	[[nodiscard]] auto
 	size() const
