@@ -26,7 +26,7 @@ namespace {
 	};
 
 	void
-	partition(benchmark::State & state)
+	partition1(benchmark::State & state)
 	{
 		TestMainWindowAppBase window;
 		Data data(static_cast<size_t>(state.range()));
@@ -39,8 +39,28 @@ namespace {
 			pos %= 1000000;
 		}
 	}
+
+	void
+	partition2(benchmark::State & state)
+	{
+		TestMainWindowAppBase window;
+		Data data(static_cast<size_t>(state.range()));
+		GlobalPosition2D pos {};
+		for (auto loop : state) {
+			data.instances.partition(
+					[&pos](const auto & instance) {
+						return std::abs(instance.pos.x - pos.x) < 5;
+					},
+					[&pos](const auto & instance) {
+						return std::abs(instance.pos.y - pos.y) < 5;
+					});
+			pos += GlobalPosition2D {33, 17};
+			pos %= 1000000;
+		}
+	}
 }
 
-BENCHMARK(partition)->Range(0, 1 << 20);
+BENCHMARK(partition1)->Range(0, 1 << 20);
+BENCHMARK(partition2)->Range(0, 1 << 20);
 
 BENCHMARK_MAIN();

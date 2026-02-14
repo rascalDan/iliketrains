@@ -255,4 +255,59 @@ BOOST_AUTO_TEST_CASE(PartitionBy, *boost::unit_test::timeout(1))
 	checkReverseIndex();
 }
 
+BOOST_AUTO_TEST_CASE(PartitionBy2, *boost::unit_test::timeout(1))
+{
+	std::mt19937 gen(std::random_device {}());
+	std::uniform_int_distribution<int> dist(0, 100000);
+	static constexpr auto COUNT = 20;
+	reserve(COUNT);
+	std::vector<decltype(acquire(0))> instances;
+	instances.reserve(COUNT);
+	// At least one of each
+	instances.push_back(acquire(1));
+	instances.push_back(acquire(3));
+	while (instances.size() < COUNT) {
+		instances.push_back(acquire(dist(gen)));
+	}
+	const std::vector<int> values(instances.begin(), instances.end());
+	BOOST_REQUIRE_EQUAL(size(), COUNT);
+
+	const auto pred3 = [](auto value) {
+		return (value % 3) == 0;
+	};
+	const auto pred5 = [](auto value) {
+		return (value % 5) == 0;
+	};
+	auto matchedBoundaries = partition(pred3, pred5);
+	// As PartitionBy... primary partition is normal layout
+	// The underlying data is partitioned...
+	BOOST_REQUIRE(std::is_partitioned(mkcspan().cbegin(), mkcspan().cend(), pred3));
+	// The external view of the data is unchanged...
+	BOOST_CHECK_EQUAL_COLLECTIONS(values.cbegin(), values.cend(), instances.cbegin(), instances.cend());
+	// The partition point is right...
+	BOOST_CHECK(!pred3(at(matchedBoundaries.first)));
+	BOOST_CHECK(pred3(at(matchedBoundaries.first - 1)));
+
+	// Secondary partition lives contiguous in the middle somewhere, with two falsy blocks at each end
+	const auto p2bndry = matchedBoundaries.second;
+
+	BOOST_TEST_CONTEXT(mkcspan()) {
+		BOOST_TEST_CONTEXT(matchedBoundaries.first) {
+			BOOST_CHECK(std::all_of(
+					mkcspan().cbegin(), mkcspan().cbegin() + static_cast<int>(matchedBoundaries.first), pred3));
+			BOOST_CHECK(std::none_of(
+					mkcspan().cbegin() + static_cast<int>(matchedBoundaries.first), mkcspan().cend(), pred3));
+		}
+
+		BOOST_TEST_CONTEXT(p2bndry) {
+			BOOST_CHECK(std::all_of(mkcspan().cbegin() + static_cast<int>(p2bndry.first),
+					mkcspan().begin() + static_cast<int>(p2bndry.second), pred5));
+			BOOST_CHECK(std::none_of(mkcspan().cbegin(), mkcspan().cbegin() + static_cast<int>(p2bndry.first), pred5));
+			BOOST_CHECK(std::none_of(mkcspan().cbegin() + static_cast<int>(p2bndry.second), mkcspan().cend(), pred5));
+		}
+	}
+
+	checkReverseIndex();
+}
+
 BOOST_AUTO_TEST_SUITE_END()

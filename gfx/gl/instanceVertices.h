@@ -2,6 +2,7 @@
 
 #include "glContainer.h"
 #include <cassert>
+#include <functional>
 #include <special_members.h>
 #include <utility>
 
@@ -131,6 +132,19 @@ public:
 	partition(Pred pred)
 	{
 		return indexOf(partition(base::begin(), base::end(), pred));
+	}
+
+	using PartitionResult
+			= std::pair<typename base::size_type, std::pair<typename base::size_type, typename base::size_type>>;
+
+	template<typename Pred1, typename Pred2>
+	PartitionResult
+	partition(Pred1 pred1, Pred2 pred2)
+	{
+		auto boundary1 = partition(base::begin(), base::end(), pred1);
+		auto begin2 = partition(base::begin(), boundary1, std::not_fn(pred2));
+		auto end2 = partition(boundary1, base::end(), pred2);
+		return {indexOf(boundary1), {indexOf(begin2), indexOf(end2)}};
 	}
 
 protected:
