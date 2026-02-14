@@ -250,8 +250,8 @@ BOOST_AUTO_TEST_CASE(PartitionBy, *boost::unit_test::timeout(1))
 	// The external view of the data is unchanged...
 	BOOST_CHECK_EQUAL_COLLECTIONS(values.cbegin(), values.cend(), instances.cbegin(), instances.cend());
 	// The partition point is right...
-	BOOST_CHECK(!pred(*matchedEnd));
-	BOOST_CHECK(pred(*--matchedEnd));
+	BOOST_CHECK(!pred(at(matchedEnd)));
+	BOOST_CHECK(pred(at(matchedEnd - 1)));
 	checkReverseIndex();
 }
 

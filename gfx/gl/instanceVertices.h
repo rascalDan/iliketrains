@@ -127,15 +127,21 @@ public:
 	}
 
 	template<typename Pred>
-	glContainer<T>::iterator
+	base::size_type
 	partition(Pred pred)
 	{
-		return partition(base::begin(), base::end(), pred);
+		return indexOf(partition(base::begin(), base::end(), pred));
 	}
 
 protected:
 	static constexpr auto npos = static_cast<size_t>(-1);
 	friend InstanceProxy;
+
+	base::size_type
+	indexOf(base::iterator iter)
+	{
+		return static_cast<base::size_type>(iter - base::begin());
+	}
 
 	void
 	release(const size_t pidx)
