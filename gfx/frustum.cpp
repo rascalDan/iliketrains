@@ -48,9 +48,27 @@ Frustum::boundByPlanes(const BoundingBox & aabb, size_t nplanes) const
 			= EXTENT_CORNER_IDXS * [relativeAabb = aabb - position](auto idxs) -> glm::vec4 {
 		return {(relativeAabb.*(idxs.x)).x, (relativeAabb.*(idxs.y)).y, (relativeAabb.*(idxs.z)).z, 1.F};
 	};
-	return std::ranges::none_of(std::span(planes).subspan(0, nplanes), [&corners](const auto & frustumPlane) {
-		return (std::ranges::all_of(corners, [&frustumPlane](const auto & corner) {
-			return glm::dot(frustumPlane, corner) < 0.F;
+	return contains(corners, nplanes, 0);
+}
+
+bool
+Frustum::contains(GlobalPosition3D point, RelativeDistance size) const
+{
+	return contains(std::array {RelativePosition4D {(point - position), 1.F}}, FACES, size);
+}
+
+bool
+Frustum::shadedBy(GlobalPosition3D point, RelativeDistance size) const
+{
+	return contains(std::array {RelativePosition4D {(point - position), 1.F}}, FACES - 1, size);
+}
+
+bool
+Frustum::contains(const std::span<const RelativePosition4D> points, const size_t nplanes, RelativeDistance size) const
+{
+	return std::ranges::none_of(std::span(planes).subspan(0, nplanes), [&points, size](const auto & frustumPlane) {
+		return (std::ranges::all_of(points, [&frustumPlane, size](const auto & corner) {
+			return glm::dot(frustumPlane, corner) < -size;
 		}));
 	});
 }

@@ -4,6 +4,7 @@
 #include "config/types.h"
 #include <array>
 #include <glm/mat4x4.hpp>
+#include <span>
 
 class Frustum {
 public:
@@ -31,12 +32,15 @@ public:
 
 	using BoundingBox = AxisAlignedBoundingBox<GlobalDistance>;
 	[[nodiscard]] bool contains(const BoundingBox &) const;
+	[[nodiscard]] bool contains(GlobalPosition3D, RelativeDistance size = 0) const;
 	[[nodiscard]] bool shadedBy(const BoundingBox &) const;
+	[[nodiscard]] bool shadedBy(GlobalPosition3D, RelativeDistance size = 0) const;
 
 protected:
 	static constexpr size_t FACES = 6;
 	void updateCache();
 	[[nodiscard]] bool boundByPlanes(const BoundingBox &, size_t nplanes) const;
+	[[nodiscard]] bool contains(std::span<const RelativePosition4D>, size_t nplanes, RelativeDistance) const;
 
 	GlobalPosition3D position;
 	glm::mat4 view, projection;
