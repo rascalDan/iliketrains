@@ -85,6 +85,12 @@ GameMainWindow::handleInput(const SDL_Event & event)
 void
 GameMainWindow::render()
 {
+	for (const auto & [assetId, asset] : gameState->assets) {
+		if (const auto renderable = asset.getAs<Renderable>()) {
+			renderable->preFrame(camera);
+		}
+	}
+	gameState->world.apply<const Renderable>(&Renderable::preFrame, camera);
 	SceneRenderer::render(*this);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

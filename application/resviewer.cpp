@@ -141,6 +141,7 @@ private:
 						selectedAssetId = asset.first;
 						selectedAsset = renderable;
 						location = asset.second->createAt(position);
+						renderable->preFrame(camera);
 					}
 				}
 			}

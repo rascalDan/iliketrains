@@ -12,7 +12,7 @@ class Location;
 
 class Asset : public Persistence::Persistable, public StdTypeDefs<Asset> {
 public:
-	using ManyPtr = ManySharedPtr<Asset, const Renderable>;
+	using ManyPtr = ManySharedPtr<Asset, Renderable>;
 	using TexturePtr = std::shared_ptr<TextureAtlas>;
 
 	/// Used only for the asset viewer

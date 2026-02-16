@@ -1,6 +1,11 @@
 #include "renderable.h"
 
 void
+Renderable::preFrame(const Frustum &)
+{
+}
+
+void
 Renderable::lights(const SceneShader &) const
 {
 }
