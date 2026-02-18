@@ -72,6 +72,13 @@ namespace {
 		render(float dist)
 		{
 			sceneRenderer.camera.setView({-dist, dist * 1.2F, dist * 1.2F}, south + east + down);
+			const auto & [camFrust, lightFrust] = sceneRenderer.preFrame({{0.9, 0.5}});
+			for (const auto & [assetId, asset] : gameState.assets) {
+				if (const auto renderable = asset.getAs<Renderable>()) {
+					renderable->preFrame(camFrust, lightFrust);
+				}
+			}
+			gameState.world.apply<Renderable>(&Renderable::preFrame, camFrust, lightFrust);
 			sceneRenderer.render(*this);
 		}
 

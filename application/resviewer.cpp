@@ -44,8 +44,9 @@ private:
 	void
 	render() override
 	{
+		const auto & [camFrust, lightFrust] = preFrame(gameState->environment->getSunPos());
 		SceneRenderer::render(*this);
-		controls();
+		controls(camFrust, lightFrust);
 	}
 
 	void
@@ -89,12 +90,12 @@ private:
 	}
 
 	void
-	controls()
+	controls(const Frustum & camFrust, const Frustum & lightFrust)
 	{
 		if (ImGui::Begin("Resource view")) {
 			ImGui::SetWindowSize({});
 			fileSelection();
-			assetSelection();
+			assetSelection(camFrust, lightFrust);
 		}
 		ImGui::End();
 
@@ -130,7 +131,7 @@ private:
 	}
 
 	void
-	assetSelection()
+	assetSelection(const Frustum & camFrust, const Frustum & lightFrust)
 	{
 		if (!gameState->assets.empty()) {
 			ImGui::BeginListBox("Asset");
@@ -141,7 +142,7 @@ private:
 						selectedAssetId = asset.first;
 						selectedAsset = renderable;
 						location = asset.second->createAt(position);
-						renderable->preFrame(camera);
+						renderable->preFrame(camFrust, lightFrust);
 					}
 				}
 			}
@@ -173,6 +174,12 @@ private:
 		if (selectedAsset) {
 			selectedAsset->shadows(mapper, frustum);
 		}
+	}
+
+	void
+	environment(const SceneShader &, const SceneRenderer & renderer) const override
+	{
+		gameState->environment->render(renderer, *this);
 	}
 
 	std::span<const std::filesystem::path> fileList;

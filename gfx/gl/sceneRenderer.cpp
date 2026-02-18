@@ -77,6 +77,12 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 	shader.setViewPort({0, 0, size.x, size.y});
 }
 
+std::pair<const Frustum &, const Frustum &>
+SceneRenderer::preFrame(const LightDirection & lightDirection)
+{
+	return {camera, shadowMapper.preFrame(lightDirection, camera)};
+}
+
 void
 SceneRenderer::render(const SceneProvider & scene) const
 {

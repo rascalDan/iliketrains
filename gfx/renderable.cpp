@@ -1,7 +1,7 @@
 #include "renderable.h"
 
 void
-Renderable::preFrame(const Frustum &)
+Renderable::preFrame(const Frustum &, const Frustum &)
 {
 }
 

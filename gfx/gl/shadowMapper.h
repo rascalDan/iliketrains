@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/types.h"
+#include "gfx/frustum.h"
 #include "gfx/gl/shadowStenciller.h"
 #include "lib/glArrays.h"
 #include "program.h"
@@ -22,6 +23,7 @@ public:
 	using Definitions = std::vector<glm::mat4x4>;
 	using Sizes = std::vector<RelativePosition3D>;
 
+	const Frustum & preFrame(const LightDirection & direction, const Camera &);
 	[[nodiscard]] Definitions update(const SceneProvider &, const LightDirection & direction, const Camera &) const;
 
 	class ShadowProgram : public Program {
@@ -77,5 +79,10 @@ private:
 	glFrameBuffer depthMapFBO;
 	glTexture depthMap;
 	TextureAbsCoord size;
+
+	Definitions definitions;
+	Sizes sizes;
+	Frustum frustum;
+
 	mutable ShadowStenciller shadowStenciller;
 };

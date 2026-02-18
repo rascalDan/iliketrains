@@ -31,7 +31,7 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	landmess {shadowLandmass_vert}, dynamicPointInst {shadowDynamicPointInst_vert},
 	dynamicPointInstWithTextures {shadowDynamicPointInstWithTextures_vert, shadowDynamicPointInstWithTextures_geom,
 			shadowDynamicPointInstWithTextures_frag},
-	size {s}
+	size {s}, frustum {{}, {}, {}}
 {
 	glDebugScope _ {depthMap};
 	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
@@ -82,6 +82,37 @@ ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightV
 	return bandViewExtents;
 }
 
+const Frustum &
+ShadowMapper::preFrame(const LightDirection & dir, const Camera & camera)
+{
+	const auto lightViewDir = glm::lookAt({}, dir.vector(), up);
+	const auto lightViewPoint = camera.getPosition();
+	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
+	using ExtentsBoundingBox = AxisAlignedBoundingBox<RelativeDistance>;
+	definitions.clear();
+	sizes.clear();
+	std::ranges::transform(bandViewExtents | std::views::pairwise, std::back_inserter(definitions),
+			[&lightViewDir, this](const auto & band) mutable {
+				const auto & [near, far] = band;
+				auto extents = ExtentsBoundingBox::fromPoints(std::span {near.begin(), far.end()});
+				extents.min.z -= 10'000.F;
+				extents.max.z += 10'000.F;
+				const auto lightProjection = glm::ortho(
+						extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
+				sizes.emplace_back(extents.max - extents.min);
+				return lightProjection * lightViewDir;
+			});
+
+	ExtentsBoundingBox extents {lightViewPoint, lightViewPoint};
+	for (const auto & point : bandViewExtents.back()) {
+		extents += point;
+	}
+	const auto lightProjection
+			= glm::ortho(extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
+	frustum = {lightViewPoint, lightViewDir, lightProjection};
+	return frustum;
+}
+
 ShadowMapper::Definitions
 ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, const Camera & camera) const
 {
@@ -100,39 +131,16 @@ ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, co
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, size.x, size.y);
 
-	const auto lightViewDir = glm::lookAt({}, dir.vector(), up);
 	const auto lightViewPoint = camera.getPosition();
-	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
-	Definitions out;
-	Sizes sizes;
-	using ExtentsBoundingBox = AxisAlignedBoundingBox<RelativeDistance>;
-	std::ranges::transform(bandViewExtents | std::views::pairwise, std::back_inserter(out),
-			[&lightViewDir, &sizes](const auto & band) mutable {
-				const auto & [near, far] = band;
-				auto extents = ExtentsBoundingBox::fromPoints(std::span {near.begin(), far.end()});
-				extents.min.z -= 10'000.F;
-				extents.max.z += 10'000.F;
-				const auto lightProjection = glm::ortho(
-						extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
-				sizes.emplace_back(extents.max - extents.min);
-				return lightProjection * lightViewDir;
-			});
 	for (const auto p : std::initializer_list<const ShadowProgram *> {
 				 &landmess, &dynamicPoint, &dynamicPointInst, &dynamicPointInstWithTextures, &stencilShadowProgram}) {
-		p->setView(out, sizes, lightViewPoint);
+		p->setView(definitions, sizes, lightViewPoint);
 	}
-	ExtentsBoundingBox extents {lightViewPoint, lightViewPoint};
-	for (const auto & point : bandViewExtents.back()) {
-		extents += point;
-	}
-	const auto lightProjection
-			= glm::ortho(extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
-	Frustum frustum {lightViewPoint, lightViewDir, lightProjection};
 	scene.shadows(*this, frustum);
 
 	glCullFace(GL_BACK);
 
-	return out;
+	return definitions;
 }
 
 ShadowMapper::ShadowProgram::ShadowProgram(const Shader & vs) : Program {vs, commonShadowPoint_geom} { }

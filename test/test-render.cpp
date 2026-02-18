@@ -162,6 +162,13 @@ BOOST_AUTO_TEST_CASE(Basic)
 	TestSceneRenderer renderer {size, output};
 	renderer.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	const TestScene scene;
+	const auto & [camFrust, lightFrust] = renderer.preFrame(gameState.environment->getSunPos());
+	for (const auto & [assetId, asset] : gameState.assets) {
+		if (const auto renderable = asset.getAs<Renderable>()) {
+			renderable->preFrame(camFrust, lightFrust);
+		}
+	}
+	gameState.world.apply<Renderable>(&Renderable::preFrame, camFrust, lightFrust);
 	renderer.render(scene);
 	renderer.saveBuffers(ANALYSIS_DIRECTORY / "basic");
 	Texture::save(outImage, (ANALYSIS_DIRECTORY / "basic/final.tga").c_str());
@@ -203,6 +210,7 @@ BOOST_AUTO_TEST_CASE(TerrainSD19)
 		}
 	};
 
+	renderer.preFrame(gameState.environment->getSunPos());
 	renderer.render(TestTerrain {});
 	Texture::save(outImage, (ANALYSIS_DIRECTORY / "terrain.tga").c_str());
 }

@@ -11,13 +11,19 @@ Environment::tick(TickDuration)
 	worldTime += 50;
 }
 
+Direction2D
+Environment::getSunPos() const
+{
+	return getSunPos({}, worldTime);
+}
+
 void
 Environment::render(const SceneRenderer & renderer, const SceneProvider & scene) const
 {
 	constexpr RGB baseAmbient {0.1F}, baseDirectional {0.0F};
 	constexpr RGB relativeAmbient {0.3F, 0.3F, 0.4F}, relativeDirectional {0.6F, 0.6F, 0.5F};
 
-	const LightDirection sunPos = getSunPos({}, worldTime);
+	const LightDirection sunPos = getSunPos();
 	const auto ambient = baseAmbient + relativeAmbient * sunPos.ambient();
 	const auto directional = baseDirectional + relativeDirectional * sunPos.directional();
 

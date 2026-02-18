@@ -13,7 +13,7 @@ public:
 	virtual ~Renderable() = default;
 	DEFAULT_MOVE_COPY(Renderable);
 
-	virtual void preFrame(const Frustum &);
+	virtual void preFrame(const Frustum &, const Frustum &);
 	virtual void render(const SceneShader & shader, const Frustum &) const = 0;
 	virtual void lights(const SceneShader & shader) const;
 	virtual void shadows(const ShadowMapper & shadowMapper, const Frustum &) const;
