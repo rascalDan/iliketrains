@@ -2,7 +2,7 @@
 
 layout(binding = 3) uniform sampler2D textureAlbedo;
 
-include(`materialInterface.glsl')
+include(`materialDetail.glsl')
 include(`materialCommon.glsl')
 
 in vec2 texCoord;
