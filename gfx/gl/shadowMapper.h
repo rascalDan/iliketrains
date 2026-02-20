@@ -5,10 +5,10 @@
 #include "gfx/gl/shadowStenciller.h"
 #include "lib/glArrays.h"
 #include "program.h"
+#include <array>
 #include <gfx/models/texture.h>
 #include <glm/vec2.hpp>
 #include <span>
-#include <vector>
 
 class SceneProvider;
 class Camera;
@@ -20,11 +20,12 @@ public:
 
 	static constexpr std::size_t SHADOW_BANDS {4};
 
-	using Definitions = std::vector<glm::mat4x4>;
-	using Sizes = std::vector<RelativePosition3D>;
+	using Definitions = std::array<glm::mat4, SHADOW_BANDS>;
+	using Sizes = std::array<RelativePosition3D, SHADOW_BANDS>;
 
 	const Frustum & preFrame(const LightDirection & direction, const Camera &);
-	[[nodiscard]] Definitions update(const SceneProvider &, const LightDirection & direction, const Camera &) const;
+	[[nodiscard]] std::span<const glm::mat4> update(
+			const SceneProvider &, const LightDirection & direction, const Camera &) const;
 
 	class ShadowProgram : public Program {
 	public:
@@ -74,12 +75,13 @@ public:
 	}
 
 private:
-	[[nodiscard]] static std::vector<std::array<RelativePosition3D, 4>> getBandViewExtents(
-			const Camera &, const glm::mat4 & lightView);
+	using BandViewExtents = std::array<std::array<RelativePosition3D, 4>, SHADOW_BANDS + 1>;
+	[[nodiscard]] static size_t getBandViewExtents(BandViewExtents &, const Camera &, const glm::mat4 & lightView);
 	glFrameBuffer depthMapFBO;
 	glTexture depthMap;
 	TextureAbsCoord size;
 
+	BandViewExtents bandViewExtents;
 	Definitions definitions;
 	Sizes sizes;
 	Frustum frustum;

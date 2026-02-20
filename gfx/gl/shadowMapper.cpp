@@ -8,7 +8,6 @@
 #include "gl_traits.h"
 #include "gldebug.h"
 #include "location.h"
-#include "maths.h"
 #include "sceneProvider.h"
 #include "sceneShader.h"
 #include <gfx/camera.h>
@@ -25,7 +24,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
-#include <vector>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	landmess {shadowLandmass_vert}, dynamicPointInst {shadowDynamicPointInst_vert},
@@ -54,66 +52,63 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-constexpr auto shadowBands
-		= []<GlobalDistance... ints>(const float scaleFactor, std::integer_sequence<GlobalDistance, ints...>) {
-			  const auto base = 10'000'000 / pow(scaleFactor, sizeof...(ints) - 1);
-			  return std::array {1, static_cast<GlobalDistance>((base * pow(scaleFactor, ints)))...};
+constexpr GlobalDistance SHADOW_NEAR = 1;
+constexpr GlobalDistance SHADOW_FAR = 10'000'000;
+constexpr auto SHADOW_BANDS_DISTS
+		= []<GlobalDistance... Ints>(const float scaleFactor, std::integer_sequence<GlobalDistance, Ints...>) {
+			  const auto base = SHADOW_FAR / pow(scaleFactor, sizeof...(Ints) - 1);
+			  return std::array {SHADOW_NEAR, static_cast<GlobalDistance>((base * pow(scaleFactor, Ints)))...};
 		  }(4.6F, std::make_integer_sequence<GlobalDistance, ShadowMapper::SHADOW_BANDS>());
 
-static_assert(shadowBands.front() == 1);
-static_assert(shadowBands.back() == 10'000'000);
-static_assert(shadowBands.size() == ShadowMapper::SHADOW_BANDS + 1);
+static_assert(SHADOW_BANDS_DISTS.front() == 1);
+static_assert(SHADOW_BANDS_DISTS.back() == SHADOW_FAR);
+static_assert(SHADOW_BANDS_DISTS.size() == ShadowMapper::SHADOW_BANDS + 1);
 
-std::vector<std::array<RelativePosition3D, 4>>
-ShadowMapper::getBandViewExtents(const Camera & camera, const glm::mat4 & lightViewDir)
+size_t
+ShadowMapper::getBandViewExtents(
+		BandViewExtents & bandViewExtents, const Camera & camera, const glm::mat4 & lightViewDir)
 {
-	std::vector<std::array<RelativePosition3D, 4>> bandViewExtents;
-	for (const auto dist : shadowBands) {
+	size_t band = 0;
+	for (const auto dist : SHADOW_BANDS_DISTS) {
 		const auto extents = camera.extentsAtDist(dist);
-		bandViewExtents.emplace_back(extents * [&lightViewDir, cameraPos = camera.getPosition()](const auto & e) {
-			return glm::mat3(lightViewDir) * (e.xyz() - cameraPos);
-		});
-		if (std::none_of(extents.begin(), extents.end(), [targetDist = dist - 1](const auto & e) {
-				return e.w > targetDist;
+		bandViewExtents[band++] = extents * [&lightViewDir, cameraPos = camera.getPosition()](const auto & extent) {
+			return glm::mat3(lightViewDir) * (extent.xyz() - cameraPos);
+		};
+		if (std::ranges::none_of(extents, [dist](const auto & extent) {
+				return extent.w >= dist;
 			})) {
 			break;
 		}
 	}
-	return bandViewExtents;
+	return band;
 }
 
 const Frustum &
 ShadowMapper::preFrame(const LightDirection & dir, const Camera & camera)
 {
-	const auto lightViewDir = glm::lookAt({}, dir.vector(), up);
+	const auto lightViewDir = glm::lookAt({}, dir.vector(), Camera::upFromForward(dir.vector()));
 	const auto lightViewPoint = camera.getPosition();
-	const auto bandViewExtents = getBandViewExtents(camera, lightViewDir);
-	using ExtentsBoundingBox = AxisAlignedBoundingBox<RelativeDistance>;
-	definitions.clear();
-	sizes.clear();
-	std::ranges::transform(bandViewExtents | std::views::pairwise, std::back_inserter(definitions),
-			[&lightViewDir, this](const auto & band) mutable {
-				const auto & [near, far] = band;
-				auto extents = ExtentsBoundingBox::fromPoints(std::span {near.begin(), far.end()});
-				extents.min.z -= 10'000.F;
-				extents.max.z += 10'000.F;
-				const auto lightProjection = glm::ortho(
-						extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
-				sizes.emplace_back(extents.max - extents.min);
-				return lightProjection * lightViewDir;
-			});
+	const auto bandViewExtentCount = getBandViewExtents(bandViewExtents, camera, lightViewDir);
+	const auto activeBandViewExtents = std::span(bandViewExtents).subspan(0, bandViewExtentCount);
 
-	ExtentsBoundingBox extents {lightViewPoint, lightViewPoint};
-	for (const auto & point : bandViewExtents.back()) {
-		extents += point;
+	using ExtentsBoundingBox = AxisAlignedBoundingBox<RelativeDistance>;
+	for (auto out = std::make_pair(sizes.begin(), definitions.begin());
+			const auto & [near, far] : activeBandViewExtents | std::views::pairwise) {
+		const auto extents = ExtentsBoundingBox::fromPoints(std::span {near.begin(), far.end()});
+		const auto lightProjection = glm::ortho(
+				extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
+		*out.first++ = extents.max - extents.min;
+		*out.second++ = lightProjection * lightViewDir;
 	}
+
+	const auto extents = ExtentsBoundingBox::fromPoints(activeBandViewExtents.back()) += {};
 	const auto lightProjection
 			= glm::ortho(extents.min.x, extents.max.x, extents.min.y, extents.max.y, -extents.max.z, -extents.min.z);
 	frustum = {lightViewPoint, lightViewDir, lightProjection};
 	return frustum;
 }
 
-ShadowMapper::Definitions
+std::span<const glm::mat4>
 ShadowMapper::update(const SceneProvider & scene, const LightDirection & dir, const Camera & camera) const
 {
 	glDebugScope _ {depthMap};
