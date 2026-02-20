@@ -67,8 +67,9 @@ bool
 Frustum::contains(const std::span<const RelativePosition4D> points, const size_t nplanes, RelativeDistance size) const
 {
 	return std::ranges::none_of(std::span(planes).subspan(0, nplanes), [&points, size](const auto & frustumPlane) {
-		return (std::ranges::all_of(points, [&frustumPlane, size](const auto & corner) {
-			return glm::dot(frustumPlane, corner) < -size;
+		return (std::ranges::all_of(points, [&frustumPlane, size](const auto & point) {
+			const auto distanceFromPlane = glm::dot(frustumPlane, point) + frustumPlane.w;
+			return distanceFromPlane < -size;
 		}));
 	});
 }
@@ -80,6 +81,8 @@ Frustum::updateCache()
 	inverseViewProjection = glm::inverse(viewProjection);
 	std::ranges::transform(PLANES, planes.begin(), [vpt = glm::transpose(viewProjection)](const auto & idxs) {
 		const auto [idx, sgn] = idxs;
-		return vpt[3] + (vpt[idx] * sgn);
+		const auto plane = vpt[3] + (vpt[idx] * sgn);
+		const auto mag = glm::length(plane.xyz());
+		return plane / mag;
 	});
 }
