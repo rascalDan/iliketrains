@@ -152,7 +152,7 @@ Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) con
 {
 	shadowMapper.landmess.use();
 	for (const auto & [surface, sab] : meshes) {
-		if (frustum.shadedBy(sab.aabb)) {
+		if (frustum.contains(sab.aabb)) {
 			glBindVertexArray(sab.vertexArray);
 			glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
 		}
