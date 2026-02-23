@@ -69,16 +69,21 @@ namespace {
 		}
 
 		void
+		forEachRenderable(const RenderableProcessor & func) const override
+		{
+			for (const auto & [assetId, asset] : gameState.assets) {
+				if (const auto renderable = asset.getAs<Renderable>()) {
+					func(renderable);
+				}
+			}
+			gameState.world.apply<Renderable>(func);
+		}
+
+		void
 		render(float dist)
 		{
 			sceneRenderer.camera.setView({-dist, dist * 1.2F, dist * 1.2F}, south + east + down);
-			const auto & [camFrust, lightFrust] = sceneRenderer.preFrame({{0.9, 0.5}});
-			for (const auto & [assetId, asset] : gameState.assets) {
-				if (const auto renderable = asset.getAs<Renderable>()) {
-					renderable->preFrame(camFrust, lightFrust);
-				}
-			}
-			gameState.world.apply<Renderable>(&Renderable::preFrame, camFrust, lightFrust);
+			sceneRenderer.preFrame(*this, {{0.9, 0.5}});
 			sceneRenderer.render(*this);
 		}
 

@@ -256,14 +256,20 @@ BOOST_DATA_TEST_CASE(Deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	TestRenderOutput tro {{640, 480}};
 
 	struct TestTerrain : public SceneProvider {
-		explicit TestTerrain(GeoData geoData) : terrain(std::move(geoData)) { }
+		explicit TestTerrain(GeoData geoData) : terrain(std::make_shared<Terrain>(std::move(geoData))) { }
 
-		const Terrain terrain;
+		std::shared_ptr<Terrain> terrain;
+
+		void
+		forEachRenderable(const RenderableProcessor & func) const override
+		{
+			func(terrain.get());
+		}
 
 		void
 		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
-			terrain.render(shader, frustum);
+			terrain->render(shader, frustum);
 		}
 
 		void
@@ -281,7 +287,7 @@ BOOST_DATA_TEST_CASE(Deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 		void
 		shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const override
 		{
-			terrain.shadows(shadowMapper, frustum);
+			terrain->shadows(shadowMapper, frustum);
 		}
 	};
 

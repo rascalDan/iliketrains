@@ -4,6 +4,7 @@
 #include <gfx/gl/shaders/directionalLight-frag.h>
 #include <gfx/gl/shaders/lighting-frag.h>
 #include <gfx/gl/shaders/lighting-vert.h>
+#include <gfx/renderable.h>
 #include <glm/gtc/type_ptr.hpp>
 
 static constexpr const std::array<const glm::i8vec4, 4> displayVAOdata {{
@@ -77,10 +78,14 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 	shader.setViewPort({0, 0, size.x, size.y});
 }
 
-std::pair<const Frustum &, const Frustum &>
-SceneRenderer::preFrame(const LightDirection & lightDirection)
+void
+SceneRenderer::preFrame(const SceneProvider & scene, const LightDirection lightDirection)
 {
-	return {camera, shadowMapper.preFrame(lightDirection, camera)};
+	glDebugScope _ {output};
+	const auto lightView = shadowMapper.preFrame(lightDirection, camera);
+	scene.forEachRenderable([&lightView, this](Renderable * renderable) {
+		renderable->preFrame(camera, lightView);
+	});
 }
 
 void

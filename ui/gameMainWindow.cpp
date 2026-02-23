@@ -83,15 +83,20 @@ GameMainWindow::handleInput(const SDL_Event & event)
 }
 
 void
-GameMainWindow::render()
+GameMainWindow::forEachRenderable(const RenderableProcessor & func) const
 {
-	const auto & [camFrust, lightFrust] = SceneRenderer::preFrame(gameState->environment->getSunPos());
 	for (const auto & [assetId, asset] : gameState->assets) {
 		if (const auto renderable = asset.getAs<Renderable>()) {
-			renderable->preFrame(camFrust, lightFrust);
+			func(renderable);
 		}
 	}
-	gameState->world.apply<const Renderable>(&Renderable::preFrame, camFrust, lightFrust);
+	gameState->world.apply<Renderable>(func);
+}
+
+void
+GameMainWindow::render()
+{
+	SceneRenderer::preFrame(*this, gameState->environment->getSunPos());
 	SceneRenderer::render(*this);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

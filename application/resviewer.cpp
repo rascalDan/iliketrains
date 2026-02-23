@@ -44,9 +44,9 @@ private:
 	void
 	render() override
 	{
-		const auto & [camFrust, lightFrust] = preFrame(gameState->environment->getSunPos());
+		SceneRenderer::preFrame(*this, gameState->environment->getSunPos());
 		SceneRenderer::render(*this);
-		controls(camFrust, lightFrust);
+		controls();
 	}
 
 	void
@@ -90,12 +90,12 @@ private:
 	}
 
 	void
-	controls(const Frustum & camFrust, const Frustum & lightFrust)
+	controls()
 	{
 		if (ImGui::Begin("Resource view")) {
 			ImGui::SetWindowSize({});
 			fileSelection();
-			assetSelection(camFrust, lightFrust);
+			assetSelection();
 		}
 		ImGui::End();
 
@@ -131,7 +131,7 @@ private:
 	}
 
 	void
-	assetSelection(const Frustum & camFrust, const Frustum & lightFrust)
+	assetSelection()
 	{
 		if (!gameState->assets.empty()) {
 			ImGui::BeginListBox("Asset");
@@ -142,11 +142,18 @@ private:
 						selectedAssetId = asset.first;
 						selectedAsset = renderable;
 						location = asset.second->createAt(position);
-						renderable->preFrame(camFrust, lightFrust);
 					}
 				}
 			}
 			ImGui::EndListBox();
+		}
+	}
+
+	void
+	forEachRenderable(const RenderableProcessor & func) const override
+	{
+		if (selectedAsset) {
+			func(selectedAsset);
 		}
 	}
 
@@ -186,7 +193,7 @@ private:
 	std::filesystem::file_time_type fileTime;
 	const std::filesystem::path * selectedFile {};
 	std::string selectedAssetId;
-	const Renderable * selectedAsset {};
+	Renderable * selectedAsset {};
 	Location position {.pos = {0, 0, TERRAIN_HEIGHT}, .rot = {}};
 	std::any location;
 	Angle cameraAngle {0.F};

@@ -30,12 +30,12 @@ namespace {
 	class TestScene : public SceneProvider {
 		RailVehicleClassPtr brush47rvc;
 		std::shared_ptr<RailVehicle> train1, train2;
-		RailLinks rail;
+		std::shared_ptr<RailLinks> rail = std::make_shared<RailLinks>();
 		std::shared_ptr<Environment> env = std::make_shared<Environment>();
 
 		std::shared_ptr<Terrain> terrain
 				= std::make_shared<Terrain>(GeoData::createFlat({0, 0}, {1000000, 1000000}, 1));
-		Water water {terrain};
+		std::shared_ptr<Water> water = std::make_shared<Water>(terrain);
 
 	public:
 		TestScene()
@@ -69,16 +69,29 @@ namespace {
 									.rot = {0, rotationDistribution(randomdev), 0}});
 				}
 			}
-			rail.addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
-			rail.addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
+			rail->addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
+			rail->addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
+		}
+
+		void
+		forEachRenderable(const RenderableProcessor & func) const override
+		{
+			func(terrain.get());
+			func(water.get());
+			func(rail.get());
+			std::ranges::for_each(gameState->assets, [&func](const auto & asset) {
+				if (const auto renderable = asset.second.template getAs<const Renderable>()) {
+					func(renderable);
+				}
+			});
 		}
 
 		void
 		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
 			terrain->render(shader, frustum);
-			water.render(shader, frustum);
-			rail.render(shader, frustum);
+			water->render(shader, frustum);
+			rail->render(shader, frustum);
 			std::ranges::for_each(gameState->assets, [&shader, &frustum](const auto & asset) {
 				if (const auto renderable = asset.second.template getAs<const Renderable>()) {
 					renderable->render(shader, frustum);
@@ -162,13 +175,7 @@ BOOST_AUTO_TEST_CASE(Basic)
 	TestSceneRenderer renderer {size, output};
 	renderer.camera.setView({-10000, -10000, 60000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 	const TestScene scene;
-	const auto & [camFrust, lightFrust] = renderer.preFrame(gameState.environment->getSunPos());
-	for (const auto & [assetId, asset] : gameState.assets) {
-		if (const auto renderable = asset.getAs<Renderable>()) {
-			renderable->preFrame(camFrust, lightFrust);
-		}
-	}
-	gameState.world.apply<Renderable>(&Renderable::preFrame, camFrust, lightFrust);
+	renderer.preFrame(scene, gameState.environment->getSunPos());
 	renderer.render(scene);
 	renderer.saveBuffers(ANALYSIS_DIRECTORY / "basic");
 	Texture::save(outImage, (ANALYSIS_DIRECTORY / "basic/final.tga").c_str());
@@ -182,13 +189,20 @@ BOOST_AUTO_TEST_CASE(TerrainSD19)
 	class TestTerrain : public SceneProvider {
 		std::shared_ptr<Terrain> terrain
 				= std::make_shared<Terrain>(GeoData::loadFromAsciiGrid(FIXTURESDIR "height/SD19.asc"));
-		Water water {terrain};
+		std::shared_ptr<Water> water = std::make_shared<Water>(terrain);
+
+		void
+		forEachRenderable(const RenderableProcessor & func) const override
+		{
+			func(terrain.get());
+			func(water.get());
+		}
 
 		void
 		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
 			terrain->render(shader, frustum);
-			water.render(shader, frustum);
+			water->render(shader, frustum);
 		}
 
 		void
@@ -210,8 +224,9 @@ BOOST_AUTO_TEST_CASE(TerrainSD19)
 		}
 	};
 
-	renderer.preFrame(gameState.environment->getSunPos());
-	renderer.render(TestTerrain {});
+	TestTerrain testTerrain;
+	renderer.preFrame(testTerrain, gameState.environment->getSunPos());
+	renderer.render(testTerrain);
 	Texture::save(outImage, (ANALYSIS_DIRECTORY / "terrain.tga").c_str());
 }
 
@@ -221,22 +236,28 @@ BOOST_AUTO_TEST_CASE(RailNetwork)
 	renderer.camera.setView({0, 0, 10000}, glm::normalize(glm::vec3 {1, 1, -0.5F}));
 
 	class TestRail : public SceneProvider {
-		RailLinks net;
+		std::shared_ptr<RailLinks> net = std::make_shared<RailLinks>();
 
 	public:
 		TestRail()
 		{
-			net.addLinksBetween({20000, 10000, 0}, {100000, 100000, 0});
-			net.addLinksBetween({20000, 10000, 0}, {10000, 10000, 0});
-			net.addLinksBetween({10000, 20000, 0}, {100000, 120000, 0});
-			net.addLinksBetween({10000, 20000, 0}, {10000, 10000, 0});
-			net.addLinksBetween({100000, 100000, 0}, {100000, 120000, 0});
+			net->addLinksBetween({20000, 10000, 0}, {100000, 100000, 0});
+			net->addLinksBetween({20000, 10000, 0}, {10000, 10000, 0});
+			net->addLinksBetween({10000, 20000, 0}, {100000, 120000, 0});
+			net->addLinksBetween({10000, 20000, 0}, {10000, 10000, 0});
+			net->addLinksBetween({100000, 100000, 0}, {100000, 120000, 0});
+		}
+
+		void
+		forEachRenderable(const RenderableProcessor & func) const override
+		{
+			func(net.get());
 		}
 
 		void
 		content(const SceneShader & shader, const Frustum & frustum) const override
 		{
-			net.render(shader, frustum);
+			net->render(shader, frustum);
 		}
 
 		void

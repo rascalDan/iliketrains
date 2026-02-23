@@ -14,6 +14,7 @@ public:
 private:
 	bool handleInput(const SDL_Event &) override;
 
+	void forEachRenderable(const RenderableProcessor & func) const override;
 	void content(const SceneShader &, const Frustum &) const override;
 	void environment(const SceneShader &, const SceneRenderer &) const override;
 	void lights(const SceneShader &) const override;

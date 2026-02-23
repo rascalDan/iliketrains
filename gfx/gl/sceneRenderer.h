@@ -17,8 +17,8 @@ public:
 
 	void resize(ScreenAbsCoord size);
 
+	void preFrame(const SceneProvider & scene, LightDirection lightDirection);
 	void render(const SceneProvider &) const;
-	std::pair<const Frustum &, const Frustum &> preFrame(const LightDirection &);
 	void setAmbientLight(const RGB & colour) const;
 	void setDirectionalLight(const RGB & colour, const LightDirection & direction, const SceneProvider &) const;
 
