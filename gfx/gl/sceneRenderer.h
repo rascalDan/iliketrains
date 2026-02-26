@@ -1,5 +1,6 @@
 #pragma once
 
+#include "billboardPainter.h"
 #include "gfx/lightDirection.h"
 #include "glArrays.h"
 #include "gldebug.h"
@@ -62,4 +63,5 @@ protected:
 	glBuffer displayVBO;
 	SceneShader shader;
 	ShadowMapper shadowMapper;
+	BillboardPainter billboardPainter;
 };

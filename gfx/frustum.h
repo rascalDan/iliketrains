@@ -17,6 +17,12 @@ public:
 	}
 
 	[[nodiscard]] auto &
+	getView() const
+	{
+		return view;
+	}
+
+	[[nodiscard]] auto &
 	getViewProjection() const
 	{
 		return viewProjection;

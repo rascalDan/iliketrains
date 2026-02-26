@@ -19,3 +19,8 @@ void
 Renderable::updateStencil(const ShadowStenciller &) const
 {
 }
+
+void
+Renderable::updateBillboard(const BillboardPainter &) const
+{
+}

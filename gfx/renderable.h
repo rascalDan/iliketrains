@@ -6,6 +6,7 @@ class SceneShader;
 class Frustum;
 class ShadowMapper;
 class ShadowStenciller;
+class BillboardPainter;
 
 class Renderable {
 public:
@@ -19,4 +20,5 @@ public:
 	virtual void shadows(const ShadowMapper & shadowMapper, const Frustum &) const;
 
 	virtual void updateStencil(const ShadowStenciller & lightDir) const;
+	virtual void updateBillboard(const BillboardPainter &) const;
 };
