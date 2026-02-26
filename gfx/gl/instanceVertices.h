@@ -144,9 +144,16 @@ public:
 	PartitionResult
 	partition(Pred1 pred1, Pred2 pred2)
 	{
+		return partition(pred1, std::not_fn(pred2), pred2);
+	}
+
+	template<typename Pred1, typename Pred2, typename Pred3>
+	PartitionResult
+	partition(Pred1 pred1, Pred2 pred2, Pred3 pred3)
+	{
 		auto boundary1 = partition(base::begin(), base::end(), pred1);
-		auto begin2 = partition(base::begin(), boundary1, std::not_fn(pred2));
-		auto end2 = partition(boundary1, base::end(), pred2);
+		auto begin2 = partition(base::begin(), boundary1, pred2);
+		auto end2 = partition(boundary1, base::end(), pred3);
 		return {indexOf(boundary1), {indexOf(begin2), indexOf(end2)}};
 	}
 
