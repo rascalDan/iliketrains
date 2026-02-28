@@ -126,8 +126,8 @@ namespace {
 BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
 BOOST_DATA_TEST_CASE(Cam,
-		boost::unit_test::data::xrange(500, 30000, 1300) * boost::unit_test::data::xrange(500, 10000, 300)
-				* boost::unit_test::data::xrange(50000, 500000, 70000),
+		boost::unit_test::data::xrange(500, 30000, 1300) * boost::unit_test::data::xrange(500.F, 10000.F, 300.F)
+				* boost::unit_test::data::xrange(50000.F, 500000.F, 70000.F),
 		dist, near, far)
 {
 	static constexpr GlobalPosition4D POS {-10, -10, 60000, 0};

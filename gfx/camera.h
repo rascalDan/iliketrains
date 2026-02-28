@@ -8,7 +8,7 @@
 
 class Camera : public Frustum {
 public:
-	Camera(GlobalPosition3D position, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far);
+	Camera(GlobalPosition3D position, Angle fov, Angle aspect, RelativeDistance near, RelativeDistance far);
 
 	[[nodiscard]] Ray<GlobalPosition3D> unProject(const ScreenRelCoord &) const;
 
@@ -61,17 +61,35 @@ public:
 		return forward;
 	}
 
+	[[nodiscard]] auto
+	getNear() const
+	{
+		return near;
+	}
+
+	[[nodiscard]] auto
+	getFar() const
+	{
+		return far;
+	}
+
+	[[nodiscard]] auto
+	getDepth() const
+	{
+		return far - near;
+	}
+
 	[[nodiscard]] std::array<GlobalPosition4D, 4> extentsAtDist(GlobalDistance) const;
 
 	[[nodiscard]] static Direction3D upFromForward(const Direction3D & forward);
 
 private:
-	Camera(GlobalPosition3D position, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far,
+	Camera(GlobalPosition3D position, Angle fov, Angle aspect, RelativeDistance near, RelativeDistance far,
 			const glm::mat4 & view, const glm::mat4 & projection);
 	void updateView();
 
 	Angle fov, aspect;
 	Direction3D forward;
 	Direction3D up;
-	GlobalDistance near, far;
+	RelativeDistance near, far;
 };

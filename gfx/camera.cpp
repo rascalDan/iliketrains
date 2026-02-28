@@ -4,13 +4,13 @@
 #include <maths.h>
 #include <ray.h>
 
-Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far) :
+Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, RelativeDistance near, RelativeDistance far) :
 	Camera {pos, fov, aspect, near, far, glm::lookAt({}, ::north, ::up),
 			glm::perspective(fov, aspect, static_cast<RelativeDistance>(near), static_cast<RelativeDistance>(far))}
 {
 }
 
-Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, GlobalDistance near, GlobalDistance far,
+Camera::Camera(GlobalPosition3D pos, Angle fov, Angle aspect, RelativeDistance near, RelativeDistance far,
 		const glm::mat4 & view, const glm::mat4 & projection) :
 	Frustum {pos, view, projection}, fov {fov}, aspect {aspect}, forward {::north}, up {::up}, near {near}, far {far}
 {
@@ -58,9 +58,8 @@ Camera::extentsAtDist(const GlobalDistance dist) const
 		}
 		return {target, dist};
 	};
-	const auto depth = -(2.F * (static_cast<float>(dist - near)) * static_cast<float>(far))
-					/ (static_cast<float>(dist) * (static_cast<float>(near - far)))
-			- 1.F;
+	const auto depth
+			= -(2.F * (static_cast<float>(dist) - near) * far) / (static_cast<float>(dist) * (near - far)) - 1.F;
 	static constexpr const std::array extents {-1.F, 1.F};
 	static constexpr const auto cartesianExtents = extents * extents;
 	return cartesianExtents * [&depth, this, &clampToSeaFloor](const auto & extent) {
