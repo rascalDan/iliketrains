@@ -154,6 +154,7 @@ BOOST_AUTO_TEST_CASE(Tree, *boost::unit_test::timeout(5))
 	auto plant2 = std::make_shared<Plant>(tree011, Location {.pos = {3000, -4000, 0}, .rot = {0, 1, 0}});
 	auto plant3 = std::make_shared<Plant>(tree011, Location {.pos = {-2000, -4000, 0}, .rot = {0, 2, 0}});
 	auto plant4 = std::make_shared<Plant>(tree011, Location {.pos = {3000, 2000, 0}, .rot = {0, 3, 0}});
+	auto plant5 = std::make_shared<Plant>(tree011, Location {.pos = {500'000, -500'000, -400'000}, .rot = {0, 3, 0}});
 	objects.emplace(tree011);
 
 	render(6000);
