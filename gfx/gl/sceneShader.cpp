@@ -1,4 +1,6 @@
 #include "sceneShader.h"
+#include <gfx/gl/shaders/billboard-frag.h>
+#include <gfx/gl/shaders/billboard-vert.h>
 #include <gfx/gl/shaders/dynamicPoint-vert.h>
 #include <gfx/gl/shaders/dynamicPointInst-vert.h>
 #include <gfx/gl/shaders/fixedPoint-vert.h>
@@ -30,7 +32,7 @@ inline void
 SceneShader::allPrograms(auto member, auto &&... ps) const
 {
 	for (const auto & prog : std::initializer_list<const SceneProgram *> {&basic, &basicInst, &water, &landmass,
-				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve}) {
+				 &absolute, &pointLightInst, &spotLightInst, &networkStraight, &networkCurve, &billboard}) {
 		(prog->*member)(std::forward<decltype(ps)>(ps)...);
 	}
 }
@@ -87,6 +89,16 @@ SceneShader::BasicProgram::use(Location const & location) const
 {
 	Program::use();
 	setModel(location);
+}
+
+SceneShader::BillboardProgram::BillboardProgram() : SceneProgram {billboard_vert, billboard_frag} { }
+
+void
+SceneShader::BillboardProgram::use(RelativeDistance size, RelativePosition3D centre) const
+{
+	Program::use();
+	glUniform(sizeLoc, size);
+	glUniform(centreLoc, centre);
 }
 
 void

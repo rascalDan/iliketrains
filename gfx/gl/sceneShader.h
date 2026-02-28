@@ -32,6 +32,17 @@ class SceneShader {
 		RequiredUniformLocation modelPosLoc {*this, "modelPos"};
 	};
 
+	class BillboardProgram : public SceneProgram {
+	public:
+		BillboardProgram();
+
+		void use(RelativeDistance size, RelativePosition3D centre) const;
+
+	private:
+		RequiredUniformLocation sizeLoc {*this, "size"};
+		RequiredUniformLocation centreLoc {*this, "centre"};
+	};
+
 	class AbsolutePosProgram : public SceneProgram {
 	public:
 		using Program::use;
@@ -74,6 +85,7 @@ public:
 	BasicProgram basic;
 	WaterProgram water;
 	AbsolutePosProgram basicInst, absolute, spotLightInst, pointLightInst;
+	BillboardProgram billboard;
 	LandmassProgram landmass;
 	NetworkProgram networkStraight, networkCurve;
 
