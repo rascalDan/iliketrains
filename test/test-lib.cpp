@@ -33,7 +33,7 @@ namespace {
 		}));
 	}
 
-	using TestArray = glArrays<5, &generator, &deleter>;
+	using TestArray = glManagedArray<Detail::glNamed, 5, &generator, &deleter>;
 }
 
 BOOST_AUTO_TEST_CASE(GenerateAndDelete)

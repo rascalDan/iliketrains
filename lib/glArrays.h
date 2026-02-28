@@ -5,91 +5,129 @@
 #include <cstddef>
 #include <glad/gl.h>
 #include <special_members.h>
+#include <utility>
+
+namespace Detail {
+	// NOLINTNEXTLINE(readability-identifier-naming)
+	class glNamed;
+
+	template<typename Named>
+	concept IsglNamed = sizeof(Named) == sizeof(GLuint) && std::is_base_of_v<Detail::glNamed, Named>;
+}
+
+template<Detail::IsglNamed, size_t, auto, auto>
+// NOLINTNEXTLINE(readability-identifier-naming)
+struct glManagedArray;
+
+namespace Detail {
+	// NOLINTNEXTLINE(readability-identifier-naming)
+	class glNamed {
+	public:
+		glNamed() = default;
+		~glNamed() = default;
+		DEFAULT_MOVE_NO_COPY(glNamed);
+
+		GLuint
+		operator*() const noexcept
+		{
+			return name;
+		}
+
+		// NOLINTNEXTLINE(hicpp-explicit-conversions)
+		operator GLuint() const noexcept
+		{
+			return name;
+		}
+
+	protected:
+		GLuint name {};
+		template<Detail::IsglNamed, size_t, auto, auto> friend struct ::glManagedArray;
+	};
+}
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-template<size_t N> class glArraysBase {
-	static_assert(N > 0);
-
-public:
-	~glArraysBase() = default;
-	NO_COPY(glArraysBase);
-	CUSTOM_MOVE(glArraysBase);
-
-	// NOLINTNEXTLINE(hicpp-explicit-conversions)
-	operator GLuint() const
-		requires(N == 1)
+template<Detail::IsglNamed Named, auto Gen, auto Del> struct glManagedSingle : public Named {
+	glManagedSingle() noexcept
 	{
-		return ids.front();
+		(*Gen)(1, &this->name);
 	}
 
-	GLuint
-	operator*() const
-		requires(N == 1)
+	glManagedSingle(glManagedSingle && src) noexcept
 	{
-		return ids.front();
+		this->name = std::exchange(src.name, 0);
 	}
 
-	const auto &
-	operator[](size_t n) const
+	~glManagedSingle() noexcept
 	{
-		return ids[n];
+		if (this->name) {
+			(*Del)(1, &this->name);
+		}
 	}
 
-	constexpr static auto
-	size()
-	{
-		return N;
-	}
+	NO_COPY(glManagedSingle);
 
-protected:
-	glArraysBase() noexcept = default;
-	std::array<GLuint, N> ids {};
+	glManagedSingle &
+	operator=(glManagedSingle && src) noexcept
+	{
+		if (this->name) {
+			(*Del)(1, &this->name);
+		}
+		this->name = std::exchange(src.name, 0);
+		return *this;
+	}
 };
 
-template<size_t N> inline glArraysBase<N>::glArraysBase(glArraysBase<N> && src) noexcept : ids {src.ids}
-{
-	std::fill(src.ids.begin(), src.ids.end(), 0);
-}
-
-template<size_t N>
-inline glArraysBase<N> &
-glArraysBase<N>::operator=(glArraysBase<N> && src) noexcept
-{
-	ids = src.ids;
-	std::fill(src.ids.begin(), src.ids.end(), 0);
-	return *this;
-}
-
+template<Detail::IsglNamed Named, size_t N, auto Gen, auto Del>
 // NOLINTNEXTLINE(readability-identifier-naming)
-template<size_t N, auto Gen, auto Del> class glArrays : public glArraysBase<N> {
-public:
-	using glArraysBase<N>::glArraysBase;
-	using glArraysBase<N>::operator=;
+struct glManagedArray : public std::array<Named, N> {
+	using Arr = std::array<Named, N>;
 
-	DEFAULT_MOVE_COPY(glArrays);
-
-	glArrays() noexcept
+	glManagedArray() noexcept
 	{
-		(*Gen)(N, this->ids.data());
+		(*Gen)(N, &Arr::front().name);
 	}
 
-	~glArrays() noexcept
+	glManagedArray(glManagedArray && src) noexcept
 	{
-		if (this->ids.front()) {
-			(*Del)(N, this->ids.data());
+		Arr::operator=(std::exchange(static_cast<Arr &>(src), {}));
+	}
+
+	~glManagedArray() noexcept
+	{
+		if (Arr::front().name) {
+			(*Del)(N, &Arr::front().name);
 		}
+	}
+
+	NO_COPY(glManagedArray);
+
+	glManagedArray &
+	operator=(glManagedArray && src) noexcept
+	{
+		if (Arr::front().name) {
+			(*Del)(N, &Arr::front().name);
+		}
+		Arr::operator=(std::exchange(static_cast<Arr &>(src), {}));
+		return *this;
+	}
+
+	[[nodiscard]] static constexpr size_t
+	size() noexcept
+	{
+		return N;
 	}
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
-template<size_t N> using glVertexArrays = glArrays<N, &glGenVertexArrays, &glDeleteVertexArrays>;
-using glVertexArray = glVertexArrays<1>;
-template<size_t N> using glBuffers = glArrays<N, &glGenBuffers, &glDeleteBuffers>;
-using glBuffer = glBuffers<1>;
-template<size_t N> using glTextures = glArrays<N, &glGenTextures, &glDeleteTextures>;
-using glTexture = glTextures<1>;
-template<size_t N> using glFrameBuffers = glArrays<N, &glGenFramebuffers, &glDeleteFramebuffers>;
-using glFrameBuffer = glFrameBuffers<1>;
-template<size_t N> using glRenderBuffers = glArrays<N, &glGenRenderbuffers, &glDeleteRenderbuffers>;
-using glRenderBuffer = glRenderBuffers<1>;
+template<size_t N> using glVertexArrays = glManagedArray<Detail::glNamed, N, &glGenVertexArrays, &glDeleteVertexArrays>;
+using glVertexArray = glManagedSingle<Detail::glNamed, &glGenVertexArrays, &glDeleteVertexArrays>;
+template<size_t N> using glBuffers = glManagedArray<Detail::glNamed, N, &glGenBuffers, &glDeleteBuffers>;
+using glBuffer = glManagedSingle<Detail::glNamed, &glGenBuffers, &glDeleteBuffers>;
+template<size_t N> using glTextures = glManagedArray<Detail::glNamed, N, &glGenTextures, &glDeleteTextures>;
+using glTexture = glManagedSingle<Detail::glNamed, &glGenTextures, &glDeleteTextures>;
+template<size_t N> using glFrameBuffers = glManagedArray<Detail::glNamed, N, &glGenFramebuffers, &glDeleteFramebuffers>;
+using glFrameBuffer = glManagedSingle<Detail::glNamed, &glGenFramebuffers, &glDeleteFramebuffers>;
+template<size_t N>
+using glRenderBuffers = glManagedArray<Detail::glNamed, N, &glGenRenderbuffers, &glDeleteRenderbuffers>;
+using glRenderBuffer = glManagedSingle<Detail::glNamed, &glGenRenderbuffers, &glDeleteRenderbuffers>;
 // NOLINTEND(readability-identifier-naming)
