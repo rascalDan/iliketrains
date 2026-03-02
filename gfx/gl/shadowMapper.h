@@ -68,10 +68,10 @@ public:
 	DynamicPoint dynamicPoint;
 	StencilShadowProgram stencilShadowProgram;
 
-	// NOLINTNEXTLINE(hicpp-explicit-conversions)
-	operator GLuint() const
+	void
+	bind(GLenum unit) const
 	{
-		return depthMap;
+		depthMap.bind(GL_TEXTURE_2D_ARRAY, unit);
 	}
 
 private:

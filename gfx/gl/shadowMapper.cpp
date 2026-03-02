@@ -32,7 +32,7 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	size {s}, frustum {{}, {}, {}}
 {
 	glDebugScope _ {depthMap};
-	glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
+	depthMap.bind(GL_TEXTURE_2D_ARRAY);
 	glTexImage3D(
 			GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, size.x, size.y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

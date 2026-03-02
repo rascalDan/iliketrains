@@ -1,9 +1,9 @@
 #pragma once
 
+#include "gfx/gl/glTexture.h"
 #include <array>
 #include <cstddef>
 #include <filesystem>
-#include <glArrays.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <map>

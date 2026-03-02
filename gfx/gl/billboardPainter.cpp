@@ -40,8 +40,8 @@ BillboardPainter::createBillBoardTextures(GLsizei width, GLsizei height)
 	glTextures<3> textures;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	const auto configuregdata = [width, height](const GLuint texture, const GLint iformat, const GLenum format) {
-		glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+	const auto configuregdata = [width, height](const auto & texture, const GLint iformat, const GLenum format) {
+		texture.bind(GL_TEXTURE_2D_ARRAY);
 		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -78,7 +78,7 @@ BillboardPainter::renderBillBoard(
 	}
 	glUseProgram(program);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	const TextureDimensions billboardSize = {256, 256, 8}; // Texture::getSize(billboard[0]);
+	const TextureDimensions billboardSize = billboard[0].getSize();
 	glViewport(0, 0, billboardSize.x, billboardSize.y);
 	const auto & centre = mesh.getDimensions().centre;
 	const auto & size = mesh.getDimensions().size;

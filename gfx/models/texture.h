@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config/types.h"
-#include "glArrays.h"
+#include "gfx/gl/glTexture.h"
 #include "stdTypeDefs.h"
 #include <filesystem>
 #include <glm/fwd.hpp>
@@ -38,7 +38,6 @@ public:
 	static void saveDepth(const glTexture &, const char * path);
 	static void saveNormal(const glTexture &, const char * path);
 	static void savePosition(const glTexture &, const char * path);
-	static TextureDimensions getSize(const glTexture &);
 
 protected:
 	static void save(const glTexture &, GLenum, GLenum, uint8_t channels, const char * path, uint8_t tgaFormat);

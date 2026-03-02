@@ -116,12 +116,12 @@ Font::getTextureWithSpace(unsigned int adv) const
 					return (ft.used + adv) < size.x;
 				});
 			itr != fontTextures.end()) {
-		glBindTexture(GL_TEXTURE_2D, itr->texture);
+		itr->texture.bind();
 		return static_cast<std::size_t>(itr - fontTextures.begin());
 	}
 
 	auto & texture = fontTextures.emplace_back();
-	glBindTexture(GL_TEXTURE_2D, texture.texture);
+	texture.texture.bind();
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y), 0, GL_RED,
 			GL_UNSIGNED_BYTE, nullptr);
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

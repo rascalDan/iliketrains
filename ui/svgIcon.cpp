@@ -15,7 +15,7 @@ SvgIcon::SvgIcon(ImageDimensions dim, const std::filesystem::path & path)
 	}
 	bitmap.convertToRGBA();
 
-	glBindTexture(GL_TEXTURE_2D, texture);
+	texture.bind();
 
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);

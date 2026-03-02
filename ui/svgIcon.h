@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glArrays.h"
+#include "gfx/gl/glTexture.h"
 #include <config/types.h>
 #include <filesystem>
 #include <imgui.h>

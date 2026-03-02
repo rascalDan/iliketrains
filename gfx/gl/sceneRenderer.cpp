@@ -24,9 +24,9 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	shader.setViewPort({0, 0, size.x, size.y});
 	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
 
-	const auto configuregdata = [this](const GLuint data, const std::initializer_list<GLint> iformats,
+	const auto configuregdata = [this](const auto & data, const std::initializer_list<GLint> iformats,
 										const GLenum format, const GLenum attachment) {
-		glBindTexture(GL_TEXTURE_2D, data);
+		data.bind();
 		glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		for (const auto iformat : iformats) {
@@ -65,8 +65,8 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 	glDebugScope _ {output};
 	size = newSize;
 	camera.setAspect(ratio(size));
-	const auto configuregdata = [this](const GLuint data, const GLint iformat, const GLenum format) {
-		glBindTexture(GL_TEXTURE_2D, data);
+	const auto configuregdata = [this](const auto & data, const GLint iformat, const GLenum format) {
+		data.bind();
 		glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
 	};
 	configuregdata(gPosition, GL_RGB32I, GL_RGB_INTEGER);
@@ -124,12 +124,9 @@ SceneRenderer::render(const SceneProvider & scene) const
 		// * per light - reads normal and position, writes illumination
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glBlendFunc(GL_ONE, GL_ONE);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gPosition);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, gNormal);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
+		gPosition.bind(GL_TEXTURE_2D, GL_TEXTURE0);
+		gNormal.bind(GL_TEXTURE_2D, GL_TEXTURE1);
+		shadowMapper.bind(GL_TEXTURE2);
 		glDisable(GL_DEPTH_TEST);
 		scene.lights(shader);
 	}
@@ -141,10 +138,8 @@ SceneRenderer::render(const SceneProvider & scene) const
 		glCullFace(GL_BACK);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, gIllumination);
+		gAlbedoSpec.bind(GL_TEXTURE_2D, GL_TEXTURE2);
+		gIllumination.bind(GL_TEXTURE_2D, GL_TEXTURE3);
 		lighting.use();
 		renderQuad();
 	}
@@ -168,12 +163,9 @@ SceneRenderer::setDirectionalLight(
 		const auto lvp = shadowMapper.update(scene, direction, camera);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glBlendFunc(GL_ONE, GL_ONE);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gPosition);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, gNormal);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapper);
+		gPosition.bind(GL_TEXTURE_2D, GL_TEXTURE0);
+		gNormal.bind(GL_TEXTURE_2D, GL_TEXTURE1);
+		shadowMapper.bind(GL_TEXTURE2);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
 		dirLight.setDirectionalLight(colour, direction.vector(), camera.getPosition(), lvp);

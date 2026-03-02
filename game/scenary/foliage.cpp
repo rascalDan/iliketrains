@@ -77,12 +77,9 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			glDebugScope _ {0, "Billboard"};
 			const auto dimensions = bodyMesh->getDimensions();
 			shader.billboard.use(dimensions.size, dimensions.centre);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, billboard[0]);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, billboard[1]);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, billboard[2]);
+			billboard[0].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE0);
+			billboard[1].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE1);
+			billboard[2].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE2);
 			glBindVertexArray(instancePointVAO);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
@@ -107,8 +104,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 		if (const auto count = instancePartitions.second.second - instancePartitions.second.first) {
 			const auto dimensions = bodyMesh->getDimensions();
 			mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, shadowStencil);
+			shadowStencil.bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE0);
 			glBindVertexArray(instancePointVAO);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);

@@ -123,8 +123,6 @@ template<size_t N> using glVertexArrays = glManagedArray<Detail::glNamed, N, &gl
 using glVertexArray = glManagedSingle<Detail::glNamed, &glGenVertexArrays, &glDeleteVertexArrays>;
 template<size_t N> using glBuffers = glManagedArray<Detail::glNamed, N, &glGenBuffers, &glDeleteBuffers>;
 using glBuffer = glManagedSingle<Detail::glNamed, &glGenBuffers, &glDeleteBuffers>;
-template<size_t N> using glTextures = glManagedArray<Detail::glNamed, N, &glGenTextures, &glDeleteTextures>;
-using glTexture = glManagedSingle<Detail::glNamed, &glGenTextures, &glDeleteTextures>;
 template<size_t N> using glFrameBuffers = glManagedArray<Detail::glNamed, N, &glGenFramebuffers, &glDeleteFramebuffers>;
 using glFrameBuffer = glManagedSingle<Detail::glNamed, &glGenFramebuffers, &glDeleteFramebuffers>;
 template<size_t N>

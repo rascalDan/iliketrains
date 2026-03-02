@@ -1,7 +1,7 @@
 #pragma once
 
+#include "gfx/gl/glTexture.h"
 #include <filesystem>
-#include <glArrays.h>
 #include <glm/glm.hpp>
 #include <imgui.h>
 

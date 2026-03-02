@@ -11,7 +11,7 @@ Icon::Icon(const std::filesystem::path & fileName) : Icon {Image {Resource::mapP
 
 Icon::Icon(const Image & tex) : size {tex.width, tex.height}
 {
-	glBindTexture(GL_TEXTURE_2D, m_texture);
+	m_texture.bind();
 
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);

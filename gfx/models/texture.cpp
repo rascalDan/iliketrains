@@ -1,6 +1,5 @@
 #include "texture.h"
 #include "config/types.h"
-#include "glArrays.h"
 #include "tga.h"
 #include <fcntl.h>
 #include <filesystem.h>
@@ -41,7 +40,7 @@ Texture::Texture(GLsizei width, GLsizei height, TextureOptions to) : Texture {wi
 
 Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to) : type {to.type}
 {
-	glBindTexture(type, m_texture);
+	m_texture.bind(type);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glTexParameter(type, GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
@@ -65,25 +64,14 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 void
 Texture::bind(GLenum unit) const
 {
-	glActiveTexture(unit);
-	glBindTexture(type, m_texture);
-}
-
-TextureDimensions
-Texture::getSize(const glTexture & texture)
-{
-	TextureDimensions size {};
-	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_WIDTH, &size.x);
-	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_HEIGHT, &size.y);
-	glGetTextureLevelParameteriv(texture, 0, GL_TEXTURE_DEPTH, &size.z);
-	return size;
+	m_texture.bind(type, unit);
 }
 
 void
 Texture::save(
 		const glTexture & texture, GLenum format, GLenum type, uint8_t channels, const char * path, uint8_t tgaFormat)
 {
-	const auto size = getSize(texture);
+	const auto size = texture.getSize();
 	const size_t dataSize = (static_cast<size_t>(size.x * size.y * size.z * channels));
 	const size_t fileSize = dataSize + sizeof(TGAHead);
 
@@ -132,7 +120,7 @@ Texture::saveNormal(const glTexture & texture, const char * path)
 
 TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Texture(width, height, nullptr, {})
 {
-	glBindTexture(GL_TEXTURE_RECTANGLE, m_atlas);
+	m_atlas.bind(GL_TEXTURE_RECTANGLE);
 
 	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -147,8 +135,7 @@ void
 TextureAtlas::bind(GLenum unit) const
 {
 	Texture::bind(unit);
-	glActiveTexture(unit + 1);
-	glBindTexture(GL_TEXTURE_RECTANGLE, m_atlas);
+	m_atlas.bind(GL_TEXTURE_RECTANGLE, unit + 1);
 }
 
 GLuint

@@ -1,7 +1,6 @@
 #include "shadowStenciller.h"
 #include "gfx/lightDirection.h"
 #include "gfx/models/mesh.h"
-#include "glArrays.h"
 #include "gl_traits.h"
 #include "gldebug.h"
 #include "maths.h"
@@ -34,7 +33,7 @@ glTexture
 ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
 {
 	glTexture stencil;
-	glBindTexture(GL_TEXTURE_2D_ARRAY, stencil);
+	stencil.bind(GL_TEXTURE_2D_ARRAY);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -62,7 +61,7 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 	}
 	glUseProgram(shadowCaster);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	const auto stencilSize = Texture::getSize(stencil);
+	const auto stencilSize = stencil.getSize();
 	glViewport(0, 0, stencilSize.x, stencilSize.y);
 	const auto & centre = mesh.getDimensions().centre;
 	const auto & size = mesh.getDimensions().size;
