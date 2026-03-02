@@ -1,9 +1,7 @@
 #pragma once
 
 #include "assetFactory/asset.h"
-#include "gfx/gl/billboardPainter.h"
 #include "gfx/gl/instanceVertices.h"
-#include "gfx/gl/shadowStenciller.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
@@ -32,13 +30,15 @@ public:
 	void shadows(const ShadowMapper &, const Frustum &) const override;
 	void updateStencil(const ShadowStenciller &) const override;
 	void updateBillboard(const BillboardPainter &) const override;
-	glTexture shadowStencil = ShadowStenciller::createStencilTexture(256, 256);
-	glTextures<3> billboard = BillboardPainter::createBillBoardTextures(256, 256);
 
 protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<Foliage>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	void postLoad() override;
+	GLsizei billboardSize {};
+	RelativeDistance useMeshClipDist {};
+	glTexture shadowStencil;
+	glTextures<3> billboard;
 
 private:
 	InstanceVertices<Foliage::LocationVertex>::PartitionResult instancePartitions;
