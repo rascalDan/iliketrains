@@ -2,7 +2,7 @@
 
 #include "config/types.h"
 #include "gfx/gl/vertexArrayObject.h"
-#include <glArrays.h>
+#include <gfx/gl/glVertexArray.h>
 #include <glad/gl.h>
 #include <ranges>
 #include <span>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "collection.h"
+#include "gfx/gl/glVertexArray.h"
 #include "gfx/gl/instanceVertices.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
