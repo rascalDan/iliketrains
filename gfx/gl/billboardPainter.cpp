@@ -1,6 +1,4 @@
 #include "billboardPainter.h"
-#include "gfx/models/mesh.h"
-#include "glArrays.h"
 #include "gl_traits.h"
 #include "gldebug.h"
 #include "maths.h"
@@ -15,7 +13,7 @@ const auto VIEWS = []<GLint... Ep>(std::integer_sequence<GLint, Ep...>) {
 }(std::make_integer_sequence<GLint, BillboardPainter::VIEW_ANGLES<GLint>>());
 
 BillboardPainter::BillboardPainter() :
-	program {billboardPainter_vert, billboardPainter_geom, billboardPainter_frag}, view {}
+	program {billboardPainter_vert, billboardPainter_geom, billboardPainter_frag}, angle {}, view {}
 {
 	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -28,9 +26,16 @@ BillboardPainter::BillboardPainter() :
 }
 
 void
-BillboardPainter::setView(const glm::mat4 & newView)
+BillboardPainter::setView(const Angle newAngle, const glm::mat4 & newView)
 {
+	angle = newAngle;
 	view = newView;
+}
+
+Angle
+BillboardPainter::getAngle() const
+{
+	return angle;
 }
 
 glTextures<3>

@@ -9,8 +9,9 @@
 
 static_assert(std::is_constructible_v<Foliage>);
 constexpr float OBJECT_BILLBOARD_DIVISOR = 64;
+constexpr float BILLBOARD_ANGLE_TOLERANCE = 250.F; // Radians per mm size
 constexpr float ASSUMED_VIEWPORT = 1440;
-constexpr float OVER_SAMPLE_MULTIPLIER = 4; // Use mesh until billboard 1/4 of rendered size
+constexpr float OVER_SAMPLE_MULTIPLIER = 2; // Use mesh until billboard 1/2 of rendered size
 
 namespace {
 	GLsizei
@@ -51,18 +52,22 @@ Foliage::postLoad()
 }
 
 void
-Foliage::updateStencil(const ShadowStenciller & ss) const
+Foliage::updateStencil(const ShadowStenciller & shadowStenciller) const
 {
-	if (instancePartitions.second.second != instancePartitions.second.first) {
-		ss.renderStencil(shadowStencil, *bodyMesh, texture);
+	if (instancePartitions.second.second != instancePartitions.second.first
+			&& glm::distance(shadowStenciller.getLightDirection(), shadowStencilDir)
+					> BILLBOARD_ANGLE_TOLERANCE / bodyMesh->getDimensions().size) {
+		shadowStenciller.renderStencil(shadowStencil, *bodyMesh, texture);
 	}
 }
 
 void
 Foliage::updateBillboard(const BillboardPainter & bbp) const
 {
-	if (instancePartitions.first != instancePartitions.second.first) {
+	if (instancePartitions.first != instancePartitions.second.first
+			&& std::abs(bbp.getAngle() - billboardAngle) > BILLBOARD_ANGLE_TOLERANCE / bodyMesh->getDimensions().size) {
 		bbp.renderBillBoard(billboard, *bodyMesh, texture);
+		billboardAngle = bbp.getAngle();
 	}
 }
 

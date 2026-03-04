@@ -16,6 +16,7 @@ public:
 	[[nodiscard]]
 	static glTexture createStencilTexture(GLsizei width, GLsizei height);
 	void setLightDirection(const LightDirection & lightDir);
+	[[nodiscard]] Direction2D getLightDirection() const;
 	void renderStencil(const glTexture &, const MeshBase &, Texture::AnyPtr texture) const;
 
 private:
@@ -23,5 +24,6 @@ private:
 	Program shadowCaster;
 	Program::RequiredUniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 
+	Direction2D lightDir;
 	std::array<glm::mat4, STENCIL_ANGLES<size_t>> viewProjections;
 };

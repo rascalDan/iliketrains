@@ -37,7 +37,9 @@ protected:
 	void postLoad() override;
 	GLsizei billboardSize {};
 	RelativeDistance useMeshClipDist {};
+	mutable Direction2D shadowStencilDir {std::numeric_limits<Direction2D::value_type>::infinity()};
 	glTexture shadowStencil;
+	mutable Angle billboardAngle = std::numeric_limits<Angle>::infinity();
 	glTextures<3> billboard;
 
 private:

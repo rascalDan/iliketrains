@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 ShadowStenciller::ShadowStenciller() :
-	shadowCaster {shadowStencil_vert, shadowStencil_geom, shadowStencil_frag}, viewProjections {}
+	shadowCaster {shadowStencil_vert, shadowStencil_geom, shadowStencil_frag}, lightDir {}, viewProjections {}
 {
 	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -22,11 +22,18 @@ ShadowStenciller::ShadowStenciller() :
 void
 ShadowStenciller::setLightDirection(const LightDirection & lightDir)
 {
+	this->lightDir = lightDir.position();
 	viewProjections = [&lightDir]<GLint... Ep>(std::integer_sequence<GLint, Ep...>) {
 		constexpr float STEP = two_pi / STENCIL_ANGLES<decltype(two_pi)>;
 		return std::array {rotate_pitch<4>(half_pi - lightDir.position().y)
 				* rotate_yaw<4>((Ep * STEP) - lightDir.position().x)...};
 	}(std::make_integer_sequence<GLint, STENCIL_ANGLES<GLint>>());
+}
+
+Direction2D
+ShadowStenciller::getLightDirection() const
+{
+	return lightDir;
 }
 
 glTexture

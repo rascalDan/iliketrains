@@ -83,7 +83,7 @@ SceneRenderer::preFrame(const SceneProvider & scene, const LightDirection lightD
 {
 	glDebugScope _ {output};
 	const auto lightView = shadowMapper.preFrame(lightDirection, camera);
-	billboardPainter.setView(camera.getView());
+	billboardPainter.setView(std::asin(camera.getForward().z), camera.getView());
 	scene.forEachRenderable([&lightView, this](Renderable * renderable) {
 		renderable->preFrame(camera, lightView);
 		renderable->updateBillboard(billboardPainter);

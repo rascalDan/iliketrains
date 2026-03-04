@@ -15,7 +15,8 @@ public:
 
 	[[nodiscard]]
 	static glTextures<3> createBillBoardTextures(GLsizei width, GLsizei height);
-	void setView(const glm::mat4 &);
+	void setView(Angle angle, const glm::mat4 &);
+	[[nodiscard]] Angle getAngle() const;
 	void renderBillBoard(const glTextures<3> &, const MeshBase &, Texture::AnyPtr texture) const;
 
 private:
@@ -24,5 +25,6 @@ private:
 	Program::RequiredUniformLocation viewProjectionLoc {program, "viewProjection"};
 	Program::RequiredUniformLocation viewLoc {program, "view"};
 
+	Angle angle;
 	glm::mat4 view;
 };
