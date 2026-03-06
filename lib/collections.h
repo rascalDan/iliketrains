@@ -10,10 +10,8 @@
 #include <vector>
 
 template<typename T, typename E>
-concept SequentialCollection = requires(T c) {
-	{ c.size() } -> std::integral;
-	{ c.data() } -> std::same_as<const E *>;
-};
+concept SequentialCollection
+		= std::ranges::contiguous_range<T> && std::is_same_v<const E, const typename T::value_type>;
 template<typename T>
 concept IterableCollection = std::is_same_v<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>;
 
