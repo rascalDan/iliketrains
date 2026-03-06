@@ -14,12 +14,6 @@ struct gl_traits_base {
 };
 
 struct gl_traits_float : public gl_traits_base {
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
-				return 1;
-			}};
-
 	template<GLenum type, GLint size>
 	static GLuint
 	vertexAttribFormatFunc(GLuint vao, GLuint index, GLuint offset)
@@ -30,12 +24,6 @@ struct gl_traits_float : public gl_traits_base {
 };
 
 struct gl_traits_longfloat : public gl_traits_base {
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				glVertexAttribLPointer(index, size, type, stride, pointer);
-				return 1;
-			}};
-
 	template<GLenum type, GLint size>
 	static GLuint
 	vertexAttribFormatFunc(GLuint vao, GLuint index, GLuint offset)
@@ -46,12 +34,6 @@ struct gl_traits_longfloat : public gl_traits_base {
 };
 
 struct gl_traits_integer : public gl_traits_base {
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				glVertexAttribIPointer(index, size, type, stride, pointer);
-				return 1;
-			}};
-
 	template<GLenum type, GLint size>
 	static GLuint
 	vertexAttribFormatFunc(GLuint vao, GLuint index, GLuint offset)
@@ -115,14 +97,6 @@ template<> struct gl_traits<glm::uint32> : public gl_traits_integer {
 
 template<typename T, std::size_t S> struct gl_traits<std::array<T, S>> : public gl_traits<T> {
 	static constexpr GLint size {S * gl_traits<T>::size};
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				const auto base = static_cast<const T *>(pointer);
-				for (GLuint e = 0; e < S; e++) {
-					glVertexAttribPointer(index + e, gl_traits<T>::size, type, GL_FALSE, stride, base + e);
-				}
-				return S;
-			}};
 	static constexpr auto vertexArrayAttribFormat {[](GLuint vao, GLuint index, GLuint offset) {
 		if constexpr (std::is_pod_v<T>) {
 			return gl_traits<T>::template vertexAttribFormatFunc<gl_traits<T>::type, S>(vao, index, offset);
@@ -148,14 +122,6 @@ template<glm::length_t L, typename T, glm::qualifier Q> struct gl_traits<glm::ve
 template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
 struct gl_traits<glm::mat<C, R, T, Q>> : public gl_traits<T> {
 	static constexpr GLint size {C * R};
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				const auto base = static_cast<const T *>(pointer);
-				for (GLuint r = 0; r < R; r++) {
-					glVertexAttribPointer(index + r, C, type, GL_FALSE, stride, base + (r * C));
-				}
-				return R;
-			}};
 	static constexpr auto vertexArrayAttribFormat {[](GLuint vao, GLuint index, GLuint offset) {
 		GLuint used = 0;
 		for (GLuint row = 0; row < R; row++) {
