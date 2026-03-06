@@ -4,6 +4,7 @@ import path : glob-tree ;
 
 lib boost_unit_test_framework ;
 lib benchmark ;
+lib stdc++exp ;
 
 path-constant res : ../res ;
 path-constant fixtures : fixtures ;
@@ -42,7 +43,7 @@ project : requirements
 	<toolset>tidy:<xcheckxx>hicpp-vararg
 	<toolset>tidy:<librarydef>boost
 	;
-lib test : [ glob *.cpp : test-*.cpp perf-*.cpp ] ;
+lib test : [ glob *.cpp : test-*.cpp perf-*.cpp ] : <library>stdc++exp ;
 rule perfrun ( main + : extra-requirements * : runtime-dependency * : command-args * ) {
 	local name = $(main[0]:S=) ;
 	local benchmark = $(main[0]:S=.benchmark) ;

@@ -1,15 +1,19 @@
 #include "testMainWindow.h"
+#include <boost/test/framework.hpp>
 #include <boost/test/test_tools.hpp>
 #include <format>
+#include <stacktrace>
 
 TestMainWindow::TestMainWindow() : MainWindow {{1, 1}, __FILE__, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN}
 {
 	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(
 			[](GLenum /*source*/, GLenum type, GLuint /*id*/, GLenum severity, GLsizei /*length*/,
 					const GLchar * message, const void *) {
 				const auto msg = std::format("GL CALLBACK: {} type = 0x{:x}, severity = 0x{:x}, message = {}",
 						(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+				BOOST_TEST_INFO(std::stacktrace::current());
 				switch (type) {
 					case GL_DEBUG_TYPE_ERROR:
 					case GL_DEBUG_TYPE_PORTABILITY:
