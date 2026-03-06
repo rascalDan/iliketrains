@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/types.h"
+#include "gfx/gl/glBuffer.h"
 #include "gfx/gl/vertexArrayObject.h"
 #include <gfx/gl/glVertexArray.h>
 #include <glad/gl.h>

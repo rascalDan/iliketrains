@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glArrays.h"
+#include "gfx/gl/glBuffer.h"
 #include <cassert>
 #include <span>
 #include <stdexcept>

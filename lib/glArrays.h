@@ -119,8 +119,6 @@ struct glManagedArray : public std::array<Named, N> {
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
-template<size_t N> using glBuffers = glManagedArray<Detail::glNamed, N, &glGenBuffers, &glDeleteBuffers>;
-using glBuffer = glManagedSingle<Detail::glNamed, &glGenBuffers, &glDeleteBuffers>;
 template<size_t N> using glFrameBuffers = glManagedArray<Detail::glNamed, N, &glGenFramebuffers, &glDeleteFramebuffers>;
 using glFrameBuffer = glManagedSingle<Detail::glNamed, &glGenFramebuffers, &glDeleteFramebuffers>;
 template<size_t N>
