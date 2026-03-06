@@ -2,7 +2,6 @@
 
 #include "config/types.h"
 #include "gfx/gl/glBuffer.h"
-#include "gfx/gl/vertexArrayObject.h"
 #include <gfx/gl/glVertexArray.h>
 #include <glad/gl.h>
 #include <ranges>
@@ -54,15 +53,15 @@ public:
 					return static_cast<RelativePosition3D>(v.pos);
 				}))}
 	{
-		VertexArrayObject::data(vertices, m_vertexArrayBuffers[0], GL_ARRAY_BUFFER);
-		VertexArrayObject::data(indices, m_vertexArrayBuffers[1], GL_ARRAY_BUFFER);
-		configureVAO(m_vertexArrayObject);
+		m_vertexArrayBuffers[0].storage(vertices, 0);
+		m_vertexArrayBuffers[1].storage(indices, 0);
+		configureVAO(m_vertexArrayObject, 0);
 	}
 
-	VertexArrayObject &
-	configureVAO(VertexArrayObject && vao) const
+	auto
+	configureVAO(glVertexArray & vao, GLuint divisor) const
 	{
-		return vao.addAttribsFor<V>(m_vertexArrayBuffers[0]).addIndices(m_vertexArrayBuffers[1]);
+		return vao.configure().addAttribsFor<V>(divisor, m_vertexArrayBuffers[0]).addIndices(m_vertexArrayBuffers[1]);
 	}
 };
 

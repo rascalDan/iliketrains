@@ -1,7 +1,6 @@
 #include "railVehicleClass.h"
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
-#include "gfx/gl/vertexArrayObject.h"
 #include <array>
 #include <glm/glm.hpp>
 #include <lib/resource.h>
@@ -34,14 +33,14 @@ void
 RailVehicleClass::postLoad()
 {
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO)
-			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(instances.bufferName(), 1);
+	bodyMesh->configureVAO(instanceVAO, 0)
+			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(1, instances.bufferName());
 	bogies.front()
-			->configureVAO(instancesBogiesVAO.front())
-			.addAttribs<LocationVertex, &LocationVertex::front, &LocationVertex::frontPos>(instances.bufferName(), 1);
+			->configureVAO(instancesBogiesVAO.front(), 0)
+			.addAttribs<LocationVertex, &LocationVertex::front, &LocationVertex::frontPos>(1, instances.bufferName());
 	bogies.back()
-			->configureVAO(instancesBogiesVAO.back())
-			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(instances.bufferName(), 1);
+			->configureVAO(instancesBogiesVAO.back(), 0)
+			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(1, instances.bufferName());
 	static_assert(sizeof(LocationVertex) == 144UL);
 }
 

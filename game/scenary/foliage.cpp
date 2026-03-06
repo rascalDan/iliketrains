@@ -4,7 +4,6 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/shadowStenciller.h"
-#include "gfx/gl/vertexArrayObject.h"
 #include <location.h>
 
 static_assert(std::is_constructible_v<Foliage>);
@@ -38,11 +37,11 @@ void
 Foliage::postLoad()
 {
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO)
+	bodyMesh->configureVAO(instanceVAO, 0)
 			.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(
-					instances.bufferName(), 1);
-	VertexArrayObject {instancePointVAO}.addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(
-			instances.bufferName());
+					1, instances.bufferName());
+	instancePointVAO.configure().addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(
+			0, instances.bufferName());
 
 	const auto & size = bodyMesh->getDimensions().size;
 	billboardSize = billboardTextureSizeForObject(size);

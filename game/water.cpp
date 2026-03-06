@@ -24,10 +24,10 @@ namespace glm {
 }
 
 template<>
-VertexArrayObject &
-VertexArrayObject::addAttribsFor<Water::Vertex>(const GLuint arrayBuffer, const GLuint divisor)
+Impl::VertexArrayConfigurator &
+Impl::VertexArrayConfigurator::addAttribsFor<Water::Vertex>(const GLuint divisor, const glBuffer & buffer)
 {
-	return addAttribs<Water::Vertex, &Water::Vertex::pos>(arrayBuffer, divisor);
+	return addAttribs<Water::Vertex, &Water::Vertex::pos>(divisor, buffer);
 }
 
 Water::Water(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, water {std::make_shared<Texture>("water.png")}

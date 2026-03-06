@@ -1,6 +1,5 @@
 #include "illuminator.h"
 #include "gfx/gl/sceneShader.h"
-#include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/texture.h" // IWYU pragma: keep
 #include <location.h>
 
@@ -41,15 +40,15 @@ Illuminator::postLoad()
 		throw std::logic_error {"Illuminator has no lights"};
 	}
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO)
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+	bodyMesh->configureVAO(instanceVAO, 0)
+			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1, instances.bufferName());
 	if (!spotLight.empty()) {
 		instancesSpotLightVAO.emplace();
-		VertexArrayObject {*instancesSpotLightVAO}
+		instancesSpotLightVAO->configure()
 				.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
 						&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(
-						instancesSpotLight.bufferName(), 0)
-				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+						0, instancesSpotLight.bufferName())
+				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1, instances.bufferName());
 		std::transform(
 				spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
 					return instancesSpotLight.acquire(*s);
@@ -57,10 +56,10 @@ Illuminator::postLoad()
 	}
 	if (!pointLight.empty()) {
 		instancesPointLightVAO.emplace();
-		VertexArrayObject {*instancesPointLightVAO}
+		instancesPointLightVAO->configure()
 				.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
-						&PointLightVertex::kq>(instancesPointLight.bufferName(), 0)
-				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+						&PointLightVertex::kq>(0, instancesPointLight.bufferName())
+				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1, instances.bufferName());
 		std::transform(
 				pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {
 					return instancesPointLight.acquire(*s);

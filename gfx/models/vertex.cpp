@@ -1,10 +1,10 @@
 #include "vertex.h"
-#include "gfx/gl/vertexArrayObject.h"
+#include "gfx/gl/glVertexArray.h"
 
 template<>
-VertexArrayObject &
-VertexArrayObject::addAttribsFor<Vertex>(const GLuint arrayBuffer, const GLuint divisor)
+Impl::VertexArrayConfigurator &
+Impl::VertexArrayConfigurator::addAttribsFor<Vertex>(const GLuint divisor, const glBuffer & buffer)
 {
 	return addAttribs<Vertex, &Vertex::pos, &Vertex::texCoord, &Vertex::normal, &Vertex::colour, &Vertex::material>(
-			arrayBuffer, divisor);
+			divisor, buffer);
 }
