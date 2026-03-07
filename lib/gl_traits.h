@@ -14,27 +14,33 @@ struct gl_traits_base {
 };
 
 struct gl_traits_float : public gl_traits_base {
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
-				return 1;
-			}};
+	template<GLenum type, GLint size>
+	static GLuint
+	vertexAttribFormatFunc(GLuint vao, GLuint index, GLuint offset)
+	{
+		glVertexArrayAttribFormat(vao, index, size, type, GL_FALSE, offset);
+		return 1;
+	}
 };
 
 struct gl_traits_longfloat : public gl_traits_base {
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				glVertexAttribLPointer(index, size, type, stride, pointer);
-				return 1;
-			}};
+	template<GLenum type, GLint size>
+	static GLuint
+	vertexAttribFormatFunc(GLuint vao, GLuint index, GLuint offset)
+	{
+		glVertexArrayAttribLFormat(vao, index, size, type, offset);
+		return 1;
+	}
 };
 
 struct gl_traits_integer : public gl_traits_base {
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint size, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				glVertexAttribIPointer(index, size, type, stride, pointer);
-				return 1;
-			}};
+	template<GLenum type, GLint size>
+	static GLuint
+	vertexAttribFormatFunc(GLuint vao, GLuint index, GLuint offset)
+	{
+		glVertexArrayAttribIFormat(vao, index, size, type, offset);
+		return 1;
+	}
 };
 
 template<> struct gl_traits<glm::f32> : public gl_traits_float {
@@ -44,18 +50,22 @@ template<> struct gl_traits<glm::f32> : public gl_traits_float {
 	static constexpr std::array glUniformmFunc {&glUniformMatrix2fv, &glUniformMatrix3fv, &glUniformMatrix4fv};
 	static constexpr auto glTexParameterFunc {&glTexParameterf};
 	static constexpr auto glTexParameterfFunc {&glTexParameterfv};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::f64> : public gl_traits_longfloat {
 	static constexpr GLenum type {GL_DOUBLE};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::int8> : public gl_traits_integer {
 	static constexpr GLenum type {GL_BYTE};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::int16> : public gl_traits_integer {
 	static constexpr GLenum type {GL_SHORT};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::int32> : public gl_traits_integer {
@@ -64,14 +74,17 @@ template<> struct gl_traits<glm::int32> : public gl_traits_integer {
 	static constexpr std::array glUniformvFunc {&glUniform1iv, &glUniform2iv, &glUniform3iv, &glUniform4iv};
 	static constexpr auto glTexParameterFunc {&glTexParameteri};
 	static constexpr auto glTexParameterfFunc {&glTexParameteriv};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::uint8> : public gl_traits_integer {
 	static constexpr GLenum type {GL_UNSIGNED_BYTE};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::uint16> : public gl_traits_integer {
 	static constexpr GLenum type {GL_UNSIGNED_SHORT};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<> struct gl_traits<glm::uint32> : public gl_traits_integer {
@@ -79,35 +92,44 @@ template<> struct gl_traits<glm::uint32> : public gl_traits_integer {
 	static constexpr auto glUniformFunc {&glUniform1ui};
 	static constexpr std::array<decltype(&glUniform1uiv), 5> glUniformvFunc {
 			&glUniform1uiv, &glUniform2uiv, &glUniform3uiv, &glUniform4uiv};
+	static constexpr auto vertexArrayAttribFormat {&vertexAttribFormatFunc<type, 1>};
 };
 
 template<typename T, std::size_t S> struct gl_traits<std::array<T, S>> : public gl_traits<T> {
 	static constexpr GLint size {S * gl_traits<T>::size};
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				const auto base = static_cast<const T *>(pointer);
-				for (GLuint e = 0; e < S; e++) {
-					glVertexAttribPointer(index + e, gl_traits<T>::size, type, GL_FALSE, stride, base + e);
-				}
-				return S;
-			}};
+	static constexpr auto vertexArrayAttribFormat {[](GLuint vao, GLuint index, GLuint offset) {
+		if constexpr (std::is_pod_v<T>) {
+			return gl_traits<T>::template vertexAttribFormatFunc<gl_traits<T>::type, S>(vao, index, offset);
+		}
+		else {
+			GLuint used = 0;
+			for (GLuint e = 0; e < S; e++) {
+				used += gl_traits<T>::template vertexAttribFormatFunc<gl_traits<T>::type, 1>(
+						vao, index + e, offset + (e * sizeof(T)));
+			}
+			return used;
+		}
+	}};
 };
 
 template<glm::length_t L, typename T, glm::qualifier Q> struct gl_traits<glm::vec<L, T, Q>> : public gl_traits<T> {
 	static constexpr GLint size {L};
+	static constexpr auto vertexArrayAttribFormat {[](GLuint vao, GLuint index, GLuint offset) {
+		return gl_traits<T>::template vertexAttribFormatFunc<gl_traits<T>::type, L>(vao, index, offset);
+	}};
 };
 
 template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
 struct gl_traits<glm::mat<C, R, T, Q>> : public gl_traits<T> {
 	static constexpr GLint size {C * R};
-	static constexpr auto vertexAttribFunc {
-			[](GLuint index, GLint, GLenum type, GLsizei stride, const void * pointer) -> GLuint {
-				const auto base = static_cast<const T *>(pointer);
-				for (GLuint r = 0; r < R; r++) {
-					glVertexAttribPointer(index + r, C, type, GL_FALSE, stride, base + (r * C));
-				}
-				return R;
-			}};
+	static constexpr auto vertexArrayAttribFormat {[](GLuint vao, GLuint index, GLuint offset) {
+		GLuint used = 0;
+		for (GLuint row = 0; row < R; row++) {
+			used += gl_traits<T>::template vertexAttribFormatFunc<gl_traits<T>::type, C>(
+					vao, index + row, offset + (C * row * static_cast<GLuint>(sizeof(T))));
+		}
+		return used;
+	}};
 };
 
 template<typename T>

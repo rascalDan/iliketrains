@@ -77,19 +77,6 @@ BOOST_AUTO_TEST_CASE(AcquireReleaseMove)
 	BOOST_CHECK(reverseIndex.empty());
 }
 
-BOOST_AUTO_TEST_CASE(AutoMapUnmap)
-{
-	{
-		auto proxy = acquire();
-		BOOST_CHECK(data_);
-		std::ignore = bufferName();
-		BOOST_CHECK(data_);
-		BOOST_CHECK_EQUAL(1, size());
-		BOOST_CHECK(!data_);
-	}
-	BOOST_CHECK_EQUAL(0, size());
-}
-
 BOOST_AUTO_TEST_CASE(Initialize)
 {
 	auto proxy = acquire(5);
@@ -246,7 +233,7 @@ BOOST_AUTO_TEST_CASE(PartitionBy, *boost::unit_test::timeout(1))
 	};
 	auto matchedEnd = partition(pred);
 	// The underlying data is partitioned...
-	BOOST_REQUIRE(std::is_partitioned(mkcspan().cbegin(), mkcspan().cend(), pred));
+	BOOST_REQUIRE(std::is_partitioned(cbegin(), cend(), pred));
 	// The external view of the data is unchanged...
 	BOOST_CHECK_EQUAL_COLLECTIONS(values.cbegin(), values.cend(), instances.cbegin(), instances.cend());
 	// The partition point is right...
@@ -281,7 +268,7 @@ BOOST_AUTO_TEST_CASE(PartitionBy2, *boost::unit_test::timeout(1))
 	auto matchedBoundaries = partition(pred3, pred5);
 	// As PartitionBy... primary partition is normal layout
 	// The underlying data is partitioned...
-	BOOST_REQUIRE(std::is_partitioned(mkcspan().cbegin(), mkcspan().cend(), pred3));
+	BOOST_REQUIRE(std::is_partitioned(cbegin(), cend(), pred3));
 	// The external view of the data is unchanged...
 	BOOST_CHECK_EQUAL_COLLECTIONS(values.cbegin(), values.cend(), instances.cbegin(), instances.cend());
 	// The partition point is right...
@@ -291,19 +278,17 @@ BOOST_AUTO_TEST_CASE(PartitionBy2, *boost::unit_test::timeout(1))
 	// Secondary partition lives contiguous in the middle somewhere, with two falsy blocks at each end
 	const auto p2bndry = matchedBoundaries.second;
 
-	BOOST_TEST_CONTEXT(mkcspan()) {
+	BOOST_TEST_CONTEXT(std::span(cbegin(), cend())) {
 		BOOST_TEST_CONTEXT(matchedBoundaries.first) {
-			BOOST_CHECK(std::all_of(
-					mkcspan().cbegin(), mkcspan().cbegin() + static_cast<int>(matchedBoundaries.first), pred3));
-			BOOST_CHECK(std::none_of(
-					mkcspan().cbegin() + static_cast<int>(matchedBoundaries.first), mkcspan().cend(), pred3));
+			BOOST_CHECK(std::all_of(cbegin(), cbegin() + static_cast<int>(matchedBoundaries.first), pred3));
+			BOOST_CHECK(std::none_of(cbegin() + static_cast<int>(matchedBoundaries.first), cend(), pred3));
 		}
 
 		BOOST_TEST_CONTEXT(p2bndry) {
-			BOOST_CHECK(std::all_of(mkcspan().cbegin() + static_cast<int>(p2bndry.first),
-					mkcspan().begin() + static_cast<int>(p2bndry.second), pred5));
-			BOOST_CHECK(std::none_of(mkcspan().cbegin(), mkcspan().cbegin() + static_cast<int>(p2bndry.first), pred5));
-			BOOST_CHECK(std::none_of(mkcspan().cbegin() + static_cast<int>(p2bndry.second), mkcspan().cend(), pred5));
+			BOOST_CHECK(std::all_of(
+					cbegin() + static_cast<int>(p2bndry.first), cbegin() + static_cast<int>(p2bndry.second), pred5));
+			BOOST_CHECK(std::none_of(cbegin(), cbegin() + static_cast<int>(p2bndry.first), pred5));
+			BOOST_CHECK(std::none_of(cbegin() + static_cast<int>(p2bndry.second), cend(), pred5));
 		}
 	}
 

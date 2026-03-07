@@ -1,6 +1,5 @@
 #include "sceneRenderer.h"
 #include "maths.h"
-#include "vertexArrayObject.h"
 #include <gfx/gl/shaders/directionalLight-frag.h>
 #include <gfx/gl/shaders/lighting-frag.h>
 #include <gfx/gl/shaders/lighting-vert.h>
@@ -22,7 +21,7 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	lighting {lighting_vert, lighting_frag}, shadowMapper {{2048, 2048}}
 {
 	shader.setViewPort({0, 0, size.x, size.y});
-	VertexArrayObject {displayVAO}.addAttribs<glm::i8vec4>(displayVBO, displayVAOdata);
+	displayVAO.configure().addAttribs<glm::i8vec4>(0, displayVBO, displayVAOdata);
 
 	const auto configuregdata = [this](const auto & data, const std::initializer_list<GLint> iformats,
 										const GLenum format, const GLenum attachment) {

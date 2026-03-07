@@ -22,7 +22,7 @@
 #include <gfx/gl/shaders/spotLight-vert.h>
 #include <gfx/gl/shaders/water-frag.h>
 #include <gfx/gl/shaders/water-vert.h>
-#include <gfx/gl/vertexArrayObject.h>
+#include <gl_traits.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <location.h>

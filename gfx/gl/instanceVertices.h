@@ -1,13 +1,13 @@
 #pragma once
 
-#include "glContainer.h"
+#include "glAllocator.h"
 #include <cassert>
 #include <functional>
 #include <special_members.h>
 #include <utility>
 
-template<typename T> class InstanceVertices : protected glContainer<T> {
-	using base = glContainer<T>;
+template<typename T> class InstanceVertices : protected glVector<T> {
+	using base = glVector<T>;
 
 public:
 	class [[nodiscard]] InstanceProxy {
@@ -120,15 +120,30 @@ public:
 		return InstanceProxy {this, index.size() - 1};
 	}
 
-	using base::bufferName;
-	using base::reserve;
-
-	[[nodiscard]] auto
-	size() const
+	[[nodiscard]] GLuint
+	bufferName() const
 	{
-		base::unmap();
-		return base::size();
+		return base::get_allocator().getNameFor(static_cast<const base &>(*this));
 	}
+
+	using base::at;
+	using base::begin;
+	using base::cbegin;
+	using base::cend;
+	using base::crbegin;
+	using base::crend;
+	using base::end;
+	using base::rbegin;
+	using base::rend;
+	using base::size;
+	using base::operator[];
+	using base::back;
+	using base::capacity;
+	using base::data;
+	using base::empty;
+	using base::front;
+	using base::reserve;
+	using base::shrink_to_fit;
 
 	template<typename Pred>
 	base::size_type
@@ -195,8 +210,8 @@ protected:
 	}
 
 	template<typename Pred>
-	glContainer<T>::iterator
-	partition(glContainer<T>::iterator first, glContainer<T>::iterator last, Pred pred)
+	base::iterator
+	partition(base::iterator first, base::iterator last, Pred pred)
 	{
 		while (first < last) {
 			first = std::find_if_not(first, last, pred);

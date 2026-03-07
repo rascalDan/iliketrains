@@ -17,10 +17,10 @@ static constexpr RGB OPEN_SURFACE {-1};
 static constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
 
 template<>
-VertexArrayObject &
-VertexArrayObject::addAttribsFor<Terrain::Vertex>(const GLuint arrayBuffer, const GLuint divisor)
+Impl::VertexArrayConfigurator &
+Impl::VertexArrayConfigurator::addAttribsFor<Terrain::Vertex>(const GLuint divisor, const glBuffer & buffer)
 {
-	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(arrayBuffer, divisor);
+	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(divisor, buffer);
 }
 
 bool
@@ -78,16 +78,14 @@ Terrain::copyIndicesToBuffers(const SurfaceIndices & surfaceIndices)
 		auto meshItr = meshes.find(surfaceKey);
 		if (meshItr == meshes.end()) {
 			meshItr = meshes.emplace(surfaceKey, SurfaceArrayBuffer {}).first;
-			VertexArrayObject {meshItr->second.vertexArray}
-					.addAttribsFor<Vertex>(verticesBuffer)
-					.addIndices(meshItr->second.indicesBuffer, indices)
-					.data(verticesBuffer, GL_ARRAY_BUFFER);
+			meshItr->second.vertexArray.configure()
+					.addAttribsFor<Vertex>(0, verticesBuffer)
+					.addIndices(meshItr->second.indicesBuffer);
 		}
 		else {
-			VertexArrayObject {meshItr->second.vertexArray}
-					.addIndices(meshItr->second.indicesBuffer, indices)
-					.data(verticesBuffer, GL_ARRAY_BUFFER);
+			meshItr->second.vertexArray.configure().addIndices(meshItr->second.indicesBuffer);
 		}
+		meshItr->second.indicesBuffer.data(indices, GL_DYNAMIC_DRAW);
 		meshItr->second.count = static_cast<GLsizei>(indices.size());
 		meshItr->second.aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(
 				indices | std::views::transform([this](const auto vertex) {

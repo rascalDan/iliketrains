@@ -1,6 +1,5 @@
 #include "illuminator.h"
 #include "gfx/gl/sceneShader.h"
-#include "gfx/gl/vertexArrayObject.h"
 #include "gfx/models/texture.h" // IWYU pragma: keep
 #include <location.h>
 
@@ -41,15 +40,14 @@ Illuminator::postLoad()
 		throw std::logic_error {"Illuminator has no lights"};
 	}
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO)
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+	bodyMesh->configureVAO(instanceVAO, 0)
+			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
 	if (!spotLight.empty()) {
 		instancesSpotLightVAO.emplace();
-		VertexArrayObject {*instancesSpotLightVAO}
+		instancesSpotLightVAO->configure()
 				.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
-						&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(
-						instancesSpotLight.bufferName(), 0)
-				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+						&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(0)
+				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
 		std::transform(
 				spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
 					return instancesSpotLight.acquire(*s);
@@ -57,10 +55,10 @@ Illuminator::postLoad()
 	}
 	if (!pointLight.empty()) {
 		instancesPointLightVAO.emplace();
-		VertexArrayObject {*instancesPointLightVAO}
+		instancesPointLightVAO->configure()
 				.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
-						&PointLightVertex::kq>(instancesPointLight.bufferName(), 0)
-				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(instances.bufferName(), 1);
+						&PointLightVertex::kq>(0)
+				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
 		std::transform(
 				pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {
 					return instancesPointLight.acquire(*s);
@@ -76,6 +74,7 @@ Illuminator::render(const SceneShader & shader, const Frustum &) const
 		if (texture) {
 			texture->bind();
 		}
+		glVertexArrayVertexBuffer(instanceVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
 		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }
@@ -87,11 +86,17 @@ Illuminator::lights(const SceneShader & shader) const
 		if (const auto scount = instancesSpotLight.size()) {
 			shader.spotLightInst.use();
 			glBindVertexArray(*instancesSpotLightVAO);
+			glVertexArrayVertexBuffer(
+					*instancesSpotLightVAO, 0, instancesSpotLight.bufferName(), 0, sizeof(SpotLightVertex));
+			glVertexArrayVertexBuffer(*instancesSpotLightVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(scount), static_cast<GLsizei>(count));
 		}
 		if (const auto pcount = instancesPointLight.size()) {
 			shader.pointLightInst.use();
 			glBindVertexArray(*instancesPointLightVAO);
+			glVertexArrayVertexBuffer(
+					*instancesPointLightVAO, 0, instancesPointLight.bufferName(), 0, sizeof(PointLightVertex));
+			glVertexArrayVertexBuffer(*instancesPointLightVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(pcount), static_cast<GLsizei>(count));
 		}
 

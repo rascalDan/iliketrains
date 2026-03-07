@@ -4,7 +4,6 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/shadowStenciller.h"
-#include "gfx/gl/vertexArrayObject.h"
 #include <location.h>
 
 static_assert(std::is_constructible_v<Foliage>);
@@ -38,11 +37,9 @@ void
 Foliage::postLoad()
 {
 	texture = getTexture();
-	bodyMesh->configureVAO(instanceVAO)
-			.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(
-					instances.bufferName(), 1);
-	VertexArrayObject {instancePointVAO}.addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(
-			instances.bufferName());
+	bodyMesh->configureVAO(instanceVAO, 0)
+			.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(1);
+	instancePointVAO.configure().addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(0);
 
 	const auto & size = bodyMesh->getDimensions().size;
 	billboardSize = billboardTextureSizeForObject(size);
@@ -105,6 +102,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			billboard[1].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE1);
 			billboard[2].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE2);
 			glBindVertexArray(instancePointVAO);
+			glVertexArrayVertexBuffer(instancePointVAO, 0, instances.bufferName(), 0, sizeof(LocationVertex));
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
 		}
@@ -114,6 +112,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			if (texture) {
 				texture->bind();
 			}
+			glVertexArrayVertexBuffer(instanceVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
 			bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 		}
 	}
@@ -130,6 +129,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 			mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
 			shadowStencil.bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE0);
 			glBindVertexArray(instancePointVAO);
+			glVertexArrayVertexBuffer(instancePointVAO, 0, instances.bufferName(), 0, sizeof(LocationVertex));
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
 		}
@@ -141,6 +141,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 			else {
 				mapper.dynamicPointInst.use();
 			}
+			glVertexArrayVertexBuffer(instanceVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
 			bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 		}
 	}

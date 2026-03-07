@@ -3,7 +3,6 @@
 #include "network.h"
 #include <game/network/network.impl.h> // IWYU pragma: keep
 #include <gfx/gl/sceneShader.h>
-#include <gfx/gl/vertexArrayObject.h>
 #include <gfx/models/texture.h>
 
 template class NetworkOf<RailLink, RailLinkStraight, RailLinkCurve>;
@@ -139,18 +138,17 @@ RailLink::vehiclePositionOffset() const
 
 template<> NetworkLinkHolder<RailLinkStraight>::NetworkLinkHolder()
 {
-	VertexArrayObject {vao}
+	vao.configure()
 			.addAttribs<RailLinkStraight::Vertex, &RailLinkStraight::Vertex::a, &RailLinkStraight::Vertex::b,
-					&RailLinkStraight::Vertex::rotation, &RailLinkStraight::Vertex::textureRepeats>(
-					vertices.bufferName());
+					&RailLinkStraight::Vertex::rotation, &RailLinkStraight::Vertex::textureRepeats>(0);
 }
 
 template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder()
 {
-	VertexArrayObject {vao}
+	vao.configure()
 			.addAttribs<RailLinkCurve::Vertex, &RailLinkCurve::Vertex::a, &RailLinkCurve::Vertex::b,
 					&RailLinkCurve::Vertex::c, &RailLinkCurve::Vertex::textureRepeats, &RailLinkCurve::Vertex::aangle,
-					&RailLinkCurve::Vertex::bangle, &RailLinkCurve::Vertex::radius>(vertices.bufferName());
+					&RailLinkCurve::Vertex::bangle, &RailLinkCurve::Vertex::radius>(0);
 }
 
 namespace {
@@ -161,6 +159,8 @@ namespace {
 		if (auto count = networkLinks.vertices.size()) {
 			shader.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
 			glBindVertexArray(networkLinks.vao);
+			glVertexArrayVertexBuffer(
+					networkLinks.vao, 0, networkLinks.vertices.bufferName(), 0, sizeof(typename LinkType::Vertex));
 			glDrawArrays(mode, 0, static_cast<GLsizei>(count));
 		}
 	};
