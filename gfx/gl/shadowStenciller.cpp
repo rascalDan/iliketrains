@@ -75,5 +75,5 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 							const auto & viewProjection) {
 						return viewProjection * extentsMat;
 					}});
-	mesh.Draw();
+	mesh.draw();
 }

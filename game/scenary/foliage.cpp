@@ -113,7 +113,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 				texture->bind();
 			}
 			instanceVAO.useBuffer(1, instances);
-			bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
+			bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
 		}
 	}
 }
@@ -142,7 +142,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 				mapper.dynamicPointInst.use();
 			}
 			instanceVAO.useBuffer(1, instances);
-			bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
+			bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
 		}
 	}
 }

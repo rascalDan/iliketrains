@@ -55,9 +55,9 @@ RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 		instanceVAO.useBuffer(1, instances);
 		instancesBogiesVAO.front().useBuffer(1, instances);
 		instancesBogiesVAO.back().useBuffer(1, instances);
-		bodyMesh->DrawInstanced(instanceVAO, count);
-		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
-		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
+		bodyMesh->drawInstanced(instanceVAO, count);
+		bogies.front()->drawInstanced(instancesBogiesVAO.front(), count);
+		bogies.back()->drawInstanced(instancesBogiesVAO.back(), count);
 	}
 }
 
@@ -66,8 +66,8 @@ RailVehicleClass::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		mapper.dynamicPointInst.use();
-		bodyMesh->DrawInstanced(instanceVAO, count);
-		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
-		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
+		bodyMesh->drawInstanced(instanceVAO, count);
+		bogies.front()->drawInstanced(instancesBogiesVAO.front(), count);
+		bogies.back()->drawInstanced(instancesBogiesVAO.back(), count);
 	}
 }

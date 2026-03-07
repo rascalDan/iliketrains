@@ -90,5 +90,5 @@ BillboardPainter::renderBillBoard(
 							const auto & view) {
 						return this->view * view * extentsMat;
 					}});
-	mesh.Draw();
+	mesh.draw();
 }

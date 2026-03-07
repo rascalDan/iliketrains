@@ -15,19 +15,19 @@ public:
 	class Dimensions {
 	public:
 		using Extents1D = std::ranges::minmax_result<RelativeDistance>;
-		explicit Dimensions(const std::span<const RelativePosition3D>);
+		explicit Dimensions(std::span<const RelativePosition3D>);
 
 		RelativePosition3D minExtent, maxExtent;
 		RelativePosition3D centre;
 		RelativeDistance size;
 
 	private:
-		Dimensions(const std::span<const RelativePosition3D>, const std::array<Extents1D, 3> &);
-		static Extents1D extents(const std::span<const RelativePosition3D>, glm::length_t D);
+		Dimensions(std::span<const RelativePosition3D>, const std::array<Extents1D, 3> &);
+		static Extents1D extents(std::span<const RelativePosition3D>, glm::length_t);
 	};
 
-	void Draw() const;
-	void DrawInstanced(GLuint vao, GLsizei count, GLuint base = 0) const;
+	void draw() const;
+	void drawInstanced(GLuint vao, GLsizei count, GLuint base = 0) const;
 
 	[[nodiscard]] const Dimensions &
 	getDimensions() const
@@ -36,11 +36,11 @@ public:
 	}
 
 protected:
-	MeshBase(GLsizei m_numIndices, GLenum mode, const std::vector<RelativePosition3D> &);
+	MeshBase(GLsizei numIndices, GLenum mode, const std::vector<RelativePosition3D> &);
 
-	glVertexArray m_vertexArrayObject;
-	glBuffers<2> m_vertexArrayBuffers;
-	GLsizei m_numIndices;
+	glVertexArray vertexArrayObject;
+	glBuffers<2> vertexArrayBuffers;
+	GLsizei numIndices;
 	GLenum mode;
 	Dimensions dimensions;
 };
@@ -49,19 +49,19 @@ template<typename V> class MeshT : public MeshBase, public ConstTypeDefs<MeshT<V
 public:
 	MeshT(const std::span<const V> vertices, const std::span<const unsigned int> indices, GLenum mode = GL_TRIANGLES) :
 		MeshBase {static_cast<GLsizei>(indices.size()), mode,
-				materializeRange(vertices | std::views::transform([](const auto & v) {
-					return static_cast<RelativePosition3D>(v.pos);
+				materializeRange(vertices | std::views::transform([](const auto & vertex) {
+					return static_cast<RelativePosition3D>(vertex.pos);
 				}))}
 	{
-		m_vertexArrayBuffers[0].storage(vertices, 0);
-		m_vertexArrayBuffers[1].storage(indices, 0);
-		configureVAO(m_vertexArrayObject, 0);
+		vertexArrayBuffers[0].storage(vertices, 0);
+		vertexArrayBuffers[1].storage(indices, 0);
+		configureVAO(vertexArrayObject, 0);
 	}
 
 	auto
 	configureVAO(glVertexArray & vao, GLuint divisor) const
 	{
-		return vao.configure().addAttribsFor<V>(divisor, m_vertexArrayBuffers[0]).addIndices(m_vertexArrayBuffers[1]);
+		return vao.configure().addAttribsFor<V>(divisor, vertexArrayBuffers[0]).addIndices(vertexArrayBuffers[1]);
 	}
 };
 

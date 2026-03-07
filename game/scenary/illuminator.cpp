@@ -75,7 +75,7 @@ Illuminator::render(const SceneShader & shader, const Frustum &) const
 			texture->bind();
 		}
 		instanceVAO.useBuffer(1, instances);
-		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
+		bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }
 
