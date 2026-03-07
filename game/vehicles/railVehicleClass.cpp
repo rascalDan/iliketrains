@@ -34,13 +34,13 @@ RailVehicleClass::postLoad()
 {
 	texture = getTexture();
 	bodyMesh->configureVAO(instanceVAO, 0)
-			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(1, instances.bufferName());
+			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(1);
 	bogies.front()
 			->configureVAO(instancesBogiesVAO.front(), 0)
-			.addAttribs<LocationVertex, &LocationVertex::front, &LocationVertex::frontPos>(1, instances.bufferName());
+			.addAttribs<LocationVertex, &LocationVertex::front, &LocationVertex::frontPos>(1);
 	bogies.back()
 			->configureVAO(instancesBogiesVAO.back(), 0)
-			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(1, instances.bufferName());
+			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(1);
 	static_assert(sizeof(LocationVertex) == 144UL);
 }
 
@@ -52,6 +52,10 @@ RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 			texture->bind();
 		}
 		shader.basicInst.use();
+		const auto instancesBuffer = instances.bufferName();
+		glVertexArrayVertexBuffer(instanceVAO, 1, instancesBuffer, 0, sizeof(LocationVertex));
+		glVertexArrayVertexBuffer(instancesBogiesVAO.front(), 1, instancesBuffer, 0, sizeof(LocationVertex));
+		glVertexArrayVertexBuffer(instancesBogiesVAO.back(), 1, instancesBuffer, 0, sizeof(LocationVertex));
 		bodyMesh->DrawInstanced(instanceVAO, count);
 		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
 		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
