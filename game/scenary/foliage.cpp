@@ -43,8 +43,8 @@ Foliage::postLoad()
 
 	const auto & size = bodyMesh->getDimensions().size;
 	billboardSize = billboardTextureSizeForObject(size);
-	shadowStencil = ShadowStenciller::createStencilTexture(billboardSize, billboardSize);
-	billboard = BillboardPainter::createBillBoardTextures(billboardSize, billboardSize);
+	ShadowStenciller::configureStencilTexture(shadowStencil, billboardSize, billboardSize);
+	BillboardPainter::configureBillBoardTextures(billboard, billboardSize, billboardSize);
 	useMeshClipDist = (ASSUMED_VIEWPORT * OVER_SAMPLE_MULTIPLIER * size) / static_cast<RelativeDistance>(billboardSize);
 }
 

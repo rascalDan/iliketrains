@@ -36,10 +36,9 @@ ShadowStenciller::getLightDirection() const
 	return lightDir;
 }
 
-glTexture
-ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
+void
+ShadowStenciller::configureStencilTexture(glTexture & stencil, GLsizei width, GLsizei height)
 {
-	glTexture stencil;
 	stencil.bind(GL_TEXTURE_2D_ARRAY);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -50,8 +49,6 @@ ShadowStenciller::createStencilTexture(GLsizei width, GLsizei height)
 
 	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, STENCIL_ANGLES<GLint>, 0,
 			GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
-
-	return stencil;
 }
 
 void

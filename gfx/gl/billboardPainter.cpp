@@ -38,11 +38,10 @@ BillboardPainter::getAngle() const
 	return angle;
 }
 
-glTextures<3>
-BillboardPainter::createBillBoardTextures(GLsizei width, GLsizei height)
+void
+BillboardPainter::configureBillBoardTextures(glTextures<3> & textures, GLsizei width, GLsizei height)
 {
 	glDebugScope _ {0};
-	glTextures<3> textures;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	const auto configuregdata = [width, height](const auto & texture, const GLint iformat, const GLenum format) {
@@ -56,8 +55,6 @@ BillboardPainter::createBillBoardTextures(GLsizei width, GLsizei height)
 	configuregdata(textures[0], GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
 	configuregdata(textures[1], GL_RGB8_SNORM, GL_RGB);
 	configuregdata(textures[2], GL_RGB5_A1, GL_RGBA);
-
-	return textures;
 }
 
 void
