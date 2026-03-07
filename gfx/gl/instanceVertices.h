@@ -126,6 +126,8 @@ public:
 		return base::get_allocator().getNameFor(static_cast<const base &>(*this));
 	}
 
+	using base::value_type;
+
 	using base::at;
 	using base::begin;
 	using base::cbegin;

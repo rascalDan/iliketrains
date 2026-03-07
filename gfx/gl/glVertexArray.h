@@ -115,6 +115,17 @@ namespace Impl {
 		{
 			return VertexArrayConfigurator {name};
 		}
+
+		template<typename GlAllocated>
+		void
+		useBuffer(GLuint binding, const GlAllocated & buffer) const
+			requires requires {
+				{ buffer.bufferName() } -> std::same_as<GLuint>;
+			}
+		{
+			using T = typename GlAllocated::value_type;
+			glVertexArrayVertexBuffer(name, binding, buffer.bufferName(), 0, sizeof(T));
+		}
 	};
 }
 

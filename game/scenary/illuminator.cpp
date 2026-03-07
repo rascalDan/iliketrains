@@ -74,7 +74,7 @@ Illuminator::render(const SceneShader & shader, const Frustum &) const
 		if (texture) {
 			texture->bind();
 		}
-		glVertexArrayVertexBuffer(instanceVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
+		instanceVAO.useBuffer(1, instances);
 		bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }
@@ -86,17 +86,15 @@ Illuminator::lights(const SceneShader & shader) const
 		if (const auto scount = instancesSpotLight.size()) {
 			shader.spotLightInst.use();
 			glBindVertexArray(*instancesSpotLightVAO);
-			glVertexArrayVertexBuffer(
-					*instancesSpotLightVAO, 0, instancesSpotLight.bufferName(), 0, sizeof(SpotLightVertex));
-			glVertexArrayVertexBuffer(*instancesSpotLightVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
+			instancesSpotLightVAO->useBuffer(0, instancesSpotLight);
+			instancesSpotLightVAO->useBuffer(1, instances);
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(scount), static_cast<GLsizei>(count));
 		}
 		if (const auto pcount = instancesPointLight.size()) {
 			shader.pointLightInst.use();
 			glBindVertexArray(*instancesPointLightVAO);
-			glVertexArrayVertexBuffer(
-					*instancesPointLightVAO, 0, instancesPointLight.bufferName(), 0, sizeof(PointLightVertex));
-			glVertexArrayVertexBuffer(*instancesPointLightVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
+			instancesPointLightVAO->useBuffer(0, instancesPointLight);
+			instancesPointLightVAO->useBuffer(1, instances);
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(pcount), static_cast<GLsizei>(count));
 		}
 

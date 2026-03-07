@@ -159,8 +159,7 @@ namespace {
 		if (auto count = networkLinks.vertices.size()) {
 			shader.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
 			glBindVertexArray(networkLinks.vao);
-			glVertexArrayVertexBuffer(
-					networkLinks.vao, 0, networkLinks.vertices.bufferName(), 0, sizeof(typename LinkType::Vertex));
+			networkLinks.vao.useBuffer(0, networkLinks.vertices);
 			glDrawArrays(mode, 0, static_cast<GLsizei>(count));
 		}
 	};

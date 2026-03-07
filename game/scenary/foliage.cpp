@@ -102,7 +102,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			billboard[1].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE1);
 			billboard[2].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE2);
 			glBindVertexArray(instancePointVAO);
-			glVertexArrayVertexBuffer(instancePointVAO, 0, instances.bufferName(), 0, sizeof(LocationVertex));
+			instancePointVAO.useBuffer(0, instances);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
 		}
@@ -112,7 +112,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			if (texture) {
 				texture->bind();
 			}
-			glVertexArrayVertexBuffer(instanceVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
+			instanceVAO.useBuffer(1, instances);
 			bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 		}
 	}
@@ -129,7 +129,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 			mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
 			shadowStencil.bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE0);
 			glBindVertexArray(instancePointVAO);
-			glVertexArrayVertexBuffer(instancePointVAO, 0, instances.bufferName(), 0, sizeof(LocationVertex));
+			instancePointVAO.useBuffer(0, instances);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
 		}
@@ -141,7 +141,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 			else {
 				mapper.dynamicPointInst.use();
 			}
-			glVertexArrayVertexBuffer(instanceVAO, 1, instances.bufferName(), 0, sizeof(LocationVertex));
+			instanceVAO.useBuffer(1, instances);
 			bodyMesh->DrawInstanced(instanceVAO, static_cast<GLsizei>(count));
 		}
 	}

@@ -52,10 +52,9 @@ RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 			texture->bind();
 		}
 		shader.basicInst.use();
-		const auto instancesBuffer = instances.bufferName();
-		glVertexArrayVertexBuffer(instanceVAO, 1, instancesBuffer, 0, sizeof(LocationVertex));
-		glVertexArrayVertexBuffer(instancesBogiesVAO.front(), 1, instancesBuffer, 0, sizeof(LocationVertex));
-		glVertexArrayVertexBuffer(instancesBogiesVAO.back(), 1, instancesBuffer, 0, sizeof(LocationVertex));
+		instanceVAO.useBuffer(1, instances);
+		instancesBogiesVAO.front().useBuffer(1, instances);
+		instancesBogiesVAO.back().useBuffer(1, instances);
 		bodyMesh->DrawInstanced(instanceVAO, count);
 		bogies.front()->DrawInstanced(instancesBogiesVAO.front(), count);
 		bogies.back()->DrawInstanced(instancesBogiesVAO.back(), count);
