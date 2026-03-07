@@ -43,11 +43,10 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 	m_texture.bind(type);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameter(type, GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
-	glTexParameter(type, GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
-
-	glTexParameter(type, GL_TEXTURE_MIN_FILTER, to.minFilter);
-	glTexParameter(type, GL_TEXTURE_MAG_FILTER, to.magFilter);
+	m_texture.parameter(GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
+	m_texture.parameter(GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
+	m_texture.parameter(GL_TEXTURE_MIN_FILTER, to.minFilter);
+	m_texture.parameter(GL_TEXTURE_MAG_FILTER, to.magFilter);
 	glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	auto isMimmap = [](auto value) {
 		auto eqAnyOf = [value](auto... test) {
@@ -122,11 +121,10 @@ TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Textur
 {
 	m_atlas.bind(GL_TEXTURE_RECTANGLE);
 
-	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameter(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	m_atlas.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	m_atlas.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	m_atlas.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	m_atlas.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA16UI, 2, static_cast<GLsizei>(count), 0, GL_RGBA_INTEGER,
 			GL_UNSIGNED_BYTE, nullptr);
 }

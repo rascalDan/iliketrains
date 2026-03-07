@@ -42,10 +42,10 @@ ShadowStenciller::configureStencilTexture(glTexture & stencil, GLsizei width, GL
 	stencil.bind(GL_TEXTURE_2D_ARRAY);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	stencil.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	stencil.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stencil.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	stencil.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, STENCIL_ANGLES<GLint>, 0,
 			GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);

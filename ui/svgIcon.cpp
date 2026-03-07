@@ -1,5 +1,4 @@
 #include "svgIcon.h"
-#include "gl_traits.h"
 #include <resource.h>
 
 SvgIcon::SvgIcon(ImageDimensions dim, const std::filesystem::path & path)
@@ -17,11 +16,10 @@ SvgIcon::SvgIcon(ImageDimensions dim, const std::filesystem::path & path)
 
 	texture.bind();
 
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	texture.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	texture.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	texture.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dim.x, dim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.data());
 }
 

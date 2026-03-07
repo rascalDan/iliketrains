@@ -1,5 +1,4 @@
 #include "billboardPainter.h"
-#include "gl_traits.h"
 #include "gldebug.h"
 #include "maths.h"
 #include <gfx/gl/shaders/billboardPainter-frag.h>
@@ -44,12 +43,12 @@ BillboardPainter::configureBillBoardTextures(glTextures<3> & textures, GLsizei w
 	glDebugScope _ {0};
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	const auto configuregdata = [width, height](const auto & texture, const GLint iformat, const GLenum format) {
+	const auto configuregdata = [width, height](Impl::glTexture & texture, const GLint iformat, const GLenum format) {
 		texture.bind(GL_TEXTURE_2D_ARRAY);
-		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texture.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		texture.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		texture.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, iformat, width, height, VIEW_ANGLES<GLint>, 0, format, GL_BYTE, nullptr);
 	};
 	configuregdata(textures[0], GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);

@@ -35,12 +35,12 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	depthMap.bind(GL_TEXTURE_2D_ARRAY);
 	glTexImage3D(
 			GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, size.x, size.y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	depthMap.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	depthMap.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	depthMap.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	depthMap.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	static constexpr RGBA border {std::numeric_limits<RGBA::value_type>::infinity()};
-	glTexParameter(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, border);
+	depthMap.parameter(GL_TEXTURE_BORDER_COLOR, border);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0);
