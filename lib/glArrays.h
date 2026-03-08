@@ -8,19 +8,15 @@
 #include <utility>
 
 namespace Detail {
-	// NOLINTNEXTLINE(readability-identifier-naming)
 	class glNamed;
 
 	template<typename Named>
 	concept IsglNamed = sizeof(Named) == sizeof(GLuint) && std::is_base_of_v<Detail::glNamed, Named>;
 }
 
-template<Detail::IsglNamed, size_t, auto, auto>
-// NOLINTNEXTLINE(readability-identifier-naming)
-struct glManagedArray;
+template<Detail::IsglNamed, size_t, auto, auto> struct glManagedArray;
 
 namespace Detail {
-	// NOLINTNEXTLINE(readability-identifier-naming)
 	class glNamed {
 	public:
 		glNamed() = default;
@@ -45,7 +41,6 @@ namespace Detail {
 	};
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming)
 template<Detail::IsglNamed Named, auto Gen, auto Del> struct glManagedSingle : public Named {
 	glManagedSingle() noexcept
 	{
@@ -77,9 +72,7 @@ template<Detail::IsglNamed Named, auto Gen, auto Del> struct glManagedSingle : p
 	}
 };
 
-template<Detail::IsglNamed Named, size_t N, auto Gen, auto Del>
-// NOLINTNEXTLINE(readability-identifier-naming)
-struct glManagedArray : public std::array<Named, N> {
+template<Detail::IsglNamed Named, size_t N, auto Gen, auto Del> struct glManagedArray : public std::array<Named, N> {
 	using Arr = std::array<Named, N>;
 
 	glManagedArray() noexcept
@@ -118,10 +111,8 @@ struct glManagedArray : public std::array<Named, N> {
 	}
 };
 
-// NOLINTBEGIN(readability-identifier-naming)
 template<size_t N> using glFrameBuffers = glManagedArray<Detail::glNamed, N, &glGenFramebuffers, &glDeleteFramebuffers>;
 using glFrameBuffer = glManagedSingle<Detail::glNamed, &glGenFramebuffers, &glDeleteFramebuffers>;
 template<size_t N>
 using glRenderBuffers = glManagedArray<Detail::glNamed, N, &glGenRenderbuffers, &glDeleteRenderbuffers>;
 using glRenderBuffer = glManagedSingle<Detail::glNamed, &glGenRenderbuffers, &glDeleteRenderbuffers>;
-// NOLINTEND(readability-identifier-naming)

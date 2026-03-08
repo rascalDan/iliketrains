@@ -108,7 +108,6 @@ namespace Impl {
 		GLuint attrib = 0;
 	};
 
-	// NOLINTNEXTLINE(readability-identifier-naming)
 	struct glVertexArray : Detail::glNamed {
 		VertexArrayConfigurator
 		configure()
@@ -116,21 +115,19 @@ namespace Impl {
 			return VertexArrayConfigurator {name};
 		}
 
-		template<typename GlAllocated>
+		template<typename glAllocated>
 		void
-		useBuffer(GLuint binding, const GlAllocated & buffer) const
+		useBuffer(GLuint binding, const glAllocated & buffer) const
 			requires requires {
 				{ buffer.bufferName() } -> std::same_as<GLuint>;
 			}
 		{
-			using T = typename GlAllocated::value_type;
+			using T = typename glAllocated::value_type;
 			glVertexArrayVertexBuffer(name, binding, buffer.bufferName(), 0, sizeof(T));
 		}
 	};
 }
 
-// NOLINTBEGIN(readability-identifier-naming)
 template<size_t N>
 using glVertexArrays = glManagedArray<Impl::glVertexArray, N, &glCreateVertexArrays, &glDeleteVertexArrays>;
 using glVertexArray = glManagedSingle<Impl::glVertexArray, &glCreateVertexArrays, &glDeleteVertexArrays>;
-// NOLINTEND(readability-identifier-naming)

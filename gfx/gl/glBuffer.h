@@ -3,7 +3,6 @@
 #include "glArrays.h"
 
 namespace Impl {
-	// NOLINTNEXTLINE(readability-identifier-naming)
 	struct glBuffer : Detail::glNamed {
 		void
 		storage(const std::ranges::contiguous_range auto & data, GLenum flags)
@@ -21,7 +20,5 @@ namespace Impl {
 	};
 }
 
-// NOLINTBEGIN(readability-identifier-naming)
 template<size_t N> using glBuffers = glManagedArray<Impl::glBuffer, N, &glCreateBuffers, &glDeleteBuffers>;
 using glBuffer = glManagedSingle<Impl::glBuffer, &glCreateBuffers, &glDeleteBuffers>;
-// NOLINTEND(readability-identifier-naming)
