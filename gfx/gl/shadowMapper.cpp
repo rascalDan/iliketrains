@@ -24,6 +24,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/matrix.hpp>
+#include <maths.h>
 
 ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	landmess {shadowLandmass_vert}, dynamicPointInst {shadowDynamicPointInst_vert},
@@ -32,9 +33,7 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	size {s}, frustum {{}, {}, {}}
 {
 	glDebugScope _ {depthMap};
-	depthMap.bind(GL_TEXTURE_2D_ARRAY);
-	glTexImage3D(
-			GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, size.x, size.y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	depthMap.storage(1, GL_DEPTH_COMPONENT16, size || static_cast<GLsizei>(SHADOW_BANDS));
 	depthMap.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	depthMap.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	depthMap.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);

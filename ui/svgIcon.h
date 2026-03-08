@@ -14,5 +14,5 @@ public:
 
 private:
 	friend class LoadFromFile; // Test case verifying size/content
-	glTexture texture;
+	glTexture<GL_TEXTURE_2D> texture;
 };

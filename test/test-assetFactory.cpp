@@ -38,7 +38,7 @@ namespace {
 			auto outpath = (ANALYSIS_DIRECTORY / boost::unit_test::framework::current_test_case().full_name())
 								   .replace_extension(".tga");
 			std::filesystem::create_directories(outpath.parent_path());
-			Texture::save(outImage, outpath.c_str());
+			outImage.saveColour(outpath.c_str());
 		}
 
 		void

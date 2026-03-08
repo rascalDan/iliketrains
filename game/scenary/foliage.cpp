@@ -43,8 +43,8 @@ Foliage::postLoad()
 
 	const auto & size = bodyMesh->getDimensions().size;
 	billboardSize = billboardTextureSizeForObject(size);
-	ShadowStenciller::configureStencilTexture(shadowStencil, billboardSize, billboardSize);
-	BillboardPainter::configureBillBoardTextures(billboard, billboardSize, billboardSize);
+	ShadowStenciller::configureStencilTexture(shadowStencil, {billboardSize, billboardSize});
+	BillboardPainter::configureBillBoardTextures(billboard, {billboardSize, billboardSize});
 	useMeshClipDist = (ASSUMED_VIEWPORT * OVER_SAMPLE_MULTIPLIER * size) / static_cast<RelativeDistance>(billboardSize);
 }
 
@@ -98,9 +98,9 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			glDebugScope _ {0, "Billboard"};
 			const auto dimensions = bodyMesh->getDimensions();
 			shader.billboard.use(dimensions.size, dimensions.centre);
-			billboard[0].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE0);
-			billboard[1].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE1);
-			billboard[2].bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE2);
+			billboard[0].bind(0);
+			billboard[1].bind(1);
+			billboard[2].bind(2);
 			glBindVertexArray(instancePointVAO);
 			instancePointVAO.useBuffer(0, instances);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
@@ -110,7 +110,7 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			glDebugScope _ {0, "Mesh"};
 			shader.basicInst.use();
 			if (texture) {
-				texture->bind();
+				texture->bind(0);
 			}
 			instanceVAO.useBuffer(1, instances);
 			bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
@@ -127,7 +127,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 		if (const auto count = instancePartitions.second.second - instancePartitions.second.first) {
 			const auto dimensions = bodyMesh->getDimensions();
 			mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
-			shadowStencil.bind(GL_TEXTURE_2D_ARRAY, GL_TEXTURE0);
+			shadowStencil.bind(0);
 			glBindVertexArray(instancePointVAO);
 			instancePointVAO.useBuffer(0, instances);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
@@ -135,7 +135,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 		}
 		if (const auto count = instancePartitions.second.first) {
 			if (texture) {
-				texture->bind(GL_TEXTURE3);
+				texture->bind(3);
 				mapper.dynamicPointInstWithTextures.use();
 			}
 			else {

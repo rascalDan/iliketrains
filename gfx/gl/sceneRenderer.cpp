@@ -23,28 +23,21 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	shader.setViewPort({0, 0, size.x, size.y});
 	displayVAO.configure().addAttribs<glm::i8vec4>(0, displayVBO, displayVAOdata);
 
-	const auto configuregdata = [this](glTexture & data, const std::initializer_list<GLint> iformats,
-										const GLenum format, const GLenum attachment) {
-		data.bind();
+	const auto configuregdata = [this](glTexture<GL_TEXTURE_2D> & data, const GLenum iformat, const GLenum attachment) {
+		data.storage(1, iformat, size);
 		data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		for (const auto iformat : iformats) {
-			glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-				return iformat;
-			}
-		}
-		throw std::runtime_error("Framebuffer could not be completed!");
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
 	};
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	configuregdata(gPosition, {GL_RGB32I}, GL_RGB_INTEGER, GL_COLOR_ATTACHMENT0);
-	normaliFormat = configuregdata(gNormal, {GL_RGB8_SNORM, GL_RGB16F}, GL_RGB, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT2);
-	constexpr std::array<unsigned int, 3> attachments {
-			GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	configuregdata(gPosition, GL_RGB32I, GL_COLOR_ATTACHMENT0);
+	configuregdata(gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
+	configuregdata(gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		throw std::runtime_error("Framebuffer could not be completed! (setup gBuffer)");
+	}
+	constexpr std::array<GLenum, 3> attachments {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
 	glDrawBuffers(attachments.size(), attachments.data());
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);
@@ -52,7 +45,10 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
-	configuregdata(gIllumination, {GL_RGB8}, GL_RGB, GL_COLOR_ATTACHMENT0);
+	configuregdata(gIllumination, GL_RGB8, GL_COLOR_ATTACHMENT0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		throw std::runtime_error("Framebuffer could not be completed! (setup gBufferIll)");
+	}
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
@@ -64,16 +60,27 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 	glDebugScope _ {output};
 	size = newSize;
 	camera.setAspect(ratio(size));
-	const auto configuregdata = [this](const auto & data, const GLint iformat, const GLenum format) {
-		data.bind();
-		glTexImage2D(GL_TEXTURE_2D, 0, iformat, size.x, size.y, 0, format, GL_BYTE, nullptr);
+	const auto configuregdata = [this](glTexture<GL_TEXTURE_2D> & data, const GLenum iformat, const GLenum attachment) {
+		data = {};
+		data.storage(1, iformat, size);
+		data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
 	};
-	configuregdata(gPosition, GL_RGB32I, GL_RGB_INTEGER);
-	configuregdata(gNormal, normaliFormat, GL_RGB);
-	configuregdata(gAlbedoSpec, GL_RGB8, GL_RGB);
-	configuregdata(gIllumination, GL_RGB8, GL_RGB);
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	configuregdata(gPosition, GL_RGB32I, GL_COLOR_ATTACHMENT0);
+	configuregdata(gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
+	configuregdata(gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		throw std::runtime_error("Framebuffer could not be completed! (resize gBuffer)");
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
+	configuregdata(gIllumination, GL_RGB8, GL_COLOR_ATTACHMENT0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		throw std::runtime_error("Framebuffer could not be completed! (resize gBufferIll)");
+	}
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	shader.setViewPort({0, 0, size.x, size.y});
 }
 
@@ -123,9 +130,9 @@ SceneRenderer::render(const SceneProvider & scene) const
 		// * per light - reads normal and position, writes illumination
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glBlendFunc(GL_ONE, GL_ONE);
-		gPosition.bind(GL_TEXTURE_2D, GL_TEXTURE0);
-		gNormal.bind(GL_TEXTURE_2D, GL_TEXTURE1);
-		shadowMapper.bind(GL_TEXTURE2);
+		gPosition.bind(0);
+		gNormal.bind(1);
+		shadowMapper.bind(2);
 		glDisable(GL_DEPTH_TEST);
 		scene.lights(shader);
 	}
@@ -137,8 +144,8 @@ SceneRenderer::render(const SceneProvider & scene) const
 		glCullFace(GL_BACK);
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
-		gAlbedoSpec.bind(GL_TEXTURE_2D, GL_TEXTURE2);
-		gIllumination.bind(GL_TEXTURE_2D, GL_TEXTURE3);
+		gAlbedoSpec.bind(2);
+		gIllumination.bind(3);
 		lighting.use();
 		renderQuad();
 	}
@@ -162,9 +169,9 @@ SceneRenderer::setDirectionalLight(
 		const auto lvp = shadowMapper.update(scene, direction, camera);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
 		glBlendFunc(GL_ONE, GL_ONE);
-		gPosition.bind(GL_TEXTURE_2D, GL_TEXTURE0);
-		gNormal.bind(GL_TEXTURE_2D, GL_TEXTURE1);
-		shadowMapper.bind(GL_TEXTURE2);
+		gPosition.bind(0);
+		gNormal.bind(1);
+		shadowMapper.bind(2);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
 		dirLight.setDirectionalLight(colour, direction.vector(), camera.getPosition(), lvp);

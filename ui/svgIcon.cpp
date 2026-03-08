@@ -14,19 +14,18 @@ SvgIcon::SvgIcon(ImageDimensions dim, const std::filesystem::path & path)
 	}
 	bitmap.convertToRGBA();
 
-	texture.bind();
-
+	texture.storage(1, GL_RGBA8, dim);
 	texture.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	texture.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	texture.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dim.x, dim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.data());
+	texture.image(dim, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.data());
 }
 
 ImTextureID
 SvgIcon::operator*() const
 {
-	static_assert(sizeof(glTexture) <= sizeof(ImTextureID));
+	static_assert(sizeof(glTexture<GL_TEXTURE_2D>) <= sizeof(ImTextureID));
 	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr) This is how ImGui works
 	return reinterpret_cast<ImTextureID>(*texture);
 }

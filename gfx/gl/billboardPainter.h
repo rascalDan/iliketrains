@@ -13,10 +13,10 @@ public:
 
 	BillboardPainter();
 
-	static void configureBillBoardTextures(glTextures<3> &, GLsizei width, GLsizei height);
+	static void configureBillBoardTextures(glTextures<GL_TEXTURE_2D_ARRAY, 3> &, ImageDimensions);
 	void setView(Angle angle, const glm::mat4 &);
 	[[nodiscard]] Angle getAngle() const;
-	void renderBillBoard(const glTextures<3> &, const MeshBase &, Texture::AnyPtr texture) const;
+	void renderBillBoard(const glTextures<GL_TEXTURE_2D_ARRAY, 3> &, const MeshBase &, Texture::AnyPtr texture) const;
 
 private:
 	glFrameBuffer fbo;

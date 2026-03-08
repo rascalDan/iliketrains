@@ -169,7 +169,7 @@ void
 RailLinks::render(const SceneShader & shader, const Frustum &) const
 {
 	if (auto _ = glDebugScope(0); !links.empty()) {
-		texture->bind();
+		texture->bind(0);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(-1, 0);
 		renderType<RailLinkStraight>(*this, shader.networkStraight, GL_POINTS);

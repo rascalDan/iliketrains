@@ -300,7 +300,7 @@ BOOST_DATA_TEST_CASE(Deform, loadFixtureJson<DeformTerrainData>("geoData/deform/
 	std::for_each(cams.begin(), cams.end(), [&renderer, &terrain, &tro](const auto & cam) {
 		renderer.camera.setView(cam.first.first, glm::normalize(cam.first.second));
 		BOOST_CHECK_NO_THROW(renderer.render(terrain));
-		Texture::save(tro.outImage, (ANALYSIS_DIRECTORY / cam.second).c_str());
+		tro.outImage.saveColour((ANALYSIS_DIRECTORY / cam.second).c_str());
 	});
 }
 

@@ -5,15 +5,13 @@
 TestRenderOutput::TestRenderOutput(TextureAbsCoord outputSize) : size {outputSize}
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, output);
-	const auto configuregdata
-			= [this](glTexture & data, const GLint format, const GLenum type, const GLenum attachment) {
-				  data.bind();
-				  glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, GL_RGBA, type, nullptr);
-				  data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				  data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				  glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
-			  };
-	configuregdata(outImage, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
+	const auto configuregdata = [this](glTexture<GL_TEXTURE_2D> & data, const GLenum format, const GLenum attachment) {
+		data.storage(1, format, size);
+		data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+	};
+	configuregdata(outImage, GL_RGBA8, GL_COLOR_ATTACHMENT0);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depth);

@@ -16,5 +16,5 @@ public:
 	ImTextureID operator*() const;
 
 private:
-	glTexture m_texture;
+	glTexture<GL_TEXTURE_2D> m_texture;
 };

@@ -49,7 +49,7 @@ RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
 		if (texture) {
-			texture->bind();
+			texture->bind(0);
 		}
 		shader.basicInst.use();
 		instanceVAO.useBuffer(1, instances);

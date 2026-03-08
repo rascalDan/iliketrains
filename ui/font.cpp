@@ -92,8 +92,7 @@ Font::generateChars(const utf8_string_view chars) const
 			const auto textureIdx = getTextureWithSpace(glyph->bitmap.width);
 			auto & texture = fontTextures[textureIdx];
 
-			glTexSubImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(texture.used), 0,
-					static_cast<GLsizei>(glyph->bitmap.width), static_cast<GLsizei>(glyph->bitmap.rows), GL_RED,
+			texture.texture.subImage({texture.used, 0}, {glyph->bitmap.width, glyph->bitmap.rows}, GL_RED,
 					GL_UNSIGNED_BYTE, glyph->bitmap.buffer);
 
 			const auto & cd = charsData
@@ -115,14 +114,11 @@ Font::getTextureWithSpace(unsigned int adv) const
 					return (ft.used + adv) < size.x;
 				});
 			itr != fontTextures.end()) {
-		itr->texture.bind();
 		return static_cast<std::size_t>(itr - fontTextures.begin());
 	}
 
 	auto & texture = fontTextures.emplace_back();
-	texture.texture.bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y), 0, GL_RED,
-			GL_UNSIGNED_BYTE, nullptr);
+	texture.texture.storage(1, GL_R8, size);
 	texture.texture.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	texture.texture.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	texture.texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);

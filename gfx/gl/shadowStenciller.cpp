@@ -37,22 +37,19 @@ ShadowStenciller::getLightDirection() const
 }
 
 void
-ShadowStenciller::configureStencilTexture(glTexture & stencil, GLsizei width, GLsizei height)
+ShadowStenciller::configureStencilTexture(glTexture<GL_TEXTURE_2D_ARRAY> & stencil, ImageDimensions size)
 {
-	stencil.bind(GL_TEXTURE_2D_ARRAY);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
+	stencil.storage(1, GL_DEPTH_COMPONENT16, size || STENCIL_ANGLES<GLsizei>);
 	stencil.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	stencil.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	stencil.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	stencil.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, STENCIL_ANGLES<GLint>, 0,
-			GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 }
 
 void
-ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh, const Texture::AnyPtr texture) const
+ShadowStenciller::renderStencil(
+		const glTexture<GL_TEXTURE_2D_ARRAY> & stencil, const MeshBase & mesh, const Texture::AnyPtr texture) const
 {
 	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -61,7 +58,7 @@ ShadowStenciller::renderStencil(const glTexture & stencil, const MeshBase & mesh
 		throw std::runtime_error("Stencil framebuffer not complete!");
 	}
 	if (texture) {
-		texture->bind();
+		texture->bind(0);
 	}
 	glUseProgram(shadowCaster);
 	glClear(GL_DEPTH_BUFFER_BIT);

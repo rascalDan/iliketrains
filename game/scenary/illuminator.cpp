@@ -72,7 +72,7 @@ Illuminator::render(const SceneShader & shader, const Frustum &) const
 	if (const auto count = instances.size()) {
 		shader.basicInst.use();
 		if (texture) {
-			texture->bind();
+			texture->bind(0);
 		}
 		instanceVAO.useBuffer(1, instances);
 		bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));

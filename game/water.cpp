@@ -105,6 +105,6 @@ void
 Water::render(const SceneShader & shader, const Frustum &) const
 {
 	shader.water.use(waveCycle);
-	water->bind();
+	water->bind(0);
 	meshes.apply(&MeshT<GlobalPosition3D>::draw);
 }

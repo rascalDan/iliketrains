@@ -10,14 +10,12 @@ Icon::Icon(const std::filesystem::path & fileName) : Icon {Image {Resource::mapP
 
 Icon::Icon(const Image & tex) : size {tex.width, tex.height}
 {
-	m_texture.bind();
-
+	m_texture.storage(1, GL_RGBA8, size);
 	m_texture.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	m_texture.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	m_texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	m_texture.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
+	m_texture.image(size, GL_RGBA, GL_UNSIGNED_BYTE, tex.data.data());
 }
 
 ImTextureID

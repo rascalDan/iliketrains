@@ -17,7 +17,7 @@ public:
 	const TextureAbsCoord size;
 	glFrameBuffer output;
 	glRenderBuffer depth;
-	glTexture outImage;
+	glTexture<GL_TEXTURE_2D> outImage;
 	GameState gameState;
 };
 

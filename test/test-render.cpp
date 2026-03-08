@@ -165,10 +165,10 @@ BOOST_AUTO_TEST_CASE(Basic)
 		saveBuffers(const std::filesystem::path & prefix) const
 		{
 			std::filesystem::create_directories(prefix);
-			Texture::save(gAlbedoSpec, (prefix / "albedo.tga").c_str());
-			Texture::savePosition(gPosition, (prefix / "position.tga").c_str());
-			Texture::saveNormal(gNormal, (prefix / "normal.tga").c_str());
-			Texture::save(gIllumination, (prefix / "illumination.tga").c_str());
+			gAlbedoSpec.saveColour((prefix / "albedo.tga").c_str());
+			gPosition.savePosition((prefix / "position.tga").c_str());
+			gNormal.saveNormal((prefix / "normal.tga").c_str());
+			gIllumination.saveColour((prefix / "illumination.tga").c_str());
 		}
 	};
 
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(Basic)
 	renderer.preFrame(scene, gameState.environment->getSunPos());
 	renderer.render(scene);
 	renderer.saveBuffers(ANALYSIS_DIRECTORY / "basic");
-	Texture::save(outImage, (ANALYSIS_DIRECTORY / "basic/final.tga").c_str());
+	outImage.saveColour((ANALYSIS_DIRECTORY / "basic/final.tga").c_str());
 }
 
 BOOST_AUTO_TEST_CASE(TerrainSD19)
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(TerrainSD19)
 	TestTerrain testTerrain;
 	renderer.preFrame(testTerrain, gameState.environment->getSunPos());
 	renderer.render(testTerrain);
-	Texture::save(outImage, (ANALYSIS_DIRECTORY / "terrain.tga").c_str());
+	outImage.saveColour((ANALYSIS_DIRECTORY / "terrain.tga").c_str());
 }
 
 BOOST_AUTO_TEST_CASE(RailNetwork)
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(RailNetwork)
 	};
 
 	renderer.render(TestRail {});
-	Texture::save(outImage, (ANALYSIS_DIRECTORY / "railnet.tga").c_str());
+	outImage.saveColour((ANALYSIS_DIRECTORY / "railnet.tga").c_str());
 }
 
 BOOST_AUTO_TEST_SUITE_END();

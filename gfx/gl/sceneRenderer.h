@@ -31,8 +31,7 @@ protected:
 	ScreenAbsCoord size;
 	GLuint output;
 	glFrameBuffer gBuffer, gBufferIll;
-	GLint normaliFormat;
-	glTexture gPosition, gNormal, gAlbedoSpec, gIllumination;
+	glTexture<GL_TEXTURE_2D> gPosition, gNormal, gAlbedoSpec, gIllumination;
 	glRenderBuffer depth;
 
 	class DeferredLightProgram : public Program {

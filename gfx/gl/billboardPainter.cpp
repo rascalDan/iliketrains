@@ -38,27 +38,26 @@ BillboardPainter::getAngle() const
 }
 
 void
-BillboardPainter::configureBillBoardTextures(glTextures<3> & textures, GLsizei width, GLsizei height)
+BillboardPainter::configureBillBoardTextures(glTextures<GL_TEXTURE_2D_ARRAY, 3> & textures, ImageDimensions size)
 {
 	glDebugScope _ {0};
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	const auto configuregdata = [width, height](Impl::glTexture & texture, const GLint iformat, const GLenum format) {
-		texture.bind(GL_TEXTURE_2D_ARRAY);
+	const auto configuregdata = [size](Impl::glTexture<GL_TEXTURE_2D_ARRAY> & texture, const GLenum iformat) {
+		texture.storage(1, iformat, size || VIEW_ANGLES<GLsizei>);
 		texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		texture.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		texture.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		texture.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, iformat, width, height, VIEW_ANGLES<GLint>, 0, format, GL_BYTE, nullptr);
 	};
-	configuregdata(textures[0], GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
-	configuregdata(textures[1], GL_RGB8_SNORM, GL_RGB);
-	configuregdata(textures[2], GL_RGB5_A1, GL_RGBA);
+	configuregdata(textures[0], GL_DEPTH_COMPONENT16);
+	configuregdata(textures[1], GL_RGB8_SNORM);
+	configuregdata(textures[2], GL_RGB5_A1);
 }
 
 void
-BillboardPainter::renderBillBoard(
-		const glTextures<3> & billboard, const MeshBase & mesh, const Texture::AnyPtr texture) const
+BillboardPainter::renderBillBoard(const glTextures<GL_TEXTURE_2D_ARRAY, 3> & billboard, const MeshBase & mesh,
+		const Texture::AnyPtr texture) const
 {
 	glDebugScope _ {fbo};
 	glEnable(GL_BLEND);
@@ -75,7 +74,7 @@ BillboardPainter::renderBillBoard(
 		throw std::runtime_error("Billboard framebuffer not complete!");
 	}
 	if (texture) {
-		texture->bind();
+		texture->bind(0);
 	}
 	glUseProgram(program);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

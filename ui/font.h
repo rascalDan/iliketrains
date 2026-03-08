@@ -28,7 +28,7 @@ public:
 	};
 
 	struct FontTexture {
-		glTexture texture;
+		glTexture<GL_TEXTURE_2D> texture;
 		unsigned int used;
 	};
 

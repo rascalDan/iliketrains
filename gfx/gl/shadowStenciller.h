@@ -13,10 +13,10 @@ public:
 
 	ShadowStenciller();
 
-	static void configureStencilTexture(glTexture &, GLsizei width, GLsizei height);
+	static void configureStencilTexture(glTexture<GL_TEXTURE_2D_ARRAY> &, ImageDimensions);
 	void setLightDirection(const LightDirection & lightDir);
 	[[nodiscard]] Direction2D getLightDirection() const;
-	void renderStencil(const glTexture &, const MeshBase &, Texture::AnyPtr texture) const;
+	void renderStencil(const glTexture<GL_TEXTURE_2D_ARRAY> &, const MeshBase &, Texture::AnyPtr texture) const;
 
 private:
 	glFrameBuffer fbo;

@@ -41,7 +41,7 @@ void
 EditNetwork::render(const SceneShader & shader, const Frustum & frustum) const
 {
 	if (builder) {
-		blue.bind();
+		blue.bind(0);
 		shader.absolute.use();
 		builder->render(shader, frustum);
 	}

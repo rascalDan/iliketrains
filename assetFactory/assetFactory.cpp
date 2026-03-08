@@ -140,6 +140,7 @@ AssetFactory::createTexutre() const
 					size++;
 					return decltype(textureFragmentPositions)::value_type {i.first->id, m};
 				});
+		texture->complete();
 	}
 }
 

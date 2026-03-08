@@ -38,9 +38,9 @@ protected:
 	GLsizei billboardSize {};
 	RelativeDistance useMeshClipDist {};
 	mutable Direction2D shadowStencilDir {std::numeric_limits<Direction2D::value_type>::infinity()};
-	glTexture shadowStencil;
+	glTexture<GL_TEXTURE_2D_ARRAY> shadowStencil;
 	mutable Angle billboardAngle = std::numeric_limits<Angle>::infinity();
-	glTextures<3> billboard;
+	glTextures<GL_TEXTURE_2D_ARRAY, 3> billboard;
 
 private:
 	InstanceVertices<Foliage::LocationVertex>::PartitionResult instancePartitions;

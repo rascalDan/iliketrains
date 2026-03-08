@@ -1,6 +1,5 @@
 #include "texture.h"
 #include "config/types.h"
-#include "tga.h"
 #include <fcntl.h>
 #include <filesystem.h>
 #include <gfx/image.h>
@@ -10,6 +9,8 @@
 #include <resource.h>
 #include <stb/stb_image.h>
 #include <sys/mman.h>
+
+using std::ceil;
 
 GLint
 TextureOptions::glMapMode(TextureOptions::MapMode mm)
@@ -38,16 +39,17 @@ Texture::Texture(const Image & tex, TextureOptions to) :
 
 Texture::Texture(GLsizei width, GLsizei height, TextureOptions to) : Texture {width, height, nullptr, to} { }
 
-Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to) : type {to.type}
+Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to)
 {
-	m_texture.bind(type);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+	const auto levels = static_cast<GLsizei>(ceil(std::log2(std::max(width, height))));
+	m_texture.storage(levels, GL_RGBA8, {width, height});
 	m_texture.parameter(GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
 	m_texture.parameter(GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
 	m_texture.parameter(GL_TEXTURE_MIN_FILTER, to.minFilter);
 	m_texture.parameter(GL_TEXTURE_MAG_FILTER, to.magFilter);
-	glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	m_texture.image({width, height}, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	auto isMimmap = [](auto value) {
 		auto eqAnyOf = [value](auto... test) {
 			return (... || (value == test));
@@ -55,91 +57,37 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 		return eqAnyOf(
 				GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
 	};
-	if (isMimmap(to.minFilter) || isMimmap(to.magFilter)) {
-		glGenerateMipmap(type);
+	if (levels > 1 && (isMimmap(to.minFilter) || isMimmap(to.magFilter))) {
+		m_texture.generateMipmap();
 	}
 }
 
 void
 Texture::bind(GLenum unit) const
 {
-	m_texture.bind(type, unit);
+	m_texture.bind(unit);
 }
 
-void
-Texture::save(
-		const glTexture & texture, GLenum format, GLenum type, uint8_t channels, const char * path, uint8_t tgaFormat)
+TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Texture(width, height)
 {
-	const auto size = texture.getSize();
-	const size_t dataSize = (static_cast<size_t>(size.x * size.y * size.z * channels));
-	const size_t fileSize = dataSize + sizeof(TGAHead);
-
-	filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
-	out.truncate(fileSize);
-	auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
-	*tga.get<TGAHead>() = {
-			.format = tgaFormat,
-			.size = {size.x, size.y * size.z},
-			.pixelDepth = static_cast<uint8_t>(8 * channels),
-	};
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
-	tga.msync(MS_ASYNC);
-}
-
-void
-Texture::save(const char * path) const
-{
-	save(m_texture, GL_BGR, GL_UNSIGNED_BYTE, 3, path, 2);
-}
-
-void
-Texture::save(const glTexture & texture, const char * path)
-{
-	save(texture, GL_BGR, GL_UNSIGNED_BYTE, 3, path, 2);
-}
-
-void
-Texture::savePosition(const glTexture & texture, const char * path)
-{
-	save(texture, GL_BGR_INTEGER, GL_UNSIGNED_BYTE, 3, path, 2);
-}
-
-void
-Texture::saveDepth(const glTexture & texture, const char * path)
-{
-	save(texture, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 1, path, 3);
-}
-
-void
-Texture::saveNormal(const glTexture & texture, const char * path)
-{
-	save(texture, GL_BGR, GL_BYTE, 3, path, 2);
-}
-
-TextureAtlas::TextureAtlas(GLsizei width, GLsizei height, GLuint count) : Texture(width, height, nullptr, {})
-{
-	m_atlas.bind(GL_TEXTURE_RECTANGLE);
-
 	m_atlas.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	m_atlas.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	m_atlas.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	m_atlas.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA16UI, 2, static_cast<GLsizei>(count), 0, GL_RGBA_INTEGER,
-			GL_UNSIGNED_BYTE, nullptr);
+	m_atlas.storage(1, GL_RGBA16UI, {2, count});
 }
 
 void
 TextureAtlas::bind(GLenum unit) const
 {
 	Texture::bind(unit);
-	m_atlas.bind(GL_TEXTURE_RECTANGLE, unit + 1);
+	m_atlas.bind(unit + 1);
 }
 
 GLuint
 TextureAtlas::add(TextureAbsCoord position, TextureAbsCoord size, void * data, TextureOptions to)
 {
-	glTextureSubImage2D(m_texture, 0, position.x, position.y, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	m_texture.subImage(position, size, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	struct Material {
 		glm::vec<2, uint16_t> position, size;
@@ -148,6 +96,12 @@ TextureAtlas::add(TextureAbsCoord position, TextureAbsCoord size, void * data, T
 	} material {position, size, to.wrapU, to.wrapV};
 
 	static_assert(sizeof(Material) <= 32);
-	glTextureSubImage2D(m_atlas, 0, 0, static_cast<GLsizei>(used), 2, 1, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, &material);
+	m_atlas.subImage({0, used}, {2, 1}, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, &material);
 	return ++used;
+}
+
+void
+TextureAtlas::complete()
+{
+	m_texture.generateMipmap();
 }

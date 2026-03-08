@@ -127,7 +127,7 @@ Terrain::afterChange()
 void
 Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 {
-	grass->bind();
+	grass->bind(0);
 
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
 		return itr1.first.surface == itr2.first.surface;

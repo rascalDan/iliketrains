@@ -17,7 +17,6 @@ struct TextureOptions {
 	};
 	MapMode wrapU {MapMode::Repeat}, wrapV {MapMode::Repeat};
 	GLint minFilter {GL_LINEAR}, magFilter {GL_LINEAR};
-	GLenum type {GL_TEXTURE_2D};
 	static GLint glMapMode(MapMode);
 };
 
@@ -31,29 +30,21 @@ public:
 	explicit Texture(GLsizei width, GLsizei height, TextureOptions = {});
 	explicit Texture(GLsizei width, GLsizei height, const void * data, TextureOptions = {});
 
-	virtual void bind(GLenum unit = GL_TEXTURE0) const;
-
-	void save(const char * path) const;
-	static void save(const glTexture &, const char * path);
-	static void saveDepth(const glTexture &, const char * path);
-	static void saveNormal(const glTexture &, const char * path);
-	static void savePosition(const glTexture &, const char * path);
+	virtual void bind(GLuint unit) const;
 
 protected:
-	static void save(const glTexture &, GLenum, GLenum, uint8_t channels, const char * path, uint8_t tgaFormat);
-
-	glTexture m_texture;
-	GLenum type;
+	glTexture<GL_TEXTURE_2D> m_texture;
 };
 
 class TextureAtlas : public Texture {
 public:
 	TextureAtlas(GLsizei width, GLsizei height, GLuint count);
 
-	void bind(GLenum unit = GL_TEXTURE0) const override;
+	void bind(GLuint unit) const override;
 	GLuint add(TextureAbsCoord position, TextureAbsCoord size, void * data, TextureOptions = {});
+	void complete();
 
 private:
-	glTexture m_atlas;
+	glTexture<GL_TEXTURE_RECTANGLE> m_atlas;
 	GLuint used {};
 };
