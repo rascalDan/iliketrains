@@ -1,6 +1,8 @@
 #include "glTexture.h"
+#include "config/types.h"
 #include "filesystem.h"
 #include "gfx/models/tga.h"
+#include "maths.h"
 #include <fcntl.h>
 #include <ranges>
 #include <sys/mman.h>
@@ -95,31 +97,37 @@ Impl::glTextureDims<Dims>::image(const GLenum format, const GLenum type, const v
 namespace {
 	template<glm::length_t Dims>
 		requires(Dims >= 1 && Dims <= 3)
+	size_t
+	areaOf(glm::vec<Dims, GLsizei> size)
+	{
+		size_t area = 1;
+		for (auto dim = 0; dim < Dims; ++dim) {
+			area *= static_cast<size_t>(size[dim]);
+		}
+		return area;
+	}
+
+	template<glm::length_t Dims, glm::length_t channels>
+		requires(Dims >= 1 && Dims <= 3)
 	void
-	save(const Impl::glTextureDims<Dims> & texture, const GLenum format, const GLenum type, uint8_t channels,
-			const char * path, uint8_t tgaFormat)
+	save(const Impl::glTextureDims<Dims> & texture, const GLenum format, const GLenum type, const char * path,
+			uint8_t tgaFormat)
 	{
 		const auto size = texture.getSize();
-		const auto area = [size]() {
-			size_t area = 1;
-			for (auto dim = 0; dim < Dims; ++dim) {
-				area *= static_cast<size_t>(size[dim]);
-			}
-			return area;
-		}();
+		const auto area = areaOf(size);
 		size_t dataSize = area * channels;
-		const size_t fileSize = dataSize + sizeof(TGAHead);
+		const size_t fileSize = dataSize + sizeof(TGAHead<channels>);
 
 		filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
 		out.truncate(fileSize);
 		auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
-		*tga.get<TGAHead>() = {
+		auto outTga = tga.get<TGAHead<channels>>();
+		*outTga = {
 				.format = tgaFormat,
-				.size = {size.x, 1 * (area / static_cast<size_t>(size.x))},
-				.pixelDepth = static_cast<uint8_t>(8 * channels),
+				.size = {size.x, (area / static_cast<size_t>(size.x))},
 		};
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), tga.get<TGAHead>() + 1);
+		glGetTextureImage(texture, 0, format, type, static_cast<GLsizei>(dataSize), outTga->data);
 		tga.msync(MS_ASYNC);
 	}
 }
@@ -129,7 +137,7 @@ template<glm::length_t Dims>
 void
 Impl::glTextureDims<Dims>::saveColour(const char * path) const
 {
-	save(*this, GL_BGR, GL_UNSIGNED_BYTE, 3, path, 2);
+	save<Dims, 3>(*this, GL_BGR, GL_UNSIGNED_BYTE, path, 2);
 }
 
 template<glm::length_t Dims>
@@ -137,7 +145,34 @@ template<glm::length_t Dims>
 void
 Impl::glTextureDims<Dims>::savePosition(const char * path) const
 {
-	save(*this, GL_BGR_INTEGER, GL_UNSIGNED_BYTE, 3, path, 2);
+	const auto size = getSize();
+	const auto area = areaOf(size);
+	size_t dataSize = area * sizeof(TGAHead<3>::PixelType);
+	const size_t fileSize = dataSize + sizeof(TGAHead<3>);
+
+	filesystem::fh out {path, O_RDWR | O_CREAT, 0660};
+	out.truncate(fileSize);
+	auto tga = out.mmap(fileSize, 0, PROT_WRITE, MAP_SHARED);
+	auto outTga = tga.get<TGAHead<3>>();
+	*outTga = {
+			.format = 2,
+			.size = {size.x, (area / static_cast<size_t>(size.x))},
+	};
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	std::vector<GlobalPosition3D> raw {area};
+	glGetTextureImage(
+			name, 0, GL_BGR_INTEGER, GL_INT, static_cast<GLsizei>(sizeof(GlobalPosition3D) * area), raw.data());
+	using Comp = GlobalPosition3D (*)(const GlobalPosition3D &, const GlobalPosition3D &);
+	auto notZero = std::views::filter([](const GlobalPosition3D & pos) {
+		return pos != GlobalPosition3D {};
+	});
+	const auto minPos = *std::ranges::fold_left_first(raw | notZero, static_cast<Comp>(&glm::min));
+	const auto maxPos = *std::ranges::fold_left_first(raw | notZero, static_cast<Comp>(&glm::max));
+	const auto rangePos = difference(maxPos, minPos);
+	std::ranges::transform(raw, outTga->data, [minPos, rangePos](const GlobalPosition3D & pos) {
+		return GlobalPosition3D(255.F * (difference(pos, minPos) / rangePos));
+	});
+	tga.msync(MS_ASYNC);
 }
 
 template<glm::length_t Dims>
@@ -145,7 +180,7 @@ template<glm::length_t Dims>
 void
 Impl::glTextureDims<Dims>::saveDepth(const char * path) const
 {
-	save(*this, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 1, path, 3);
+	save<Dims, 1>(*this, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, path, 3);
 }
 
 template<glm::length_t Dims>
@@ -153,7 +188,7 @@ template<glm::length_t Dims>
 void
 Impl::glTextureDims<Dims>::saveNormal(const char * path) const
 {
-	save(*this, GL_BGR, GL_BYTE, 3, path, 2);
+	save<Dims, 3>(*this, GL_BGR, GL_BYTE, path, 2);
 }
 
 template struct Impl::glTextureDims<1>;

@@ -40,7 +40,7 @@ namespace {
 	public:
 		TestScene()
 		{
-			terrain->point(GeoData::VertexHandle {517}).z = 100'000;
+			terrain->point(GeoData::VertexHandle {517}).z = 40'000;
 			terrain->generateMeshes();
 			gameState->assets = AssetFactory::loadAll(RESDIR);
 			brush47rvc = gameState->assets.at("brush-47").dynamicCast<RailVehicleClass>();
