@@ -1,9 +1,9 @@
 #pragma once
 
-#include "gfx/gl/program.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/texture.h"
-#include "glArrays.h"
+#include "glFramebuffer.h"
+#include "program.h"
 
 class LightDirection;
 
@@ -19,7 +19,7 @@ public:
 	void renderStencil(const glTexture<GL_TEXTURE_2D_ARRAY> &, const MeshBase &, Texture::AnyPtr texture) const;
 
 private:
-	glFrameBuffer fbo;
+	mutable glFramebuffer fbo;
 	Program shadowCaster;
 	Program::RequiredUniformLocation viewProjectionLoc {shadowCaster, "viewProjection"};
 

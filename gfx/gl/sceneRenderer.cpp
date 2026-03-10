@@ -1,5 +1,6 @@
 #include "sceneRenderer.h"
 #include "maths.h"
+#include "stream_support.h"
 #include <gfx/gl/shaders/directionalLight-frag.h>
 #include <gfx/gl/shaders/lighting-frag.h>
 #include <gfx/gl/shaders/lighting-vert.h>
@@ -23,35 +24,9 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	shader.setViewPort({0, 0, size.x, size.y});
 	displayVAO.configure().addAttribs<glm::i8vec4>(0, displayVBO, displayVAOdata);
 
-	const auto configuregdata = [this](glTexture<GL_TEXTURE_2D> & data, const GLenum iformat, const GLenum attachment) {
-		data.storage(1, iformat, size);
-		data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
-	};
-
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	configuregdata(gPosition, GL_RGB32F, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer could not be completed! (setup gBuffer)");
-	}
-	constexpr std::array<GLenum, 3> attachments {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-	glDrawBuffers(attachments.size(), attachments.data());
-
-	glBindRenderbuffer(GL_RENDERBUFFER, depth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
-	configuregdata(gIllumination, GL_RGB8, GL_COLOR_ATTACHMENT0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer could not be completed! (setup gBufferIll)");
-	}
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, output);
+	gBuffer.drawBuffers(GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2);
+	gBufferIll.drawBuffers(GL_COLOR_ATTACHMENT0);
+	configureBuffers();
 }
 
 void
@@ -59,29 +34,38 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 {
 	glDebugScope _ {output};
 	size = newSize;
+	shader.setViewPort({0, 0, size.x, size.y});
 	camera.setAspect(ratio(size));
-	const auto configuregdata = [this](glTexture<GL_TEXTURE_2D> & data, const GLenum iformat, const GLenum attachment) {
-		data = {};
+
+	depth = {};
+	gPosition = {};
+	gNormal = {};
+	gAlbedoSpec = {};
+	gIllumination = {};
+	configureBuffers();
+}
+
+void
+SceneRenderer::configureBuffers()
+{
+	const auto configureAttachment = [this](glFramebuffer & fbo, glTexture<GL_TEXTURE_2D> & data, const GLenum iformat,
+											 const GLenum attachment) {
 		data.storage(1, iformat, size);
 		data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+		fbo.texture(attachment, data);
 	};
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	configuregdata(gPosition, GL_RGB32F, GL_COLOR_ATTACHMENT0);
-	configuregdata(gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
-	configuregdata(gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer could not be completed! (resize gBuffer)");
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, gBufferIll);
-	configuregdata(gIllumination, GL_RGB8, GL_COLOR_ATTACHMENT0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer could not be completed! (resize gBufferIll)");
-	}
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	shader.setViewPort({0, 0, size.x, size.y});
+
+	configureAttachment(gBuffer, gPosition, GL_RGB32F, GL_COLOR_ATTACHMENT0);
+	configureAttachment(gBuffer, gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
+	configureAttachment(gBuffer, gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
+
+	depth.storage(GL_DEPTH_COMPONENT, size);
+	gBuffer.buffer(GL_DEPTH_ATTACHMENT, depth);
+	gBuffer.assertComplete();
+
+	configureAttachment(gBufferIll, gIllumination, GL_RGB8, GL_COLOR_ATTACHMENT0);
+	gBufferIll.assertComplete();
 }
 
 void

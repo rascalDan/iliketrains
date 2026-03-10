@@ -53,10 +53,8 @@ ShadowStenciller::renderStencil(
 {
 	glDebugScope _ {fbo};
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, stencil, 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Stencil framebuffer not complete!");
-	}
+	fbo.texture(GL_DEPTH_ATTACHMENT, stencil);
+	fbo.assertComplete();
 	if (texture) {
 		texture->bind(0);
 	}

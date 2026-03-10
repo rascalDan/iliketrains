@@ -1,8 +1,8 @@
 #pragma once
 
 #include "billboardPainter.h"
+#include "gfx/gl/glFramebuffer.h"
 #include "gfx/lightDirection.h"
-#include "glArrays.h"
 #include "gldebug.h"
 #include "program.h"
 #include "sceneProvider.h"
@@ -27,12 +27,13 @@ public:
 
 protected:
 	void renderQuad() const;
+	void configureBuffers();
 
 	ScreenAbsCoord size;
 	GLuint output;
-	glFrameBuffer gBuffer, gBufferIll;
+	glFramebuffer gBuffer, gBufferIll;
 	glTexture<GL_TEXTURE_2D> gPosition, gNormal, gAlbedoSpec, gIllumination;
-	glRenderBuffer depth;
+	glRenderbuffer depth;
 
 	class DeferredLightProgram : public Program {
 	public:

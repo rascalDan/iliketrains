@@ -110,9 +110,3 @@ template<Detail::IsglNamed Named, size_t N, auto Gen, auto Del> struct glManaged
 		return N;
 	}
 };
-
-template<size_t N> using glFrameBuffers = glManagedArray<Detail::glNamed, N, &glGenFramebuffers, &glDeleteFramebuffers>;
-using glFrameBuffer = glManagedSingle<Detail::glNamed, &glGenFramebuffers, &glDeleteFramebuffers>;
-template<size_t N>
-using glRenderBuffers = glManagedArray<Detail::glNamed, N, &glGenRenderbuffers, &glDeleteRenderbuffers>;
-using glRenderBuffer = glManagedSingle<Detail::glNamed, &glGenRenderbuffers, &glDeleteRenderbuffers>;

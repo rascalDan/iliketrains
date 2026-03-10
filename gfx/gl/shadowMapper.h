@@ -77,7 +77,7 @@ public:
 private:
 	using BandViewExtents = std::array<std::array<RelativePosition3D, 4>, SHADOW_BANDS + 1>;
 	[[nodiscard]] static size_t getBandViewExtents(BandViewExtents &, const Camera &, const glm::mat4 & lightView);
-	glFrameBuffer depthMapFBO;
+	glFramebuffer depthMapFBO;
 	glTexture<GL_TEXTURE_2D_ARRAY> depthMap;
 	TextureAbsCoord size;
 

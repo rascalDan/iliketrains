@@ -67,12 +67,10 @@ BillboardPainter::renderBillBoard(const glTextures<GL_TEXTURE_2D_ARRAY, 3> & bil
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glClearColor(0, 0, 0, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, billboard[0], 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, billboard[1], 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, billboard[2], 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Billboard framebuffer not complete!");
-	}
+	fbo.texture(GL_DEPTH_ATTACHMENT, billboard[0]);
+	fbo.texture(GL_COLOR_ATTACHMENT0, billboard[1]);
+	fbo.texture(GL_COLOR_ATTACHMENT1, billboard[2]);
+	fbo.assertComplete();
 	if (texture) {
 		texture->bind(0);
 	}

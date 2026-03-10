@@ -2,7 +2,7 @@
 
 #include "config/types.h"
 #include "game/gamestate.h"
-#include "glArrays.h"
+#include "gfx/gl/glFramebuffer.h"
 #include <glm/vec2.hpp>
 #include <special_members.h>
 
@@ -15,8 +15,8 @@ public:
 	NO_COPY(TestRenderOutput);
 
 	const TextureAbsCoord size;
-	glFrameBuffer output;
-	glRenderBuffer depth;
+	glFramebuffer output;
+	glRenderbuffer depth;
 	glTexture<GL_TEXTURE_2D> outImage;
 	GameState gameState;
 };

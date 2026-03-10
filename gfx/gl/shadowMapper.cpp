@@ -41,14 +41,9 @@ ShadowMapper::ShadowMapper(const TextureAbsCoord & s) :
 	static constexpr RGBA border {std::numeric_limits<RGBA::value_type>::infinity()};
 	depthMap.parameter(GL_TEXTURE_BORDER_COLOR, border);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer not complete!");
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	depthMapFBO.texture(GL_DEPTH_ATTACHMENT, depthMap);
+	depthMapFBO.drawBuffers(GL_NONE);
+	depthMapFBO.assertComplete();
 }
 
 constexpr GlobalDistance SHADOW_NEAR = 1;

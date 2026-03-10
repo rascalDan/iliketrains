@@ -1,25 +1,20 @@
 #include "testRenderOutput.h"
 #include <gl_traits.h>
-#include <stdexcept>
 
 TestRenderOutput::TestRenderOutput(TextureAbsCoord outputSize) : size {outputSize}
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, output);
-	const auto configuregdata = [this](glTexture<GL_TEXTURE_2D> & data, const GLenum format, const GLenum attachment) {
-		data.storage(1, format, size);
+	const auto configureAttachment = [this](glFramebuffer & fbo, glTexture<GL_TEXTURE_2D> & data, const GLenum iformat,
+											 const GLenum attachment) {
+		data.storage(1, iformat, size);
 		data.parameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		data.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
+		fbo.texture(attachment, data);
 	};
-	configuregdata(outImage, GL_RGBA8, GL_COLOR_ATTACHMENT0);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	configureAttachment(output, outImage, GL_RGBA8, GL_COLOR_ATTACHMENT0);
+	output.drawBuffers(GL_COLOR_ATTACHMENT0);
 
-	glBindRenderbuffer(GL_RENDERBUFFER, depth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+	depth.storage(GL_DEPTH_COMPONENT, size);
+	output.buffer(GL_DEPTH_ATTACHMENT, depth);
 
-	// finally check if framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		throw std::runtime_error("Framebuffer not complete!");
-	}
+	output.assertComplete();
 }
