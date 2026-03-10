@@ -6,7 +6,7 @@
 #include <gfx/image.h>
 #include <gfx/models/mesh.h>
 #include <gfx/models/vertex.h>
-#include <glMappedBufferWriter.h>
+#include <glMappedBufferSpan.h>
 #include <glm/glm.hpp>
 #include <location.h>
 #include <maths.h>
@@ -33,7 +33,8 @@ Terrain::SurfaceKey::operator<(const SurfaceKey & other) const
 inline void
 Terrain::copyVerticesToBuffer() const
 {
-	std::ranges::transform(all_vertices(), glMappedBufferWriter<Vertex> {GL_ARRAY_BUFFER, verticesBuffer, n_vertices()},
+	std::ranges::transform(all_vertices(),
+			glMappedBufferSpan<Vertex> {verticesBuffer, n_vertices(), GL_WRITE_ONLY, true}.begin(),
 			[this](const auto & vertex) {
 				return Vertex {point(vertex), normal(vertex)};
 			});
