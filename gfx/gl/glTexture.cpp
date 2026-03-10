@@ -159,18 +159,17 @@ Impl::glTextureDims<Dims>::savePosition(const char * path) const
 			.size = {size.x, (area / static_cast<size_t>(size.x))},
 	};
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	std::vector<GlobalPosition3D> raw {area};
-	glGetTextureImage(
-			name, 0, GL_BGR_INTEGER, GL_INT, static_cast<GLsizei>(sizeof(GlobalPosition3D) * area), raw.data());
-	using Comp = GlobalPosition3D (*)(const GlobalPosition3D &, const GlobalPosition3D &);
-	auto notZero = std::views::filter([](const GlobalPosition3D & pos) {
-		return pos != GlobalPosition3D {};
+	std::vector<RelativePosition3D> raw {area};
+	glGetTextureImage(name, 0, GL_BGR, GL_FLOAT, static_cast<GLsizei>(sizeof(GlobalPosition3D) * area), raw.data());
+	using Comp = RelativePosition3D (*)(const RelativePosition3D &, const RelativePosition3D &);
+	auto notZero = std::views::filter([](const RelativePosition3D & pos) {
+		return pos != RelativePosition3D {};
 	});
 	const auto minPos = *std::ranges::fold_left_first(raw | notZero, static_cast<Comp>(&glm::min));
 	const auto maxPos = *std::ranges::fold_left_first(raw | notZero, static_cast<Comp>(&glm::max));
 	const auto rangePos = difference(maxPos, minPos);
-	std::ranges::transform(raw, outTga->data, [minPos, rangePos](const GlobalPosition3D & pos) {
-		return GlobalPosition3D(255.F * (difference(pos, minPos) / rangePos));
+	std::ranges::transform(raw, outTga->data, [minPos, rangePos](const auto & pos) {
+		return 255.F * ((pos - minPos) / rangePos);
 	});
 	tga.msync(MS_ASYNC);
 }

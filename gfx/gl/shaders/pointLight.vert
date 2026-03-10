@@ -16,9 +16,9 @@ flat out float kq;
 void
 main()
 {
-	position = modelPos + ivec3(mat3(model) * v_position);
+	position = (modelPos - viewPoint) + ivec3(mat3(model) * v_position);
 	kq = v_kq;
 	size = (8000 * sqrt(max(max(v_colour.r, v_colour.g), v_colour.b))) / sqrt(v_kq);
 	colour = v_colour;
-	gl_Position = vec4(position - viewPoint, 0);
+	gl_Position = vec4(position, 0);
 }

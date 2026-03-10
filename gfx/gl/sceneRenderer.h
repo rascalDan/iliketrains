@@ -45,13 +45,11 @@ protected:
 		DirectionalLightProgram();
 		using Program::use;
 
-		void setDirectionalLight(
-				const RGB &, const Direction3D &, const GlobalPosition3D &, const std::span<const glm::mat4x4>) const;
+		void setDirectionalLight(const RGB &, const Direction3D &, const std::span<const glm::mat4x4>) const;
 
 	private:
 		RequiredUniformLocation directionLoc {*this, "lightDirection"};
 		RequiredUniformLocation colourLoc {*this, "lightColour"};
-		RequiredUniformLocation lightPointLoc {*this, "lightPoint"};
 		RequiredUniformLocation lightViewProjectionLoc {*this, "lightViewProjection"};
 		RequiredUniformLocation lightViewProjectionCountLoc {*this, "lightViewProjectionCount"};
 	};

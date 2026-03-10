@@ -6,13 +6,12 @@ out vec3 FragColor;
 
 in vec2 TexCoords;
 
-layout(binding = 0) uniform isampler2D gPosition;
+layout(binding = 0) uniform sampler2D gPosition;
 layout(binding = 1) uniform sampler2D gNormal;
 layout(binding = 2) uniform sampler2DArray shadowMap;
 
 uniform vec3 lightDirection;
 uniform vec3 lightColour;
-uniform ivec3 lightPoint;
 uniform mat4 lightViewProjection[MAX_MAPS];
 uniform uint lightViewProjectionCount;
 
@@ -53,7 +52,7 @@ isShaded(vec4 Position)
 void
 main()
 {
-	const vec4 Position = vec4(texture(gPosition, TexCoords).xyz - lightPoint, 1);
+	const vec4 Position = vec4(texture(gPosition, TexCoords).xyz, 1);
 	const vec3 Normal = texture(gNormal, TexCoords).rgb;
 	const float shaded = isShaded(Position);
 	FragColor = shaded * max(dot(-lightDirection, Normal) * lightColour, 0);

@@ -31,7 +31,7 @@ SceneRenderer::SceneRenderer(ScreenAbsCoord s, GLuint o, glDebugScope) :
 	};
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	configuregdata(gPosition, GL_RGB32I, GL_COLOR_ATTACHMENT0);
+	configuregdata(gPosition, GL_RGB32F, GL_COLOR_ATTACHMENT0);
 	configuregdata(gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
 	configuregdata(gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -68,7 +68,7 @@ SceneRenderer::resize(ScreenAbsCoord newSize)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, data, 0);
 	};
 	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	configuregdata(gPosition, GL_RGB32I, GL_COLOR_ATTACHMENT0);
+	configuregdata(gPosition, GL_RGB32F, GL_COLOR_ATTACHMENT0);
 	configuregdata(gNormal, GL_RGB8_SNORM, GL_COLOR_ATTACHMENT1);
 	configuregdata(gAlbedoSpec, GL_RGB8, GL_COLOR_ATTACHMENT2);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
@@ -174,7 +174,7 @@ SceneRenderer::setDirectionalLight(
 		shadowMapper.bind(2);
 		glViewport(0, 0, size.x, size.y);
 		dirLight.use();
-		dirLight.setDirectionalLight(colour, direction.vector(), camera.getPosition(), lvp);
+		dirLight.setDirectionalLight(colour, direction.vector(), lvp);
 		renderQuad();
 	}
 }
@@ -194,14 +194,13 @@ const auto toTextureSpaceMat = glm::translate(glm::identity<glm::mat4>(), glm::v
 
 void
 SceneRenderer::DirectionalLightProgram::setDirectionalLight(
-		const RGB & c, const Direction3D & d, const GlobalPosition3D & p, const std::span<const glm::mat4x4> lvp) const
+		const RGB & c, const Direction3D & d, const std::span<const glm::mat4x4> lvp) const
 {
 	const auto toTextureSpace = [](const glm::mat4 & m) {
 		return toTextureSpaceMat * m;
 	};
 	glUniform(colourLoc, c);
 	glUniform(directionLoc, d);
-	glUniform(lightPointLoc, p);
 	glUniform(lightViewProjectionCountLoc, static_cast<GLuint>(lvp.size()));
 	glUniform(lightViewProjectionLoc, std::span<const glm::mat4> {lvp * toTextureSpace});
 }

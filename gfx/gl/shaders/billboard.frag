@@ -10,7 +10,7 @@ uniform float size;
 
 include(`materialOut.glsl')
 
-flat in ivec3 ModelPos;
+flat in vec3 ModelPos;
 flat in float Yaw;
 flat in float Depth;
 

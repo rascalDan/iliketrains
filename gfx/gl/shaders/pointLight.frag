@@ -2,7 +2,7 @@
 
 out vec3 FragColor;
 
-layout(binding = 0) uniform isampler2D gPosition;
+layout(binding = 0) uniform sampler2D gPosition;
 layout(binding = 1) uniform sampler2D gNormal;
 uniform ivec4 viewPort;
 flat in vec4 geo_centre;
