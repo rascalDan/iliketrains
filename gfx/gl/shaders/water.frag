@@ -1,8 +1,10 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
+
+#include "materialOut.glsl"
 
 in vec4 FragPos;
 in vec2 TexCoords;
-include(`materialOut.glsl')
 
 uniform sampler2D texture0;
 

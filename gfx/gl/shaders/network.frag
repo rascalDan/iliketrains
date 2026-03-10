@@ -1,6 +1,8 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
-include(`materialOut.glsl')
+#include "materialOut.glsl"
+
 in vec3 rposition;
 in vec2 texCoord;
 

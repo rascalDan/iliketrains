@@ -1,4 +1,5 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
 layout(location = 0) in ivec3 v_pos[2];
 layout(location = 2) in mat2 v_rot;
@@ -9,7 +10,7 @@ flat out mat2 rot;
 flat out float reps;
 flat out float dist;
 
-include(`networkCommon.glsl')
+#include "networkCommon.glsl"
 
 void
 main()

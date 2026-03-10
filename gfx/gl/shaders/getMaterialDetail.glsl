@@ -1,3 +1,8 @@
+#ifndef GET_MATERIAL_DETAIL_INCLUDED
+#define GET_MATERIAL_DETAIL_INCLUDED
+
+#include "materialDetail.glsl"
+
 MaterialDetail
 getMaterialDetail(uint midx)
 {
@@ -10,3 +15,5 @@ getMaterialDetail(uint midx)
 	}
 	return MaterialDetail(vec2(0, 0), vec2(0, 0), uvec2(0, 0));
 }
+
+#endif

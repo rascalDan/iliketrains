@@ -1,3 +1,8 @@
+#ifndef MATERIAL_COMMON_INCLUDED
+#define MATERIAL_COMMON_INCLUDED
+
+#include "materialDetail.glsl"
+
 float
 map(uint mapmode, float value)
 {
@@ -31,3 +36,5 @@ getTextureColour(MaterialDetail mat, vec2 uv)
 	}
 	return texture(textureAlbedo, uv);
 }
+
+#endif

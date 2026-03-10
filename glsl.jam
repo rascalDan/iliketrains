@@ -18,7 +18,7 @@ generators.register-standard glsl.embed : GL_FRAGMENT_SHADER : CPP(%-frag) H(%-f
 
 class m4-scanner : common-scanner {
     rule pattern ( ) {
-        return "s?include\\(`([^']*)'\\)" ;
+        return "#include *\"([^\"]*)\"" ;
     }
 }
 
@@ -34,12 +34,12 @@ type.set-scanner GL_GENERIC_SHADER : m4-scanner ;
 actions glsl.embed
 {
 	set -e
-	m4 -I$(2:D) -DSOURCE=$(2) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) $(2) > $(1[3])$(2:S)
+	glslangValidator -E $(2) | grep -v '#line' > $(1[3])$(2:S)
 	glslangValidator -l $(1[3])$(2:S)
 	mv $(1[3])$(2:S) $(1[3])
 	clang-format -i $(1[3])
-	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) lib/embed-glsl.h.m4 > $(1[2])
-	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(OPTIONS) lib/embed-glsl.cpp.m4 > $(1[1])
+	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(SHADER_TYPE) lib/embed-glsl.h.m4 > $(1[2])
+	m4 -I$(2:D) -DSOURCE=$(1[3]) -DOUTPUT=$(1[3]) -DNAME=$(2:B) -DTYPE=$(2:S) -DGLTYPE=$(SHADER_TYPE) lib/embed-glsl.cpp.m4 > $(1[1])
 	clang-format -i $(1[1]) $(1[2])
 }
 
@@ -48,5 +48,5 @@ rule glsl.embed ( targets * : sources * : properties * )
 	NOUPDATE $(targets[2]) ;
 	DEPENDS $(targets[2]) : lib/embed-glsl.h.m4 ;
 	DEPENDS $(targets[1]) $(targets[3]) : lib/embed-glsl.cpp.m4 ;
-	OPTIONS on $(targets) = [ type.type $(sources) ] ;
+	SHADER_TYPE on $(targets) = [ type.type $(sources) ] ;
 }

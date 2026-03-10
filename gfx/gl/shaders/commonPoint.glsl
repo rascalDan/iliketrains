@@ -1,4 +1,7 @@
-include(`getMaterialDetail.glsl')
+#ifndef COMMON_POINT_INCLUDED
+#define COMMON_POINT_INCLUDED
+
+#include "getMaterialDetail.glsl"
 
 void
 main()
@@ -11,3 +14,5 @@ main()
 
 	gl_Position = viewProjection * vec4(FragPos, 1);
 }
+
+#endif

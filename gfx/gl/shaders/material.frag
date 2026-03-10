@@ -1,10 +1,11 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
 layout(binding = 0) uniform sampler2D textureAlbedo;
 
-include(`materialInterface.glsl')
-include(`materialOut.glsl')
-include(`materialCommon.glsl')
+#include "materialCommon.glsl"
+#include "materialInterface.glsl"
+#include "materialOut.glsl"
 
 void
 main()

@@ -1,4 +1,5 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
 layout(isolines, equal_spacing, cw) in;
 
@@ -16,7 +17,7 @@ flat out float dist;
 const float startTolerance = 1. / 200.;
 const float endTolerance = 1. - startTolerance;
 
-include(`networkCommon.glsl')
+#include "networkCommon.glsl"
 
 mat2
 getRot(float angle)

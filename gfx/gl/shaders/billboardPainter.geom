@@ -1,6 +1,7 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
-include(`materialDetail.glsl')
+#include "materialDetail.glsl"
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 24) out;

@@ -1,4 +1,5 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
 layout(lines) in;
 layout(triangle_strip, max_vertices = 10) out;
@@ -8,7 +9,7 @@ flat in mat2 rot[];
 flat in float tpos[];
 flat in float dist[];
 
-include(`networkCommon.glsl')
+#include "networkCommon.glsl"
 
 void
 main()

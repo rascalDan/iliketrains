@@ -1,11 +1,12 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
 layout(binding = 0) uniform sampler2D textureAlbedo;
 layout(location = 0) out vec4 bNormal;
 layout(location = 1) out vec4 bAlbedoSpec;
 
-include(`materialDetail.glsl')
-include(`materialCommon.glsl')
+#include "materialCommon.glsl"
+#include "materialDetail.glsl"
 in vec2 gTexCoords;
 in vec3 gNormal;
 in vec4 gColour;

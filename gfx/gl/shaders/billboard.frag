@@ -1,4 +1,5 @@
 #version 460 core
+#extension GL_ARB_shading_language_include : enable
 
 const float tau = 6.28318531;
 
@@ -8,7 +9,7 @@ layout(binding = 2) uniform sampler2DArray billboardAlbedo;
 uniform mat4 viewProjection;
 uniform float size;
 
-include(`materialOut.glsl')
+#include "materialOut.glsl"
 
 flat in vec3 ModelPos;
 flat in float Yaw;
