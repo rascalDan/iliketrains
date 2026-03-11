@@ -33,6 +33,7 @@ void
 RailVehicleClass::postLoad()
 {
 	texture = getTexture();
+	glDebugScope _ {0};
 	bodyMesh->configureVAO(instanceVAO, 0)
 			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(1);
 	bogies.front()
@@ -48,6 +49,7 @@ void
 RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
+		glDebugScope _ {instanceVAO};
 		if (texture) {
 			texture->bind(0);
 		}
@@ -65,6 +67,7 @@ void
 RailVehicleClass::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (const auto count = static_cast<GLsizei>(instances.size())) {
+		glDebugScope _ {instanceVAO};
 		mapper.dynamicPointInst.use();
 		bodyMesh->drawInstanced(instanceVAO, count);
 		bogies.front()->drawInstanced(instancesBogiesVAO.front(), count);

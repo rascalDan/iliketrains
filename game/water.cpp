@@ -104,6 +104,7 @@ Water::tick(TickDuration dur)
 void
 Water::render(const SceneShader & shader, const Frustum &) const
 {
+	glDebugScope _ {0};
 	shader.water.use(waveCycle);
 	water->bind(0);
 	meshes.apply(&MeshT<GlobalPosition3D>::draw);

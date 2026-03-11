@@ -157,6 +157,7 @@ namespace {
 	renderType(const NetworkLinkHolder<LinkType> & networkLinks, auto & shader, GLenum mode)
 	{
 		if (auto count = networkLinks.vertices.size()) {
+			auto _ = glDebugScope(networkLinks.vao);
 			shader.use(RAIL_CROSS_SECTION, RAIL_TEXTURE_POS);
 			glBindVertexArray(networkLinks.vao);
 			networkLinks.vao.useBuffer(0, networkLinks.vertices);
@@ -168,7 +169,8 @@ namespace {
 void
 RailLinks::render(const SceneShader & shader, const Frustum &) const
 {
-	if (auto _ = glDebugScope(0); !links.empty()) {
+	if (!links.empty()) {
+		auto _ = glDebugScope(0);
 		texture->bind(0);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(-1, 0);

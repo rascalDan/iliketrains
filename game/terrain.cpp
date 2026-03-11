@@ -108,6 +108,7 @@ Terrain::pruneOrphanMeshes(const SurfaceIndices & surfaceIndices)
 void
 Terrain::generateMeshes()
 {
+	glDebugScope _ {0};
 	copyVerticesToBuffer();
 	const auto surfaceIndices = mapSurfaceFacesToIndices();
 	copyIndicesToBuffers(surfaceIndices);
@@ -128,6 +129,7 @@ Terrain::afterChange()
 void
 Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 {
+	glDebugScope _ {0};
 	grass->bind(0);
 
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
@@ -149,6 +151,7 @@ Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 void
 Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
+	glDebugScope _ {0};
 	shadowMapper.landmess.use();
 	for (const auto & [surface, sab] : meshes) {
 		if (frustum.contains(sab.aabb)) {

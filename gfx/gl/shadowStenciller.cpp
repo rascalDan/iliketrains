@@ -39,6 +39,7 @@ ShadowStenciller::getLightDirection() const
 void
 ShadowStenciller::configureStencilTexture(glTexture<GL_TEXTURE_2D_ARRAY> & stencil, ImageDimensions size)
 {
+	glDebugScope _ {0};
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	stencil.storage(1, GL_DEPTH_COMPONENT16, size || STENCIL_ANGLES<GLsizei>);
 	stencil.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);

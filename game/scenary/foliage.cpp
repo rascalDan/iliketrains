@@ -37,6 +37,7 @@ void
 Foliage::postLoad()
 {
 	texture = getTexture();
+	glDebugScope _ {0};
 	bodyMesh->configureVAO(instanceVAO, 0)
 			.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(1);
 	instancePointVAO.configure().addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(0);
@@ -92,7 +93,7 @@ void
 Foliage::render(const SceneShader & shader, const Frustum &) const
 {
 	if (instancePartitions.first) {
-		glDebugScope _ {instancePointVAO};
+		glDebugScope _ {instanceVAO};
 		std::ignore = instances.size();
 		if (const auto count = instancePartitions.first - instancePartitions.second.first) {
 			glDebugScope _ {0, "Billboard"};
@@ -122,9 +123,10 @@ void
 Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (instancePartitions.second.second) {
-		glDebugScope _ {instancePointVAO};
+		glDebugScope _ {instanceVAO};
 		std::ignore = instances.size();
 		if (const auto count = instancePartitions.second.second - instancePartitions.second.first) {
+			glDebugScope _ {0, "Billboard"};
 			const auto dimensions = bodyMesh->getDimensions();
 			mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
 			shadowStencil.bind(0);
@@ -134,6 +136,7 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 			glBindVertexArray(0);
 		}
 		if (const auto count = instancePartitions.second.first) {
+			glDebugScope _ {0, "Mesh"};
 			if (texture) {
 				texture->bind(3);
 				mapper.dynamicPointInstWithTextures.use();

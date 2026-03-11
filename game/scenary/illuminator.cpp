@@ -40,6 +40,7 @@ Illuminator::postLoad()
 		throw std::logic_error {"Illuminator has no lights"};
 	}
 	texture = getTexture();
+	glDebugScope _ {0};
 	bodyMesh->configureVAO(instanceVAO, 0)
 			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
 	if (!spotLight.empty()) {
@@ -70,6 +71,7 @@ void
 Illuminator::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = instances.size()) {
+		glDebugScope _ {instanceVAO};
 		shader.basicInst.use();
 		if (texture) {
 			texture->bind(0);
@@ -83,7 +85,9 @@ void
 Illuminator::lights(const SceneShader & shader) const
 {
 	if (const auto count = instances.size()) {
+		glDebugScope _ {instanceVAO};
 		if (const auto scount = instancesSpotLight.size()) {
+			glDebugScope _ {*instancesSpotLightVAO, "Spot lights"};
 			shader.spotLightInst.use();
 			glBindVertexArray(*instancesSpotLightVAO);
 			instancesSpotLightVAO->useBuffer(0, instancesSpotLight);
@@ -91,6 +95,7 @@ Illuminator::lights(const SceneShader & shader) const
 			glDrawArraysInstanced(GL_POINTS, 0, static_cast<GLsizei>(scount), static_cast<GLsizei>(count));
 		}
 		if (const auto pcount = instancesPointLight.size()) {
+			glDebugScope _ {*instancesPointLightVAO, "Point llights"};
 			shader.pointLightInst.use();
 			glBindVertexArray(*instancesPointLightVAO);
 			instancesPointLightVAO->useBuffer(0, instancesPointLight);
