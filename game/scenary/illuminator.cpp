@@ -5,6 +5,9 @@
 
 static_assert(std::is_constructible_v<Illuminator>);
 
+std::weak_ptr<glVertexArray> Illuminator::commonInstanceVAO, Illuminator::commonInstancesSpotLightVAO,
+		Illuminator::commonInstancesPointLightVAO;
+
 std::any
 Illuminator::createAt(const Location & position) const
 {
@@ -41,25 +44,32 @@ Illuminator::postLoad()
 	}
 	texture = getTexture();
 	glDebugScope _ {0};
-	bodyMesh->configureVAO(instanceVAO, 0)
-			.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
-	if (!spotLight.empty()) {
-		instancesSpotLightVAO.emplace();
-		instancesSpotLightVAO->configure()
-				.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
-						&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(0)
+	if (!(instanceVAO = commonInstanceVAO.lock())) {
+		commonInstanceVAO = instanceVAO = std::make_shared<glVertexArray>();
+		bodyMesh->configureVAO(*instanceVAO, 0)
 				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+	}
+	if (!spotLight.empty()) {
+		if (!(instancesSpotLightVAO = commonInstancesSpotLightVAO.lock())) {
+			commonInstancesSpotLightVAO = instancesSpotLightVAO = std::make_shared<glVertexArray>();
+			instancesSpotLightVAO->configure()
+					.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
+							&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(0)
+					.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+		}
 		std::transform(
 				spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
 					return instancesSpotLight.acquire(*s);
 				});
 	}
 	if (!pointLight.empty()) {
-		instancesPointLightVAO.emplace();
-		instancesPointLightVAO->configure()
-				.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
-						&PointLightVertex::kq>(0)
-				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+		if (!(instancesPointLightVAO = commonInstancesPointLightVAO.lock())) {
+			commonInstancesPointLightVAO = instancesPointLightVAO = std::make_shared<glVertexArray>();
+			instancesPointLightVAO->configure()
+					.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
+							&PointLightVertex::kq>(0)
+					.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+		}
 		std::transform(
 				pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {
 					return instancesPointLight.acquire(*s);
@@ -71,13 +81,13 @@ void
 Illuminator::render(const SceneShader & shader, const Frustum &) const
 {
 	if (const auto count = instances.size()) {
-		glDebugScope _ {instanceVAO};
+		glDebugScope _ {*instanceVAO};
 		shader.basicInst.use();
 		if (texture) {
 			texture->bind(0);
 		}
-		instanceVAO.useBuffer(1, instances);
-		bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
+		instanceVAO->useBuffer(1, instances);
+		bodyMesh->drawInstanced(*instanceVAO, static_cast<GLsizei>(count));
 	}
 }
 
@@ -85,7 +95,7 @@ void
 Illuminator::lights(const SceneShader & shader) const
 {
 	if (const auto count = instances.size()) {
-		glDebugScope _ {instanceVAO};
+		glDebugScope _ {*instanceVAO};
 		if (const auto scount = instancesSpotLight.size()) {
 			glDebugScope _ {*instancesSpotLightVAO, "Spot lights"};
 			shader.spotLightInst.use();

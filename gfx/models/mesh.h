@@ -2,12 +2,14 @@
 
 #include "config/types.h"
 #include "gfx/gl/glBuffer.h"
-#include "gfx/models/vertex.h"
+#include "gfx/gl/gldebug.h"
 #include <gfx/gl/glVertexArray.h>
 #include <glad/gl.h>
 #include <ranges>
 #include <span>
 #include <stdTypeDefs.h>
+
+class Vertex;
 
 class MeshBase {
 public:
@@ -35,10 +37,11 @@ public:
 	}
 
 protected:
-	MeshBase(GLsizei numIndices, GLenum mode, const std::vector<RelativePosition3D> &);
+	MeshBase(GLsizei numIndices, GLenum mode, const std::vector<RelativePosition3D> &, GLsizei vertexStride);
 
-	glVertexArray vertexArrayObject;
+	std::shared_ptr<glVertexArray> vertexArrayObject;
 	glBuffers<2> vertexArrayBuffers;
+	GLsizei vertexStride;
 	GLsizei numIndices;
 	GLenum mode;
 	Dimensions dimensions;
@@ -50,18 +53,29 @@ public:
 		MeshBase {static_cast<GLsizei>(indices.size()), mode,
 				materializeRange(vertices | std::views::transform([](const auto & vertex) {
 					return static_cast<RelativePosition3D>(vertex.pos);
-				}))}
+				})),
+				sizeof(V)}
 	{
+		glDebugScope _ {0};
 		vertexArrayBuffers[0].storage(vertices, 0);
 		vertexArrayBuffers[1].storage(indices, 0);
-		configureVAO(vertexArrayObject, 0);
+		if (!(vertexArrayObject = commonVertexArrayObject.lock())) {
+			commonVertexArrayObject = vertexArrayObject = std::make_shared<glVertexArray>();
+			configureVAO(*vertexArrayObject, 0);
+		}
 	}
 
 	auto
 	configureVAO(glVertexArray & vao, GLuint divisor) const
 	{
-		return vao.configure().addAttribsFor<V>(divisor, vertexArrayBuffers[0]).addIndices(vertexArrayBuffers[1]);
+		glDebugScope _ {0};
+		return vao.configure().addAttribsFor<V>(divisor);
 	}
+
+protected:
+	static std::weak_ptr<glVertexArray> commonVertexArrayObject;
 };
+
+template<typename T> std::weak_ptr<glVertexArray> MeshT<T>::commonVertexArrayObject;
 
 using Mesh = MeshT<Vertex>;

@@ -11,8 +11,8 @@ class Location;
 class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illuminator> {
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
-	glVertexArray instanceVAO;
-	std::optional<glVertexArray> instancesSpotLightVAO, instancesPointLightVAO;
+	std::shared_ptr<glVertexArray> instanceVAO, instancesSpotLightVAO, instancesPointLightVAO;
+	static std::weak_ptr<glVertexArray> commonInstanceVAO, commonInstancesSpotLightVAO, commonInstancesPointLightVAO;
 
 public:
 	[[nodiscard]] std::any createAt(const Location &) const override;
@@ -42,7 +42,6 @@ public:
 		bool persist(Persistence::PersistenceStore & store) override;
 	};
 
-public:
 	using LocationVertex = std::pair<glm::mat3, GlobalPosition3D>;
 	mutable InstanceVertices<LocationVertex> instances;
 	mutable InstanceVertices<SpotLightVertex> instancesSpotLight;

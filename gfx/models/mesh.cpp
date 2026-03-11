@@ -1,7 +1,8 @@
 #include "mesh.h"
 
-MeshBase::MeshBase(GLsizei m_numIndices, GLenum mode, const std::vector<RelativePosition3D> & positions) :
-	numIndices {m_numIndices}, mode {mode}, dimensions {positions}
+MeshBase::MeshBase(
+		GLsizei m_numIndices, GLenum mode, const std::vector<RelativePosition3D> & positions, GLsizei vertexStride) :
+	vertexStride {vertexStride}, numIndices {m_numIndices}, mode {mode}, dimensions {positions}
 {
 }
 
@@ -31,7 +32,9 @@ MeshBase::Dimensions::extents(const std::span<const RelativePosition3D> position
 void
 MeshBase::draw() const
 {
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(*vertexArrayObject);
+	glVertexArrayVertexBuffer(*vertexArrayObject, 0, vertexArrayBuffers[0], 0, vertexStride);
+	glVertexArrayElementBuffer(*vertexArrayObject, vertexArrayBuffers[1]);
 
 	glDrawElements(mode, numIndices, GL_UNSIGNED_INT, nullptr);
 
@@ -42,6 +45,8 @@ void
 MeshBase::drawInstanced(GLuint vao, GLsizei count, GLuint base) const
 {
 	glBindVertexArray(vao);
+	glVertexArrayVertexBuffer(vao, 0, vertexArrayBuffers[0], 0, vertexStride);
+	glVertexArrayElementBuffer(vao, vertexArrayBuffers[1]);
 
 	glDrawElementsInstancedBaseInstance(mode, numIndices, GL_UNSIGNED_INT, nullptr, count, base);
 

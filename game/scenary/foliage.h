@@ -12,8 +12,8 @@ class Location;
 class Foliage : public Asset, public Renderable, public StdTypeDefs<Foliage> {
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
-	glVertexArray instanceVAO;
-	glVertexArray instancePointVAO;
+	std::shared_ptr<glVertexArray> instanceVAO, instancePointVAO;
+	static std::weak_ptr<glVertexArray> commonInstanceVAO, commonInstancePointVAO;
 
 public:
 	[[nodiscard]] std::any createAt(const Location &) const override;

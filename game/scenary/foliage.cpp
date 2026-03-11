@@ -20,6 +20,8 @@ namespace {
 	}
 }
 
+std::weak_ptr<glVertexArray> Foliage::commonInstanceVAO, Foliage::commonInstancePointVAO;
+
 std::any
 Foliage::createAt(const Location & position) const
 {
@@ -38,10 +40,15 @@ Foliage::postLoad()
 {
 	texture = getTexture();
 	glDebugScope _ {0};
-	bodyMesh->configureVAO(instanceVAO, 0)
-			.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(1);
-	instancePointVAO.configure().addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(0);
-
+	if (!(instanceVAO = commonInstanceVAO.lock())) {
+		commonInstanceVAO = instanceVAO = std::make_shared<glVertexArray>();
+		bodyMesh->configureVAO(*instanceVAO, 0)
+				.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(1);
+	}
+	if (!(instancePointVAO = commonInstancePointVAO.lock())) {
+		commonInstancePointVAO = instancePointVAO = std::make_shared<glVertexArray>();
+		instancePointVAO->configure().addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(0);
+	}
 	const auto & size = bodyMesh->getDimensions().size;
 	billboardSize = billboardTextureSizeForObject(size);
 	ShadowStenciller::configureStencilTexture(shadowStencil, {billboardSize, billboardSize});
@@ -93,7 +100,7 @@ void
 Foliage::render(const SceneShader & shader, const Frustum &) const
 {
 	if (instancePartitions.first) {
-		glDebugScope _ {instanceVAO};
+		glDebugScope _ {*instanceVAO};
 		std::ignore = instances.size();
 		if (const auto count = instancePartitions.first - instancePartitions.second.first) {
 			glDebugScope _ {0, "Billboard"};
@@ -102,8 +109,8 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			billboard[0].bind(0);
 			billboard[1].bind(1);
 			billboard[2].bind(2);
-			glBindVertexArray(instancePointVAO);
-			instancePointVAO.useBuffer(0, instances);
+			glBindVertexArray(*instancePointVAO);
+			instancePointVAO->useBuffer(0, instances);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
 		}
@@ -113,8 +120,8 @@ Foliage::render(const SceneShader & shader, const Frustum &) const
 			if (texture) {
 				texture->bind(0);
 			}
-			instanceVAO.useBuffer(1, instances);
-			bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
+			instanceVAO->useBuffer(1, instances);
+			bodyMesh->drawInstanced(*instanceVAO, static_cast<GLsizei>(count));
 		}
 	}
 }
@@ -123,15 +130,15 @@ void
 Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
 	if (instancePartitions.second.second) {
-		glDebugScope _ {instanceVAO};
+		glDebugScope _ {*instanceVAO};
 		std::ignore = instances.size();
 		if (const auto count = instancePartitions.second.second - instancePartitions.second.first) {
 			glDebugScope _ {0, "Billboard"};
 			const auto dimensions = bodyMesh->getDimensions();
 			mapper.stencilShadowProgram.use(dimensions.centre, dimensions.size);
 			shadowStencil.bind(0);
-			glBindVertexArray(instancePointVAO);
-			instancePointVAO.useBuffer(0, instances);
+			glBindVertexArray(*instancePointVAO);
+			instancePointVAO->useBuffer(0, instances);
 			glDrawArrays(GL_POINTS, static_cast<GLint>(instancePartitions.second.first), static_cast<GLsizei>(count));
 			glBindVertexArray(0);
 		}
@@ -144,8 +151,8 @@ Foliage::shadows(const ShadowMapper & mapper, const Frustum &) const
 			else {
 				mapper.dynamicPointInst.use();
 			}
-			instanceVAO.useBuffer(1, instances);
-			bodyMesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
+			instanceVAO->useBuffer(1, instances);
+			bodyMesh->drawInstanced(*instanceVAO, static_cast<GLsizei>(count));
 		}
 	}
 }

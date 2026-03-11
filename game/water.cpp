@@ -1,5 +1,6 @@
 #include "water.h"
 #include "game/geoData.h"
+#include "gfx/gl/gldebug.h"
 #include "gfx/models/texture.h"
 #include <algorithm>
 #include <cstddef>
@@ -42,6 +43,7 @@ static constexpr GlobalDistance BORDER = TILE_SIZE / 2;
 void
 Water::generateMeshes()
 {
+	glDebugScope _ {0};
 	// Map out where a water square needs to exist to cover all terrain faces with a low vertex
 	std::set<GlobalPosition2D> waterPositions;
 	std::for_each(geoData->vertices_sbegin(), geoData->vertices_end(), [this, &waterPositions](const auto vh) {

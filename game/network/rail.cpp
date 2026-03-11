@@ -138,6 +138,7 @@ RailLink::vehiclePositionOffset() const
 
 template<> NetworkLinkHolder<RailLinkStraight>::NetworkLinkHolder()
 {
+	glDebugScope _ {0};
 	vao.configure()
 			.addAttribs<RailLinkStraight::Vertex, &RailLinkStraight::Vertex::a, &RailLinkStraight::Vertex::b,
 					&RailLinkStraight::Vertex::rotation, &RailLinkStraight::Vertex::textureRepeats>(0);
@@ -145,6 +146,7 @@ template<> NetworkLinkHolder<RailLinkStraight>::NetworkLinkHolder()
 
 template<> NetworkLinkHolder<RailLinkCurve>::NetworkLinkHolder()
 {
+	glDebugScope _ {0};
 	vao.configure()
 			.addAttribs<RailLinkCurve::Vertex, &RailLinkCurve::Vertex::a, &RailLinkCurve::Vertex::b,
 					&RailLinkCurve::Vertex::c, &RailLinkCurve::Vertex::textureRepeats, &RailLinkCurve::Vertex::aangle,
@@ -170,7 +172,7 @@ void
 RailLinks::render(const SceneShader & shader, const Frustum &) const
 {
 	if (!links.empty()) {
-		auto _ = glDebugScope(0);
+		glDebugScope _ {0};
 		texture->bind(0);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(-1, 0);

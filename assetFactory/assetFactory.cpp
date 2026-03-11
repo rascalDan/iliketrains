@@ -3,6 +3,7 @@
 #include "cuboid.h"
 #include "cylinder.h"
 #include "filesystem.h"
+#include "gfx/gl/gldebug.h"
 #include "gfx/image.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
@@ -26,6 +27,7 @@ AssetFactory::AssetFactory() :
 std::shared_ptr<AssetFactory>
 AssetFactory::loadXML(const std::filesystem::path & filename)
 {
+	glDebugScope _ {0, filename.native()};
 	filesystem::FileStar file {filename.c_str(), "r"};
 	return Persistence::SAXParsePersistence {}.loadState<std::shared_ptr<AssetFactory>>(file);
 }
@@ -33,6 +35,7 @@ AssetFactory::loadXML(const std::filesystem::path & filename)
 AssetFactory::Assets
 AssetFactory::loadAll(const std::filesystem::path & root)
 {
+	glDebugScope _ {0};
 	return std::accumulate(std::filesystem::recursive_directory_iterator {root},
 			std::filesystem::recursive_directory_iterator {}, Assets {}, [](auto out, const auto & path) {
 				if (path.path().extension() == ".xml") {
@@ -115,6 +118,7 @@ void
 AssetFactory::createTexutre() const
 {
 	if (!textureFragments.empty() && !texture) {
+		glDebugScope _ {0};
 		// * layout images
 		std::map<const TextureFragment *, std::unique_ptr<const Image>> images;
 		std::transform(

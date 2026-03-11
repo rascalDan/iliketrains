@@ -16,11 +16,13 @@
 static constexpr RGB OPEN_SURFACE {-1};
 static constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fast divide
 
-template<>
-Impl::VertexArrayConfigurator &
-Impl::VertexArrayConfigurator::addAttribsFor<Terrain::Vertex>(const GLuint divisor)
+void
+Terrain::initialise()
 {
-	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(divisor);
+	glDebugScope _ {0};
+	vertexArray.configure().addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(
+			0, verticesBuffer);
+	generateMeshes();
 }
 
 bool
@@ -76,19 +78,10 @@ void
 Terrain::copyIndicesToBuffers(const SurfaceIndices & surfaceIndices)
 {
 	for (const auto & [surfaceKey, indices] : surfaceIndices) {
-		auto meshItr = meshes.find(surfaceKey);
-		if (meshItr == meshes.end()) {
-			meshItr = meshes.emplace(surfaceKey, SurfaceArrayBuffer {}).first;
-			meshItr->second.vertexArray.configure()
-					.addAttribsFor<Vertex>(0, verticesBuffer)
-					.addIndices(meshItr->second.indicesBuffer);
-		}
-		else {
-			meshItr->second.vertexArray.configure().addIndices(meshItr->second.indicesBuffer);
-		}
-		meshItr->second.indicesBuffer.data(indices, GL_DYNAMIC_DRAW);
-		meshItr->second.count = static_cast<GLsizei>(indices.size());
-		meshItr->second.aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(
+		auto & mesh = meshes[surfaceKey];
+		mesh.indicesBuffer.data(indices, GL_DYNAMIC_DRAW);
+		mesh.count = static_cast<GLsizei>(indices.size());
+		mesh.aabb = AxisAlignedBoundingBox<GlobalDistance>::fromPoints(
 				indices | std::views::transform([this](const auto vertex) {
 					return this->point(VertexHandle {static_cast<int>(vertex)});
 				}));
@@ -130,6 +123,7 @@ void
 Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 {
 	glDebugScope _ {0};
+	glBindVertexArray(vertexArray);
 	grass->bind(0);
 
 	const auto chunkBySurface = std::views::chunk_by([](const auto & itr1, const auto & itr2) {
@@ -140,7 +134,7 @@ Terrain::render(const SceneShader & shader, const Frustum & frustum) const
 		shader.landmass.use(surface ? surface->colorBias : OPEN_SURFACE);
 		for (const auto & sab : surfaceRange) {
 			if (frustum.contains(sab.second.aabb)) {
-				glBindVertexArray(sab.second.vertexArray);
+				glVertexArrayElementBuffer(vertexArray, sab.second.indicesBuffer);
 				glDrawElements(GL_TRIANGLES, sab.second.count, GL_UNSIGNED_INT, nullptr);
 			}
 		}
@@ -152,10 +146,11 @@ void
 Terrain::shadows(const ShadowMapper & shadowMapper, const Frustum & frustum) const
 {
 	glDebugScope _ {0};
+	glBindVertexArray(vertexArray);
 	shadowMapper.landmess.use();
 	for (const auto & [surface, sab] : meshes) {
 		if (frustum.contains(sab.aabb)) {
-			glBindVertexArray(sab.vertexArray);
+			glVertexArrayElementBuffer(vertexArray, sab.indicesBuffer);
 			glDrawElements(GL_TRIANGLES, sab.count, GL_UNSIGNED_INT, nullptr);
 		}
 	}

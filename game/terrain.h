@@ -13,7 +13,7 @@ class Terrain : public GeoData, public WorldObject, public Renderable {
 public:
 	template<typename... P> explicit Terrain(P &&... params) : GeoData {std::forward<P>(params)...}
 	{
-		generateMeshes();
+		initialise();
 	}
 
 	void render(const SceneShader & shader, const Frustum &) const override;
@@ -29,14 +29,16 @@ public:
 	void generateMeshes();
 
 private:
+	void initialise();
 	void afterChange() override;
 
 	struct SurfaceArrayBuffer {
-		glVertexArray vertexArray;
 		glBuffer indicesBuffer;
 		GLsizei count;
 		AxisAlignedBoundingBox<GlobalDistance> aabb;
 	};
+
+	glVertexArray vertexArray;
 
 	struct SurfaceKey {
 		const Surface * surface;
