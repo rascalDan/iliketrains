@@ -40,7 +40,15 @@ namespace Impl {
 		}
 
 		// Customisation point
-		template<typename VertexT> VertexArrayConfigurator & addAttribsFor(GLuint divisor, const glBuffer & buffer);
+		template<typename VertexT> VertexArrayConfigurator & addAttribsFor(GLuint divisor);
+
+		template<typename VertexT>
+		VertexArrayConfigurator &
+		addAttribsFor(GLuint divisor, const glBuffer & buffer)
+		{
+			glVertexArrayVertexBuffer(name, binding, buffer, 0, sizeof(VertexT));
+			return addAttribsFor<VertexT>(divisor);
+		}
 
 		template<typename VertexT, MP... Attribs>
 		VertexArrayConfigurator &

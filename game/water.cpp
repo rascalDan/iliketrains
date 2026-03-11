@@ -25,9 +25,9 @@ namespace glm {
 
 template<>
 Impl::VertexArrayConfigurator &
-Impl::VertexArrayConfigurator::addAttribsFor<Water::Vertex>(const GLuint divisor, const glBuffer & buffer)
+Impl::VertexArrayConfigurator::addAttribsFor<Water::Vertex>(const GLuint divisor)
 {
-	return addAttribs<Water::Vertex, &Water::Vertex::pos>(divisor, buffer);
+	return addAttribs<Water::Vertex, &Water::Vertex::pos>(divisor);
 }
 
 Water::Water(std::shared_ptr<GeoData> tm) : geoData {std::move(tm)}, water {std::make_shared<Texture>("water.png")}

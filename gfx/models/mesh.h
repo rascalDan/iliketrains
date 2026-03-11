@@ -2,13 +2,12 @@
 
 #include "config/types.h"
 #include "gfx/gl/glBuffer.h"
+#include "gfx/models/vertex.h"
 #include <gfx/gl/glVertexArray.h>
 #include <glad/gl.h>
 #include <ranges>
 #include <span>
 #include <stdTypeDefs.h>
-
-class Vertex;
 
 class MeshBase {
 public:

@@ -18,9 +18,9 @@ static constexpr GlobalDistance TILE_SIZE = 1024 * 1024; // ~1km, power of 2, fa
 
 template<>
 Impl::VertexArrayConfigurator &
-Impl::VertexArrayConfigurator::addAttribsFor<Terrain::Vertex>(const GLuint divisor, const glBuffer & buffer)
+Impl::VertexArrayConfigurator::addAttribsFor<Terrain::Vertex>(const GLuint divisor)
 {
-	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(divisor, buffer);
+	return addAttribs<Terrain::Vertex, &Terrain::Vertex::pos, &Terrain::Vertex::normal>(divisor);
 }
 
 bool
