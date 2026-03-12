@@ -125,13 +125,33 @@ namespace Impl {
 
 		template<typename glAllocated>
 		void
-		useBuffer(GLuint binding, const glAllocated & buffer) const
+		useBuffer(GLuint binding, const glAllocated & buffer, GLsizei offset = 0) const
 			requires requires {
 				{ buffer.bufferName() } -> std::same_as<GLuint>;
 			}
 		{
 			using T = typename glAllocated::value_type;
-			glVertexArrayVertexBuffer(name, binding, buffer.bufferName(), 0, sizeof(T));
+			useBuffer(binding, buffer.bufferName(), sizeof(T), offset);
+		}
+
+		template<typename V>
+		void
+		useBuffer(GLuint binding, GLuint bufferName, auto V::* mbr) const
+		{
+			useBuffer(binding, bufferName, sizeof(V), VertexArrayConfigurator::MP {mbr});
+		}
+
+		template<typename V>
+		void
+		useBuffer(GLuint binding, GLuint bufferName, GLintptr offset = 0) const
+		{
+			useBuffer(binding, bufferName, sizeof(V), offset);
+		}
+
+		void
+		useBuffer(GLuint binding, GLuint bufferName, GLsizei stride, GLintptr offset = 0) const
+		{
+			glVertexArrayVertexBuffer(name, binding, bufferName, offset, stride);
 		}
 	};
 }

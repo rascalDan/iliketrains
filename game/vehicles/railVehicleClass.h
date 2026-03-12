@@ -20,8 +20,12 @@ public:
 	[[nodiscard]] std::any createAt(const Location &) const override;
 
 	struct LocationVertex {
-		glm::mat3 body, front, back;
-		GlobalPosition3D bodyPos, frontPos, backPos;
+		struct Part {
+			glm::mat3 rotation;
+			GlobalPosition3D position;
+		};
+
+		Part body, front, back;
 	};
 
 	std::array<Mesh::Ptr, 2> bogies;
@@ -38,10 +42,10 @@ protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<RailVehicleClass>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	void postLoad() override;
+	void renderAllParts(size_t count) const;
 
 private:
 	glVertexArray instanceVAO;
-	std::array<glVertexArray, 2> instancesBogiesVAO;
 };
 
 using RailVehicleClassPtr = std::shared_ptr<RailVehicleClass>;

@@ -7,6 +7,7 @@
 #include <location.h>
 #include <maths.h>
 #include <memory>
+#include <ranges>
 
 bool
 RailVehicleClass::persist(Persistence::PersistenceStore & store)
@@ -20,12 +21,11 @@ std::any
 RailVehicleClass::createAt(const Location & position) const
 {
 	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(instances.acquire(LocationVertex {
-			.body = position.getRotationTransform(),
-			.front = position.getRotationTransform(),
-			.back = position.getRotationTransform(),
-			.bodyPos = position.pos,
-			.frontPos = {sincos(position.rot.x) * wheelBase * 0.5F, position.pos.z},
-			.backPos = {sincos(position.rot.x) * wheelBase * -0.5F, position.pos.z},
+			.body = {.rotation = position.getRotationTransform(), .position = position.pos},
+			.front = {.rotation = position.getRotationTransform(),
+					.position = {sincos(position.rot.x) * wheelBase * 0.5F, position.pos.z}},
+			.back = {.rotation = position.getRotationTransform(),
+					.position = {sincos(position.rot.x) * wheelBase * -0.5F, position.pos.z}},
 	}));
 }
 
@@ -35,42 +35,44 @@ RailVehicleClass::postLoad()
 	texture = getTexture();
 	glDebugScope _ {0};
 	bodyMesh->configureVAO(instanceVAO, 0)
-			.addAttribs<LocationVertex, &LocationVertex::body, &LocationVertex::bodyPos>(1);
-	bogies.front()
-			->configureVAO(instancesBogiesVAO.front(), 0)
-			.addAttribs<LocationVertex, &LocationVertex::front, &LocationVertex::frontPos>(1);
-	bogies.back()
-			->configureVAO(instancesBogiesVAO.back(), 0)
-			.addAttribs<LocationVertex, &LocationVertex::back, &LocationVertex::backPos>(1);
+			.addAttribs<LocationVertex, &LocationVertex::Part::rotation, &LocationVertex::Part::position>(1);
 	static_assert(sizeof(LocationVertex) == 144UL);
+}
+
+void
+RailVehicleClass::renderAllParts(const size_t count) const
+{
+	using PartPair = std::pair<Mesh::Ptr, LocationVertex::Part LocationVertex::*>;
+	const auto bufferName = instances.bufferName();
+	for (const auto & [mesh, part] : {
+				 PartPair {bodyMesh, &LocationVertex::body},
+				 PartPair {bogies.front(), &LocationVertex::front},
+				 PartPair {bogies.back(), &LocationVertex::back},
+		 }) {
+		instanceVAO.useBuffer<LocationVertex>(1, bufferName, part);
+		mesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
+	}
 }
 
 void
 RailVehicleClass::render(const SceneShader & shader, const Frustum &) const
 {
-	if (const auto count = static_cast<GLsizei>(instances.size())) {
+	if (const auto count = (instances.size())) {
 		glDebugScope _ {instanceVAO};
 		if (texture) {
 			texture->bind(0);
 		}
 		shader.basicInst.use();
-		instanceVAO.useBuffer(1, instances);
-		instancesBogiesVAO.front().useBuffer(1, instances);
-		instancesBogiesVAO.back().useBuffer(1, instances);
-		bodyMesh->drawInstanced(instanceVAO, count);
-		bogies.front()->drawInstanced(instancesBogiesVAO.front(), count);
-		bogies.back()->drawInstanced(instancesBogiesVAO.back(), count);
+		renderAllParts(count);
 	}
 }
 
 void
 RailVehicleClass::shadows(const ShadowMapper & mapper, const Frustum &) const
 {
-	if (const auto count = static_cast<GLsizei>(instances.size())) {
+	if (const auto count = instances.size()) {
 		glDebugScope _ {instanceVAO};
 		mapper.dynamicPointInst.use();
-		bodyMesh->drawInstanced(instanceVAO, count);
-		bogies.front()->drawInstanced(instancesBogiesVAO.front(), count);
-		bogies.back()->drawInstanced(instancesBogiesVAO.back(), count);
+		renderAllParts(count);
 	}
 }

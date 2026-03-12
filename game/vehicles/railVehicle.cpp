@@ -14,18 +14,18 @@
 RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
 	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)},
 	location {[this](const BufferedLocation * l) {
-		this->get()->body = l->getRotationTransform();
-		this->get()->bodyPos = l->position();
+		this->get()->body.rotation = l->getRotationTransform();
+		this->get()->body.position = l->position();
 	}},
 	bogies {{
 			{[this](const BufferedLocation * l) {
-				 this->get()->front = l->getRotationTransform();
-				 this->get()->frontPos = l->position();
+				 this->get()->front.rotation = l->getRotationTransform();
+				 this->get()->front.position = l->position();
 			 },
 					GlobalPosition3D {0, rvClass->wheelBase / 2.F, 0}},
 			{[this](const BufferedLocation * l) {
-				 this->get()->back = l->getRotationTransform();
-				 this->get()->backPos = l->position();
+				 this->get()->back.rotation = l->getRotationTransform();
+				 this->get()->back.position = l->position();
 			 },
 					GlobalPosition3D {0, -rvClass->wheelBase / 2.F, 0}},
 	}}
