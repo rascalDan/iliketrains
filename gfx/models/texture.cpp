@@ -33,23 +33,27 @@ Texture::Texture(const std::filesystem::path & fileName, TextureOptions to) :
 }
 
 Texture::Texture(const Image & tex, TextureOptions to) :
-	Texture {static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), tex.data.data(), to}
+	Texture {static_cast<GLsizei>(tex.width), static_cast<GLsizei>(tex.height), GL_RGBA, GL_UNSIGNED_BYTE,
+			tex.data.data(), to}
 {
 }
 
-Texture::Texture(GLsizei width, GLsizei height, TextureOptions to) : Texture {width, height, nullptr, to} { }
-
-Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOptions to)
+Texture::Texture(GLsizei width, GLsizei height, TextureOptions to)
 {
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 	const auto levels = static_cast<GLsizei>(ceil(std::log2(std::max(width, height))));
 	m_texture.storage(levels, GL_RGBA8, {width, height});
 	m_texture.parameter(GL_TEXTURE_WRAP_S, TextureOptions::glMapMode(to.wrapU));
 	m_texture.parameter(GL_TEXTURE_WRAP_T, TextureOptions::glMapMode(to.wrapV));
 	m_texture.parameter(GL_TEXTURE_MIN_FILTER, to.minFilter);
 	m_texture.parameter(GL_TEXTURE_MAG_FILTER, to.magFilter);
-	m_texture.image({width, height}, GL_RGBA, GL_UNSIGNED_BYTE, data);
+}
+
+Texture::Texture(GLsizei width, GLsizei height, GLenum pixelFormat, GLenum PixelType, const void * pixels,
+		TextureOptions to) : Texture {width, height, to}
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	m_texture.image({width, height}, pixelFormat, PixelType, pixels);
 	auto isMimmap = [](auto value) {
 		auto eqAnyOf = [value](auto... test) {
 			return (... || (value == test));
@@ -57,6 +61,7 @@ Texture::Texture(GLsizei width, GLsizei height, const void * data, TextureOption
 		return eqAnyOf(
 				GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
 	};
+	const auto levels = static_cast<GLsizei>(ceil(std::log2(std::max(width, height))));
 	if (levels > 1 && (isMimmap(to.minFilter) || isMimmap(to.magFilter))) {
 		m_texture.generateMipmap();
 	}

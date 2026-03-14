@@ -10,7 +10,7 @@
 
 constexpr const glm::u8vec4 TRANSPARENT_BLUE {30, 50, 255, 200};
 
-EditNetwork::EditNetwork(Network * n) : network {n}, blue {1, 1, &TRANSPARENT_BLUE} { }
+EditNetwork::EditNetwork(Network * n) : network {n}, blue {1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &TRANSPARENT_BLUE} { }
 
 bool
 EditNetwork::click(const SDL_MouseButtonEvent & e, const Ray<GlobalPosition3D> & ray)

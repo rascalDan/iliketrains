@@ -28,7 +28,8 @@ public:
 	explicit Texture(const std::filesystem::path & fileName, TextureOptions = {});
 	explicit Texture(const Image & image, TextureOptions = {});
 	explicit Texture(GLsizei width, GLsizei height, TextureOptions = {});
-	explicit Texture(GLsizei width, GLsizei height, const void * data, TextureOptions = {});
+	explicit Texture(GLsizei width, GLsizei height, GLenum pixelFormat, GLenum PixelType, const void * pixels,
+			TextureOptions = {});
 
 	virtual void bind(GLuint unit) const;
 
