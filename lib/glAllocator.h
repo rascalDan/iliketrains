@@ -1,22 +1,124 @@
-#include <concepts>
-#include <flat_map>
+#include "special_members.h"
 #include <glad/gl.h>
+#include <iterator>
 #include <memory>
-#include <stream_support.h>
 #include <vector>
 
 namespace Detail {
-	template<typename T> class glAllocator;
-	template<typename C, typename T>
-	concept IsGlBufferAllocated = requires(const C & container) {
-		{ container.get_allocator() } -> std::same_as<glAllocator<T>>;
+	template<typename T> class glPointer {
+	public:
+		constexpr glPointer(const glPointer<std::remove_const_t<T>> & other)
+			requires(std::is_const_v<T>)
+			: ptr {other.get()}, name {other.bufferName()}
+		{
+		}
+
+		DEFAULT_MOVE_COPY(glPointer);
+
+		constexpr glPointer() : ptr {nullptr}, name {0} { }
+
+		constexpr glPointer(T * ptr, GLuint name) : ptr {ptr}, name {name} { }
+
+		auto operator<=>(const glPointer &) const noexcept = default;
+
+		operator T *() const noexcept
+		{
+			return ptr;
+		}
+
+		operator bool() const noexcept
+		{
+			return ptr;
+		}
+
+		std::ptrdiff_t
+		operator-(const glPointer & other) const noexcept
+		{
+			return ptr - other.ptr;
+		}
+
+		T *
+		get() const noexcept
+		{
+			return ptr;
+		}
+
+		T &
+		operator*() const noexcept
+		{
+			return *ptr;
+		}
+
+		[[nodiscard]]
+		T &
+		operator[](std::unsigned_integral auto index) const noexcept
+		{
+			return ptr[index];
+		}
+
+		T *
+		operator->() const noexcept
+		{
+			return ptr;
+		}
+
+		glPointer<T> &
+		operator++() noexcept
+		{
+			++ptr;
+			return *this;
+		}
+
+		glPointer<T> &
+		operator--() noexcept
+		{
+			--ptr;
+			return *this;
+		}
+
+		[[nodiscard]] glPointer<T>
+		operator+(std::integral auto offset) const noexcept
+		{
+			return {ptr + offset, name};
+		}
+
+		[[nodiscard]] glPointer<T>
+		operator-(std::integral auto offset) const noexcept
+		{
+			return {ptr - offset, name};
+		}
+
+		[[nodiscard]] glPointer<T>
+		operator+=(std::integral auto offset) const noexcept
+		{
+			return {ptr += offset, name};
+		}
+
+		[[nodiscard]] glPointer<T>
+		operator-=(std::integral auto offset) const noexcept
+		{
+			return {ptr -= offset, name};
+		}
+
+		[[nodiscard]] GLuint
+		bufferName() const noexcept
+		{
+			return name;
+		}
+
+	private:
+		T * ptr;
+		GLuint name;
 	};
+
+	std::pair<void *, GLuint> allocateBuffer(size_t count, size_t objSize);
+	void deallocateBuffer(GLuint name);
 
 	template<typename T> class glAllocator {
 	public:
 		// NOLINTBEGIN(readability-identifier-naming) - STL like
-		using pointer = T *;
-		using const_pointer = const T *;
+		using pointer = glPointer<T>;
+		using const_pointer = glPointer<const T>;
 		using value_type = T;
 
 		// NOLINTEND(readability-identifier-naming)
@@ -24,67 +126,38 @@ namespace Detail {
 		pointer
 		allocate(size_t count)
 		{
-			constexpr static GLbitfield MAPPING_FLAGS
-					= GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-			constexpr static GLbitfield STORAGE_FLAGS = GL_DYNAMIC_STORAGE_BIT | MAPPING_FLAGS;
-			GLuint name = 0;
-			glCreateBuffers(1, &name);
-			const auto size = static_cast<GLsizeiptr>(count * sizeof(T));
-			glNamedBufferStorage(name, size, nullptr, STORAGE_FLAGS);
-			const auto data = static_cast<pointer>(glMapNamedBufferRange(name, 0, size, MAPPING_FLAGS));
-			if (!data) {
-				glDeleteBuffers(1, &name);
-				throw std::bad_alloc();
-			}
-			buffers->emplace(data, name);
-			return data;
+			auto allocated = allocateBuffer(count, sizeof(T));
+			return {static_cast<T *>(allocated.first), allocated.second};
 		}
+
+#if (__cpp_lib_allocate_at_least >= 202302L)
+		std::allocation_result<pointer>
+		allocate_at_least(size_t count)
+		{
+			count = std::min(count, 32ZU);
+			return {allocate(count), count};
+		}
+#endif
 
 		void
-		deallocate(const_pointer ptr, size_t)
+		deallocate(pointer ptr, size_t)
 		{
-			const auto itr = buffers->find(ptr);
-			glUnmapNamedBuffer(itr->second);
-			glDeleteBuffers(1, &itr->second);
-			buffers->erase(itr);
+			deallocateBuffer(ptr.bufferName());
 		}
 
-		[[nodiscard]] GLuint
-		getNameFor(const_pointer ptr) const
-		{
-			const auto itr = buffers->find(ptr);
-			if (itr != buffers->end()) {
-				return itr->second;
-			}
-			return 0;
-		}
-
-		template<IsGlBufferAllocated<T> C>
-		[[nodiscard]]
-		GLuint
-		getNameFor(const C & container) const
-		{
-			return getNameFor(container.data());
-		}
-
-		bool operator==(const glAllocator &) const = default;
-
-	private:
-		using BufferMap = std::flat_map<const_pointer, GLuint>;
-		std::shared_ptr<BufferMap> buffers = std::make_shared<BufferMap>();
+		using is_always_equal = std::true_type;
 	};
 }
+
+template<typename T> struct std::iterator_traits<Detail::glPointer<T>> {
+	using iterator_category = std::random_access_iterator_tag;
+	using iterator_concept = std::contiguous_iterator_tag;
+	using value_type = T;
+	using difference_type = std::ptrdiff_t;
+	using reference = T &;
+	using pointer = T *;
+};
 
 template<typename T>
 // NOLINTNEXTLINE(readability-identifier-naming) - OpenGL like
 using glVector = std::vector<T, typename std::allocator_traits<Detail::glAllocator<T>>::allocator_type>;
-
-template<typename C>
-GLuint
-operator*(const C & container)
-	requires Detail::IsGlBufferAllocated<C, typename C::value_type>
-{
-	return container.get_allocator().getNameFor(container);
-}
-
-static_assert(Detail::IsGlBufferAllocated<glVector<int>, int>);

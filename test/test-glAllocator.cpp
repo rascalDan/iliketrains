@@ -5,6 +5,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "glAllocator.h"
+#include <ranges>
 
 BOOST_GLOBAL_FIXTURE(TestMainWindowAppBase);
 
@@ -14,9 +15,9 @@ namespace {
 		GLuint name = 0;
 		{
 			glVector<long double> list;
-			BOOST_REQUIRE_EQUAL(list.get_allocator().getNameFor(list), 0);
+			BOOST_REQUIRE_EQUAL(list.begin().base().bufferName(), 0);
 			list.reserve(5);
-			name = list.get_allocator().getNameFor(list);
+			name = list.begin().base().bufferName();
 			BOOST_REQUIRE_GT(name, 0);
 			std::ranges::copy(std::views::iota(0, 10), std::back_inserter(list));
 			BOOST_REQUIRE_EQUAL(10, list.size());

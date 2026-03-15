@@ -124,7 +124,7 @@ public:
 	[[nodiscard]] GLuint
 	bufferName() const
 	{
-		return base::get_allocator().getNameFor(static_cast<const base &>(*this));
+		return base::begin().base().bufferName();
 	}
 
 	using typename base::value_type;
