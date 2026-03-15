@@ -11,10 +11,12 @@ namespace Impl {
 		template<typename M, typename T> struct MP {
 			constexpr MP(M T::* ptr) : ptr {ptr} { }
 
+			constexpr
 			operator GLuint() const
 			{
-				return static_cast<GLuint>(reinterpret_cast<const char *>(&(static_cast<T *>(nullptr)->*ptr))
-						- static_cast<const char *>(nullptr));
+				constexpr static char dummy {};
+				return static_cast<GLuint>(reinterpret_cast<const char *>(&(reinterpret_cast<const T *>(&dummy)->*ptr))
+						- reinterpret_cast<const char *>(&dummy));
 			}
 
 			M T::* ptr;
