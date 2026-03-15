@@ -1,5 +1,4 @@
 #include "gameMainSelector.h"
-#include "ui/uiComponent.h"
 #include <SDL2/SDL.h>
 #include <game/gamestate.h>
 #include <game/selectable.h>
@@ -9,8 +8,6 @@
 #include <stream_support.h>
 
 GameMainSelector::GameMainSelector(const Camera * c) : camera {c} { }
-
-constexpr ScreenAbsCoord TargetPos {5, 45};
 
 void
 GameMainSelector::render()
