@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glAllocator.h"
+#include <algorithm>
 #include <cassert>
 #include <functional>
 #include <special_members.h>
