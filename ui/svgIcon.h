@@ -13,6 +13,6 @@ public:
 	ImTextureID operator*() const;
 
 private:
-	friend class LoadFromFile; // Test case verifying size/content
+	friend struct LoadFromFile; // Test case verifying size/content
 	glTexture<GL_TEXTURE_2D> texture;
 };
