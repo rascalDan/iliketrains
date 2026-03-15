@@ -23,6 +23,12 @@ Camera::setAspect(Angle aspect)
 	Frustum::updateCache();
 }
 
+Angle
+Camera::getAspect() const
+{
+	return aspect;
+}
+
 Ray<GlobalPosition3D>
 Camera::unProject(const ScreenRelCoord & mouse) const
 {

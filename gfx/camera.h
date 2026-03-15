@@ -13,6 +13,7 @@ public:
 	[[nodiscard]] Ray<GlobalPosition3D> unProject(const ScreenRelCoord &) const;
 
 	void setAspect(Angle aspect);
+	Angle getAspect() const;
 
 	void
 	setPosition(const GlobalPosition3D & p)
