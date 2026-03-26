@@ -1,3 +1,5 @@
+#pragma once
+
 #include "special_members.h"
 #include <glad/gl.h>
 #include <iterator>
@@ -12,6 +14,8 @@ namespace Detail {
 			: ptr {other.get()}, name {other.bufferName()}
 		{
 		}
+
+		~glPointer() noexcept = default;
 
 		DEFAULT_MOVE_COPY(glPointer);
 
@@ -65,6 +69,7 @@ namespace Detail {
 		glPointer<T> &
 		operator++() noexcept
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			++ptr;
 			return *this;
 		}
@@ -72,6 +77,7 @@ namespace Detail {
 		glPointer<T> &
 		operator--() noexcept
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			--ptr;
 			return *this;
 		}
@@ -120,6 +126,7 @@ namespace Detail {
 		using pointer = glPointer<T>;
 		using const_pointer = glPointer<const T>;
 		using value_type = T;
+		using is_always_equal = std::true_type;
 
 		// NOLINTEND(readability-identifier-naming)
 
@@ -144,20 +151,19 @@ namespace Detail {
 		{
 			deallocateBuffer(ptr.bufferName());
 		}
-
-		using is_always_equal = std::true_type;
 	};
 }
 
 template<typename T> struct std::iterator_traits<Detail::glPointer<T>> {
+	// NOLINTBEGIN(readability-identifier-naming) - STL like
 	using iterator_category = std::random_access_iterator_tag;
 	using iterator_concept = std::contiguous_iterator_tag;
 	using value_type = T;
 	using difference_type = std::ptrdiff_t;
 	using reference = T &;
 	using pointer = T *;
+	// NOLINTEND(readability-identifier-naming) - STL like
 };
 
 template<typename T>
-// NOLINTNEXTLINE(readability-identifier-naming) - OpenGL like
 using glVector = std::vector<T, typename std::allocator_traits<Detail::glAllocator<T>>::allocator_type>;
