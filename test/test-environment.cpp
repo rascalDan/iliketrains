@@ -12,7 +12,8 @@
 
 namespace {
 	using SunPosTestData = std::tuple<Direction2D, time_t, Direction2D>;
-	using SunDirTestData = std::tuple<Direction2D, Direction3D, float, float>;
+	using SunDirTestData = std::tuple<Direction2D, Direction3D>;
+	using SunAmtTestData = std::tuple<float, float>;
 	constexpr Direction2D DONCASTER = {-1.1, 53.5};
 	constexpr Direction2D NEW_YORK = {74.0, 40.7};
 	constexpr Direction2D SYNDEY = {-151.2, -33.9};
@@ -41,24 +42,54 @@ BOOST_DATA_TEST_CASE(SunPosition,
 
 BOOST_DATA_TEST_CASE(SunDirection,
 		boost::unit_test::data::make<SunDirTestData>({
-				{{0.F, 0.F}, south, 0.314F, 0.0087F},
-				{{90.F, 0.F}, west, 0.314F, 0.0087F},
-				{{-90.F, 0.F}, east, 0.314F, 0.0087F},
+				{{0.F, 0.F}, south},
+				{{90.F, 0.F}, west},
+				{{-90.F, 0.F}, east},
 				// From above
 				// EqGM midnight, sun below horizon, shining upwards
-				{{181.52F, -66.86F}, {-0.01F, 0.39F, 0.919F}, 0, 0.F},
+				{{181.52F, -66.86F}, {-0.01F, 0.39F, 0.919F}},
 				// EqGM just before sunrise, mostly west, north a bit, up a bit
-				{{113.12F, -0.85F}, {-0.92F, 0.39F, 0.015F}, 0.299F, 0.F},
+				{{113.12F, -0.85F}, {-0.92F, 0.39F, 0.015F}},
 				// EqGM just after sunrise, mostly west, north a bit, down a bit
-				{{113.12F, 6.05F}, {-0.92F, 0.39F, -0.015F}, 0.42F, 0.114F},
+				{{113.12F, 6.05F}, {-0.92F, 0.39F, -0.015F}},
 				// Doncaster noon, roughly from south to north, high in the sky, downward
-				{{176.34F, 59.64F}, {-0.03F, 0.5F, -0.86F}, 1, 1},
+				{{176.34F, 59.64F}, {-0.03F, 0.5F, -0.86F}},
 		}),
-		position, direction, amb, dir)
+		position, direction)
 {
 	const LightDirection lightDir {position * degreesToRads};
 	BOOST_CHECK_CLOSE_VEC(lightDir.vector(), direction);
 	BOOST_CHECK_CLOSE(glm::length(lightDir.vector()), 1.F, 1);
-	BOOST_CHECK_CLOSE(lightDir.ambient(), amb, 5);
-	BOOST_CHECK_CLOSE(lightDir.directional(), dir, 5);
+}
+
+BOOST_DATA_TEST_CASE(SunDirectionalAmount,
+		boost::unit_test::data::make<SunAmtTestData>({
+				{5._degrees, 1.F},
+				{1._degrees, 1.F},
+				{0._degrees, 1.F},
+				{-0.25_degrees, 1.F},
+				{-0.5_degrees, 0.5F},
+				{-0.75_degrees, 0.F},
+				{-1._degrees, 0.F},
+				{-5._degrees, 0.F},
+		}),
+		elevation, amount)
+{
+	const LightDirection lightDir {{0, elevation}};
+	BOOST_CHECK_CLOSE(lightDir.directional(), amount, 1.F);
+}
+
+BOOST_DATA_TEST_CASE(SunAmbientAmount,
+		boost::unit_test::data::make<SunAmtTestData>({
+				{20._degrees, 1.F},
+				{1._degrees, 1.F},
+				{-9._degrees, 0.5F},
+				{-18._degrees, 0.F},
+				{-25._degrees, 0.F},
+				{-50._degrees, 0.F},
+		}),
+		elevation, amount)
+{
+	const LightDirection lightDir {{0, elevation}};
+	BOOST_CHECK_CLOSE(lightDir.ambient(), amount, 1.F);
 }

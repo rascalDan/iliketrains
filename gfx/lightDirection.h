@@ -31,9 +31,16 @@ public:
 		return dir;
 	}
 
+	[[nodiscard]] float
+	atmosphericScattering() const noexcept
+	{
+		return atmosScatter;
+	}
+
 private:
 	Direction2D pos;
 	Direction3D vec;
 	float amb;
 	float dir;
+	float atmosScatter;
 };
