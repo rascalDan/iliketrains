@@ -11,9 +11,11 @@ public:
 	Environment();
 	void tick(TickDuration elapsed) override;
 	void render(const SceneRenderer &, const SceneProvider &) const;
-	Direction2D getSunPos() const;
-	static Direction2D getSunPos(const Direction2D position, const time_t time);
+	[[nodiscard]] Direction2D getSunPos() const;
+	[[nodiscard]] time_t getWorldTime() const;
+	[[nodiscard]] static Direction2D getSunPos(Direction2D position, time_t time);
 
 private:
 	time_t worldTime;
+	glm::vec<2, Angle> earthPos;
 };

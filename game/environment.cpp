@@ -3,7 +3,9 @@
 #include <chronology.h>
 #include <gfx/gl/sceneRenderer.h>
 
-Environment::Environment() : worldTime {"2024-01-01T12:00:00"_time_t} { }
+constexpr Direction2D DONCASTER = {-1.1_degrees, 53.5_degrees};
+
+Environment::Environment() : worldTime {"2026-06-01T12:00:00"_time_t}, earthPos {DONCASTER} { }
 
 void
 Environment::tick(TickDuration)
@@ -11,21 +13,29 @@ Environment::tick(TickDuration)
 	worldTime += 50;
 }
 
+time_t
+Environment::getWorldTime() const
+{
+	return worldTime;
+}
+
 Direction2D
 Environment::getSunPos() const
 {
-	return getSunPos({}, worldTime);
+	return getSunPos(earthPos, worldTime);
 }
 
 void
 Environment::render(const SceneRenderer & renderer, const SceneProvider & scene) const
 {
-	constexpr RGB baseAmbient {0.1F}, baseDirectional {0.0F};
-	constexpr RGB relativeAmbient {0.3F, 0.3F, 0.4F}, relativeDirectional {0.6F, 0.6F, 0.5F};
+	constexpr RGB SUN_LIGHT {1, 1, .878F};
+	constexpr RGB SKY_BLUE {.529F, .808F, .922F};
+	constexpr RGB BASE_AMBIENT_LIGHT {0.1F};
 
-	const LightDirection sunPos = getSunPos();
-	const auto ambient = baseAmbient + relativeAmbient * sunPos.ambient();
-	const auto directional = baseDirectional + relativeDirectional * sunPos.directional();
+	const LightDirection sunPos {getSunPos()};
+	const auto scattered = SKY_BLUE * sunPos.atmosphericScattering() * sunPos.ambient();
+	const auto ambient = BASE_AMBIENT_LIGHT + scattered;
+	const auto directional = (SUN_LIGHT - BASE_AMBIENT_LIGHT - scattered) * sunPos.directional();
 
 	renderer.setAmbientLight(ambient);
 	renderer.setDirectionalLight(directional, sunPos, scene);
