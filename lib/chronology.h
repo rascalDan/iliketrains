@@ -5,3 +5,4 @@
 
 using TickDuration = std::chrono::duration<float, std::chrono::seconds::period>;
 time_t operator""_time_t(const char * iso, size_t);
+std::chrono::seconds operator""_seconds(const char * iso, size_t);

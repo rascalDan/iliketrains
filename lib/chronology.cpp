@@ -10,3 +10,9 @@ operator""_time_t(const char * iso, size_t)
 	}
 	return mktime(&tm);
 }
+
+std::chrono::seconds
+operator""_seconds(const char * iso, size_t)
+{
+	return std::chrono::seconds(operator""_time_t(iso, 0));
+}

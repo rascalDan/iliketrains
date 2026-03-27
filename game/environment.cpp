@@ -5,15 +5,17 @@
 
 constexpr Direction2D DONCASTER = {-1.1_degrees, 53.5_degrees};
 
-Environment::Environment() : worldTime {"2026-06-01T12:00:00"_time_t}, earthPos {DONCASTER} { }
-
-void
-Environment::tick(TickDuration)
+Environment::Environment() : worldTime {"2026-06-01T12:00:00"_seconds}, gameTimeScaleFactor {1440}, earthPos {DONCASTER}
 {
-	worldTime += 50;
 }
 
-time_t
+void
+Environment::tick(TickDuration elapsed)
+{
+	worldTime += std::chrono::duration_cast<WorldTime::duration>(elapsed * gameTimeScaleFactor);
+}
+
+Environment::WorldTime
 Environment::getWorldTime() const
 {
 	return worldTime;
@@ -22,7 +24,7 @@ Environment::getWorldTime() const
 Direction2D
 Environment::getSunPos() const
 {
-	return getSunPos(earthPos, worldTime);
+	return getSunPos(earthPos, worldTime.time_since_epoch().count());
 }
 
 void

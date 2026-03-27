@@ -28,6 +28,7 @@ public:
 	render() override
 	{
 		if (IltGui::BeginToolbar("bottomBar", ImGuiDir_Down, TOOLBAR_HEIGHT)) {
+			IltGui::Text(std::format("{:%a, %H:%M\n%d %m %Y}", gameState->environment->getWorldTime()));
 			if (ImGui::ImageButton("Build rails", *buildRailsIcon, TOOLBAR_ICON_SIZE<ImVec2>)) {
 				gms->target = std::make_unique<EditNetworkOf<RailLinks>>();
 			}
