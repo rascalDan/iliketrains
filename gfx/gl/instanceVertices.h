@@ -9,11 +9,12 @@
 
 template<typename T> class InstanceVertices : protected glVector<T> {
 	using base = glVector<T>;
+	using IndexT = uint32_t;
 
 public:
 	class [[nodiscard]] InstanceProxy {
 	public:
-		InstanceProxy(InstanceVertices * iv, std::size_t idx) : instances {iv}, index {idx} { }
+		InstanceProxy(InstanceVertices * iv, IndexT idx) : instances {iv}, index {idx} { }
 
 		InstanceProxy(InstanceProxy && other) noexcept :
 			instances {std::exchange(other.instances, nullptr)}, index {other.index}
@@ -98,9 +99,9 @@ public:
 			return instances->lookup(index);
 		}
 
-	private:
+		// private:
 		InstanceVertices<T> * instances;
-		std::size_t index;
+		IndexT index;
 	};
 
 	template<typename... Params>
@@ -110,15 +111,15 @@ public:
 		if (!unused.empty()) {
 			auto idx = unused.back();
 			unused.pop_back();
-			index[idx] = base::size();
+			index[idx] = static_cast<IndexT>(base::size());
 			reverseIndex.emplace_back(idx);
 			base::emplace_back(std::forward<Params>(params)...);
 			return InstanceProxy {this, idx};
 		}
-		index.emplace_back(base::size());
-		reverseIndex.push_back(base::size());
+		index.emplace_back(static_cast<IndexT>(base::size()));
+		reverseIndex.push_back(static_cast<IndexT>(base::size()));
 		base::emplace_back(std::forward<Params>(params)...);
-		return InstanceProxy {this, index.size() - 1};
+		return InstanceProxy {this, static_cast<IndexT>(index.size() - 1)};
 	}
 
 	[[nodiscard]] GLuint
@@ -176,7 +177,7 @@ public:
 	}
 
 protected:
-	static constexpr auto npos = static_cast<size_t>(-1);
+	static constexpr auto npos = static_cast<IndexT>(-1);
 	friend InstanceProxy;
 
 	base::size_type
@@ -186,9 +187,9 @@ protected:
 	}
 
 	void
-	release(const size_t pidx)
+	release(const IndexT pidx)
 	{
-		if (const size_t last = base::size() - 1; last != index[pidx]) {
+		if (const auto last = static_cast<IndexT>(base::size() - 1); last != index[pidx]) {
 			lookup(pidx) = std::move(base::back());
 			const auto movedKey = reverseIndex[last];
 			index[movedKey] = std::exchange(index[pidx], npos);
@@ -207,7 +208,7 @@ protected:
 	}
 
 	[[nodiscard]] T &
-	lookup(size_t pindex)
+	lookup(IndexT pindex)
 	{
 		return base::data()[index[pindex]];
 	}
@@ -231,8 +232,8 @@ protected:
 	}
 
 	//  Index into buffer given to nth proxy
-	std::vector<size_t> index;
-	std::vector<size_t> reverseIndex;
+	std::vector<IndexT> index;
+	std::vector<IndexT> reverseIndex;
 	//  List of free spaces in index
-	std::vector<size_t> unused;
+	std::vector<IndexT> unused;
 };
