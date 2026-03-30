@@ -11,6 +11,8 @@ public:
 
 	[[nodiscard]] glm::mat3 getRotationTransform() const;
 
+	Location operator+(RelativePosition3D) const;
+
 	GlobalPosition3D pos;
 	Rotation3D rot;
 };

@@ -18,13 +18,13 @@ class Foliage : public Asset, public Renderable, public StdTypeDefs<Foliage> {
 public:
 	[[nodiscard]] std::any createAt(const Location &) const override;
 
-	struct LocationVertex {
-		glm::mat3 rotation;
-		float yaw;
-		GlobalPosition3D position;
+	struct InstanceVertex {
+		CommonLocationInstance location;
+		// float scale;
+		// something colorBias;
 	};
 
-	mutable InstanceVertices<LocationVertex> instances;
+	mutable InstanceVertices<InstanceVertex> instances;
 	void preFrame(const Frustum &, const Frustum &) override;
 	void render(const SceneShader &, const Frustum &) const override;
 	void shadows(const ShadowMapper &, const Frustum &) const override;
@@ -43,5 +43,5 @@ protected:
 	glTextures<GL_TEXTURE_2D_ARRAY, 3> billboard;
 
 private:
-	InstanceVertices<Foliage::LocationVertex>::PartitionResult instancePartitions;
+	InstanceVertices<InstanceVertex>::PartitionResult instancePartitions;
 };

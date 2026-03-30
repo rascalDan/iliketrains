@@ -49,14 +49,8 @@ namespace {
 			std::uniform_int_distribution<GlobalDistance> positionOffsetDistribution {-1500, +1500};
 			std::uniform_int_distribution<int> treeDistribution {1, 3};
 			std::uniform_int_distribution<int> treeVariantDistribution {1, 4};
-			train1 = std::make_shared<RailVehicle>(brush47rvc);
-			train1->location.setPosition({52000, 50000, 2000});
-			train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
-			train1->bogies.back().setPosition(train1->bogies.back().position() + train1->location.position());
-			train2 = std::make_shared<RailVehicle>(brush47rvc);
-			train2->location.setPosition({52000, 30000, 2000});
-			train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
-			train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
+			train1 = std::make_shared<RailVehicle>(brush47rvc, GlobalPosition3D {52000, 50000, 2000});
+			train2 = std::make_shared<RailVehicle>(brush47rvc, GlobalPosition3D {52000, 30000, 2000});
 			for (auto posX = 40000; posX < 100000; posX += 5000) {
 				for (auto posY = 65000; posY < 125000; posY += 5000) {
 					gameState->world.create<Plant>(

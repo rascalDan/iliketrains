@@ -128,6 +128,12 @@ public:
 		return base::begin().base().bufferName();
 	}
 
+	[[nodiscard]] GLuint
+	indexBufferName() const
+	{
+		return index.begin().base().bufferName();
+	}
+
 	using typename base::value_type;
 
 	using base::at;
@@ -232,7 +238,7 @@ protected:
 	}
 
 	//  Index into buffer given to nth proxy
-	std::vector<IndexT> index;
+	glVector<IndexT> index;
 	std::vector<IndexT> reverseIndex;
 	//  List of free spaces in index
 	std::vector<IndexT> unused;

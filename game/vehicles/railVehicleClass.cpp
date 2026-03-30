@@ -7,7 +7,6 @@
 #include <location.h>
 #include <maths.h>
 #include <memory>
-#include <ranges>
 
 bool
 RailVehicleClass::persist(Persistence::PersistenceStore & store)
@@ -20,12 +19,10 @@ RailVehicleClass::persist(Persistence::PersistenceStore & store)
 std::any
 RailVehicleClass::createAt(const Location & position) const
 {
-	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(instances.acquire(LocationVertex {
-			.body = {.rotation = position.getRotationTransform(), .position = position.pos},
-			.front = {.rotation = position.getRotationTransform(),
-					.position = {sincos(position.rot.x) * wheelBase * 0.5F, position.pos.z}},
-			.back = {.rotation = position.getRotationTransform(),
-					.position = {sincos(position.rot.x) * wheelBase * -0.5F, position.pos.z}},
+	return std::make_shared<InstanceVertices<InstanceVertex>::InstanceProxy>(instances.acquire(InstanceVertex {
+			.body = locationData->acquire(position),
+			.front = locationData->acquire(position + ((sincos(position.rot.x) * wheelBase * 0.5F) || 0.F)),
+			.back = locationData->acquire(position + ((sincos(position.rot.x) * wheelBase * -0.5F) || 0.F)),
 	}));
 }
 
@@ -34,22 +31,20 @@ RailVehicleClass::postLoad()
 {
 	texture = getTexture();
 	glDebugScope _ {0};
-	bodyMesh->configureVAO(instanceVAO, 0)
-			.addAttribs<LocationVertex, &LocationVertex::Part::rotation, &LocationVertex::Part::position>(1);
-	static_assert(sizeof(LocationVertex) == 144UL);
+	bodyMesh->configureVAO(instanceVAO, 0).addAttribs<InstanceVertex, &InstanceVertex::body>(1);
 }
 
 void
 RailVehicleClass::renderAllParts(const size_t count) const
 {
-	using PartPair = std::pair<Mesh::Ptr, LocationVertex::Part LocationVertex::*>;
+	using PartPair = std::pair<Mesh::Ptr, CommonLocationInstance InstanceVertex::*>;
 	const auto bufferName = instances.bufferName();
 	for (const auto & [mesh, part] : {
-				 PartPair {bodyMesh, &LocationVertex::body},
-				 PartPair {bogies.front(), &LocationVertex::front},
-				 PartPair {bogies.back(), &LocationVertex::back},
+				 PartPair {bodyMesh, &InstanceVertex::body},
+				 PartPair {bogies.front(), &InstanceVertex::front},
+				 PartPair {bogies.back(), &InstanceVertex::back},
 		 }) {
-		instanceVAO.useBuffer<LocationVertex>(1, bufferName, part);
+		instanceVAO.useBuffer<InstanceVertex>(1, bufferName, part);
 		mesh->drawInstanced(instanceVAO, static_cast<GLsizei>(count));
 	}
 }

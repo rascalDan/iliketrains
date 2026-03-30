@@ -7,7 +7,7 @@ class Location;
 
 class Light : public WorldObject {
 	std::shared_ptr<const Illuminator> type;
-	InstanceVertices<Illuminator::LocationVertex>::InstanceProxy location;
+	InstanceVertices<Illuminator::InstanceVertex>::InstanceProxy instance;
 
 	void
 	tick(TickDuration) override

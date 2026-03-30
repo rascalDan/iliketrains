@@ -42,8 +42,11 @@ public:
 		bool persist(Persistence::PersistenceStore & store) override;
 	};
 
-	using LocationVertex = std::pair<glm::mat3, GlobalPosition3D>;
-	mutable InstanceVertices<LocationVertex> instances;
+	struct InstanceVertex {
+		CommonLocationInstance location;
+	};
+
+	mutable InstanceVertices<InstanceVertex> instances;
 	mutable InstanceVertices<SpotLightVertex> instancesSpotLight;
 	mutable InstanceVertices<PointLightVertex> instancesPointLight;
 	void render(const SceneShader &, const Frustum &) const override;

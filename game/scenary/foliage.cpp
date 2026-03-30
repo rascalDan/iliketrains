@@ -25,8 +25,8 @@ std::weak_ptr<glVertexArray> Foliage::commonInstanceVAO, Foliage::commonInstance
 std::any
 Foliage::createAt(const Location & position) const
 {
-	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(
-			instances.acquire(position.getRotationTransform(), position.rot.y, position.pos));
+	return std::make_shared<InstanceVertices<InstanceVertex>::InstanceProxy>(
+			instances.acquire(locationData->acquire(position)));
 }
 
 bool
@@ -42,12 +42,11 @@ Foliage::postLoad()
 	glDebugScope _ {0};
 	if (!(instanceVAO = commonInstanceVAO.lock())) {
 		commonInstanceVAO = instanceVAO = std::make_shared<glVertexArray>();
-		bodyMesh->configureVAO(*instanceVAO, 0)
-				.addAttribs<LocationVertex, &LocationVertex::rotation, &LocationVertex::position>(1);
+		bodyMesh->configureVAO(*instanceVAO, 0).addAttribs<InstanceVertex, &InstanceVertex::location>(1);
 	}
 	if (!(instancePointVAO = commonInstancePointVAO.lock())) {
 		commonInstancePointVAO = instancePointVAO = std::make_shared<glVertexArray>();
-		instancePointVAO->configure().addAttribs<LocationVertex, &LocationVertex::position, &LocationVertex::yaw>(0);
+		instancePointVAO->configure().addAttribs<InstanceVertex, &InstanceVertex::location>(0);
 	}
 	const auto & size = bodyMesh->getDimensions().size;
 	billboardSize = billboardTextureSizeForObject(size);
@@ -82,14 +81,14 @@ Foliage::preFrame(const Frustum & frustum, const Frustum & lighting)
 	if (instances.size() > 0) {
 		const auto & dims = bodyMesh->getDimensions();
 		instancePartitions = instances.partition(
-				[&frustum, &dims](const auto & location) {
-					return frustum.contains(location.position + dims.centre, dims.size);
+				[&frustum, &dims](const auto & instance) {
+					return frustum.contains(instance.location->position.xyz() + dims.centre, dims.size);
 				},
-				[&frustum, this](const auto & location) {
-					return distance(frustum.getPosition(), location.position) < useMeshClipDist;
+				[&frustum, this](const auto & instance) {
+					return distance(frustum.getPosition(), instance.location->position.xyz()) < useMeshClipDist;
 				},
-				[&lighting, &dims](const auto & location) {
-					return lighting.contains(location.position + dims.centre, dims.size);
+				[&lighting, &dims](const auto & instance) {
+					return lighting.contains(instance.location->position.xyz() + dims.centre, dims.size);
 				});
 		//         In view frustum       /            Outside view frustum            /
 		// Close to view / Far from view / Casts shadow into view / No shadow in view /

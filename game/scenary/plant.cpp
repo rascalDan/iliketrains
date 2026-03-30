@@ -3,6 +3,6 @@
 
 Plant::Plant(std::shared_ptr<const Foliage> type, const Location & position) :
 	type {std::move(type)},
-	location {this->type->instances.acquire(position.getRotationTransform(), position.rot.y, position.pos)}
+	instance {this->type->instances.acquire(Renderable::commonLocationData.lock()->acquire(position))}
 {
 }

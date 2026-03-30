@@ -11,8 +11,8 @@ std::weak_ptr<glVertexArray> Illuminator::commonInstanceVAO, Illuminator::common
 std::any
 Illuminator::createAt(const Location & position) const
 {
-	return std::make_shared<InstanceVertices<LocationVertex>::InstanceProxy>(
-			instances.acquire(position.getRotationTransform(), position.pos));
+	return std::make_shared<InstanceVertices<InstanceVertex>::InstanceProxy>(
+			instances.acquire(locationData->acquire(position)));
 }
 
 bool
@@ -46,8 +46,7 @@ Illuminator::postLoad()
 	glDebugScope _ {0};
 	if (!(instanceVAO = commonInstanceVAO.lock())) {
 		commonInstanceVAO = instanceVAO = std::make_shared<glVertexArray>();
-		bodyMesh->configureVAO(*instanceVAO, 0)
-				.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+		bodyMesh->configureVAO(*instanceVAO, 0).addAttribs<InstanceVertex, &InstanceVertex::location>(1);
 	}
 	if (!spotLight.empty()) {
 		if (!(instancesSpotLightVAO = commonInstancesSpotLightVAO.lock())) {
@@ -55,7 +54,7 @@ Illuminator::postLoad()
 			instancesSpotLightVAO->configure()
 					.addAttribs<SpotLightVertex, &SpotLightVertex::position, &SpotLightVertex::direction,
 							&SpotLightVertex::colour, &SpotLightVertex::kq, &SpotLightVertex::arc>(0)
-					.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+					.addAttribs<InstanceVertex, &InstanceVertex::location>(1);
 		}
 		std::transform(
 				spotLight.begin(), spotLight.end(), std::back_inserter(spotLightInstances), [this](const auto & s) {
@@ -68,7 +67,7 @@ Illuminator::postLoad()
 			instancesPointLightVAO->configure()
 					.addAttribs<PointLightVertex, &PointLightVertex::position, &PointLightVertex::colour,
 							&PointLightVertex::kq>(0)
-					.addAttribs<LocationVertex, &LocationVertex::first, &LocationVertex::second>(1);
+					.addAttribs<InstanceVertex, &InstanceVertex::location>(1);
 		}
 		std::transform(
 				pointLight.begin(), pointLight.end(), std::back_inserter(pointLightInstances), [this](const auto & s) {

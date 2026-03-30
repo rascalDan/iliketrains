@@ -19,12 +19,7 @@ class Train : public Vehicle, public UniqueCollection<RailVehicle>, public Can<G
 public:
 	explicit Train(const Link::CPtr & link, float linkDist = 0) : Vehicle {link, linkDist} { }
 
-	[[nodiscard]] const Location &
-	getLocation() const override
-	{
-		return objects.front()->location;
-	}
-
+	[[nodiscard]] Location getLocation() const override;
 	[[nodiscard]] bool intersectRay(const Ray<GlobalPosition3D> &, BaryPosition &, RelativeDistance &) const override;
 
 	void tick(TickDuration elapsed) override;
