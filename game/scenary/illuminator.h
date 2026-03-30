@@ -2,6 +2,7 @@
 
 #include "assetFactory/asset.h"
 #include "gfx/gl/instanceVertices.h"
+#include "gfx/gl/lights.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
@@ -16,19 +17,6 @@ class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illumina
 
 public:
 	[[nodiscard]] std::any createAt(const Location &) const override;
-
-	struct LightCommonVertex {
-		RelativePosition3D position;
-		RGB colour;
-		RelativeDistance kq;
-	};
-
-	struct SpotLightVertex : LightCommonVertex {
-		Direction3D direction;
-		Angle arc;
-	};
-
-	struct PointLightVertex : LightCommonVertex { };
 
 	struct SpotLight : Persistence::Persistable, SpotLightVertex, StdTypeDefs<SpotLight> {
 	private:
