@@ -2,6 +2,7 @@
 #include "gl_traits.h"
 #include "location.h"
 #include "maths.h"
+#include "util.h"
 
 std::weak_ptr<Renderable::CommonLocationData> Renderable::commonLocationData;
 
@@ -21,9 +22,7 @@ Renderable::CommonLocation ::operator=(Location const & location)
 
 Renderable::Renderable()
 {
-	if (!(locationData = commonLocationData.lock())) {
-		commonLocationData = locationData = std::make_shared<CommonLocationData>();
-	}
+	createIfRequired(locationData, commonLocationData);
 }
 
 GLuint

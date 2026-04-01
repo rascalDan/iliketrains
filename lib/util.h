@@ -3,6 +3,7 @@
 #include <algorithm> // IWYU pragma: keep
 #include <array>
 #include <cstddef>
+#include <memory>
 #include <tuple>
 
 template<typename T, std::size_t N>
@@ -33,3 +34,14 @@ template<size_t... N> inline constexpr auto Nth = GetNth<N...> {};
 inline constexpr auto GetFirst = Nth<0>;
 inline constexpr auto GetSecond = Nth<1>;
 inline constexpr auto GetSwapped = Nth<0, 1>;
+
+template<typename T>
+bool
+createIfRequired(std::shared_ptr<T> & instance, std::weak_ptr<T> & common)
+{
+	if (!instance && !(instance = common.lock())) {
+		common = instance = std::make_shared<T>();
+		return true;
+	}
+	return false;
+}

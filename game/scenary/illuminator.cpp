@@ -1,6 +1,7 @@
 #include "illuminator.h"
 #include "gfx/gl/sceneShader.h"
 #include "gfx/models/texture.h" // IWYU pragma: keep
+#include "util.h"
 #include <location.h>
 
 static_assert(std::is_constructible_v<Illuminator>);
@@ -44,8 +45,7 @@ Illuminator::postLoad()
 	}
 	texture = getTexture();
 	glDebugScope _ {0};
-	if (!(instanceVAO = commonInstanceVAO.lock())) {
-		commonInstanceVAO = instanceVAO = std::make_shared<glVertexArray>();
+	if (createIfRequired(instanceVAO, commonInstanceVAO)) {
 		bodyMesh->configureVAO(*instanceVAO, 0).addAttribs<InstanceVertex, &InstanceVertex::location>(1);
 	}
 	if (!spotLight.empty()) {

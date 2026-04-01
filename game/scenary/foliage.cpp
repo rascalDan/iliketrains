@@ -4,6 +4,7 @@
 #include "gfx/gl/sceneShader.h"
 #include "gfx/gl/shadowMapper.h"
 #include "gfx/gl/shadowStenciller.h"
+#include "util.h"
 #include <location.h>
 
 static_assert(std::is_constructible_v<Foliage>);
@@ -40,12 +41,10 @@ Foliage::postLoad()
 {
 	texture = getTexture();
 	glDebugScope _ {0};
-	if (!(instanceVAO = commonInstanceVAO.lock())) {
-		commonInstanceVAO = instanceVAO = std::make_shared<glVertexArray>();
+	if (createIfRequired(instanceVAO, commonInstanceVAO)) {
 		bodyMesh->configureVAO(*instanceVAO, 0).addAttribs<InstanceVertex, &InstanceVertex::location>(1);
 	}
-	if (!(instancePointVAO = commonInstancePointVAO.lock())) {
-		commonInstancePointVAO = instancePointVAO = std::make_shared<glVertexArray>();
+	if (createIfRequired(instancePointVAO, commonInstancePointVAO)) {
 		instancePointVAO->configure().addAttribs<InstanceVertex, &InstanceVertex::location>(0);
 	}
 	const auto & size = bodyMesh->getDimensions().size;
