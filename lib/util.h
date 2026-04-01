@@ -35,6 +35,16 @@ inline constexpr auto GetFirst = Nth<0>;
 inline constexpr auto GetSecond = Nth<1>;
 inline constexpr auto GetSwapped = Nth<0, 1>;
 
+template<typename T, typename M> struct Decompose {
+	consteval Decompose(M T::*) { }
+
+	using ValueType = M;
+	using ContainerType = T;
+};
+
+template<auto MbrPtr> using MemberValueType = typename decltype(Decompose {MbrPtr})::ValueType;
+template<auto MbrPtr> using ContainerType = typename decltype(Decompose {MbrPtr})::ContainerType;
+
 template<typename T>
 bool
 createIfRequired(std::shared_ptr<T> & instance, std::weak_ptr<T> & common)

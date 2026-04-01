@@ -79,5 +79,6 @@ run test-environment.cpp : : : <library>test ;
 run test-ui.cpp : : : <library>test ;
 compile test-static-enumDetails.cpp ;
 compile test-static-stream_support.cpp ;
+compile test-static-util.cpp ;
 alias perf : perf-assetFactory perf-persistence perf-geoData perf-instancing perf-terrain ;
 explicit perf ;
