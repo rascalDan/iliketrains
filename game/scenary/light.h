@@ -14,6 +14,9 @@ class Light : public WorldObject {
 	{
 	}
 
+	std::vector<InstanceVertices<SpotLightVertex>::InstanceProxy> spotLightInstances;
+	std::vector<InstanceVertices<PointLightVertex>::InstanceProxy> pointLightInstances;
+
 public:
 	Light(std::shared_ptr<const Illuminator> type, const Location & position);
 };

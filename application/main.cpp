@@ -1,3 +1,4 @@
+#include "game/scenary/light.h"
 #include "ui/mainApplication.h"
 #include "ui/mainWindow.h"
 #include <array>
@@ -108,6 +109,9 @@ public:
 									{0, rotationDistribution(randomdev), 0}});
 				}
 			}
+
+			world.create<Light>(assets.at("old-lamp").dynamicCast<Illuminator>(),
+					Location {.pos = terrain->positionAt({{311000000, 491100000}})});
 		}
 
 		mainLoop();

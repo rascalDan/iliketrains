@@ -1,6 +1,8 @@
 #pragma once
 
+#include "gfx/gl/glVertexArray.h"
 #include "gfx/gl/instanceVertices.h"
+#include "gfx/models/lights.h"
 #include "gl_traits.h"
 #include <glm/mat3x3.hpp>
 #include <special_members.h>
@@ -20,7 +22,7 @@ public:
 
 	virtual void preFrame(const Frustum &, const Frustum &);
 	virtual void render(const SceneShader & shader, const Frustum &) const = 0;
-	virtual void lights(const SceneShader & shader) const;
+	static void lights(const SceneShader & shader);
 	virtual void shadows(const ShadowMapper & shadowMapper, const Frustum &) const;
 
 	virtual void updateStencil(const ShadowStenciller & lightDir) const;
@@ -37,10 +39,17 @@ public:
 
 	using CommonLocationData = InstanceVertices<CommonLocation>;
 	using CommonLocationInstance = CommonLocationData::InstanceProxy;
-
 	std::shared_ptr<CommonLocationData> locationData;
-
 	static std::weak_ptr<CommonLocationData> commonLocationData;
+
+	using CommonSpotLights = InstanceVertices<SpotLightVertex>;
+	std::shared_ptr<CommonSpotLights> spotLights;
+	static std::weak_ptr<CommonSpotLights> commonSpotLights;
+	using CommonPointLights = InstanceVertices<PointLightVertex>;
+	std::shared_ptr<CommonPointLights> pointLights;
+	static std::weak_ptr<CommonPointLights> commonPointLights;
+	std::shared_ptr<glVertexArray> instancesSpotLightVAO, instancesPointLightVAO;
+	static std::weak_ptr<glVertexArray> commonInstancesSpotLightVAO, commonInstancesPointLightVAO;
 };
 
 template<> struct gl_traits<InstanceVertices<Renderable::CommonLocation>::InstanceProxy> {

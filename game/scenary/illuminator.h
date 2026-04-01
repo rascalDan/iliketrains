@@ -2,7 +2,7 @@
 
 #include "assetFactory/asset.h"
 #include "gfx/gl/instanceVertices.h"
-#include "gfx/gl/lights.h"
+#include "gfx/models/lights.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
@@ -12,19 +12,19 @@ class Location;
 class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illuminator> {
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
-	std::shared_ptr<glVertexArray> instanceVAO, instancesSpotLightVAO, instancesPointLightVAO;
-	static std::weak_ptr<glVertexArray> commonInstanceVAO, commonInstancesSpotLightVAO, commonInstancesPointLightVAO;
+	std::shared_ptr<glVertexArray> instanceVAO;
+	static std::weak_ptr<glVertexArray> commonInstanceVAO;
 
 public:
 	[[nodiscard]] std::any createAt(const Location &) const override;
 
-	struct SpotLight : Persistence::Persistable, SpotLightVertex, StdTypeDefs<SpotLight> {
+	struct SpotLight : Persistence::Persistable, SpotLightDef, StdTypeDefs<SpotLight> {
 	private:
 		friend Persistence::SelectionPtrBase<std::shared_ptr<SpotLight>>;
 		bool persist(Persistence::PersistenceStore & store) override;
 	};
 
-	struct PointLight : Persistence::Persistable, PointLightVertex, StdTypeDefs<PointLight> {
+	struct PointLight : Persistence::Persistable, PointLightDef, StdTypeDefs<PointLight> {
 	private:
 		friend Persistence::SelectionPtrBase<std::shared_ptr<PointLight>>;
 		bool persist(Persistence::PersistenceStore & store) override;
@@ -35,18 +35,14 @@ public:
 	};
 
 	mutable InstanceVertices<InstanceVertex> instances;
-	mutable InstanceVertices<SpotLightVertex> instancesSpotLight;
-	mutable InstanceVertices<PointLightVertex> instancesPointLight;
 	void render(const SceneShader &, const Frustum &) const override;
-	void lights(const SceneShader &) const override;
 
 protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<Illuminator>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	void postLoad() override;
 
+public:
 	std::vector<SpotLight::Ptr> spotLight;
 	std::vector<PointLight::Ptr> pointLight;
-	std::vector<InstanceVertices<SpotLightVertex>::InstanceProxy> spotLightInstances;
-	std::vector<InstanceVertices<PointLightVertex>::InstanceProxy> pointLightInstances;
 };
