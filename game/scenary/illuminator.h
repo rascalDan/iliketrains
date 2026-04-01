@@ -1,8 +1,8 @@
 #pragma once
 
 #include "assetFactory/asset.h"
+#include "assetFactory/lights.h"
 #include "gfx/gl/instanceVertices.h"
-#include "gfx/models/lights.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
 
@@ -17,18 +17,6 @@ class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illumina
 
 public:
 	[[nodiscard]] std::any createAt(const Location &) const override;
-
-	struct SpotLight : Persistence::Persistable, SpotLightDef, StdTypeDefs<SpotLight> {
-	private:
-		friend Persistence::SelectionPtrBase<std::shared_ptr<SpotLight>>;
-		bool persist(Persistence::PersistenceStore & store) override;
-	};
-
-	struct PointLight : Persistence::Persistable, PointLightDef, StdTypeDefs<PointLight> {
-	private:
-		friend Persistence::SelectionPtrBase<std::shared_ptr<PointLight>>;
-		bool persist(Persistence::PersistenceStore & store) override;
-	};
 
 	struct InstanceVertex {
 		CommonLocationInstance location;

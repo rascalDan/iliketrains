@@ -16,19 +16,6 @@ Illuminator::createAt(const Location & position) const
 }
 
 bool
-Illuminator::SpotLight::persist(Persistence::PersistenceStore & store)
-{
-	return STORE_TYPE && STORE_MEMBER(position) && STORE_MEMBER(direction) && STORE_MEMBER(colour) && STORE_MEMBER(kq)
-			&& STORE_MEMBER(arc);
-}
-
-bool
-Illuminator::PointLight::persist(Persistence::PersistenceStore & store)
-{
-	return STORE_TYPE && STORE_MEMBER(position) && STORE_MEMBER(colour) && STORE_MEMBER(kq);
-}
-
-bool
 Illuminator::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_TYPE && STORE_HELPER(bodyMesh, Asset::MeshConstruct)
