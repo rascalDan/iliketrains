@@ -51,7 +51,7 @@ namespace {
 		void
 		lights(const SceneShader & shader) const override
 		{
-			objects.apply(&Renderable::lights, shader);
+			Renderable::lights(shader);
 		}
 
 		void

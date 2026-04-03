@@ -11,24 +11,14 @@
 #include <maths.h>
 #include <ray.h>
 
-RailVehicle::RailVehicle(RailVehicleClassPtr rvc) :
-	RailVehicleClass::Instance {rvc->instances.acquire()}, rvClass {std::move(rvc)},
-	location {[this](const BufferedLocation * l) {
-		this->get()->body.rotation = l->getRotationTransform();
-		this->get()->body.position = l->position();
-	}},
-	bogies {{
-			{[this](const BufferedLocation * l) {
-				 this->get()->front.rotation = l->getRotationTransform();
-				 this->get()->front.position = l->position();
-			 },
-					GlobalPosition3D {0, rvClass->wheelBase / 2.F, 0}},
-			{[this](const BufferedLocation * l) {
-				 this->get()->back.rotation = l->getRotationTransform();
-				 this->get()->back.position = l->position();
-			 },
-					GlobalPosition3D {0, -rvClass->wheelBase / 2.F, 0}},
-	}}
+RailVehicle::RailVehicle(RailVehicleClassPtr rvc, GlobalPosition3D position) :
+	RailVehicleClass::Instance {rvc->instances.acquire(
+			RailVehicleClass::commonLocationData.lock()->acquire(Location {.pos = position, .rot = {}}),
+			RailVehicleClass::commonLocationData.lock()->acquire(
+					Location {.pos = position + RelativePosition3D {0, rvc->wheelBase / 2.F, 0}, .rot = {}}),
+			RailVehicleClass::commonLocationData.lock()->acquire(
+					Location {.pos = position + RelativePosition3D {0, -rvc->wheelBase / 2.F, 0}, .rot = {}}))},
+	rvClass {std::move(rvc)}
 {
 }
 
@@ -36,11 +26,18 @@ void
 RailVehicle::move(const Train * t, float & trailBy)
 {
 	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};
-	const auto & b1Pos = bogies[0] = t->getBogiePosition(t->linkDist, trailBy += overhang);
-	const auto & b2Pos = bogies[1] = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase);
-	const auto diff = glm::normalize(RelativePosition3D(b2Pos.position() - b1Pos.position()));
-	location.setLocation((b1Pos.position() + b2Pos.position()) / 2, {vector_pitch(diff), vector_yaw(diff), 0});
+	const auto & b1Pos = *(get()->front = t->getBogiePosition(t->linkDist, trailBy += overhang));
+	const auto & b2Pos = *(get()->back = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase));
+	const auto diff = glm::normalize(difference(b1Pos.position, b2Pos.position));
+	get()->body = Location {
+			.pos = midpoint(b1Pos.position, b2Pos.position), .rot = {vector_pitch(diff), vector_yaw(diff), 0}};
 	trailBy += 600.F + overhang;
+}
+
+Location
+RailVehicle::getLocation() const
+{
+	return {.pos = get()->body->position, .rot = get()->body->rotation};
 }
 
 bool
@@ -49,10 +46,10 @@ RailVehicle::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & bary
 	constexpr const auto X = 1350.F;
 	const auto Y = this->rvClass->length / 2.F;
 	constexpr const auto Z = 3900.F;
-	const glm::mat3 moveBy = location.getRotationTransform();
-	const auto cornerVertices = cuboidCorners(-X, X, -Y, Y, 0.F, Z) * [&moveBy, this](const auto & corner) {
-		return location.position() + (moveBy * corner);
-	};
+	const auto cornerVertices
+			= cuboidCorners(-X, X, -Y, Y, 0.F, Z) * [body = this->get()->body.get()](const auto & corner) {
+				  return body->position + (body->rotationMatrix * corner);
+			  };
 	static constexpr const std::array<glm::vec<3, uint8_t>, 10> triangles {{
 			// Front
 			{0, 1, 2},

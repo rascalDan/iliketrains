@@ -21,6 +21,12 @@ Train::getBogiePosition(float linkDist, float dist) const
 	return b2Link.first->positionAt(b2linkDist, b2Link.second);
 }
 
+Location
+Train::getLocation() const
+{
+	return objects.front()->getLocation();
+}
+
 bool
 Train::intersectRay(const Ray<GlobalPosition3D> & ray, BaryPosition & baryPos, RelativeDistance & distance) const
 {

@@ -18,7 +18,7 @@ public:
 	float linkDist; // distance along current link
 	float speed {}; // speed in m/s (~75 km/h)
 
-	[[nodiscard]] virtual const Location & getLocation() const = 0;
+	[[nodiscard]] virtual Location getLocation() const = 0;
 	Orders orders;
 
 	ActivityPtr currentActivity;

@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <location.h>
 #include <maths.h>
-#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -15,7 +14,7 @@ FollowCameraController::updateCamera(Camera * camera) const
 {
 	const auto [pos, rot] = [this]() {
 		const auto t {target.lock()};
-		return std::tie(t->getLocation().pos, t->getLocation().rot);
+		return std::make_pair(t->getLocation().pos, t->getLocation().rot);
 	}();
 
 	switch (mode) {

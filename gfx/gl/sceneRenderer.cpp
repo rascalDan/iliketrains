@@ -78,6 +78,10 @@ SceneRenderer::preFrame(const SceneProvider & scene, const LightDirection lightD
 		renderable->preFrame(camera, lightView);
 		renderable->updateBillboard(billboardPainter);
 	});
+	if (auto cld = Renderable::commonLocationData.lock()) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, cld->bufferName());
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, cld->indexBufferName());
+	}
 }
 
 void

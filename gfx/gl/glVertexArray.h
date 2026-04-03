@@ -4,6 +4,7 @@
 #include "glArrays.h"
 #include "glBuffer.h"
 #include "gl_traits.h"
+#include "util.h"
 
 namespace Impl {
 	class VertexArrayConfigurator {
@@ -20,10 +21,7 @@ namespace Impl {
 			}
 
 			M T::* ptr;
-			using ValueType = M;
 		};
-
-		template<typename M, typename T> MP(M T::*) -> MP<M, T>;
 
 		explicit VertexArrayConfigurator(GLuint name) : name {name} { }
 
@@ -52,7 +50,7 @@ namespace Impl {
 			return addAttribsFor<VertexT>(divisor);
 		}
 
-		template<typename VertexT, MP... Attribs>
+		template<typename VertexT, auto... Attribs>
 		VertexArrayConfigurator &
 		addAttribs(const GLuint divisor)
 		{
@@ -60,7 +58,7 @@ namespace Impl {
 			return *this;
 		}
 
-		template<typename VertexT, MP... Attribs>
+		template<typename VertexT, auto... Attribs>
 		VertexArrayConfigurator &
 		addAttribs(const GLuint divisor, const glBuffer & buffer)
 		{
@@ -68,7 +66,7 @@ namespace Impl {
 			return addAttribs<VertexT, Attribs...>(divisor);
 		}
 
-		template<typename VertexT, MP... Attribs>
+		template<typename VertexT, auto... Attribs>
 		VertexArrayConfigurator &
 		addAttribs(const GLuint divisor, glBuffer & buffer, const SequentialCollection<VertexT> auto & data)
 		{
@@ -93,14 +91,15 @@ namespace Impl {
 			setPointerMeta(attrib + gl_traits<T>::vertexArrayAttribFormat(name, attrib, offset));
 		}
 
-		template<MP Attrib>
+		template<typename VertexT, auto Attrib>
 		void
 		setPointer()
 		{
-			setPointer<typename decltype(Attrib)::ValueType>(Attrib);
+			using Mbr = MemberValueType<Attrib>;
+			setPointer<Mbr>(MP<Mbr, VertexT> {Attrib});
 		}
 
-		template<typename VertexT, MP... Attribs>
+		template<typename VertexT, auto... Attribs>
 		void
 		configureAttribs(const GLuint divisor)
 		{
@@ -108,7 +107,7 @@ namespace Impl {
 				setPointer<VertexT>(0);
 			}
 			else {
-				((setPointer<Attribs>()), ...);
+				((setPointer<VertexT, Attribs>()), ...);
 			}
 			glVertexArrayBindingDivisor(name, binding++, divisor);
 		}

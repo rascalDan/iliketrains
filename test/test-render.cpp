@@ -1,3 +1,4 @@
+#include "game/scenary/light.h"
 #define BOOST_TEST_MODULE test_render
 
 #include "testHelpers.h"
@@ -49,14 +50,8 @@ namespace {
 			std::uniform_int_distribution<GlobalDistance> positionOffsetDistribution {-1500, +1500};
 			std::uniform_int_distribution<int> treeDistribution {1, 3};
 			std::uniform_int_distribution<int> treeVariantDistribution {1, 4};
-			train1 = std::make_shared<RailVehicle>(brush47rvc);
-			train1->location.setPosition({52000, 50000, 2000});
-			train1->bogies.front().setPosition(train1->bogies.front().position() + train1->location.position());
-			train1->bogies.back().setPosition(train1->bogies.back().position() + train1->location.position());
-			train2 = std::make_shared<RailVehicle>(brush47rvc);
-			train2->location.setPosition({52000, 30000, 2000});
-			train2->bogies.front().setPosition(train2->bogies.front().position() + train2->location.position());
-			train2->bogies.back().setPosition(train2->bogies.back().position() + train2->location.position());
+			train1 = std::make_shared<RailVehicle>(brush47rvc, GlobalPosition3D {52000, 50000, 2000});
+			train2 = std::make_shared<RailVehicle>(brush47rvc, GlobalPosition3D {52000, 30000, 2000});
 			for (auto posX = 40000; posX < 100000; posX += 5000) {
 				for (auto posY = 65000; posY < 125000; posY += 5000) {
 					gameState->world.create<Plant>(
@@ -71,6 +66,10 @@ namespace {
 			}
 			rail->addLinksBetween({42000, 50000, 1000}, {65000, 50000, 1000});
 			rail->addLinksBetween({65000, 50000, 1000}, {75000, 45000, 2000});
+			gameState->world.create<Light>(gameState->assets.at("old-lamp").dynamicCast<Illuminator>(),
+					Location {.pos = {25000, 52000, 1}, .rot = {}});
+			gameState->world.create<Light>(gameState->assets.at("r-light").dynamicCast<Illuminator>(),
+					Location {.pos = {20000, 57000, 1}, .rot = {}});
 		}
 
 		void
@@ -100,8 +99,9 @@ namespace {
 		}
 
 		void
-		lights(const SceneShader &) const override
+		lights(const SceneShader & shader) const override
 		{
+			Renderable::lights(shader);
 		}
 
 		void

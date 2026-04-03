@@ -19,13 +19,8 @@ public:
 
 	[[nodiscard]] std::any createAt(const Location &) const override;
 
-	struct LocationVertex {
-		struct Part {
-			glm::mat3 rotation;
-			GlobalPosition3D position;
-		};
-
-		Part body, front, back;
+	struct InstanceVertex {
+		CommonLocationInstance body, front, back;
 	};
 
 	std::array<Mesh::Ptr, 2> bogies;
@@ -35,7 +30,7 @@ public:
 	float length;
 	float maxSpeed;
 
-	mutable InstanceVertices<LocationVertex> instances;
+	mutable InstanceVertices<InstanceVertex> instances;
 	using Instance = decltype(instances)::InstanceProxy;
 
 protected:
