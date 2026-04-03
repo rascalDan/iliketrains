@@ -112,6 +112,8 @@ public:
 
 			world.create<Light>(assets.at("old-lamp").dynamicCast<Illuminator>(),
 					Location {.pos = terrain->positionAt({{311000000, 491100000}})});
+			world.create<Light>(assets.at("r-light").dynamicCast<Illuminator>(),
+					Location {.pos = terrain->positionAt({{311000000, 491096000}})});
 		}
 
 		mainLoop();
