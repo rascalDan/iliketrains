@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assetFactory/asset.h"
+#include "assetFactory/lights.h"
 #include "gfx/gl/instanceVertices.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/texture.h"
@@ -26,6 +27,8 @@ public:
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
+	std::vector<SpotLight::Ptr> spotLight;
+	std::vector<PointLight::Ptr> pointLight;
 	float wheelBase;
 	float length;
 	float maxSpeed;

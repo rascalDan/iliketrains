@@ -96,6 +96,8 @@
       <use type="buffers" position="0,9.69,1.2" colour="grey20"/>
       <use type="buffers" position="0,-9.69,1.2" colour="grey20" rotation="0,3.14159,0"/>
     </bodyMesh>
+    <spotLight position="1000,969,1300" direction="0,1,0" colour=".9,.9,.9" kq="0.001" arc=".3"/>
+    <spotLight position="-1000,969,1300" direction="0,1,0" colour=".9,.9,.9" kq="0.001" arc=".3"/>
     <bogie id="bogie1">
       <use type="bogie" position="0,-1.85,0"/>
     </bogie>

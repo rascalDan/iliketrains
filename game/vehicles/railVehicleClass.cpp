@@ -13,6 +13,8 @@ RailVehicleClass::persist(Persistence::PersistenceStore & store)
 {
 	return STORE_TYPE && STORE_MEMBER(length) && STORE_MEMBER(wheelBase) && STORE_MEMBER(maxSpeed)
 			&& STORE_NAME_HELPER("bogie", bogies, Asset::MeshArrayConstruct)
+			&& STORE_HELPER(pointLight, Persistence::Appender<decltype(pointLight)>)
+			&& STORE_HELPER(spotLight, Persistence::Appender<decltype(spotLight)>)
 			&& STORE_HELPER(bodyMesh, Asset::MeshConstruct) && Asset::persist(store);
 }
 
