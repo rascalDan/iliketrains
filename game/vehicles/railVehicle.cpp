@@ -28,7 +28,7 @@ RailVehicle::move(const Train * t, float & trailBy)
 	const auto overhang {(rvClass->length - rvClass->wheelBase) / 2};
 	const auto & b1Pos = *(get()->front = t->getBogiePosition(t->linkDist, trailBy += overhang));
 	const auto & b2Pos = *(get()->back = t->getBogiePosition(t->linkDist, trailBy += rvClass->wheelBase));
-	const auto diff = glm::normalize(difference(b2Pos.position, b1Pos.position));
+	const auto diff = glm::normalize(difference(b1Pos.position, b2Pos.position));
 	get()->body = Location {
 			.pos = midpoint(b1Pos.position, b2Pos.position), .rot = {vector_pitch(diff), vector_yaw(diff), 0}};
 	trailBy += 600.F + overhang;
