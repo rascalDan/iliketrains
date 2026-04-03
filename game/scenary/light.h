@@ -5,7 +5,7 @@
 
 class Location;
 
-class Light : public WorldObject {
+class Light : public WorldObject, public InstanceLights {
 	std::shared_ptr<const Illuminator> type;
 	InstanceVertices<Illuminator::InstanceVertex>::InstanceProxy instance;
 

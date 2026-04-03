@@ -8,7 +8,7 @@
 template<typename> class Ray;
 class Train;
 
-class RailVehicle : Selectable, RailVehicleClass::Instance {
+class RailVehicle : Selectable, RailVehicleClass::Instance, public InstanceLights {
 public:
 	explicit RailVehicle(RailVehicleClassPtr rvc, GlobalPosition3D = {});
 

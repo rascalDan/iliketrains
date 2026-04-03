@@ -20,6 +20,7 @@ RailVehicle::RailVehicle(RailVehicleClassPtr rvc, GlobalPosition3D position) :
 					Location {.pos = position + RelativePosition3D {0, -rvc->wheelBase / 2.F, 0}, .rot = {}}))},
 	rvClass {std::move(rvc)}
 {
+	lightsEnable(rvClass, get()->body.index);
 }
 
 void

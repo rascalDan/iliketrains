@@ -1,7 +1,7 @@
 #pragma once
 
 #include "assetFactory/asset.h"
-#include "assetFactory/lights.h"
+#include "game/mixins/lights.h"
 #include "gfx/gl/instanceVertices.h"
 #include "gfx/models/texture.h"
 #include "gfx/renderable.h"
@@ -9,7 +9,7 @@
 class SceneShader;
 class Location;
 
-class Illuminator : public Asset, public Renderable, public StdTypeDefs<Illuminator> {
+class Illuminator : public Asset, public Renderable, public AssetLights, public StdTypeDefs<Illuminator> {
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
 	std::shared_ptr<glVertexArray> instanceVAO;
@@ -29,8 +29,4 @@ protected:
 	friend Persistence::SelectionPtrBase<std::shared_ptr<Illuminator>>;
 	bool persist(Persistence::PersistenceStore & store) override;
 	void postLoad() override;
-
-public:
-	std::vector<SpotLight::Ptr> spotLight;
-	std::vector<PointLight::Ptr> pointLight;
 };

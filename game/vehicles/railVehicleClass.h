@@ -1,7 +1,7 @@
 #pragma once
 
 #include "assetFactory/asset.h"
-#include "assetFactory/lights.h"
+#include "game/mixins/lights.h"
 #include "gfx/gl/instanceVertices.h"
 #include "gfx/models/mesh.h"
 #include "gfx/models/texture.h"
@@ -13,7 +13,7 @@ class SceneShader;
 class ShadowMapper;
 class Location;
 
-class RailVehicleClass : public Renderable, public Asset {
+class RailVehicleClass : public Renderable, public Asset, public AssetLights {
 public:
 	void render(const SceneShader & shader, const Frustum &) const override;
 	void shadows(const ShadowMapper & shadowMapper, const Frustum &) const override;
@@ -27,8 +27,6 @@ public:
 	std::array<Mesh::Ptr, 2> bogies;
 	Mesh::Ptr bodyMesh;
 	Texture::Ptr texture;
-	std::vector<SpotLight::Ptr> spotLight;
-	std::vector<PointLight::Ptr> pointLight;
 	float wheelBase;
 	float length;
 	float maxSpeed;
